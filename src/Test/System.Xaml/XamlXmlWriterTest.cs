@@ -512,7 +512,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void GetObjectOnCollection ()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-16'?><List xmlns='clr-namespace:System.Collections.Generic;assembly=mscorlib'><x:TypeArguments xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>x:Int32</x:TypeArguments><List.Bar /></List>";
+			//string xml = @"<?xml version='1.0' encoding='utf-16'?><List xmlns='clr-namespace:System.Collections.Generic;assembly=mscorlib'><x:TypeArguments xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>x:Int32</x:TypeArguments><List.Bar /></List>";
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt2);
@@ -562,7 +562,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void StartMemberAfterGetObject ()
 		{
-			string xml = @"<?xml version='1.0' encoding='utf-16'?><List xmlns='clr-namespace:System.Collections.Generic;assembly=mscorlib'><x:TypeArguments xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>x:Int32</x:TypeArguments><List.Bar><List.Length /></List.Bar></List>";
+			//string xml = @"<?xml version='1.0' encoding='utf-16'?><List xmlns='clr-namespace:System.Collections.Generic;assembly=mscorlib'><x:TypeArguments xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>x:Int32</x:TypeArguments><List.Bar><List.Length /></List.Bar></List>";
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt2); // <List
@@ -631,7 +631,7 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartMember (xt.GetMember ("Foo"));
 			xw.WriteValue ("50");
 			xw.Close ();
-			string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><TestXmlWriterClass1 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'></TestXmlWriterClass1>",  GetType ().Assembly.GetName ().Name);
+			//string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><TestXmlWriterClass1 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'></TestXmlWriterClass1>",  GetType ().Assembly.GetName ().Name);
 		}
 
 		string ReadXml (string name)

@@ -527,7 +527,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			//Console.Error.WriteLine ("##### {0}:{1}", source, context);
 			ValueSerializerContextTest.Provider = (IServiceProvider) context;
-			var sp = context as IServiceProvider;
+			//var sp = context as IServiceProvider;
 			// ValueSerializerContextTest.Context = (IValueSerializerContext) context; -> causes InvalidCastException
 			if ((source as string) == "v")
 				return new TestValueSerialized ();

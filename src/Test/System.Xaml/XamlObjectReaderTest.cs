@@ -648,7 +648,7 @@ namespace MonoTests.Portable.Xaml
 			AttachedWrapper2.SetFoo (obj, "x");
 			AttachedWrapper2.SetFoo (obj.Value, "y");
 			try {
-				var xr = new XamlObjectReader (obj);
+				new XamlObjectReader (obj);
 //while (xr.Read ()) Console.Error.WriteLine ("{0} {1} {2} {3}", xr.NodeType, xr.Type, xr.Member, xr.Value);
 			} finally {
 				AttachedWrapper2.SetFoo (obj, null);

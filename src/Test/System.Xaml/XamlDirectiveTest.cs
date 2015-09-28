@@ -70,19 +70,19 @@ namespace MonoTests.Portable.Xaml
 		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorComplexParamsNullNamespaces ()
 		{
-			var d = new XamlDirective (null, "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
+			new XamlDirective (null, "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
 		}
 
 		[Test]
 		public void ConstructorComplexParamsEmptyNamespaces ()
 		{
-			var d = new XamlDirective (new string [0], "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
+			new XamlDirective (new string [0], "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
 		}
 
 		[Test]
 		public void ConstructorComplexParams ()
 		{
-			var d = new XamlDirective (new string [] {"urn:foo"}, "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
+			new XamlDirective (new string [] {"urn:foo"}, "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
 		}
 
 		[Test]

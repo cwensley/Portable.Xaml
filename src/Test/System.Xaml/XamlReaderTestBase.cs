@@ -659,7 +659,7 @@ namespace MonoTests.Portable.Xaml
 
 			var defns = "clr-namespace:System.Collections.Generic;assembly=mscorlib";
 			var defns2 = "clr-namespace:System;assembly=mscorlib";
-			var defns3 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
+			//var defns3 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
 
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-3");
 			Assert.AreEqual (defns, r.Namespace.Namespace, "ns#1-4");
@@ -2485,9 +2485,9 @@ namespace MonoTests.Portable.Xaml
 			xt = new XamlType (typeof (List<IEnumerable>), r.SchemaContext);
 			Assert.IsTrue (r.Read (), "so#2-1");
 
-			if (false/*contentPropertyIsUsed*/)
+			/*if (contentPropertyIsUsed)
 				Assert.AreEqual (XamlNodeType.GetObject, r.NodeType, "so#2-2.1");
-			else {
+			else*/ {
 				Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#2-2.2");
 				Assert.AreEqual (xt, r.Type, "so#2-3");
 

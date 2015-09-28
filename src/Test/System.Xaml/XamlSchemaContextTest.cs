@@ -63,13 +63,13 @@ namespace MonoTests.Portable.Xaml
 		public void ConstructorNullSettings ()
 		{
 			// allowed.
-			var ctx = new XamlSchemaContext ((XamlSchemaContextSettings) null);
+			new XamlSchemaContext ((XamlSchemaContextSettings) null);
 		}
 
 		[Test]
 		public void ConstructorNoAssembly ()
 		{
-			var ctx = new XamlSchemaContext (new Assembly [0]);
+			new XamlSchemaContext (new Assembly [0]);
 		}
 
 		[Test]

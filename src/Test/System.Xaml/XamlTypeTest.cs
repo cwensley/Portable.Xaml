@@ -696,7 +696,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void ComplexPositionalParameters ()
 		{
-			var xt = new XamlType (typeof (ComplexPositionalParameterWrapper), sctx);
+			new XamlType (typeof (ComplexPositionalParameterWrapper), sctx);
 		}
 		
 		[Test]

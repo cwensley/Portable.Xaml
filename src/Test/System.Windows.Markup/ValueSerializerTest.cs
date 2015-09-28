@@ -53,7 +53,7 @@ namespace MonoTests.System.Windows.Markup
 		[Test]
 		public void SerializerInAllTypes ()
 		{
-			var sctx = new XamlSchemaContext (new Assembly [] { typeof (XamlType).Assembly });
+			// var sctx = new XamlSchemaContext (new Assembly [] { typeof (XamlType).Assembly });
 			foreach (var t in std_types) {
 				if (t != XamlLanguage.String) {
 					Assert.IsNull (t.ValueSerializer, "IsNull? " + t.Name);
@@ -129,7 +129,6 @@ namespace MonoTests.System.Windows.Markup
 		{
 			var v = new MyValueSerializer ();
 
-			int i = 0;
 			foreach (var val in test_values) {
 				Assert.IsFalse (v.CanConvertToString (val, null), "CanConvertTo." + val);
 				try {
@@ -141,7 +140,6 @@ namespace MonoTests.System.Windows.Markup
 
 			// The funny thing also applies to CanConvertToString() and ConvertToString().
 
-			i = 0;
 			foreach (var str in test_strings) {
 				Assert.IsFalse (v.CanConvertFromString (str, null), "CanConvertFrom." + str);
 				try {
