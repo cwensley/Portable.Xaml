@@ -26,13 +26,13 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml.Schema
+namespace MonoTests.Portable.Xaml.Schema
 {
 	[TestFixture]
 	public class XamlTypeTypeConverterTest
@@ -102,7 +102,7 @@ namespace MonoTests.System.Xaml.Schema
 		{
 			// ... so, it does not seem to just call XamlType.ToString(), but rather first try to use UnderlyingType if possible.
 			Assert.AreEqual ("System.String", c.ConvertTo (null, null, XamlLanguage.String, typeof (string)), "#1"); // huh?
-			Assert.AreEqual ("System.Windows.Markup.TypeExtension", c.ConvertTo (null, null, XamlLanguage.Type, typeof (string)), "#1"); // huh?
+			Assert.AreEqual ("Portable.Xaml.Markup.TypeExtension", c.ConvertTo (null, null, XamlLanguage.Type, typeof (string)), "#1"); // huh?
 			Assert.AreEqual ("{urn:foo}Foo", c.ConvertTo (null, null, new XamlType ("urn:foo", "Foo", null, sctx), typeof (string)), "#2");
 		}
 

@@ -27,9 +27,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
@@ -43,7 +43,7 @@ using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 // - NullExtension: no member.
 // - MyExtension: [ConstructorArgument] -> only ordinal members...hmm?
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	public partial class XamlReaderTestBase
 	{
@@ -101,7 +101,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (r.Read (), "#6");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#7");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "#7-2");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
 
 			Assert.IsTrue (r.Read (), "#11");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#12");
@@ -163,7 +163,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (r.Read (), "#6");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#7");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "#7-2");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
 
 			Assert.IsTrue (r.Read (), "#11");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#12");
@@ -264,7 +264,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (r.Read (), "#6");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#7");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "#7-2");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "#7-3");
 
 			Assert.IsTrue (r.Read (), "#11");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#12");
@@ -355,7 +355,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (r.Read (), "#11");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#12");
 
-			var defns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var defns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "#13-2");
 			Assert.AreEqual (defns, r.Namespace.Namespace, "#13-3:" + r.Namespace.Prefix);
@@ -576,7 +576,7 @@ namespace MonoTests.System.Xaml
 
 			var defns = "clr-namespace:System.Collections.Generic;assembly=mscorlib";
 			var defns2 = "clr-namespace:System;assembly=mscorlib";
-			var defns3 = "clr-namespace:System.Xaml;assembly=System.Xaml";
+			var defns3 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
 
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-3");
 			Assert.AreEqual (defns, r.Namespace.Namespace, "ns#1-4");
@@ -659,7 +659,7 @@ namespace MonoTests.System.Xaml
 
 			var defns = "clr-namespace:System.Collections.Generic;assembly=mscorlib";
 			var defns2 = "clr-namespace:System;assembly=mscorlib";
-			var defns3 = "clr-namespace:System.Xaml;assembly=System.Xaml";
+			var defns3 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
 
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-3");
 			Assert.AreEqual (defns, r.Namespace.Namespace, "ns#1-4");
@@ -1017,7 +1017,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
 			Assert.AreEqual (XamlLanguage.Initialization, r.Member, "#4");
 			Assert.IsTrue (r.Read (), "#5");
-			Assert.AreEqual ("MonoTests.System.Xaml.MyExtension2", r.Value, "#6");
+			Assert.AreEqual ("MonoTests.Portable.Xaml.MyExtension2", r.Value, "#6");
 			Assert.IsTrue (r.Read (), "#7"); // EndMember
 			Assert.IsTrue (r.Read (), "#8"); // EndObject
 			Assert.IsFalse (r.Read (), "#9");
@@ -1039,7 +1039,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
 			Assert.AreEqual (XamlLanguage.Initialization, r.Member, "#4");
 			Assert.IsTrue (r.Read (), "#5");
-			Assert.AreEqual ("MonoTests.System.Xaml.MyExtension3", r.Value, "#6");
+			Assert.AreEqual ("MonoTests.Portable.Xaml.MyExtension3", r.Value, "#6");
 			Assert.IsTrue (r.Read (), "#7"); // EndMember
 			Assert.IsTrue (r.Read (), "#8"); // EndObject
 			Assert.IsFalse (r.Read (), "#9");
@@ -1061,7 +1061,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
 			Assert.AreEqual (XamlLanguage.Initialization, r.Member, "#4");
 			Assert.IsTrue (r.Read (), "#5");
-			Assert.AreEqual ("MonoTests.System.Xaml.MyExtension4", r.Value, "#6");
+			Assert.AreEqual ("MonoTests.Portable.Xaml.MyExtension4", r.Value, "#6");
 			Assert.IsTrue (r.Read (), "#7"); // EndMember
 			Assert.IsTrue (r.Read (), "#8"); // EndObject
 			Assert.IsFalse (r.Read (), "#9");
@@ -1216,7 +1216,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#3-2");
 			Assert.IsNotNull (r.Namespace, "ns#3-3");
 			Assert.AreEqual ("sx", r.Namespace.Prefix, "ns#3-4");
-			Assert.AreEqual ("clr-namespace:System.Xaml;assembly=System.Xaml", r.Namespace.Namespace, "ns#3-5");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", r.Namespace.Namespace, "ns#3-5");
 
 			Assert.IsTrue (r.Read (), "ns#4-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#4-2");
@@ -1303,7 +1303,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -1343,7 +1343,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -1397,7 +1397,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
@@ -1621,7 +1621,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -1709,7 +1709,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
@@ -1763,7 +1763,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
@@ -1817,7 +1817,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -1839,7 +1839,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
@@ -1989,7 +1989,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
@@ -2165,7 +2165,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
@@ -2226,7 +2226,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			// t:XmlSerializable
@@ -2312,7 +2312,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			// t:EnumContainer
@@ -2351,7 +2351,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
@@ -2444,7 +2444,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			Assert.IsTrue (r.Read (), "ns#2-1");
@@ -2802,7 +2802,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			// t:NullableContainer
@@ -2837,7 +2837,7 @@ namespace MonoTests.System.Xaml
 
 		protected void Read_DirectListContainer (XamlReader r)
 		{
-			var assns1 = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns1 = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			var assns2 = "clr-namespace:System.Collections.Generic;assembly=" + typeof (IList<>).Assembly.GetName ().Name;
 			ReadNamespace (r, String.Empty, assns1, "ns#1");
 			ReadNamespace (r, "scg", assns2, "ns#2");
@@ -2913,7 +2913,7 @@ namespace MonoTests.System.Xaml
 
 		protected void Read_DirectDictionaryContainer (XamlReader r)
 		{
-			var assns1 = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns1 = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			ReadNamespace (r, String.Empty, assns1, "ns#1");
 			ReadNamespace (r, "x", XamlLanguage.Xaml2006Namespace, "ns#2");
 
@@ -3211,7 +3211,7 @@ if (i == 0) {
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
 			// t:AttachedWrapper

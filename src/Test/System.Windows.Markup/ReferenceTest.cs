@@ -26,9 +26,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
 using Category = NUnit.Framework.CategoryAttribute;

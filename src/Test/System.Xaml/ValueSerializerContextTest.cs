@@ -27,16 +27,16 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
-using MonoTests.System.Xaml;
+using MonoTests.Portable.Xaml;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class ValueSerializerContextTest

@@ -27,15 +27,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectWriterTest
@@ -695,7 +695,7 @@ namespace MonoTests.System.Xaml
 			Attached2 result = null;
 			
 			var rsettings = new XamlXmlReaderSettings ();
-			using (var reader = new XamlXmlReader (new StringReader (String.Format (@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:MonoTests.System.Xaml;assembly={0}""></Attached2>", typeof (AttachedWrapper3).Assembly.GetName ().Name)), rsettings)) {
+			using (var reader = new XamlXmlReader (new StringReader (String.Format (@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></Attached2>", typeof (AttachedWrapper3).Assembly.GetName ().Name)), rsettings)) {
 				var wsettings = new XamlObjectWriterSettings ();
 				using (var writer = new XamlObjectWriter (reader.SchemaContext, wsettings)) {
 					XamlServices.Transform (reader, writer, false);
@@ -709,7 +709,7 @@ namespace MonoTests.System.Xaml
 		[Test]
 		public void OnSetValueAndHandledFalse () // part of bug #3003
 		{
-			const string ver = "net_4_x";
+			const string ver = "net_4_5";
 
 			/*
 			var obj = new TestClass3 ();
@@ -719,7 +719,7 @@ namespace MonoTests.System.Xaml
 			XamlServices.Transform (new XamlObjectReader (obj), xxw);
 			Console.Error.WriteLine (sw);
 			*/
-			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.System.Xaml;assembly=System.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace ("net_4_0", ver);
+			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace ("net_4_0", ver);
 			var settings = new XamlObjectWriterSettings ();
 			bool invoked = false;
 			settings.XamlSetValueHandler = (sender, e) => {
@@ -834,7 +834,7 @@ namespace MonoTests.System.Xaml
 
 		XamlReader GetReader (string filename)
 		{
-			const string ver = "net_4_x";
+			const string ver = "net_4_5";
 			string xml = File.ReadAllText (Path.Combine ("Test/XmlFiles", filename)).Replace ("net_4_0", ver);
 			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
 		}
@@ -905,7 +905,7 @@ namespace MonoTests.System.Xaml
 		[Test]
 		public void Write_Type2 ()
 		{
-			var obj = typeof (MonoTests.System.Xaml.TestClass1);
+			var obj = typeof (MonoTests.Portable.Xaml.TestClass1);
 			using (var xr = GetReader ("Type2.xml")) {
 				var des = XamlServices.Load (xr);
 				Assert.AreEqual (obj, des, "#1");
@@ -1177,7 +1177,7 @@ namespace MonoTests.System.Xaml
 			using (var xr = GetReader ("MyExtension3.xml")) {
 				var des = XamlServices.Load (xr);
 				// StringConverter is used and the resulting value comes from ToString().
-				Assert.AreEqual ("MonoTests.System.Xaml.MyExtension3", des, "#1");
+				Assert.AreEqual ("MonoTests.Portable.Xaml.MyExtension3", des, "#1");
 			}
 		}
 
@@ -1295,7 +1295,7 @@ namespace MonoTests.System.Xaml
 		[Test]
 		public void Write_XmlSerializableWrapper ()
 		{
-			var assns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			using (var xr = GetReader ("XmlSerializableWrapper.xml")) {
 				var des = (XmlSerializableWrapper) XamlServices.Load (xr);
 				Assert.IsNotNull (des, "#1");

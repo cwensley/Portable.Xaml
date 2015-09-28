@@ -25,13 +25,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlDirectiveTest
@@ -115,7 +115,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsNotNull (d.DependsOn, "#21");
 			Assert.AreEqual (0, d.DependsOn.Count, "#21-2");
 			Assert.IsFalse (d.IsAmbient, "#22");
-			Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
+			// TODO: Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
 		}
 
 		[Test]
@@ -148,7 +148,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsNotNull (d.DependsOn, "#21");
 			Assert.AreEqual (0, d.DependsOn.Count, "#21-2");
 			Assert.IsFalse (d.IsAmbient, "#22");
-			Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
+			//TODO: Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
 		}
 	}
 }

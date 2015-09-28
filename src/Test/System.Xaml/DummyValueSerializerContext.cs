@@ -28,12 +28,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	public class DummyValueSerializerContext : IValueSerializerContext
 	{
@@ -51,7 +51,7 @@ namespace MonoTests.System.Xaml
 		public object Instance {
 			get { throw new NotImplementedException (); }
 		}
-		public PropertyDescriptor PropertyDescriptor {
+		public PropertyInfo PropertyDescriptor {
 			get { throw new NotImplementedException (); }
 		}
 		public void OnComponentChanged ()
@@ -62,7 +62,7 @@ namespace MonoTests.System.Xaml
 		{
 			throw new NotImplementedException ();
 		}
-		public ValueSerializer GetValueSerializerFor (PropertyDescriptor descriptor)
+		public ValueSerializer GetValueSerializerFor (PropertyInfo descriptor)
 		{
 			throw new NotImplementedException ();
 		}

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{179484EC-DB00-451A-AD2D-2E2AB20DE519}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>System.Xaml</RootNamespace>
+    <AssemblyName>System.Xaml</AssemblyName>
+    <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\artifacts\pcl259\Debug</OutputPath>
+    <DefineConstants>DEBUG;PCL;MONO</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>..\artifacts\pcl259\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <DefineConstants>PCL;MONO</DefineConstants>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="MonoTODOAttribute.cs" />
+    <Compile Include="Assembly\AssemblyInfo.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\NullableConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\BoolConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\EnumConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\ISupportInitialize.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\BaseNumberConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\ITypeDescriptorContext.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\SingleConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TypeConverterAttribute.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TypeDescriptor.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TypeConverter.cs" />
+    <Compile Include="Portable.Xaml.Markup\AmbientAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\ArrayExtension.cs" />
+    <Compile Include="Portable.Xaml.Markup\ConstructorArgumentAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\ContentPropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\ContentWrapperAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\DateTimeValueSerializer.cs" />
+    <Compile Include="Portable.Xaml.Markup\DependsOnAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\DictionaryKeyPropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\IComponentConnector.cs" />
+    <Compile Include="Portable.Xaml.Markup\INameScope.cs" />
+    <Compile Include="Portable.Xaml.Markup\INameScopeDictionary.cs" />
+    <Compile Include="Portable.Xaml.Markup\IProvideValueTarget.cs" />
+    <Compile Include="Portable.Xaml.Markup\IQueryAmbient.cs" />
+    <Compile Include="Portable.Xaml.Markup\IUriContext.cs" />
+    <Compile Include="Portable.Xaml.Markup\IValueSerializerContext.cs" />
+    <Compile Include="Portable.Xaml.Markup\IXamlTypeResolver.cs" />
+    <Compile Include="Portable.Xaml.Markup\MarkupExtension.cs" />
+    <Compile Include="Portable.Xaml.Markup\MarkupExtensionReturnTypeAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\MemberDefinition.cs" />
+    <Compile Include="Portable.Xaml.Markup\NameReferenceConverter.cs" />
+    <Compile Include="Portable.Xaml.Markup\NameScopePropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\NullExtension.cs" />
+    <Compile Include="Portable.Xaml.Markup\PropertyDefinition.cs" />
+    <Compile Include="Portable.Xaml.Markup\Reference.cs" />
+    <Compile Include="Portable.Xaml.Markup\RootNamespaceAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\RuntimeNamePropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\StaticExtension.cs" />
+    <Compile Include="Portable.Xaml.Markup\StaticExtensionConverter.cs" />
+    <Compile Include="Portable.Xaml.Markup\TrimSurroundingWhitespaceAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\TypeExtension.cs" />
+    <Compile Include="Portable.Xaml.Markup\TypeExtensionConverter.cs" />
+    <Compile Include="Portable.Xaml.Markup\UidPropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\UsableDuringInitializationAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\ValueSerializer.cs" />
+    <Compile Include="Portable.Xaml.Markup\ValueSerializerAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\WhitespaceSignificantCollectionAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlDeferLoadAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlSetMarkupExtensionAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlSetMarkupExtensionEventArgs.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlSetTypeConverterAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlSetTypeConverterEventArgs.cs" />
+    <Compile Include="Portable.Xaml.Markup\XamlSetValueEventArgs.cs" />
+    <Compile Include="Portable.Xaml.Markup\XData.cs" />
+    <Compile Include="Portable.Xaml.Markup\XmlLangPropertyAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XmlnsCompatibleWithAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XmlnsDefinitionAttribute.cs" />
+    <Compile Include="Portable.Xaml.Markup\XmlnsPrefixAttribute.cs" />
+    <Compile Include="Portable.Xaml\AmbientPropertyValue.cs" />
+    <Compile Include="Portable.Xaml\AttachableMemberIdentifier.cs" />
+    <Compile Include="Portable.Xaml\AttachablePropertyServices.cs" />
+    <Compile Include="Portable.Xaml\IAmbientProvider.cs" />
+    <Compile Include="Portable.Xaml\IAttachedPropertyStore.cs" />
+    <Compile Include="Portable.Xaml\IDestinationTypeProvider.cs" />
+    <Compile Include="Portable.Xaml\INamespacePrefixLookup.cs" />
+    <Compile Include="Portable.Xaml\IRootObjectProvider.cs" />
+    <Compile Include="Portable.Xaml\IXamlIndexingReader.cs" />
+    <Compile Include="Portable.Xaml\IXamlLineInfo.cs" />
+    <Compile Include="Portable.Xaml\IXamlLineInfoConsumer.cs" />
+    <Compile Include="Portable.Xaml\IXamlNameProvider.cs" />
+    <Compile Include="Portable.Xaml\IXamlNameResolver.cs" />
+    <Compile Include="Portable.Xaml\IXamlNamespaceResolver.cs" />
+    <Compile Include="Portable.Xaml\IXamlObjectWriterFactory.cs" />
+    <Compile Include="Portable.Xaml\IXamlSchemaContextProvider.cs" />
+    <Compile Include="Portable.Xaml\NameScope.cs" />
+    <Compile Include="Portable.Xaml\NamespaceDeclaration.cs" />
+    <Compile Include="Portable.Xaml\ParsedMarkupExtensionInfo.cs" />
+    <Compile Include="Portable.Xaml\PrefixLookup.cs" />
+    <Compile Include="Portable.Xaml\TypeExtensionMethods.cs" />
+    <Compile Include="Portable.Xaml\ValueSerializerContext.cs" />
+    <Compile Include="Portable.Xaml\XamlBackgroundReader.cs" />
+    <Compile Include="Portable.Xaml\XamlDeferringLoader.cs" />
+    <Compile Include="Portable.Xaml\XamlDirective.cs" />
+    <Compile Include="Portable.Xaml\XamlDuplicateMemberException.cs" />
+    <Compile Include="Portable.Xaml\XamlException.cs" />
+    <Compile Include="Portable.Xaml\XamlInternalException.cs" />
+    <Compile Include="Portable.Xaml\XamlLanguage.cs" />
+    <Compile Include="Portable.Xaml\XamlMember.cs" />
+    <Compile Include="Portable.Xaml\XamlNameResolver.cs" />
+    <Compile Include="Portable.Xaml\XamlNode.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeList.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeQueue.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeQueueReader.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeQueueWriter.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeType.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectEventArgs.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectNodeIterator.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectReader.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectReaderException.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectReaderSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectWriter.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectWriterException.cs" />
+    <Compile Include="Portable.Xaml\XamlObjectWriterSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlParseException.cs" />
+    <Compile Include="Portable.Xaml\XamlReader.cs" />
+    <Compile Include="Portable.Xaml\XamlReaderSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlSchemaContext.cs" />
+    <Compile Include="Portable.Xaml\XamlSchemaContextSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlSchemaException.cs" />
+    <Compile Include="Portable.Xaml\XamlServices.cs" />
+    <Compile Include="Portable.Xaml\XamlSubtreeReader.cs" />
+    <Compile Include="Portable.Xaml\XamlType.cs" />
+    <Compile Include="Portable.Xaml\XamlWriter.cs" />
+    <Compile Include="Portable.Xaml\XamlWriterInternalBase.cs" />
+    <Compile Include="Portable.Xaml\XamlWriterSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlWriterStateManager.cs" />
+    <Compile Include="Portable.Xaml\XamlXmlReader.cs" />
+    <Compile Include="Portable.Xaml\XamlXmlReaderSettings.cs" />
+    <Compile Include="Portable.Xaml\XamlXmlWriter.cs" />
+    <Compile Include="Portable.Xaml\XamlXmlWriterException.cs" />
+    <Compile Include="Portable.Xaml\XamlXmlWriterSettings.cs" />
+    <Compile Include="Portable.Xaml.Schema\AllowedMemberLocations.cs" />
+    <Compile Include="Portable.Xaml.Schema\ShouldSerializeResult.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlCollectionKind.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlMemberInvoker.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlTypeInvoker.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlTypeName.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlTypeTypeConverter.cs" />
+    <Compile Include="Portable.Xaml.Schema\XamlValueConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\ICustomAttributeProvider.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Portable.Xaml.Markup\ChangeLog" />
+    <None Include="Portable.Xaml\ChangeLog" />
+    <None Include="Portable.Xaml.Schema\ChangeLog" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Portable.Xaml.ComponentModel\" />
+  </ItemGroup>
+</Project>

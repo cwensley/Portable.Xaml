@@ -27,12 +27,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	// FIXME: uncomment TypeConverter tests
@@ -288,7 +288,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyAddMethod", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
@@ -323,7 +323,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyProp", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
@@ -413,7 +413,7 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual ("{http://schemas.microsoft.com/winfx/2006/xaml}_Initialization", XamlLanguage.Initialization.ToString (), "#1");
 
 			// Wow. Uncomment this, and it will show .NET returns the XamlMember.ToString() results *inconsistently*.
-			//Assert.AreEqual ("System.Windows.Markup.XData", XamlLanguage.XData.ToString (), "#2pre");
+			//Assert.AreEqual ("Portable.Xaml.Markup.XData", XamlLanguage.XData.ToString (), "#2pre");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, XamlLanguage.XData.PreferredXamlNamespace, "#2pre2");
 
 			Assert.AreEqual ("{http://schemas.microsoft.com/winfx/2006/xaml}XData.Text", XamlLanguage.XData.GetMember ("Text").ToString (), "#2");
@@ -421,7 +421,7 @@ namespace MonoTests.System.Xaml
 			var pi = typeof (string).GetProperty ("Length");
 			Assert.AreEqual ("{http://schemas.microsoft.com/winfx/2006/xaml}String.Length", new XamlMember (pi, sctx).ToString (), "#3");
 
-			Assert.AreEqual ("System.Xaml.XamlSchemaContext.FooBar", new XamlMember ("FooBar", typeof (XamlSchemaContext).GetMethod ("GetPreferredPrefix"), null, sctx).ToString (), "#4");
+			Assert.AreEqual ("Portable.Xaml.XamlSchemaContext.FooBar", new XamlMember ("FooBar", typeof (XamlSchemaContext).GetMethod ("GetPreferredPrefix"), null, sctx).ToString (), "#4");
 
 			Assert.AreEqual ("{urn:foo}bar", new XamlDirective ("urn:foo", "bar").ToString (), "#5");
 		}

@@ -1,1 +1,1 @@
-<XmlSerializable xmlns="clr-namespace:MonoTests.System.Xaml;assembly=System.Xaml_test_net_4_0" />
+<XmlSerializable xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0" />

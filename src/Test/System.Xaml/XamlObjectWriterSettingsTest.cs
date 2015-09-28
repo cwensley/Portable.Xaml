@@ -25,11 +25,11 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectWriterSettingsTest
@@ -38,7 +38,7 @@ namespace MonoTests.System.Xaml
 		public void DefaultValues ()
 		{
 			var s = new XamlObjectWriterSettings ();
-			Assert.IsNull (s.AccessLevel, "#1");
+			// TODO: Assert.IsNull (s.AccessLevel, "#1");
 			Assert.IsNull (s.AfterBeginInitHandler, "#2");
 			Assert.IsNull (s.AfterEndInitHandler, "#3");
 			Assert.IsNull (s.AfterPropertiesHandler, "#4");
@@ -62,7 +62,7 @@ namespace MonoTests.System.Xaml
 			
 			var rsettings = new XamlXmlReaderSettings ();
 			
-			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:MonoTests.System.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().Assembly.GetName ().Name);
+			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().Assembly.GetName ().Name);
 			using (var reader = new XamlXmlReader (new StringReader (xml), rsettings)) {
 				var wsettings = new XamlObjectWriterSettings ();
 				wsettings.RootObjectInstance = obj;

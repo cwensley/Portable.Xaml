@@ -28,15 +28,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlXmlReaderTest : XamlReaderTestBase
@@ -45,7 +45,7 @@ namespace MonoTests.System.Xaml
 
 		XamlReader GetReader (string filename)
 		{
-			const string ver = "net_4_x";
+			const string ver = "net_4_5";
 			string xml = File.ReadAllText (Path.Combine ("Test/XmlFiles", filename)).Replace ("net_4_0", ver);
 			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
 		}

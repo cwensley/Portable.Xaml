@@ -27,9 +27,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 

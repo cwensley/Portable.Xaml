@@ -25,12 +25,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml.Schema
+namespace MonoTests.Portable.Xaml.Schema
 {
 	[TestFixture]
 	public class XamlValueConverterTest

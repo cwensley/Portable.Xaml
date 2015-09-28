@@ -24,10 +24,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Xaml;
+using Portable.Xaml;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlDuplicateMemberExceptionTest

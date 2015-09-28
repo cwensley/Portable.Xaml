@@ -26,13 +26,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
 
-namespace MonoTests.System.Xaml.Schema
+namespace MonoTests.Portable.Xaml.Schema
 {
 	[TestFixture]
 	public class XamlTypeInvokerTest

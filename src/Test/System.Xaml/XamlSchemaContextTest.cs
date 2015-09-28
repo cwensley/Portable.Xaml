@@ -25,16 +25,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
-[assembly:XmlnsDefinition ("urn:mono-test", "MonoTests.System.Xaml.NamespaceTest")]
-[assembly:XmlnsDefinition ("urn:mono-test2", "MonoTests.System.Xaml.NamespaceTest2")]
+[assembly:XmlnsDefinition ("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
+[assembly:XmlnsDefinition ("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
 [assembly:XmlnsCompatibleWith ("urn:foo", "urn:bar")]
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlSchemaContextTest

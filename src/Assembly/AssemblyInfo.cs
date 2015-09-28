@@ -32,16 +32,28 @@ using System;
 using System.Reflection;
 using System.Resources;
 using System.Security;
-using System.Security.Permissions;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if !PCL
+using System.Security.Permissions;
+#endif
 
 // General Information about the System.Xaml assembly
 
-[assembly: AssemblyTitle ("System.Xaml.dll")]
-[assembly: AssemblyDescription ("System.Xaml.dll")]
-[assembly: AssemblyDefaultAlias ("System.Xaml.dll")]
+[assembly: AssemblyTitle ("Portable.Xaml.dll")]
+[assembly: AssemblyDescription ("Portable.Xaml.dll")]
+[assembly: AssemblyDefaultAlias ("Portable.Xaml.dll")]
+
+[assembly: NeutralResourcesLanguage ("en-US")]
+[assembly: CLSCompliant (true)]
+[assembly: ComVisible (false)]
+
+[assembly: AssemblyVersion ("0.1.*")]
+[assembly: AssemblyInformationalVersion ("0.1-alpha")]
+[assembly: AssemblyFileVersion ("0.1")]
+
+#if !PCL
 
 [assembly: AssemblyCompany (Consts.MonoCompany)]
 [assembly: AssemblyProduct (Consts.MonoProduct)]
@@ -51,9 +63,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersion (Consts.FxFileVersion)]
 [assembly: AssemblyFileVersion (Consts.FxFileVersion)]
 
-[assembly: NeutralResourcesLanguage ("en-US")]
-[assembly: CLSCompliant (true)]
 [assembly: AssemblyDelaySign (true)]
+
 #if NET_2_1
 [assembly: AssemblyKeyFile ("../silverlight.pub")]
 #else
@@ -63,8 +74,8 @@ using System.Runtime.InteropServices;
 [assembly: SecurityCritical (SecurityCriticalScope.Explicit)]
 #endif
 
-[assembly: ComVisible (false)]
 
 #if !MOBILE
 [assembly: TypeForwardedTo (typeof (System.Windows.Markup.ValueSerializerAttribute))]
+#endif
 #endif

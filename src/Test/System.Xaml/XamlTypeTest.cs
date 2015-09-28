@@ -26,14 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using NUnit.Framework;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	// FIXME: enable DeferringLoader tests.
 	[TestFixture]
@@ -73,8 +73,8 @@ namespace MonoTests.System.Xaml
 			Assert.AreEqual (typeof (XamlXmlReader), t.UnderlyingType, "#12");
 			Assert.IsNotNull (t.BaseType, "#13");
 			Assert.AreEqual (typeof (XamlReader), t.BaseType.UnderlyingType, "#13-2");
-			Assert.AreEqual ("clr-namespace:System.Xaml;assembly=System.Xaml", t.BaseType.PreferredXamlNamespace, "#13-3");
-			Assert.AreEqual ("clr-namespace:System.Xaml;assembly=System.Xaml", t.PreferredXamlNamespace, "#14");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", t.BaseType.PreferredXamlNamespace, "#13-3");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", t.PreferredXamlNamespace, "#14");
 		}
 
 		[Test]
@@ -479,7 +479,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsFalse (t.IsNameValid, "#2"); // see #4
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("XamlTypeTest+TestClass3", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (TestClass3), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -516,7 +516,7 @@ namespace MonoTests.System.Xaml
 			Assert.IsTrue (t.IsNameValid, "#2");
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("ArgumentAttributed", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.System.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (ArgumentAttributed), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -609,7 +609,7 @@ namespace MonoTests.System.Xaml
 			l = xt.GetXamlNamespaces ().ToList ();
 			l.Sort ();
 			Assert.AreEqual (3, l.Count, "#2-1");
-			Assert.AreEqual ("clr-namespace:System.Windows.Markup;assembly=System.Xaml", l [0], "#2-2");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml.Markup;assembly=Portable.Xaml", l [0], "#2-2");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, l [1], "#2-3");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, l [2], "#2-4"); // ??
 		}

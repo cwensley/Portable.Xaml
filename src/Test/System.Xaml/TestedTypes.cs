@@ -30,9 +30,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Markup;
-using System.Xaml;
-using System.Xaml.Schema;
+using Portable.Xaml.Markup;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -43,7 +43,7 @@ using System.Xml.Serialization;
 [assembly: XmlnsDefinition ("http://schemas.example.com/test", "XamarinBug3003")] // bug #3003
 [assembly: XmlnsPrefix ("http://schemas.example.com/test", "test")] // bug #3003
 
-namespace MonoTests.System.Xaml
+namespace MonoTests.Portable.Xaml
 {
 	public class ArgumentAttributed
 	{
