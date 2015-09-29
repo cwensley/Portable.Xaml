@@ -8,16 +8,25 @@ The main difference between this and System.Xaml is that it comes with its own (
 
 Profile 259 has the broadest reach for portable projects, including CoreCLR.  Additional profiles may make sense and can be contributed if desired.  Additionally, dotnet/corefx does come with its own TypeConverter, so eventually that will be the preferred way to go.
 
-### Goals
+## Downloads
 
-The goal of this library is not necessarily to replicate the functionality of System.Xaml going forward, so breaking changes may occur, but only when necessary to keep migrating to Portable.Xaml straightforward.
+The primary way to use Portable.Xaml is by adding the [nuget package](https://www.nuget.org/packages/Portable.Xaml/) to your project.
 
-Project Status
---------------
+To get daily builds, add the [appveyor feed](https://ci.appveyor.com/nuget/portable-xaml) to your nuget package sources.  Make sure you check 'include prerelease' to show the prerelease builds.
+
+
+## Project Status
+
+[![Build status](https://ci.appveyor.com/api/projects/status/tsbibgrcmd73a7tl/branch/master?svg=true)](https://ci.appveyor.com/project/cwensley/portable-xaml/branch/master)
 
 While this library should be usable to read xaml files including markup extensions, it may have either PCL conversion or other bugs.
 
-Contributors are more than welcome! Ideally this library can become well supported for xaml support in more applications.
+Contributors are more than welcome! Ideally this library can become well supported to bring xaml to more applications.
+
+## Goals
+
+The goal of this library is not necessarily to replicate the functionality of System.Xaml going forward, so breaking changes may occur, but only when necessary to keep migrating to Portable.Xaml straightforward.
+
 
 
 License
