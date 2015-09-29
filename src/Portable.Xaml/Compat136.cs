@@ -38,7 +38,7 @@ namespace Portable.Xaml
 			TargetType = targetType;
 			InterfaceType = interfaceType;
 			var getMethod = targetType.GetType ().GetMethod ("GetInterfaceMap");
-			var mapping = getMethod.Invoke (targetType, new object[] { targetType, interfaceType });
+			var mapping = getMethod.Invoke (targetType, new object[] { interfaceType });
 			InterfaceMethods = mapping.GetType ().GetField ("InterfaceMethods").GetValue(mapping) as MethodInfo[];
 			TargetMethods = mapping.GetType ().GetField ("TargetMethods").GetValue(mapping) as MethodInfo[];
 		}
