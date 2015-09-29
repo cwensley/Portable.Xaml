@@ -101,7 +101,7 @@ namespace Portable.Xaml.Schema
 					return (TConverterBase) (object) new NullableConverter (TargetType.UnderlyingType);
 			}
 
-			if (ConverterType.GetTypeInfo().DeclaredConstructors.All(r => r.GetParameters().Length > 0))
+			if (ConverterType.GetTypeInfo().GetConstructors().All(r => r.GetParameters().Length > 0))
 				return null;
 
 			return (TConverterBase) Activator.CreateInstance (ConverterType);

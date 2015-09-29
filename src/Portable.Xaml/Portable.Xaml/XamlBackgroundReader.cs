@@ -105,7 +105,11 @@ namespace Portable.Xaml
 		{
 			if (thread != null)
 				throw new InvalidOperationException ("Thread has already started");
+			#if PCL136
+			ThreadPool.QueueUserWorkItem(state =>
+			#else
 			thread = Task.Run(() =>
+			#endif
 			{
 				while (do_work && r.Read())
 				{

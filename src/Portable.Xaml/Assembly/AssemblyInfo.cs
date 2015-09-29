@@ -47,10 +47,10 @@ using System.Security.Permissions;
 
 [assembly: NeutralResourcesLanguage ("en-US")]
 [assembly: CLSCompliant (true)]
-[assembly: ComVisible (false)]
+//[assembly: ComVisible (false)]
 
-[assembly: AssemblyVersion ("0.1.0.0")]
-[assembly: AssemblyInformationalVersion ("0.1.0")]
+[assembly: AssemblyVersion ("0.2.0.0")]
+[assembly: AssemblyInformationalVersion ("0.2.0")]
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
 

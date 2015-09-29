@@ -46,7 +46,7 @@ namespace Portable.Xaml.ComponentModel
 			
 			if (converterType != null)
 			{
-				if (converterType.GetTypeInfo().DeclaredConstructors.Any(r => r.GetParameters().Select(p => p.ParameterType).SequenceEqual(new [] { typeof(Type) })))
+				if (converterType.GetTypeInfo().GetConstructors().Any(r => r.GetParameters().Select(p => p.ParameterType).SequenceEqual(new [] { typeof(Type) })))
 					return Activator.CreateInstance(converterType, type) as TypeConverter;
 				return Activator.CreateInstance(converterType) as TypeConverter;
 			}
