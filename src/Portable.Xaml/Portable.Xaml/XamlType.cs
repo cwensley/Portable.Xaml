@@ -70,7 +70,7 @@ namespace Portable.Xaml
 			}
 			if (type.GetTypeInfo().IsGenericType) {
 				TypeArguments = new List<XamlType> ();
-				foreach (var gta in type.GetTypeInfo().GenericTypeArguments)
+				foreach (var gta in type.GetTypeInfo().GetGenericArguments())
 					TypeArguments.Add (schemaContext.GetXamlType (gta));
 			}
 		}
@@ -468,7 +468,7 @@ namespace Portable.Xaml
 			//var bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 			foreach (var pi in UnderlyingType.GetRuntimeProperties()) {
-				if (pi.GetMethod?.IsStatic ?? pi.SetMethod?.IsStatic ?? false)
+				if (pi.GetGetMethod()?.IsStatic ?? pi.GetSetMethod()?.IsStatic ?? false)
 					continue;
 				if (pi.Name.Contains (".")) // exclude explicit interface implementations.
 					continue;
@@ -557,7 +557,7 @@ namespace Portable.Xaml
 			if (typeof(TimeSpan) == UnderlyingType)
 				return false;
 			
-			return UnderlyingType.GetTypeInfo().DeclaredConstructors.All(r => r.GetParameters().Length > 0);
+			return UnderlyingType.GetTypeInfo().GetConstructors().All(r => r.GetParameters().Length > 0);
 		}
 
 		protected virtual XamlMember LookupContentProperty ()
@@ -664,13 +664,13 @@ namespace Portable.Xaml
 			if (IsDictionary) {
 				if (!IsGeneric)
 					return SchemaContext.GetXamlType(typeof(object));
-				return SchemaContext.GetXamlType(type.GetTypeInfo().GenericTypeArguments[1]);
+				return SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[1]);
 			}
 			if (!IsCollection)
 				return null;
 			if (!IsGeneric)
 				return SchemaContext.GetXamlType(typeof(object));
-			return SchemaContext.GetXamlType(type.GetTypeInfo().GenericTypeArguments[0]);
+			return SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[0]);
 		}
 
 		protected virtual XamlType LookupKeyType ()
@@ -679,7 +679,7 @@ namespace Portable.Xaml
 				return null;
 			if (!IsGeneric)
 				return SchemaContext.GetXamlType(typeof (object));
-			return SchemaContext.GetXamlType (type.GetTypeInfo().GenericTypeArguments [0]);
+			return SchemaContext.GetXamlType (type.GetTypeInfo().GetGenericArguments() [0]);
 		}
 
 		protected virtual XamlType LookupMarkupExtensionReturnType ()
@@ -709,7 +709,7 @@ namespace Portable.Xaml
 				}
 			}
 
-			var methods = (from m in UnderlyingType.GetTypeInfo().DeclaredConstructors where m.GetParameters ().Length == parameterCount select m).ToArray ();
+			var methods = (from m in UnderlyingType.GetTypeInfo().GetConstructors() where m.GetParameters ().Length == parameterCount select m).ToArray ();
 			if (methods.Length == 1)
 				return (from p in methods [0].GetParameters () select SchemaContext.GetXamlType (p.ParameterType)).ToArray ();
 

@@ -85,9 +85,9 @@ namespace Portable.Xaml.Schema
 
 			if (mi == null) {
 				if (ct.GetTypeInfo().IsGenericType) {
-					mi = ct.GetRuntimeMethod ("Add", ct.GenericTypeArguments);
+					mi = ct.GetRuntimeMethod ("Add", ct.GetTypeInfo().GetGenericArguments());
 					if (mi == null)
-						mi = LookupAddMethod (ct, typeof (ICollection<>).MakeGenericType (ct.GenericTypeArguments));
+						mi = LookupAddMethod (ct, typeof (ICollection<>).MakeGenericType (ct.GetTypeInfo().GetGenericArguments()));
 				} else {
 					mi = ct.GetRuntimeMethod ("Add", new Type [] {typeof (object)});
 					if (mi == null)
@@ -111,9 +111,9 @@ namespace Portable.Xaml.Schema
 
 			MethodInfo mi = null;
 			if (t.GetTypeInfo().IsGenericType) {
-				mi = instance.GetType ().GetRuntimeMethod ("Add", t.GenericTypeArguments);
+				mi = instance.GetType ().GetRuntimeMethod ("Add", t.GetTypeInfo().GetGenericArguments());
 				if (mi == null)
-					mi = LookupAddMethod (t, typeof (IDictionary<,>).MakeGenericType (t.GenericTypeArguments));
+					mi = LookupAddMethod (t, typeof (IDictionary<,>).MakeGenericType (t.GetTypeInfo().GetGenericArguments()));
 			} else {
 				mi = instance.GetType ().GetRuntimeMethod ("Add", new Type [] {typeof (object), typeof (object)});
 				if (mi == null)

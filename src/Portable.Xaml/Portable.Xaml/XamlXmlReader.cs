@@ -102,10 +102,17 @@ namespace Portable.Xaml
 
 		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings () { CloseInput =true };
 
+		#if PCL136
+		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			throw new NotSupportedException ("Cannot load directly from a file with this profile");
+		}
+		#else
 		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 			: this (XmlReader.Create (fileName, file_reader_settings), schemaContext, settings)
 		{
 		}
+		#endif
 
 		public XamlXmlReader (TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 			: this (XmlReader.Create (textReader), schemaContext, settings)

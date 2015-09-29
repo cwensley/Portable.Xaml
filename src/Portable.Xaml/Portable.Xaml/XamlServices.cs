@@ -31,8 +31,12 @@ namespace Portable.Xaml
 	{
 		public static Object Load (string fileName)
 		{
+			#if PCL136
+			throw new NotSupportedException("Cannot load files directly with this profile");
+			#else
 			using (var xr = XmlReader.Create (fileName))
 				return Load (xr);
+			#endif
 		}
 
 		public static Object Load (Stream stream)

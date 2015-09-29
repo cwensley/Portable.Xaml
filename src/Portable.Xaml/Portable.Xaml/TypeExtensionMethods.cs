@@ -73,7 +73,7 @@ namespace Portable.Xaml
 			if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition () == definition)
 				return true;
 
-			foreach (var iface in type.GetTypeInfo().ImplementedInterfaces)
+			foreach (var iface in type.GetTypeInfo().GetInterfaces())
 				if (iface == definition || (iface.GetTypeInfo().IsGenericType && iface.GetGenericTypeDefinition () == definition))
 					return true;
 			return false;
@@ -217,7 +217,7 @@ namespace Portable.Xaml
 				return false;
 			var ci = type.UnderlyingType
 				.GetTypeInfo()
-				.DeclaredConstructors.FirstOrDefault(c => 
+				.GetConstructors().FirstOrDefault(c => 
 					c.GetParameters().Select(r => r.ParameterType).SequenceEqual(argTypes)
 				);
 			return ci != null;
@@ -231,7 +231,7 @@ namespace Portable.Xaml
 		public static IEnumerable<XamlMember> GetSortedConstructorArguments (this XamlType type)
 		{
 			var args = type.GetConstructorArguments ().ToArray ();
-			foreach (var ci in type.UnderlyingType.GetTypeInfo().DeclaredConstructors.Where (c => c.GetParameters ().Length == args.Length)) {
+			foreach (var ci in type.UnderlyingType.GetTypeInfo().GetConstructors().Where (c => c.GetParameters ().Length == args.Length)) {
 				var pis = ci.GetParameters ();
 				if (args.Length != pis.Length)
 					continue;

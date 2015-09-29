@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\artifacts\pcl259\Debug</OutputPath>
-    <DefineConstants>DEBUG;PCL;MONO</DefineConstants>
+    <DefineConstants>DEBUG;PCL;MONO;PCL259</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -30,7 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>PCL;MONO</DefineConstants>
+    <DefineConstants>PCL;MONO;PCL259</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
@@ -165,12 +165,13 @@
     <Compile Include="Portable.Xaml.Schema\XamlTypeTypeConverter.cs" />
     <Compile Include="Portable.Xaml.Schema\XamlValueConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\ICustomAttributeProvider.cs" />
+    <Compile Include="Compat136.cs" />
+    <Compile Include="Compat259.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />
     <None Include="Portable.Xaml\ChangeLog" />
     <None Include="Portable.Xaml.Schema\ChangeLog" />
-    <None Include="Portable.Xaml-pcl259.nuspec" />
   </ItemGroup>
   <ItemGroup />
 </Project>

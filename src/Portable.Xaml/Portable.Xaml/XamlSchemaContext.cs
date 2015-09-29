@@ -294,7 +294,7 @@ namespace Portable.Xaml
 					l = new List<XamlType> ();
 					all_xaml_types.Add (xda.XmlNamespace, l);
 				}
-				foreach (var t in ass.ExportedTypes)
+				foreach (var t in ass.GetExportedTypes())
 					if (t.Namespace == xda.ClrNamespace)
 						l.Add (GetXamlType (t));
 			}

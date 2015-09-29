@@ -29,7 +29,7 @@
 		</GetAssemblyInfo>
 
     	<MakeDir Directories="$(OutputNupkgDir)" />
-    	<Exec Command="$(Runtime) $(Nuget) pack $(SourceDir)\Portable.Xaml\Portable.Xaml-pcl259.nuspec -NoDefaultExcludes -Properties Configuration=$(Configuration) -OutputDirectory $(OutputNupkgDir) -Version $(AssemblyVersion)"/>
+    	<Exec Command="$(Runtime) $(Nuget) pack $(SourceDir)\Portable.Xaml\Portable.Xaml.nuspec -NoDefaultExcludes -Properties Configuration=$(Configuration) -OutputDirectory $(OutputNupkgDir) -Version $(AssemblyVersion)"/>
     </Target>
 
 	<Target Name="Clean">

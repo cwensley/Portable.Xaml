@@ -47,7 +47,7 @@ using System.Security.Permissions;
 
 [assembly: NeutralResourcesLanguage ("en-US")]
 [assembly: CLSCompliant (true)]
-[assembly: ComVisible (false)]
+//[assembly: ComVisible (false)]
 
 [assembly: AssemblyVersion ("0.1.*")]
 [assembly: AssemblyInformationalVersion ("0.2.0-alpha")]

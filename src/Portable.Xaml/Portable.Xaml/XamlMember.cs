@@ -46,7 +46,7 @@ namespace Portable.Xaml
 			underlying_member = eventInfo;
 			DeclaringType = schemaContext.GetXamlType (eventInfo.DeclaringType);
 			target_type = DeclaringType;
-			UnderlyingSetter = eventInfo.AddMethod;
+			UnderlyingSetter = eventInfo.GetAddMethod();
 			is_event = true;
 		}
 
@@ -64,8 +64,8 @@ namespace Portable.Xaml
 			underlying_member = propertyInfo;
 			DeclaringType = schemaContext.GetXamlType (propertyInfo.DeclaringType);
 			target_type = DeclaringType;
-			UnderlyingGetter = propertyInfo.GetMethod;
-			UnderlyingSetter = propertyInfo.SetMethod;
+			UnderlyingGetter = propertyInfo.GetGetMethod();
+			UnderlyingSetter = propertyInfo.GetSetMethod();
 		}
 
 		public XamlMember (string attachableEventName, MethodInfo adder, XamlSchemaContext schemaContext)
