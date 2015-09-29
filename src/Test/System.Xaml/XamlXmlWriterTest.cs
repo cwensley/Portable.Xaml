@@ -637,7 +637,7 @@ namespace MonoTests.Portable.Xaml
 		string ReadXml (string name)
 		{
 			string ver = "net_4_5";
-			return File.ReadAllText ("Test/XmlFiles/" + name).Trim ().Replace (">\n", ">\r\n").Replace ("net_4_0", ver).Replace ("\r\n", Environment.NewLine);
+			return File.ReadAllText ("XmlFiles/" + name).Trim ().Replace (">\n", ">\r\n").Replace ("net_4_0", ver).Replace ("\r\n", Environment.NewLine);
 		}
 
 		[Test]

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+	<metadata>
+		<id>Portable.Xaml</id>
+		<version>$version$</version>
+		<title>Portable.Xaml</title>
+		<authors>Mono development team</authors>
+		<owners>Mono development team</owners>
+		<licenseUrl>https://github.com/cwensley/Portable.Xaml/raw/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/cwensley/Portable.Xaml</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<summary>Portable Xaml reader/writer</summary>
+		<description>
+Portable.Xaml is a port of mono's System.Xaml to PCL Profile 259.
+
+This allows you to read/write xaml for desktop, mobile, and CoreCLR projects.
+		</description>
+		<copyright>(c) Various Mono authors</copyright>
+		<tags>cross platform xaml</tags>
+	</metadata>
+	<files>
+		<file src="../../artifacts/pcl259/$configuration$/Portable.Xaml.dll" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10" />
+		<file src="../../artifacts/pcl259/$configuration$/Portable.Xaml.dll" target="lib\Xamarin.Mac" />
+		<file src="../../artifacts/pcl259/$configuration$/Portable.Xaml.dll" target="lib\dotnet" />
+		<file src="../../LICENSE.txt" target="LICENSE.txt" />
+	</files>
+</package>

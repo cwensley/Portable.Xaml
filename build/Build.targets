@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<Configuration Condition="$(Configuration) == ''">Release</Configuration>
+		<Platform Condition="$(Platform) == ''">Any CPU</Platform>
+        <BaseDir Condition="$(BaseDir) == ''">..</BaseDir>
+        <SourceDir Condition="$(SourceDir) == ''">$(BaseDir)\src</SourceDir>
+        <NugetDir Condition="$(NugetDir) == ''">$(SourceDir)\.nuget</NugetDir>
+        <Nuget>$(NugetDir)\nuget.exe</Nuget>
+        <ArtifactsDir>$(BaseDir)/artifacts</ArtifactsDir>
+        <OutputNupkgDir Condition="$(OutputNupkgDir) == ''">$(ArtifactsDir)/nupkg/$(Configuration)</OutputNupkgDir>
+        <Runtime Condition="$(OS) == 'Unix'">mono</Runtime>
+        <UtilitiesBasePath>$(ArtifactsDir)\obj</UtilitiesBasePath>
+	</PropertyGroup>
+	<Import Project="Utilities.targets" />
+
+	<Target Name="Build" DependsOnTargets="BuildUtilities">
+
+    	<Exec Command="$(Runtime) $(Nuget) restore $(SourceDir)\Portable.Xaml.sln"/>
+    	<MSBuild Projects="$(SourceDir)\Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
+
+	</Target>
+	
+	
+    <Target Name="Package" DependsOnTargets="Build">
+
+		<GetAssemblyInfo AssemblyFileName="$(ArtifactsDir)\pcl259\$(Configuration)\Portable.Xaml.dll">
+			<Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyVersion" />
+		</GetAssemblyInfo>
+
+    	<MakeDir Directories="$(OutputNupkgDir)" />
+    	<Exec Command="$(Runtime) $(Nuget) pack $(SourceDir)\Portable.Xaml\Portable.Xaml-pcl259.nuspec -NoDefaultExcludes -Properties Configuration=$(Configuration) -OutputDirectory $(OutputNupkgDir) -Version $(AssemblyVersion)"/>
+    </Target>
+
+	<Target Name="Clean">
+		<RemoveDir Directories="$(ArtifactsDir)"/>
+		<RemoveDir Directories="$(SourceDir)\packages"/>
+	</Target>
+</Project>

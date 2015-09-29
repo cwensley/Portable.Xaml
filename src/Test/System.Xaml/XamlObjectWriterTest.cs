@@ -835,7 +835,7 @@ namespace MonoTests.Portable.Xaml
 		XamlReader GetReader (string filename)
 		{
 			const string ver = "net_4_5";
-			string xml = File.ReadAllText (Path.Combine ("Test/XmlFiles", filename)).Replace ("net_4_0", ver);
+			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).Replace ("net_4_0", ver);
 			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
 		}
 

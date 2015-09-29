@@ -15,6 +15,7 @@
     <AssemblyName>Portable.Xaml_test_net_4_5</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,7 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoStdLib>false</NoStdLib>
-    <OutputPath>..\artifacts\pcl259\Debug</OutputPath>
+    <OutputPath>..\..\artifacts\pcl259\Debug</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,7 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoStdLib>false</NoStdLib>
-    <OutputPath>..\artifacts\pcl259\Release</OutputPath>
+    <OutputPath>..\..\artifacts\pcl259\Release</OutputPath>
   </PropertyGroup>
   <!-- Set AddAdditionalExplicitAssemblyReferences to false, otherwise if targetting .NET4.0, 
   Microsoft.NETFramework.props will force a dependency on the assembly System.Core. This
@@ -43,46 +44,46 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Test\System.Windows.Markup\ArrayExtensionTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\ReferenceTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\StaticExtensionTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\TypeExtensionConverterTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\TypeExtensionTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\ValueSerializerTest.cs" />
-    <Compile Include="Test\System.Windows.Markup\XDataTest.cs" />
-    <Compile Include="Test\System.Xaml.Schema\XamlMemberInvokerTest.cs" />
-    <Compile Include="Test\System.Xaml.Schema\XamlTypeInvokerTest.cs" />
-    <Compile Include="Test\System.Xaml.Schema\XamlTypeNameTest.cs" />
-    <Compile Include="Test\System.Xaml.Schema\XamlTypeTypeConverterTest.cs" />
-    <Compile Include="Test\System.Xaml.Schema\XamlValueConverterTest.cs" />
-    <Compile Include="Test\System.Xaml\AmbientPropertyValueTest.cs" />
-    <Compile Include="Test\System.Xaml\AttachableMemberIdentifierTest.cs" />
-    <Compile Include="Test\System.Xaml\AttachablePropertyServicesTest.cs" />
-    <Compile Include="Test\System.Xaml\DummyValueSerializerContext.cs" />
-    <Compile Include="Test\System.Xaml\NamespaceDeclarationTest.cs" />
-    <Compile Include="Test\System.Xaml\TestedTypes.cs" />
-    <Compile Include="Test\System.Xaml\ValueSerializerContextTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlBackgroundReaderTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlDirectiveTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlDuplicateMemberExceptionTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlLanguageTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlMemberTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlNodeQueueTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlObjectEventArgsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlObjectReaderSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlObjectReaderTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlObjectWriterSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlObjectWriterTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlReaderSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlReaderTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlReaderTestBase.cs" />
-    <Compile Include="Test\System.Xaml\XamlSchemaContextSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlSchemaContextTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlTypeTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlXmlReaderSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlXmlReaderTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlXmlWriterSettingsTest.cs" />
-    <Compile Include="Test\System.Xaml\XamlXmlWriterTest.cs" />
+    <Compile Include="System.Windows.Markup\ArrayExtensionTest.cs" />
+    <Compile Include="System.Windows.Markup\ReferenceTest.cs" />
+    <Compile Include="System.Windows.Markup\StaticExtensionTest.cs" />
+    <Compile Include="System.Windows.Markup\TypeExtensionConverterTest.cs" />
+    <Compile Include="System.Windows.Markup\TypeExtensionTest.cs" />
+    <Compile Include="System.Windows.Markup\ValueSerializerTest.cs" />
+    <Compile Include="System.Windows.Markup\XDataTest.cs" />
+    <Compile Include="System.Xaml.Schema\XamlMemberInvokerTest.cs" />
+    <Compile Include="System.Xaml.Schema\XamlTypeInvokerTest.cs" />
+    <Compile Include="System.Xaml.Schema\XamlTypeNameTest.cs" />
+    <Compile Include="System.Xaml.Schema\XamlTypeTypeConverterTest.cs" />
+    <Compile Include="System.Xaml.Schema\XamlValueConverterTest.cs" />
+    <Compile Include="System.Xaml\AmbientPropertyValueTest.cs" />
+    <Compile Include="System.Xaml\AttachableMemberIdentifierTest.cs" />
+    <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
+    <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
+    <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
+    <Compile Include="System.Xaml\TestedTypes.cs" />
+    <Compile Include="System.Xaml\ValueSerializerContextTest.cs" />
+    <Compile Include="System.Xaml\XamlBackgroundReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlDirectiveTest.cs" />
+    <Compile Include="System.Xaml\XamlDuplicateMemberExceptionTest.cs" />
+    <Compile Include="System.Xaml\XamlLanguageTest.cs" />
+    <Compile Include="System.Xaml\XamlMemberTest.cs" />
+    <Compile Include="System.Xaml\XamlNodeQueueTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectEventArgsTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectReaderSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectWriterSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectWriterTest.cs" />
+    <Compile Include="System.Xaml\XamlReaderSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlReaderTestBase.cs" />
+    <Compile Include="System.Xaml\XamlSchemaContextSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlSchemaContextTest.cs" />
+    <Compile Include="System.Xaml\XamlTypeTest.cs" />
+    <Compile Include="System.Xaml\XamlXmlReaderSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlXmlReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlXmlWriterSettingsTest.cs" />
+    <Compile Include="System.Xaml\XamlXmlWriterTest.cs" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -101,260 +102,260 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Xml" />
-    <Reference Include="nunit.framework">
-      <HintPath>packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="XmlFiles\AbstractContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\AbstractWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\AmbientPropertyContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\AmbientPropertyContainer2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ArgumentAttributed.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Array_Int32.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ArrayExtension.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ArrayExtension2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ArrayList.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\AttachedProperty.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ChangeLog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\CollectionContentProperty.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\CollectionContentProperty2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\CollectionContentPropertyX.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\CollectionContentPropertyX2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ComplexPositionalParameterWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ContentIncluded.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ContentPropertyContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\CurrentVersion.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\DateTime.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Dictionary_Int32_String.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Dictionary_String_Double.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Dictionary_String_Type.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Dictionary_String_Type_2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\DirectDictionaryContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\DirectDictionaryContainer2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\DirectListContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EnumContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EventContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EventStore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EventStore2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EventStore3.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\EventStore4.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ExplicitKeyDictionary.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Guid.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\GuidFactoryMethod.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Int32.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\List_Array.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\List_Int32.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\List_Int32_2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\List_Type.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\List_XmlSerializable.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ListWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ListWrapper2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\LookupCorrectEvent.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\LookupCorrectEvent2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\LookupCorrectEvent3.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyArrayExtension.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyArrayExtensionA.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyExtension.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyExtension2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyExtension3.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyExtension4.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\MyExtension6.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\NamedItems.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\NamedItems2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\NonPrimitive.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\NullableContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\NullExtension.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\PositionalParametersWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\PropertyDefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\ReadOnlyPropertyContainer.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Reference.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\SilverlightApp1.xaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\StaticExtension.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\StaticExtension2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\StaticExtensionWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\StaticMember.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\String.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\TestClass4.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\TestClass5.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\TimeSpan.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Type.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Type2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\TypeConverterOnListMember.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\TypeExtensionWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\Uri.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\XmlDocument.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\XmlSerializable.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="XmlFiles\XmlSerializableWrapper.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
-    <None Include="Test\XmlFiles\AbstractContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\AbstractWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\AmbientPropertyContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\AmbientPropertyContainer2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ArgumentAttributed.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Array_Int32.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ArrayExtension.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ArrayExtension2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ArrayList.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\AttachedProperty.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ChangeLog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\CollectionContentProperty.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\CollectionContentProperty2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\CollectionContentPropertyX.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\CollectionContentPropertyX2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ComplexPositionalParameterWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ContentIncluded.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ContentPropertyContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\CurrentVersion.xaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\DateTime.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Dictionary_Int32_String.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Dictionary_String_Double.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Dictionary_String_Type.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Dictionary_String_Type_2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\DirectDictionaryContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\DirectDictionaryContainer2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\DirectListContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EnumContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EventContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EventStore.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EventStore2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EventStore3.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\EventStore4.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ExplicitKeyDictionary.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Guid.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\GuidFactoryMethod.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Int32.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\List_Array.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\List_Int32.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\List_Int32_2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\List_Type.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\List_XmlSerializable.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ListWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ListWrapper2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\LookupCorrectEvent.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\LookupCorrectEvent2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\LookupCorrectEvent3.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyArrayExtension.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyArrayExtensionA.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyExtension.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyExtension2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyExtension3.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyExtension4.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\MyExtension6.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\NamedItems.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\NamedItems2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\NonPrimitive.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\NullableContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\NullExtension.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\PositionalParametersWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\PropertyDefinition.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\ReadOnlyPropertyContainer.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Reference.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\SilverlightApp1.xaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\StaticExtension.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\StaticExtension2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\StaticExtensionWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\StaticMember.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\String.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\TestClass4.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\TestClass5.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\TimeSpan.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Type.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Type2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\TypeConverterOnListMember.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\TypeExtensionWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\Uri.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\XmlDocument.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\XmlSerializable.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\XmlFiles\XmlSerializableWrapper.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Portable.Xaml-pcl259.csproj">
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-pcl259.csproj">
       <Project>{179484EC-DB00-451A-AD2D-2E2AB20DE519}</Project>
       <Name>Portable.Xaml-pcl259</Name>
     </ProjectReference>
