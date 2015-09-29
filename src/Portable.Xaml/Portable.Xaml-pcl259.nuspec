@@ -6,7 +6,7 @@
 		<title>Portable.Xaml</title>
 		<authors>Mono development team</authors>
 		<owners>Mono development team</owners>
-		<licenseUrl>https://github.com/cwensley/Portable.Xaml/raw/master/LICENSE</licenseUrl>
+		<licenseUrl>https://github.com/cwensley/Portable.Xaml/blob/master/LICENSE.txt</licenseUrl>
 		<projectUrl>https://github.com/cwensley/Portable.Xaml</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<summary>Portable Xaml reader/writer</summary>
