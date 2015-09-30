@@ -95,15 +95,13 @@ namespace Portable.Xaml.Markup
 				return new TypeValueSerializer ();
 
 			// Undocumented, but several primitive types get a valid serializer while it does not have TypeConverter.
-			if (type != typeof(object))
-			{
-				return new TypeConverterValueSerializer (type.GetTypeConverter ());
-			}
-
 			// There is still exceptional type! TimeSpan. Why aren't they documented?
-			if (type == typeof (TimeSpan))
-				return new TypeConverterValueSerializer (type.GetTypeConverter ());
-
+			if (type != typeof(object) || type == typeof(TimeSpan))
+			{
+				var typeConverter = type.GetTypeConverter ();
+				if (typeConverter != null)
+					return new TypeConverterValueSerializer (typeConverter);
+			}
 			return null;
 		}
 
