@@ -19,7 +19,23 @@ namespace Portable.Xaml.ComponentModel
 	{
 		static readonly Dictionary<Type, Type> converters = new Dictionary<Type, Type>
 		{
-			{ typeof(bool), typeof(BoolConverter) }
+			{ typeof(bool), typeof(BoolConverter) },
+			{ typeof(char), typeof(CharConverter) },
+			{ typeof(byte), typeof(ByteConverter) },
+			{ typeof(Single), typeof(SingleConverter) },
+			{ typeof(Double), typeof(DoubleConverter) },
+			{ typeof(Decimal), typeof(DecimalConverter) },
+			{ typeof(Int16), typeof(Int16Converter) },
+			{ typeof(Int32), typeof(Int32Converter) },
+			{ typeof(Int64), typeof(Int64Converter) },
+			{ typeof(UInt16), typeof(UInt16Converter) },
+			{ typeof(UInt32), typeof(UInt32Converter) },
+			{ typeof(UInt64), typeof(UInt64Converter) },
+			{ typeof(string), typeof(StringConverter) },
+			{ typeof(Guid), typeof(GuidConverter) },
+			{ typeof(Uri), typeof(UriConverter) },
+			{ typeof(TimeSpan), typeof(TimeSpanConverter) },
+			{ typeof(DateTime), typeof(DateTimeConverter) }
 		};
 
 		/// <summary>

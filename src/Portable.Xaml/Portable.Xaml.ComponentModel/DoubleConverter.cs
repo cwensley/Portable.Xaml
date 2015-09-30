@@ -12,25 +12,25 @@ using System.Reflection;
 namespace Portable.Xaml.ComponentModel
 {
 
-	class SingleConverter : BaseNumberConverter
+	class DoubleConverter : BaseNumberConverter
 	{
 		internal override bool AllowHex { get { return false; } }
 
-		internal override Type NumberType { get { return typeof(float); } }
+		internal override Type NumberType { get { return typeof(double); } }
 
 		internal override object FromString(string value, int fromBase)
 		{
-			return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+			return Convert.ToDouble(value, CultureInfo.InvariantCulture);
 		}
 
 		internal override object FromString(string value, NumberFormatInfo formatInfo)
 		{
-			return float.Parse(value, NumberStyles.Float, formatInfo);
+			return double.Parse(value, NumberStyles.Float, formatInfo);
 		}
 
 		internal override string ToString(object value, NumberFormatInfo formatInfo)
 		{
-			return ((float)value).ToString("R", formatInfo);
+			return ((double)value).ToString("R", formatInfo);
 		}
 	}
 	
