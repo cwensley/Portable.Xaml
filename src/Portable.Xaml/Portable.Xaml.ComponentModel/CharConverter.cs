@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Portable.Xaml.ComponentModel
 {
 
-	public class BoolConverter : TypeConverter
+	public class CharConverter : TypeConverter
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{
@@ -22,18 +22,16 @@ namespace Portable.Xaml.ComponentModel
 		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			var text = value as string;
-			if (text != null) {
-				bool result;
-				if (bool.TryParse (text, out result))
-					return result;
+			if (text != null && text.Length == 1) {
+				return text [0];
 			}
 			return base.ConvertFrom (context, culture, value);
 		}
 
 		public override object ConvertTo (ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof(string) && value is bool)
-				return Convert.ToString (value);
+			if (destinationType == typeof(string) && value is char)
+				return ((char)value).ToString();
 			return base.ConvertTo (context, culture, value, destinationType);
 		}
 	}

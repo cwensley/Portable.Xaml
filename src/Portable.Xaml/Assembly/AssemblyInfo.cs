@@ -54,6 +54,8 @@ using System.Security.Permissions;
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
 
+
+
 #if !PCL
 
 [assembly: AssemblyCompany (Consts.MonoCompany)]
