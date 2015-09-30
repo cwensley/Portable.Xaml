@@ -102,7 +102,7 @@ namespace Portable.Xaml
 				var getCurrentDomain = appDomainType.GetRuntimeProperty ("CurrentDomain");
 				if (getCurrentDomain == null)
 					return Enumerable.Empty<Assembly> ();
-				var domain = getCurrentDomain.GetValue (null);
+				var domain = getCurrentDomain.GetValue (null, null);
 
 				var getAssemblies = domain.GetType ().GetRuntimeMethod ("GetAssemblies", new Type[] { });
 				if (getAssemblies == null)
