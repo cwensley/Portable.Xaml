@@ -22,11 +22,19 @@ namespace Portable.Xaml.ComponentModel
 
 		internal abstract object FromString(string value, NumberFormatInfo formatInfo);
 
-		internal abstract string ToString(object value, NumberFormatInfo formatInfo);
+		internal virtual string ToString(object value, NumberFormatInfo formatInfo)
+		{
+			return Convert.ToString (value, formatInfo);
+		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+		}
+
+		public override bool CanConvertTo (ITypeDescriptorContext context, Type destinationType)
+		{
+			return destinationType == typeof(string) || base.CanConvertTo (context, destinationType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)

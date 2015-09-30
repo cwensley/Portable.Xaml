@@ -324,7 +324,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (type, d.Type.UnderlyingType, "#11-2");
 
 			// .NET returns StringConverter, but it should not premise that key must be string (it is object)
-			if (name != "Key")
+			if (name == "Key")
 			{
 				//Assert.IsNull (d.TypeConverter, "#12")
 			}

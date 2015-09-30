@@ -167,6 +167,21 @@
     <Compile Include="Portable.Xaml.ComponentModel\ICustomAttributeProvider.cs" />
     <Compile Include="Compat136.cs" />
     <Compile Include="Compat259.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\Int32Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\Int64Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\UInt64Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\UInt32Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\DoubleConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\CharConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\Int16Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\UInt16Converter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\ByteConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\DecimalConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TimeSpanConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\GuidConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\UriConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\DateTimeConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />

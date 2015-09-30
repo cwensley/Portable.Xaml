@@ -575,8 +575,8 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 
 			var defns = "clr-namespace:System.Collections.Generic;assembly=mscorlib";
-			var defns2 = "clr-namespace:System;assembly=mscorlib";
-			var defns3 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
+			var defns2 = "clr-namespace:Portable.Xaml;assembly=Portable.Xaml";
+			var defns3 = "clr-namespace:System;assembly=mscorlib";
 
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ns#1-3");
 			Assert.AreEqual (defns, r.Namespace.Namespace, "ns#1-4");
@@ -584,13 +584,13 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
 			Assert.IsNotNull (r.Namespace, "ns#2-3");
-			Assert.AreEqual ("s", r.Namespace.Prefix, "ns#2-3-2");
+			Assert.AreEqual ("px", r.Namespace.Prefix, "ns#2-3-2");
 			Assert.AreEqual (defns2, r.Namespace.Namespace, "ns#2-3-3");
 
 			Assert.IsTrue (r.Read (), "ns#3-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#3-2");
 			Assert.IsNotNull (r.Namespace, "ns#3-3");
-			Assert.AreEqual ("sx", r.Namespace.Prefix, "ns#3-3-2");
+			Assert.AreEqual ("s", r.Namespace.Prefix, "ns#3-3-2");
 			Assert.AreEqual (defns3, r.Namespace.Namespace, "ns#3-3-3");
 
 			Assert.IsTrue (r.Read (), "#11");
@@ -623,7 +623,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#72-2");
 			Assert.AreEqual (XamlLanguage.Items, r.Member, "#72-3");
 
-			string [] values = {"x:Int32", "Dictionary(s:Type, sx:XamlType)"};
+			string [] values = {"x:Int32", "Dictionary(s:Type, px:XamlType)"};
 			for (int i = 0; i < 2; i++) {
 				Assert.IsTrue (r.Read (), i + "#73");
 				Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, i + "#73-2");
@@ -1215,7 +1215,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (r.Read (), "ns#3-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#3-2");
 			Assert.IsNotNull (r.Namespace, "ns#3-3");
-			Assert.AreEqual ("sx", r.Namespace.Prefix, "ns#3-4");
+			Assert.AreEqual ("px", r.Namespace.Prefix, "ns#3-4");
 			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", r.Namespace.Namespace, "ns#3-5");
 
 			Assert.IsTrue (r.Read (), "ns#4-1");
