@@ -774,7 +774,7 @@ namespace Portable.Xaml
 
 			// It's still not decent to check CollectionConverter.
 			var tct = t.GetTypeConverter ()?.GetType ();
-			if (tct != typeof (TypeConverter)) //*PCL && tct != typeof (CollectionConverter)) //*PCL && tct != typeof (ReferenceConverter))
+			if (tct != null && tct != typeof (TypeConverter)) //*PCL && tct != typeof (CollectionConverter)) //*PCL && tct != typeof (ReferenceConverter))
 				return SchemaContext.GetValueConverter<TypeConverter> (tct, this);
 			return null;
 		}
