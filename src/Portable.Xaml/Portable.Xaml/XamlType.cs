@@ -547,17 +547,23 @@ namespace Portable.Xaml
 			if (UnderlyingType == null)
 				return false;
 
+			var typeInfo = UnderlyingType.GetTypeInfo ();
+
+			if (typeInfo.IsValueType)
+				return false;
+
 			// not sure if it is required, but MemberDefinition return true while they are abstract and it makes no sense.
-			if (UnderlyingType.GetTypeInfo().IsAbstract)
+			if (typeInfo.IsAbstract)
 				return true;
 
 			// FIXME: probably some primitive types are treated as special.
-			if (typeof(string).GetTypeInfo().IsAssignableFrom(UnderlyingType.GetTypeInfo()))
+			if (typeof(string).GetTypeInfo().IsAssignableFrom(typeInfo))
 				return true;
 			if (typeof(TimeSpan) == UnderlyingType)
 				return false;
-			
-			return UnderlyingType.GetTypeInfo().GetConstructors().All(r => r.GetParameters().Length > 0);
+
+
+			return typeInfo.GetConstructors().Where(r => r.IsPublic).All(r => r.GetParameters().Length > 0);
 		}
 
 		protected virtual XamlMember LookupContentProperty ()
