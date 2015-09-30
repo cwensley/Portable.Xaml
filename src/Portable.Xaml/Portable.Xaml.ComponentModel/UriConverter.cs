@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Portable.Xaml.ComponentModel
 {
 
-	class UriConverter : TypeConverter
+	public class UriConverter : TypeConverter
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{

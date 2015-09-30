@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Portable.Xaml.ComponentModel
 {
-	class ByteConverter : BaseNumberConverter
+	public class ByteConverter : BaseNumberConverter
 	{
 		internal override Type NumberType { get { return typeof(byte); } }
 

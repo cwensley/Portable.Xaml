@@ -23,12 +23,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
+using Portable.Xaml.ComponentModel;
 using NUnit.Framework;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
@@ -555,7 +555,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			Assert.IsNull (new XamlType (typeof (List<object>), sctx).TypeConverter, "#1");
 			Assert.IsNotNull (new XamlType (typeof (object), sctx).TypeConverter, "#2");
-			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance is UriTypeConverter, "#3");
+			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance is UriConverter, "#3");
 			Assert.IsTrue (new XamlType (typeof (TimeSpan), sctx).TypeConverter.ConverterInstance is TimeSpanConverter, "#4");
 			Assert.IsNull (new XamlType (typeof (XamlType), sctx).TypeConverter, "#5");
 			Assert.IsTrue (new XamlType (typeof (char), sctx).TypeConverter.ConverterInstance is CharConverter, "#6");
@@ -595,6 +595,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		[Ignore]
 		[Category ("NotWorking")]
 		public void GetXamlNamespaces ()
 		{

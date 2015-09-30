@@ -53,6 +53,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		[Ignore]
 		[Category ("NotWorking")]
 		public void GetService ()
 		{
@@ -105,6 +106,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		[Ignore]
 		[Category ("NotWorking")]
 		public void NameResolver ()
 		{
