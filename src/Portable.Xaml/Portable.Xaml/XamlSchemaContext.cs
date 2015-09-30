@@ -90,7 +90,30 @@ namespace Portable.Xaml
 		}
 
 		IEnumerable<Assembly> AssembliesInScope {
-			get { return reference_assemblies ?? Enumerable.Empty<Assembly>(); } //AppDomain.CurrentDomain.GetAssemblies (); }
+			get { return reference_assemblies ?? GetAppDomainAssemblies(); }
+		}
+
+		IEnumerable<Assembly> GetAppDomainAssemblies()
+		{
+			try {
+				var appDomainType = Type.GetType ("System.AppDomain", false);
+				if (appDomainType == null)
+					return Enumerable.Empty<Assembly> ();
+				var getCurrentDomain = appDomainType.GetRuntimeProperty ("CurrentDomain");
+				if (getCurrentDomain == null)
+					return Enumerable.Empty<Assembly> ();
+				var domain = getCurrentDomain.GetValue (null);
+
+				var getAssemblies = domain.GetType ().GetRuntimeMethod ("GetAssemblies", new Type[] { });
+				if (getAssemblies == null)
+					return Enumerable.Empty<Assembly> ();
+				var assemblies = getAssemblies.Invoke (domain, null) as IEnumerable<Assembly>;
+				if (assemblies == null)
+					return Enumerable.Empty<Assembly> ();
+				return assemblies;
+			} catch {
+				return Enumerable.Empty<Assembly> ();
+			}
 		}
 
 		public bool SupportMarkupExtensionsWithDuplicateArity { get; private set; }

@@ -82,7 +82,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void GetAllXamlNamespaces ()
 		{
-			var ctx = new XamlSchemaContext (null, null);
+			var ctx = new XamlSchemaContext ( null, null);
 			var arr = ctx.GetAllXamlNamespaces ().ToArray ();
 			Assert.AreEqual (5, arr.Length, "#1");
 			Assert.IsTrue (arr.Contains (XamlLanguage.Xaml2006Namespace), "#1-2");

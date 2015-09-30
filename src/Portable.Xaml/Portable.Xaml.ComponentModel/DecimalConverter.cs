@@ -12,7 +12,7 @@ using System.Reflection;
 namespace Portable.Xaml.ComponentModel
 {
 
-	class DecimalConverter : BaseNumberConverter
+	public class DecimalConverter : BaseNumberConverter
 	{
 		internal override bool AllowHex { get { return false; } }
 

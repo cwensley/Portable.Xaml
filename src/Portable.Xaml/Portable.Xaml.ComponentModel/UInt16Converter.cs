@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Portable.Xaml.ComponentModel
 {
-	class UInt16Converter : BaseNumberConverter
+	public class UInt16Converter : BaseNumberConverter
 	{
 		internal override Type NumberType { get { return typeof(UInt16); } }
 

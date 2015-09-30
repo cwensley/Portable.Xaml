@@ -29,7 +29,7 @@ using System.Reflection;
 using Portable.Xaml.Schema;
 using Portable.Xaml.Markup;
 
-[assembly:XmlnsDefinition (Portable.Xaml.XamlLanguage.Xaml2006Namespace, "System.Windows.Markup")] // FIXME: verify.
+[assembly:XmlnsDefinition (Portable.Xaml.XamlLanguage.Xaml2006Namespace, "Portable.Xaml.Markup")] // FIXME: verify.
 
 namespace Portable.Xaml
 {

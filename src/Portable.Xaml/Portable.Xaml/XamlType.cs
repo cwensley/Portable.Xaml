@@ -593,7 +593,7 @@ namespace Portable.Xaml
 
 		protected internal virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
-			return new TypeAttributeProvider(UnderlyingType);
+			return UnderlyingType != null ? new TypeAttributeProvider(UnderlyingType) : null;
 		}
 		
 		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()
@@ -629,12 +629,12 @@ namespace Portable.Xaml
 
 		protected virtual bool LookupIsMarkupExtension ()
 		{
-			return typeof (MarkupExtension).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			return UnderlyingType != null && typeof (MarkupExtension).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
 		}
 
 		protected virtual bool LookupIsNameScope ()
 		{
-			return typeof (INameScope).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			return UnderlyingType != null && typeof (INameScope).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
 		}
 
 		protected virtual bool LookupIsNullable ()

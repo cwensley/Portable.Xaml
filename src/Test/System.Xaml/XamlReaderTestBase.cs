@@ -1209,14 +1209,14 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (r.Read (), "ns#2-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
 			Assert.IsNotNull (r.Namespace, "ns#2-3");
-			Assert.AreEqual ("s", r.Namespace.Prefix, "ns#2-4");
-			Assert.AreEqual ("clr-namespace:System;assembly=mscorlib", r.Namespace.Namespace, "ns#2-5");
+			Assert.AreEqual ("px", r.Namespace.Prefix, "ns#2-4");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", r.Namespace.Namespace, "ns#3-5");
 
 			Assert.IsTrue (r.Read (), "ns#3-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#3-2");
 			Assert.IsNotNull (r.Namespace, "ns#3-3");
-			Assert.AreEqual ("px", r.Namespace.Prefix, "ns#3-4");
-			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", r.Namespace.Namespace, "ns#3-5");
+			Assert.AreEqual ("s", r.Namespace.Prefix, "ns#3-4");
+			Assert.AreEqual ("clr-namespace:System;assembly=mscorlib", r.Namespace.Namespace, "ns#2-5");
 
 			Assert.IsTrue (r.Read (), "ns#4-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#4-2");
@@ -1275,7 +1275,7 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.IsTrue (r.Read (), "svi#1-1." + i);
 			Assert.AreEqual (XamlNodeType.Value, r.NodeType, "svi#1-2." + i);
-			Assert.AreEqual (i == 0 ? "x:Int32" : "Dictionary(s:Type, sx:XamlType)", r.Value, "svi#1-3." + i);
+			Assert.AreEqual (i == 0 ? "x:Int32" : "Dictionary(s:Type, px:XamlType)", r.Value, "svi#1-3." + i);
 
 			Assert.IsTrue (r.Read (), "emi#1-1." + i);
 			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "emi#1-2." + i);

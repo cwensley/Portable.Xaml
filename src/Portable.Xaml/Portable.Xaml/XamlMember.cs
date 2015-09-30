@@ -308,7 +308,7 @@ namespace Portable.Xaml
 
 		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
-			return new MemberAttributeProvider(UnderlyingMember);
+			return UnderlyingMember != null ? new MemberAttributeProvider(UnderlyingMember) : null;
 		}
 
 		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()

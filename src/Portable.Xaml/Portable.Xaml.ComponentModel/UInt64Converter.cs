@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Portable.Xaml.ComponentModel
 {
 
-	class UInt64Converter : BaseNumberConverter
+	public class UInt64Converter : BaseNumberConverter
 	{
 		internal override Type NumberType { get { return typeof(UInt64); } }
 

@@ -24,7 +24,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -33,6 +32,7 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
+using Portable.Xaml.ComponentModel;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -966,7 +966,7 @@ namespace SecondTest
 
 	public class NullableUintListConverter : CustomTypeConverterBase
 	{
-		public override object ConvertFrom (System.ComponentModel.ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+		public override object ConvertFrom (ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
 		{
 			string configValue = value as string;
 			if (string.IsNullOrWhiteSpace (configValue))

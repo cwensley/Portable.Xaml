@@ -36,50 +36,51 @@ namespace Portable.Xaml
 			r = wrappedReader;
 			q = new XamlNodeQueue (r.SchemaContext) { LineInfoProvider = r as IXamlLineInfo };
 		}
-		
+
 		Task thread;
 		XamlReader r;
 		XamlNodeQueue q;
 		bool read_all_done, do_work = true;
 		ManualResetEvent wait = new ManualResetEvent (true);
+		Exception lastError;
 
 		public bool HasLineInfo {
-			get { return ((IXamlLineInfo) q.Reader).HasLineInfo; }
+			get { return ((IXamlLineInfo)q.Reader).HasLineInfo; }
 		}
-		
+
 		public override bool IsEof {
 			get { return read_all_done && q.IsEmpty; }
 		}
-		
+
 		public int LineNumber {
-			get { return ((IXamlLineInfo) q.Reader).LineNumber; }
+			get { return ((IXamlLineInfo)q.Reader).LineNumber; }
 		}
-		
+
 		[MonoTODO ("always returns 0")]
 		public int LinePosition {
-			get { return ((IXamlLineInfo) q.Reader).LinePosition; }
+			get { return ((IXamlLineInfo)q.Reader).LinePosition; }
 		}
-		
+
 		public override XamlMember Member {
 			get { return q.Reader.Member; }
 		}
-		
+
 		public override NamespaceDeclaration Namespace {
 			get { return q.Reader.Namespace; }
 		}
-		
+
 		public override XamlNodeType NodeType {
 			get { return q.Reader.NodeType; }
 		}
-		
+
 		public override XamlSchemaContext SchemaContext {
 			get { return q.Reader.SchemaContext; }
 		}
-		
+
 		public override XamlType Type {
 			get { return q.Reader.Type; }
 		}
-		
+
 		public override object Value {
 			get { return q.Reader.Value; }
 		}
@@ -88,19 +89,21 @@ namespace Portable.Xaml
 		{
 			do_work = false;
 		}
-		
+
 		public override bool Read ()
 		{
 			if (q.IsEmpty)
 				wait.WaitOne ();
+			if (lastError != null)
+				throw new XamlException("Error reading xaml", lastError);
 			return q.Reader.Read ();
 		}
-		
+
 		public void StartThread ()
 		{
 			StartThread ("XAML reader thread"); // documented name
 		}
-		
+
 		public void StartThread (string threadName)
 		{
 			if (thread != null)
@@ -108,15 +111,20 @@ namespace Portable.Xaml
 			#if PCL136
 			ThreadPool.QueueUserWorkItem(state =>
 			#else
-			thread = Task.Run(() =>
+			thread = Task.Run (() =>
 			#endif
 			{
-				while (do_work && r.Read())
-				{
-					q.Writer.WriteNode(r);
-					wait.Set();
+				try {
+					while (do_work && r.Read ()) {
+						q.Writer.WriteNode (r);
+						wait.Set ();
+					}
+				} catch (Exception ex) {
+					lastError = ex;
+					wait.Set ();
+				} finally {
+					read_all_done = true;
 				}
-				read_all_done = true;
 			});
 		}
 	}
