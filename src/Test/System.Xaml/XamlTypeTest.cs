@@ -603,7 +603,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
 		[Category ("NotWorking")]
 		public void GetXamlNamespaces ()
 		{

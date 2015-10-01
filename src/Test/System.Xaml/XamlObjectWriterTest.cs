@@ -303,7 +303,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		//[ExpectedException (typeof (ArgumentException))] // oh? XamlXmlWriter raises this.
-		//[Category ("NotWorking")] // so, it's not worthy of passing.
 		public void WriteValueTypeMismatch ()
 		{
 			var xw = new XamlObjectWriter (sctx, null);
@@ -341,7 +340,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		// This behavior is different from XamlXmlWriter. Compare to XamlXmlWriterTest.WriteValueList().
-		//[Category ("NotWorking")] // not worthy of passing
 		public void WriteValueList ()
 		{
 			var xw = new XamlObjectWriter (sctx, null);
@@ -544,7 +542,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
 		[Category ("NotWorking")] // not worthy of passing
 		public void StartMemberBeforeNamespace ()
 		{
@@ -1167,7 +1164,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (InvalidCastException))] // unable to cast string to MarkupExtension
-		[Ignore]
 		[Category ("NotWorking")]
 		public void Write_MyExtension2 ()
 		{
@@ -1377,7 +1373,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore ("type resolution falure.")]
 		[Category ("NotWorking")] // type resolution failure.
 		public void Write_EventStore4 ()
 		{

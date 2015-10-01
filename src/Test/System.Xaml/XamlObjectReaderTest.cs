@@ -379,7 +379,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (XamlObjectReaderException))]
-		[Ignore]
 		[Category ("NotWorking")]
 		public void Read_XData ()
 		{
@@ -390,7 +389,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (XamlObjectReaderException))]
-		[Ignore]
 		[Category ("NotWorking")]
 		public void Read_XDataWrapper ()
 		{
@@ -729,8 +727,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore ("only member ordering difference, maybe.")]
-		[Category ("NotWorking")]
+		[Category ("NotWorking")] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
@@ -744,8 +741,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore ("only member ordering difference, maybe.")]
-		[Category ("NotWorking")]
+		[Category ("NotWorking")] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer2 ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
