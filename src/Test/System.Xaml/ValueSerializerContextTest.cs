@@ -61,7 +61,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
+		[Ignore ("Unfinished test")]
 		[Category ("NotWorking")]
 		public void GetService ()
 		{
@@ -114,7 +114,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
+		[Ignore ("Unfinished test")]
 		[Category ("NotWorking")]
 		public void NameResolver ()
 		{

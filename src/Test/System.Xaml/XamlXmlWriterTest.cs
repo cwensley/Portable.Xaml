@@ -255,7 +255,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
 		[Category ("NotWorking")] // This is an abnormal operation and I cannot completely care about such operations.
 		public void ValueAfterObject2 ()
 		{
@@ -427,7 +426,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore]
 		[Category ("NotWorking")]
 		public void ValueThenStartObject ()
 		{
@@ -992,7 +990,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore("Cosmetic attribute order difference")]
 		[Category ("NotWorking")] // cosmetic attribute order difference
 		public void Write_AbstractWrapper ()
 		{
@@ -1054,8 +1051,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore ("TestProperty is written as element so far")]
-		[Category ("NotWorking")]
+		[Category ("NotWorking")] // TestProperty is written as element so far
 		public void Write_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();

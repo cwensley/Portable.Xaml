@@ -346,6 +346,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		[Category ("NotWorking")] // Doesn't work on MS.NET due to inability to load System.Xml in PCL
 		public void Read_XmlDocument ()
 		{
 			var doc = new XmlDocument ();
