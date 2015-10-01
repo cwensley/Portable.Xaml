@@ -26,10 +26,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using Category = NUnit.Framework.CategoryAttribute;
 

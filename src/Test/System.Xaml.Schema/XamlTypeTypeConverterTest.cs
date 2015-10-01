@@ -26,11 +26,19 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using Portable.Xaml.Markup;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 namespace MonoTests.Portable.Xaml.Schema
 {
@@ -102,7 +110,7 @@ namespace MonoTests.Portable.Xaml.Schema
 		{
 			// ... so, it does not seem to just call XamlType.ToString(), but rather first try to use UnderlyingType if possible.
 			Assert.AreEqual ("System.String", c.ConvertTo (null, null, XamlLanguage.String, typeof (string)), "#1"); // huh?
-			Assert.AreEqual ("Portable.Xaml.Markup.TypeExtension", c.ConvertTo (null, null, XamlLanguage.Type, typeof (string)), "#1"); // huh?
+			Assert.AreEqual ("Portable.Xaml.Markup.TypeExtension".Fixup(), c.ConvertTo (null, null, XamlLanguage.Type, typeof (string)), "#1"); // huh?
 			Assert.AreEqual ("{urn:foo}Foo", c.ConvertTo (null, null, new XamlType ("urn:foo", "Foo", null, sctx), typeof (string)), "#2");
 		}
 

@@ -27,10 +27,18 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {
@@ -421,7 +429,7 @@ namespace MonoTests.Portable.Xaml
 			var pi = typeof (string).GetProperty ("Length");
 			Assert.AreEqual ("{http://schemas.microsoft.com/winfx/2006/xaml}String.Length", new XamlMember (pi, sctx).ToString (), "#3");
 
-			Assert.AreEqual ("Portable.Xaml.XamlSchemaContext.FooBar", new XamlMember ("FooBar", typeof (XamlSchemaContext).GetMethod ("GetPreferredPrefix"), null, sctx).ToString (), "#4");
+			Assert.AreEqual (Compat.Namespace + ".XamlSchemaContext.FooBar", new XamlMember ("FooBar", typeof (XamlSchemaContext).GetMethod ("GetPreferredPrefix"), null, sctx).ToString (), "#4");
 
 			Assert.AreEqual ("{urn:foo}bar", new XamlDirective ("urn:foo", "bar").ToString (), "#5");
 		}

@@ -28,10 +28,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml;
+#if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using System.Xml;
+#else
+using System.Windows.Markup;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {
@@ -51,9 +57,6 @@ namespace MonoTests.Portable.Xaml
 		public object Instance {
 			get { throw new NotImplementedException (); }
 		}
-		public PropertyInfo PropertyDescriptor {
-			get { throw new NotImplementedException (); }
-		}
 		public void OnComponentChanged ()
 		{
 			throw new NotImplementedException ();
@@ -62,13 +65,27 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException ();
 		}
-		public ValueSerializer GetValueSerializerFor (PropertyInfo descriptor)
-		{
-			throw new NotImplementedException ();
-		}
 		public ValueSerializer GetValueSerializerFor (Type type)
 		{
 			throw new NotImplementedException ();
 		}
+
+		#if PCL
+		public PropertyInfo PropertyDescriptor {
+		get { throw new NotImplementedException (); }
+		}
+		public ValueSerializer GetValueSerializerFor (PropertyInfo descriptor)
+		{
+		throw new NotImplementedException ();
+		}
+		#else
+		public PropertyDescriptor PropertyDescriptor {
+			get { throw new NotImplementedException (); }
+		}
+		public ValueSerializer GetValueSerializerFor (global::System.ComponentModel.PropertyDescriptor descriptor)
+		{
+			throw new NotImplementedException ();
+		}
+		#endif
 	}
 }

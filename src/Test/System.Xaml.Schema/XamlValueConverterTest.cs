@@ -22,13 +22,21 @@
 //
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using System.Text;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 namespace MonoTests.Portable.Xaml.Schema
 {

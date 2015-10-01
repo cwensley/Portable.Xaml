@@ -27,11 +27,19 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Portable.Xaml.Markup;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
 using NUnit.Framework;
 using MonoTests.Portable.Xaml;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using Category = NUnit.Framework.CategoryAttribute;
 
@@ -90,14 +98,14 @@ namespace MonoTests.System.Windows.Markup
 				int i = 0;
 				foreach (var val in test_values) {
 					Assert.IsTrue (v.CanConvertToString (val, null), t.Name + "_" + (val != null ? val.GetType () : null));
-					Assert.AreEqual (test_strings [i++], v.ConvertToString (val, null), "value-" + t.Name + "_" + val);
+					Assert.AreEqual (test_strings [i++].Fixup(), v.ConvertToString (val, null), "value-" + t.Name + "_" + val);
 				}
 
 				// The funny thing also applies to CanConvertToString() and ConvertToString().
 
 				i = 0;
 				foreach (var str in test_strings) {
-					Assert.IsTrue (v.CanConvertFromString (str, null), t.Name + "_" + str);
+					Assert.IsTrue (v.CanConvertFromString (str.Fixup(), null), t.Name + "_" + str);
 					// FIXME: add tests for this large matrix someday.
 					//Assert.AreEqual (test_values [i++], v.ConvertFromString (str, null), "value-" + t.Name + "_" + str);
 				}

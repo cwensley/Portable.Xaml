@@ -27,10 +27,18 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
@@ -638,8 +646,7 @@ namespace MonoTests.Portable.Xaml
 
 		string ReadXml (string name)
 		{
-			string ver = "net_4_5";
-			return File.ReadAllText ("XmlFiles/" + name).Trim ().Replace ("net_4_0", ver).Replace ("\r", "").Replace("\n", Environment.NewLine);
+			return File.ReadAllText ("XmlFiles/" + name).Trim ().UpdateXml ();
 		}
 
 		[Test]
@@ -743,7 +750,7 @@ namespace MonoTests.Portable.Xaml
 		public void Write_ListType ()
 		{
 			var obj = new List<Type> (new Type [] { typeof(int), typeof(Dictionary<Type, XamlType>) }) { Capacity = 2 };
-			Assert.AreEqual (ReadXml ("List_Type.xml").Trim (), XamlServices.Save (obj), "#1");
+			Assert.AreEqual (ReadXml ($"List_Type.{Compat.Prefix}.xml").Trim (), XamlServices.Save (obj), "#1");
 		}
 
 		[Test]

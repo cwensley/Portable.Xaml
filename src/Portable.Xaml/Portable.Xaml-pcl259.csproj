@@ -179,9 +179,9 @@
     <Compile Include="Portable.Xaml.ComponentModel\DecimalConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\TimeSpanConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\GuidConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\UriConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\DateTimeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />

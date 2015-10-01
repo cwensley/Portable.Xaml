@@ -29,13 +29,20 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Portable.Xaml.Markup;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
-using Portable.Xaml.ComponentModel;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 [assembly: XmlnsDefinition ("http://www.domain.com/path", "XamlTest")] // bug #680385
 [assembly: XmlnsDefinition ("http://www.domain.com/path", "SecondTest")] // bug #681045, same xmlns key for different clrns.
