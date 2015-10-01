@@ -25,10 +25,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 [assembly:XmlnsDefinition ("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
 [assembly:XmlnsDefinition ("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]

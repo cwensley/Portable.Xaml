@@ -28,11 +28,19 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Portable.Xaml.Markup;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
@@ -45,8 +53,7 @@ namespace MonoTests.Portable.Xaml
 
 		XamlReader GetReader (string filename)
 		{
-			const string ver = "net_4_5";
-			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).Replace ("net_4_0", ver);
+			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).UpdateXml();
 			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
 		}
 
@@ -408,7 +415,7 @@ namespace MonoTests.Portable.Xaml
 		public void Read_ListType ()
 		{
 			var r = GetReader ("List_Type.xml");
-			Read_ListType (r, false);
+			Read_ListType (r, false, false);
 		}
 
 		[Test]
@@ -506,7 +513,7 @@ namespace MonoTests.Portable.Xaml
 			obj ["Foo"] = typeof (int);
 			obj ["Bar"] = typeof (Dictionary<Type,XamlType>);
 			var r = GetReader ("Dictionary_String_Type_2.xml");
-			Read_Dictionary2 (r, XamlLanguage.Type.GetMember ("Type"));
+			Read_Dictionary2 (r, XamlLanguage.Type.GetMember ("Type"), false);
 		}
 		
 		[Test]
@@ -722,7 +729,11 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Bug680385 ()
 		{
+			#if PCL136
+			XamlServices.Load (new StreamReader("XmlFiles/CurrentVersion.xaml"));
+			#else
 			XamlServices.Load ("XmlFiles/CurrentVersion.xaml");
+			#endif
 		}
 		#endregion
 	}

@@ -55,6 +55,7 @@ namespace Portable.Xaml
 		{
 		}
 
+
 		public XamlMember (PropertyInfo propertyInfo, XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
 			: this (schemaContext, invoker)
 		{
@@ -64,8 +65,8 @@ namespace Portable.Xaml
 			underlying_member = propertyInfo;
 			DeclaringType = schemaContext.GetXamlType (propertyInfo.DeclaringType);
 			target_type = DeclaringType;
-			UnderlyingGetter = propertyInfo.GetGetMethod();
-			UnderlyingSetter = propertyInfo.GetSetMethod();
+			UnderlyingGetter = propertyInfo.GetPrivateGetMethod();
+			UnderlyingSetter = propertyInfo.GetPrivateSetMethod();
 		}
 
 		public XamlMember (string attachableEventName, MethodInfo adder, XamlSchemaContext schemaContext)

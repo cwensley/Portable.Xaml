@@ -27,11 +27,17 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using System.Xml;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 

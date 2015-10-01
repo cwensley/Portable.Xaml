@@ -25,12 +25,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Reflection;
+using NUnit.Framework;
+using MonoTests.Portable.Xaml;
+#if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
-using MonoTests.Portable.Xaml;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using Category = NUnit.Framework.CategoryAttribute;
 
@@ -65,11 +72,12 @@ namespace MonoTests.System.Windows.Markup
 				return true;
 			}
 			
-			//public IContainer Container { get; set; }
-
 			public object Instance { get; set; }
 
-			//public PropertyDescriptor PropertyDescriptor { get; set; }
+			#if !PCL
+			public IContainer Container { get; set; }
+			public PropertyDescriptor PropertyDescriptor { get; set; }
+			#endif
 		}
 		
 		[Test]

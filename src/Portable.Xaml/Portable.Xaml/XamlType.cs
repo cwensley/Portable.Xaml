@@ -468,7 +468,7 @@ namespace Portable.Xaml
 			//var bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
 			foreach (var pi in UnderlyingType.GetRuntimeProperties()) {
-				if (pi.GetGetMethod()?.IsStatic ?? pi.GetSetMethod()?.IsStatic ?? false)
+				if (pi.GetPrivateGetMethod()?.IsStatic ?? pi.GetPrivateSetMethod()?.IsStatic ?? false)
 					continue;
 				if (pi.Name.Contains (".")) // exclude explicit interface implementations.
 					continue;

@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-net_4_5", "Test\Portable.Xaml-tests-net_4_5.csproj", "{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-pcl259", "Test\Portable.Xaml-tests-pcl259.csproj", "{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-pcl259", "Portable.Xaml\Portable.Xaml-pcl259.csproj", "{179484EC-DB00-451A-AD2D-2E2AB20DE519}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-pcl136", "Portable.Xaml\Portable.Xaml-pcl136.csproj", "{A283EEF5-D2BF-47DD-AFD6-A1DB3DF7CDA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-pcl136", "Test\Portable.Xaml-tests-pcl136.csproj", "{307DC911-E3EE-41F9-87BA-D1FD734E04BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-net_4_5", "Test\Portable.Xaml-tests-net_4_5.csproj", "{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +21,18 @@ Global
 		{179484EC-DB00-451A-AD2D-2E2AB20DE519}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{179484EC-DB00-451A-AD2D-2E2AB20DE519}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{179484EC-DB00-451A-AD2D-2E2AB20DE519}.Release|Any CPU.Build.0 = Release|Any CPU
+		{307DC911-E3EE-41F9-87BA-D1FD734E04BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{307DC911-E3EE-41F9-87BA-D1FD734E04BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{307DC911-E3EE-41F9-87BA-D1FD734E04BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{307DC911-E3EE-41F9-87BA-D1FD734E04BC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A283EEF5-D2BF-47DD-AFD6-A1DB3DF7CDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A283EEF5-D2BF-47DD-AFD6-A1DB3DF7CDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A283EEF5-D2BF-47DD-AFD6-A1DB3DF7CDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A283EEF5-D2BF-47DD-AFD6-A1DB3DF7CDA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}.Release|Any CPU.ActiveCfg = Release|Any CPU

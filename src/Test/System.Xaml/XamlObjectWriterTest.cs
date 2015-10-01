@@ -27,11 +27,19 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Portable.Xaml.Markup;
-using Portable.Xaml;
-using Portable.Xaml.Schema;
 using System.Xml;
 using NUnit.Framework;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
+using Portable.Xaml;
+using Portable.Xaml.Schema;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
@@ -710,8 +718,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void OnSetValueAndHandledFalse () // part of bug #3003
 		{
-			const string ver = "net_4_5";
-
 			/*
 			var obj = new TestClass3 ();
 			obj.Nested = new TestClass3 ();
@@ -720,7 +726,7 @@ namespace MonoTests.Portable.Xaml
 			XamlServices.Transform (new XamlObjectReader (obj), xxw);
 			Console.Error.WriteLine (sw);
 			*/
-			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace ("net_4_0", ver);
+			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace ("net_4_0", Compat.Version);
 			var settings = new XamlObjectWriterSettings ();
 			bool invoked = false;
 			settings.XamlSetValueHandler = (sender, e) => {
@@ -835,8 +841,7 @@ namespace MonoTests.Portable.Xaml
 
 		XamlReader GetReader (string filename)
 		{
-			const string ver = "net_4_5";
-			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).Replace ("net_4_0", ver);
+			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).UpdateXml ();
 			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
 		}
 

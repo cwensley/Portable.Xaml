@@ -56,7 +56,7 @@ namespace Portable.Xaml.Markup
 				throw new InvalidOperationException ("Member property must be set to StaticExtension before calling ProvideValue method.");
 			if (MemberType != null) {
 				var pi = MemberType.GetRuntimeProperty(Member);
-				if (pi != null && (pi.GetGetMethod()?.IsStatic ?? false))
+				if (pi != null && (pi.GetPrivateGetMethod()?.IsStatic ?? false))
 					return pi.GetValue (null, null);
 				var fi = MemberType.GetRuntimeField(Member);
 				if (fi != null && fi.IsStatic)

@@ -23,14 +23,28 @@ namespace Portable.Xaml.ComponentModel
 		{
 			var text = value as string;
 			if (text != null)
-				return DateTime.Parse (text);
+				return DateTime.Parse (text, culture ?? CultureInfo.CurrentCulture);
 			return base.ConvertFrom (context, culture, value);
 		}
 
 		public override object ConvertTo (ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
 			if (destinationType == typeof(string) && value is DateTime)
-				return ((DateTime)value).ToString("d");
+            {
+                culture = culture ?? CultureInfo.CurrentCulture;
+
+                var date = (DateTime)value;
+                var hasTime = date.TimeOfDay.TotalSeconds > 0;
+                if (culture == CultureInfo.InvariantCulture)
+                    return hasTime ? date.ToString(culture) : date.ToString("yyyy-MM-dd", culture);
+
+                var dateTimeFormat = culture.DateTimeFormat;
+                string format = dateTimeFormat.ShortDatePattern;
+                if (hasTime)
+                    format += " " + dateTimeFormat.ShortTimePattern;
+
+                return date.ToString(format, culture);
+            }
 			return base.ConvertTo (context, culture, value, destinationType);
 		}
 	}

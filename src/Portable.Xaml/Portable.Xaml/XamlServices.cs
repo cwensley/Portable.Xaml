@@ -78,19 +78,19 @@ namespace Portable.Xaml
 		/*
 		public static void Save (string fileName, object instance)
 		{
-			using (var xw = XmlWriter.Create (fileName, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true, NewLineChars = Environment.NewLine }))
+			using (var xw = XmlWriter.Create (fileName, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true }))
 				Save (xw, instance);
 		}*/
 
 		public static void Save (Stream stream, object instance)
 		{
-			using (var xw = XmlWriter.Create (stream, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true, NewLineChars = Environment.NewLine }))
+			using (var xw = XmlWriter.Create (stream, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true }))
 				Save (xw, instance);
 		}
 
 		public static void Save (TextWriter textWriter, object instance)
 		{
-			using (var xw = XmlWriter.Create (textWriter, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true, NewLineChars = Environment.NewLine }))
+			using (var xw = XmlWriter.Create (textWriter, new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true }))
 				Save (xw, instance);
 		}
 

@@ -25,11 +25,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using NUnit.Framework;
+#if PCL
 using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using Portable.Xaml.ComponentModel;
-using NUnit.Framework;
+using UriTypeConverter = Portable.Xaml.ComponentModel.UriTypeConverter;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
@@ -73,8 +81,8 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (typeof (XamlXmlReader), t.UnderlyingType, "#12");
 			Assert.IsNotNull (t.BaseType, "#13");
 			Assert.AreEqual (typeof (XamlReader), t.BaseType.UnderlyingType, "#13-2");
-			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", t.BaseType.PreferredXamlNamespace, "#13-3");
-			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", t.PreferredXamlNamespace, "#14");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml".Fixup(), t.BaseType.PreferredXamlNamespace, "#13-3");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml".Fixup(), t.PreferredXamlNamespace, "#14");
 		}
 
 		[Test]
@@ -555,7 +563,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			Assert.IsNull (new XamlType (typeof (List<object>), sctx).TypeConverter, "#1");
 			Assert.IsNotNull (new XamlType (typeof (object), sctx).TypeConverter, "#2");
-			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance is UriConverter, "#3");
+			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance is UriTypeConverter, "#3");
 			Assert.IsTrue (new XamlType (typeof (TimeSpan), sctx).TypeConverter.ConverterInstance is TimeSpanConverter, "#4");
 			Assert.IsNull (new XamlType (typeof (XamlType), sctx).TypeConverter, "#5");
 			Assert.IsTrue (new XamlType (typeof (char), sctx).TypeConverter.ConverterInstance is CharConverter, "#6");

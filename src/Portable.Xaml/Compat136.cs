@@ -116,6 +116,16 @@ namespace Portable.Xaml
 		{
 			return new InterfaceMapping (type, interfaceType);
 		}
+
+		public static MethodInfo GetPrivateSetMethod(this PropertyInfo propertyInfo)
+		{
+			return propertyInfo.GetSetMethod(true);
+		}
+
+		public static MethodInfo GetPrivateGetMethod(this PropertyInfo propertyInfo)
+		{
+			return propertyInfo.GetGetMethod(true);
+		}
 	}
 }
 #endif

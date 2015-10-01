@@ -33,12 +33,12 @@ namespace Portable.Xaml
 			return methodInfo.RemoveMethod;
 		}
 
-		public static MethodInfo GetSetMethod(this PropertyInfo propertyInfo)
+		public static MethodInfo GetPrivateSetMethod(this PropertyInfo propertyInfo)
 		{
 			return propertyInfo.SetMethod;
 		}
 
-		public static MethodInfo GetGetMethod(this PropertyInfo propertyInfo)
+		public static MethodInfo GetPrivateGetMethod(this PropertyInfo propertyInfo)
 		{
 			return propertyInfo.GetMethod;
 		}

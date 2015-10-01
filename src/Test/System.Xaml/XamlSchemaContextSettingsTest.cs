@@ -24,9 +24,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using NUnit.Framework;
+#if PCL
+using Portable.Xaml.Markup;
+using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using NUnit.Framework;
+#else
+using System.Windows.Markup;
+using System.ComponentModel;
+using System.Xaml;
+using System.Xaml.Schema;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {

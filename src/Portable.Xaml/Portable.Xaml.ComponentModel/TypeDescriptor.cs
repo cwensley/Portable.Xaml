@@ -33,7 +33,7 @@ namespace Portable.Xaml.ComponentModel
 			{ typeof(UInt64), typeof(UInt64Converter) },
 			{ typeof(string), typeof(StringConverter) },
 			{ typeof(Guid), typeof(GuidConverter) },
-			{ typeof(Uri), typeof(UriConverter) },
+			{ typeof(Uri), typeof(UriTypeConverter) },
 			{ typeof(TimeSpan), typeof(TimeSpanConverter) },
 			{ typeof(DateTime), typeof(DateTimeConverter) }
 		};
