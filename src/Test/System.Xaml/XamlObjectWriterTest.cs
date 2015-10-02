@@ -1373,7 +1373,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // type resolution failure.
 		public void Write_EventStore4 ()
 		{
 			using (var xr = GetReader ("EventStore4.xml")) {
