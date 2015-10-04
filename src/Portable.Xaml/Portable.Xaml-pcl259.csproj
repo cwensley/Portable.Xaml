@@ -4,8 +4,6 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{179484EC-DB00-451A-AD2D-2E2AB20DE519}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Portable.Xaml</RootNamespace>
@@ -13,6 +11,8 @@
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -182,6 +182,7 @@
     <Compile Include="Portable.Xaml.ComponentModel\DateTimeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />

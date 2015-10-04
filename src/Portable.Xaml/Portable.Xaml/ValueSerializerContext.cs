@@ -35,7 +35,7 @@ using System.Xml;
 
 namespace Portable.Xaml
 {
-	internal class ValueSerializerContext : IValueSerializerContext, IXamlSchemaContextProvider
+	internal class ValueSerializerContext : IValueSerializerContext, IXamlSchemaContextProvider, ITypeDescriptorContext
 	{
 		XamlNameResolver name_resolver = new XamlNameResolver ();
 		XamlTypeResolver type_resolver;
@@ -45,8 +45,9 @@ namespace Portable.Xaml
 		IAmbientProvider ambient_provider;
 		IProvideValueTarget provideValue;
 		IRootObjectProvider rootProvider;
+		IDestinationTypeProvider destinationProvider;
 
-		public ValueSerializerContext (PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider)
+		public ValueSerializerContext (PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider)
 		{
 			if (prefixLookup == null)
 				throw new ArgumentNullException ("prefixLookup");
@@ -59,6 +60,7 @@ namespace Portable.Xaml
 			ambient_provider = ambientProvider;
 			this.provideValue = provideValue;
 			this.rootProvider = rootProvider;
+			this.destinationProvider = destinationProvider;
 		}
 
 		public object GetService (Type serviceType)
@@ -81,6 +83,8 @@ namespace Portable.Xaml
 				return provideValue;
 			if (serviceType == typeof(IRootObjectProvider))
 				return rootProvider;
+			if (serviceType == typeof(IDestinationTypeProvider))
+				return destinationProvider;
 			return null;
 		}
 		

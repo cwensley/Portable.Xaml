@@ -41,25 +41,30 @@ namespace Mono.Xaml
 namespace Portable.Xaml
 #endif
 {
-	internal abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider
+	internal abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider
 	{
 		public XamlWriterInternalBase (XamlSchemaContext schemaContext, XamlWriterStateManager manager)
 		{
 			this.sctx = schemaContext;
 			this.manager = manager;
 			var p = new PrefixLookup (sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
-			service_provider = new ValueSerializerContext (p, schemaContext, AmbientProvider, this, this);
+			service_provider = new ValueSerializerContext (p, schemaContext, AmbientProvider, this, this, this);
 		}
 
 		XamlSchemaContext sctx;
 		XamlWriterStateManager manager;
 
-		internal IValueSerializerContext service_provider;
+		internal ValueSerializerContext service_provider;
 
 		internal ObjectState root_state;
 		internal Stack<ObjectState> object_states = new Stack<ObjectState> ();
 		internal PrefixLookup prefix_lookup {
 			get { return (PrefixLookup) service_provider.GetService (typeof (INamespacePrefixLookup)); }
+		}
+
+		public Type GetDestinationType ()
+		{
+			return CurrentMember?.Type.UnderlyingType;
 		}
 
 		List<NamespaceDeclaration> namespaces {

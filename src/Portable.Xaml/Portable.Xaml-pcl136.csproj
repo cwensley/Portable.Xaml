@@ -181,6 +181,7 @@
     <Compile Include="Portable.Xaml.ComponentModel\DateTimeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
