@@ -466,6 +466,8 @@ namespace Portable.Xaml
 			// and call XmlWriter.WriteNode().
 			if (xm.DeclaringType == XamlLanguage.XData && xm == XamlLanguage.XData.GetMember ("Text")) {
 				w.WriteRaw (s);
+				hasPendingValue = false;
+				pendingValue = null;
 				return;
 			}
 
