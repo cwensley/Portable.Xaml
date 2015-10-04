@@ -6,6 +6,8 @@ The main difference between this and System.Xaml is that it comes with its own (
 
 ### Why Profile 259? 
 
+[![Join the chat at https://gitter.im/cwensley/Portable.Xaml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cwensley/Portable.Xaml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Profile 259 has the broadest reach for portable projects, including CoreCLR.  Additional profiles may make sense and can be contributed if desired.  Additionally, dotnet/corefx does come with its own TypeConverter, so eventually that will be the preferred way to go.
 
 ## Downloads
