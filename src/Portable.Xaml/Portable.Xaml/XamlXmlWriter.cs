@@ -211,6 +211,8 @@ namespace Portable.Xaml
 
 		protected override void OnWriteEndMember ()
 		{
+			WritePendingValue (XamlNodeType.Value);
+
 			WritePendingStartMember (XamlNodeType.EndMember);
 
 			var member = CurrentMember;
@@ -248,6 +250,7 @@ namespace Portable.Xaml
 			var tmp = object_states.Pop ();
 			XamlType xamlType = tmp.Type;
 
+			WritePendingValue (XamlNodeType.StartObject);
 			WritePendingStartMember (XamlNodeType.StartObject);
 
 			string ns = xamlType.PreferredXamlNamespace;
@@ -321,6 +324,7 @@ namespace Portable.Xaml
 			if (member.DeclaringType != null && member == member.DeclaringType.ContentProperty)
 				return;
 
+			WritePendingValue (XamlNodeType.Value);
 			var state = object_states.Peek ();
 			
 			// Top-level positional parameters are somehow special.
@@ -440,18 +444,21 @@ namespace Portable.Xaml
 			CurrentMemberState.OccuredAs = (AllowedMemberLocations) 0xFF;
 		}
 
-		protected override void OnWriteValue (object value)
+		object pendingValue;
+		bool hasPendingValue;
+
+		void WritePendingValue(XamlNodeType nodeType)
 		{
-			if (value != null && !(value is string))
-				throw new ArgumentException ("Non-string value cannot be written.");
+			if (!hasPendingValue)
+				return;
 
 			XamlMember xm = CurrentMember;
-			WritePendingStartMember (XamlNodeType.Value);
+			WritePendingStartMember (nodeType);
 
 			if (w.WriteState != WriteState.Attribute)
 				WritePendingNamespaces ();
 
-			string s = GetValueString (xm, value);
+			string s = GetValueString (xm, pendingValue);
 
 			// It looks like a bad practice, but since .NET disables
 			// indent around XData, I assume they do this, instead
@@ -459,6 +466,8 @@ namespace Portable.Xaml
 			// and call XmlWriter.WriteNode().
 			if (xm.DeclaringType == XamlLanguage.XData && xm == XamlLanguage.XData.GetMember ("Text")) {
 				w.WriteRaw (s);
+				hasPendingValue = false;
+				pendingValue = null;
 				return;
 			}
 
@@ -478,6 +487,20 @@ namespace Portable.Xaml
 				break;
 			}
 			w.WriteString (s);
+
+			hasPendingValue = false;
+			pendingValue = null;
+		}
+
+		protected override void OnWriteValue (object value)
+		{
+			if (value != null && !(value is string))
+				throw new ArgumentException ("Non-string value cannot be written.");
+
+			WritePendingValue (XamlNodeType.Value);
+
+			pendingValue = value;
+			hasPendingValue = true;
 		}
 
 		protected override void OnWriteNamespace (NamespaceDeclaration nd)

@@ -255,7 +255,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // This is an abnormal operation and I cannot completely care about such operations.
 		public void ValueAfterObject2 ()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-16'?><String xmlns='http://schemas.microsoft.com/winfx/2006/xaml'><String.Length>foo<String />foo</String.Length></String>";
@@ -426,7 +425,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")]
 		public void ValueThenStartObject ()
 		{
 			string xml = @"<?xml version='1.0' encoding='utf-16'?><String xmlns='http://schemas.microsoft.com/winfx/2006/xaml'><String.Length>foo<String /></String.Length></String>";

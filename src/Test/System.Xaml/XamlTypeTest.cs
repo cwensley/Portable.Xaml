@@ -603,7 +603,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")]
 		public void GetXamlNamespaces ()
 		{
 			var xt = new XamlType (typeof (string), new XamlSchemaContext (null, null));
@@ -617,9 +616,15 @@ namespace MonoTests.Portable.Xaml
 			l = xt.GetXamlNamespaces ().ToList ();
 			l.Sort ();
 			Assert.AreEqual (3, l.Count, "#2-1");
-			Assert.AreEqual ("clr-namespace:Portable.Xaml.Markup;assembly=Portable.Xaml", l [0], "#2-2");
+			Assert.AreEqual ("clr-namespace:Portable.Xaml.Markup;assembly=Portable.Xaml".Fixup(), l [0], "#2-2");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, l [1], "#2-3");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, l [2], "#2-4"); // ??
+
+			xt = new XamlType (typeof (List<string>), new XamlSchemaContext (null, null));
+			l = xt.GetXamlNamespaces ().ToList ();
+			l.Sort ();
+			Assert.AreEqual (1, l.Count, "#3-1");
+			Assert.AreEqual ("clr-namespace:System.Collections.Generic;assembly=mscorlib", l [0], "#3-2");
 		}
 		
 		[Test]

@@ -364,36 +364,9 @@ namespace Portable.Xaml
 					name_scope.RegisterName (name, state.Value);
 				}
 
-				if (xm.IsEvent)
-					SetEvent (xm, (string) CurrentMemberState.Value);
-				else if (!xm.IsReadOnly) // exclude read-only object such as collection item.
+				if (!xm.IsReadOnly) // exclude read-only object such as collection item.
 					SetValue (xm, CurrentMemberState.Value);
 			}
-		}
-
-		void SetEvent (XamlMember member, string value)
-		{
-			if (member.UnderlyingMember == null)
-				throw new XamlObjectWriterException (String.Format ("Event {0} has no underlying member to attach event", member));
-
-			int idx = value.LastIndexOf ('.');
-			var xt = idx < 0 ? root_state.Type : ResolveTypeFromName (value.Substring (0, idx));
-			if (xt == null)
-				throw new XamlObjectWriterException (String.Format ("Referenced type {0} in event {1} was not found", value, member));
-			if (xt.UnderlyingType == null)
-				throw new XamlObjectWriterException (String.Format ("Referenced type {0} in event {1} has no underlying type", value, member));
-			string mn = idx < 0 ? value : value.Substring (idx + 1);
-			var ev = (EventInfo) member.UnderlyingMember;
-			// get an appropriate MethodInfo overload whose signature matches the event's handler type.
-			// FIXME: this may need more strict match. RuntimeBinder may be useful here.
-			var eventMethodParams = ev.EventHandlerType.GetRuntimeMethods().First(r => r.Name == "Invoke").GetParameters ().Select(r => r.ParameterType).ToArray();
-			
-			var target = root_state.Value;
-			var mi = target.GetType().GetRuntimeMethods().FirstOrDefault(r => r.Name == mn && r.GetParameters().Select(p => p.ParameterType).SequenceEqual(eventMethodParams));
-			if (mi == null)
-				throw new XamlObjectWriterException (String.Format ("Referenced value method {0} in type {1} indicated by event {2} was not found", mn, value, member));
-			var obj = object_states.Peek ().Value;
-			ev.AddEventHandler (obj, mi.CreateDelegate(ev.EventHandlerType, target));
 		}
 
 		void SetValue (XamlMember member, object value)
@@ -451,9 +424,6 @@ namespace Portable.Xaml
 				var xm = ms.Member;
 				if (xm == XamlLanguage.Initialization) {
 					state.Value = GetCorrectlyTypedValue (null, xt, obj);
-					state.IsInstantiated = true;
-				} else if (xm.IsEvent) {
-					ms.Value = (string) obj; // save name of value delegate (method).
 					state.IsInstantiated = true;
 				} else if (xm.Type.IsXData) {
 					var xdata = (XData) obj;
@@ -538,11 +508,11 @@ namespace Portable.Xaml
 			if (IsAllowedType (xt, value))
 				return value;
 
-			var xtc = (xm != null ? xm.TypeConverter : null) ?? xt.TypeConverter;
+			var xtc = xm?.TypeConverter ?? xt.TypeConverter;
 			if (xtc != null && value != null) {
 				var tc = xtc.ConverterInstance;
 				if (tc != null && tc.CanConvertFrom (value.GetType ()))
-					value = tc.ConvertFrom (value);
+					value = tc.ConvertFrom (service_provider, null, value);
 				return value;
 			}
 

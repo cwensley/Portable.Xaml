@@ -29,6 +29,7 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 using System.Xml.Serialization;
+using System.Collections.ObjectModel;
 
 namespace Portable.Xaml
 {
@@ -89,7 +90,7 @@ namespace Portable.Xaml
 			Name = unknownTypeName;
 			PreferredXamlNamespace = unknownTypeNamespace;
 			TypeArguments = typeArguments != null && typeArguments.Count == 0 ? null : typeArguments;
-//			explicit_ns = unknownTypeNamespace;
+			explicit_ns = unknownTypeNamespace;
 		}
 
 		protected XamlType (string typeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext)
@@ -107,7 +108,7 @@ namespace Portable.Xaml
 
 		Type type, underlying_type;
 
-//		string explicit_ns;
+		string explicit_ns;
 
 		// populated properties
 		XamlType base_type;
@@ -339,15 +340,32 @@ namespace Portable.Xaml
 
 		public virtual IList<string> GetXamlNamespaces ()
 		{
-			throw new NotImplementedException ();
-			/* this does not work like documented!
-			if (explicit_ns != null)
-				return new string [] {explicit_ns};
-			var l = SchemaContext.GetAllXamlNamespaces ();
-			if (l != null)
-				return new List<string> (l);
-			return new string [] {String.Empty};
-			*/
+			// not quite sure if this is correct, but matches documentation to get all namespaces that type exists in
+			var list = new List<string>();
+
+			if (!string.IsNullOrEmpty (explicit_ns))
+				list.Add (explicit_ns);
+
+			if (type != null) {
+				// type always exists in clr namespace
+				list.Add (string.Format ("clr-namespace:{0};assembly={1}", type.Namespace, type.GetTypeInfo ().Assembly.GetName ().Name));
+
+				// check if it's a built-in type
+				if (XamlLanguage.AllTypes.Any (r => r.UnderlyingType == type)) {
+					list.Add (XamlLanguage.Xaml2006Namespace);
+				}
+
+				// check all other registered namespaces (may duplicate for built-in types, such as xaml markup extensions)
+				foreach (var ns in SchemaContext.GetAllXamlNamespaces()) {
+					if (SchemaContext.GetAllXamlTypes (ns).Any (r => r.UnderlyingType == type)) {
+						list.Add (ns);
+					}
+				}
+			}
+			if (list.Count == 0)
+				return new [] { string.Empty };
+
+			return new ReadOnlyCollection<string> (list);
 		}
 
 		// lookups
@@ -765,7 +783,7 @@ namespace Portable.Xaml
 				t = typeof (TypeExtension);
 
 			var a = GetCustomAttributeProvider ();
-			var ca = a != null ? a.GetCustomAttribute<TypeConverterAttribute> (false) : null;
+			var ca = a?.GetCustomAttribute<TypeConverterAttribute>(false);
 			if (ca != null)
 				return SchemaContext.GetValueConverter<TypeConverter> (Type.GetType (ca.ConverterTypeName), this);
 

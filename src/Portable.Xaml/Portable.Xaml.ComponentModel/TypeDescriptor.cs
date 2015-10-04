@@ -57,6 +57,8 @@ namespace Portable.Xaml.ComponentModel
 						return new NullableConverter(type);
 					if (type.GetTypeInfo().IsEnum)
 						return new EnumConverter(type);
+					if (typeof(Delegate).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+						return new EventConverter();
 				}
 			}
 			
