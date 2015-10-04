@@ -38,7 +38,11 @@ using System.Xaml.Schema;
 
 [assembly:XmlnsDefinition ("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
 [assembly:XmlnsDefinition ("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
+
+[assembly: XmlnsDefinition("urn:bar", "MonoTests.Portable.Xaml.NamespaceTest")]
 [assembly:XmlnsCompatibleWith ("urn:foo", "urn:bar")]
+
+[assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
 namespace MonoTests.Portable.Xaml
 {
@@ -88,26 +92,28 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void GetAllXamlNamespaces ()
 		{
-			var ctx = new XamlSchemaContext ( null, null);
+			var ctx = new XamlSchemaContext (null, null);
 			var arr = ctx.GetAllXamlNamespaces ().ToArray ();
-			Assert.AreEqual (5, arr.Length, "#1");
+			Assert.AreEqual (6, arr.Length, "#1");
 			Assert.IsTrue (arr.Contains (XamlLanguage.Xaml2006Namespace), "#1-2");
 			Assert.IsTrue (arr.Contains ("urn:mono-test"), "#1-3");
-			Assert.IsTrue (arr.Contains ("urn:mono-test2"), "#1-4");
+            Assert.IsTrue(arr.Contains("urn:mono-test2"), "#1-4");
+            Assert.IsTrue(arr.Contains("urn:bar"), "#1-5");
 
-			ctx = NewStandardContext ();
+            ctx = NewStandardContext ();
 			arr = ctx.GetAllXamlNamespaces ().ToArray ();
 			Assert.AreEqual (1, arr.Length, "#2");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, arr [0], "#2-2");
 
 			ctx = NewThisAssemblyContext ();
 			arr = ctx.GetAllXamlNamespaces ().ToArray ();
-			Assert.AreEqual (4, arr.Length, "#3");
+			Assert.AreEqual (5, arr.Length, "#3");
 			Assert.IsTrue (arr.Contains ("urn:mono-test"), "#3-2");
 			Assert.IsTrue (arr.Contains ("urn:mono-test2"), "#3-3");
-		}
+            Assert.IsTrue(arr.Contains("urn:bar"), "#3-4");
+        }
 
-		[Test]
+        [Test]
 		[ExpectedException (typeof (ArgumentNullException))]
 		public void GetPreferredPrefixNull ()
 		{
@@ -134,7 +140,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotDotNet")] // TryGetCompatibleXamlNamespace() never worked like documented.
 		public void TryGetCompatibleXamlNamespace ()
 		{
 			var ctx = new XamlSchemaContext (null, null);
@@ -144,25 +149,30 @@ namespace MonoTests.Portable.Xaml
 
 			ctx = NewThisAssemblyContext ();
 			Assert.IsFalse (ctx.TryGetCompatibleXamlNamespace (String.Empty, out dummy), "#2");
-			Assert.IsFalse (ctx.TryGetCompatibleXamlNamespace ("urn:bar", out dummy), "#3");
-			// why does .NET return false here?
+
+            // test XmlnsCompatibleWith when subsuming namespace is defined, should find both.
+            Assert.IsTrue (ctx.TryGetCompatibleXamlNamespace ("urn:bar", out dummy), "#3");
 			Assert.IsTrue (ctx.TryGetCompatibleXamlNamespace ("urn:foo", out dummy), "#4");
 			Assert.AreEqual ("urn:bar", dummy, "#5");
-		}
 
-/*
-			var settings = new XamlSchemaContextSettings () { FullyQualifyAssemblyNamesInClrNamespaces = true };
-			ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly }, settings);
+            // should not find a compatible namespace when XmlnsCompatibleWith is used with undefined subsuming namespace
+            Assert.IsFalse(ctx.TryGetCompatibleXamlNamespace("urn:bar2", out dummy), "#6");
+            Assert.IsFalse(ctx.TryGetCompatibleXamlNamespace("urn:foo2", out dummy), "#7");
+        }
 
-			ctx = new XamlSchemaContext (new Assembly [] {GetType ().Assembly }, settings);
-			arr = ctx.GetAllXamlNamespaces ().ToArray ();
-			Assert.AreEqual (2, arr.Length, "#5");
-			Assert.IsTrue (arr.Contains ("urn:mono-test"), "#5-2");
-			Assert.IsTrue (arr.Contains ("urn:mono-test2"), "#5-3");
-		}
-*/
+        /*
+                    var settings = new XamlSchemaContextSettings () { FullyQualifyAssemblyNamesInClrNamespaces = true };
+                    ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly }, settings);
 
-		[Test]
+                    ctx = new XamlSchemaContext (new Assembly [] {GetType ().Assembly }, settings);
+                    arr = ctx.GetAllXamlNamespaces ().ToArray ();
+                    Assert.AreEqual (2, arr.Length, "#5");
+                    Assert.IsTrue (arr.Contains ("urn:mono-test"), "#5-2");
+                    Assert.IsTrue (arr.Contains ("urn:mono-test2"), "#5-3");
+                }
+        */
+
+        [Test]
 		public void GetXamlTypeAndAllXamlTypes ()
 		{
 			var ctx = new XamlSchemaContext (new Assembly [] {typeof (string).Assembly}); // build with corlib.

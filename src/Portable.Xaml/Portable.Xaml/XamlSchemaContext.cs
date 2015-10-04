@@ -76,7 +76,7 @@ namespace Portable.Xaml
 		IList<Assembly> reference_assemblies;
 
 		// assembly attribute caches
-		Dictionary<string,string> xaml_nss;
+		Dictionary<string,List<string>> xaml_nss;
 		Dictionary<string,string> prefixes;
 		Dictionary<string,string> compat_nss;
 		Dictionary<string,List<XamlType>> all_xaml_types;
@@ -124,18 +124,18 @@ namespace Portable.Xaml
 				return null;
 			if (xaml_nss == null) // fill it first
 				GetAllXamlNamespaces ();
-			string ret;
-			return xaml_nss.TryGetValue (clrNamespace, out ret) ? ret : null;
+			List<string> ret;
+			return xaml_nss.TryGetValue (clrNamespace, out ret) ? ret.FirstOrDefault() : null;
 		}
 
 		public virtual IEnumerable<string> GetAllXamlNamespaces ()
 		{
 			if (xaml_nss == null) {
-				xaml_nss = new Dictionary<string,string> ();
+				xaml_nss = new Dictionary<string,List<string>> ();
 				foreach (var ass in AssembliesInScope)
 					FillXamlNamespaces (ass);
 			}
-			return xaml_nss.Values.Distinct ();
+			return xaml_nss.Values.SelectMany(r => r).Distinct();
 		}
 
 		public virtual ICollection<XamlType> GetAllXamlTypes (string xamlNamespace)
@@ -271,10 +271,18 @@ namespace Portable.Xaml
 				foreach (var ass in AssembliesInScope)
 					FillCompatibilities (ass);
 			}
-			return compat_nss.TryGetValue (xamlNamespace, out compatibleNamespace);
-		}
+            if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace)
+                && GetAllXamlNamespaces().Contains(compatibleNamespace))
+                return true;
+            if (GetAllXamlNamespaces().Contains(xamlNamespace))
+            {
+                compatibleNamespace = xamlNamespace;
+                return true;
+            }
+            return false;
+        }
 
-		/*
+        /*
 		void OnAssemblyLoaded (object o, AssemblyLoadEventArgs e)
 		{
 			if (reference_assemblies != null)
@@ -290,11 +298,19 @@ namespace Portable.Xaml
 				FillAllXamlTypes (e.LoadedAssembly);
 		}*/
 
-		// cache updater methods
-		void FillXamlNamespaces (Assembly ass)
+        // cache updater methods
+        void FillXamlNamespaces (Assembly ass)
 		{
-			foreach (XmlnsDefinitionAttribute xda in ass.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
-				xaml_nss.Add (xda.ClrNamespace, xda.XmlNamespace);
+            foreach (XmlnsDefinitionAttribute xda in ass.GetCustomAttributes(typeof(XmlnsDefinitionAttribute)))
+            {
+                List<string> namespaces;
+                if (!xaml_nss.TryGetValue(xda.ClrNamespace, out namespaces))
+                {
+                    namespaces = new List<string>();
+                    xaml_nss.Add(xda.ClrNamespace, namespaces);
+                }
+                namespaces.Add(xda.XmlNamespace);
+            }
 		}
 		
 		void FillPrefixes (Assembly ass)
