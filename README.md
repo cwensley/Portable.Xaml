@@ -13,7 +13,7 @@ Portable.Xaml currently supports the following profiles:
 - Profile 259 - For .NET 4.5, CoreCLR, WinRT, Xamarin, etc.
 - Profile 136 - For .NET 4.0 support
 
-Other profiles can be contributed if desired, but these should the widest range of platforms.
+Other profiles can be contributed if desired, but these should support the widest range of platforms.
 
 ## Downloads
 
