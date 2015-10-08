@@ -3,3 +3,4 @@ artifacts
 obj/
 packages/
 .vs/
+*.user
