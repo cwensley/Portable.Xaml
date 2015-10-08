@@ -72,6 +72,7 @@
     <Compile Include="System.Xaml\XamlObjectEventArgsTest.cs" />
     <Compile Include="System.Xaml\XamlObjectReaderSettingsTest.cs" />
     <Compile Include="System.Xaml\XamlObjectReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectWriterCollectionTests.cs" />
     <Compile Include="System.Xaml\XamlObjectWriterSettingsTest.cs" />
     <Compile Include="System.Xaml\XamlObjectWriterTest.cs" />
     <Compile Include="System.Xaml\XamlReaderSettingsTest.cs" />
