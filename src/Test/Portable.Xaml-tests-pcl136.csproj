@@ -43,6 +43,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Categories.cs" />
     <Compile Include="System.Windows.Markup\ArrayExtensionTest.cs" />
     <Compile Include="System.Windows.Markup\ReferenceTest.cs" />
     <Compile Include="System.Windows.Markup\StaticExtensionTest.cs" />

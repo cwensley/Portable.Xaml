@@ -988,7 +988,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // cosmetic attribute order difference
+		[Category (Categories.NotWorking)] // cosmetic attribute order difference
 		public void Write_AbstractWrapper ()
 		{
 			var obj = new AbstractContainer () { Value2 = new DerivedObject () { Foo = "x" } };
@@ -1049,7 +1049,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // TestProperty is written as element so far
+		[Category (Categories.NotWorking)] // TestProperty is written as element so far
 		public void Write_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
