@@ -988,7 +988,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category (Categories.NotWorking)] // cosmetic attribute order difference
 		public void Write_AbstractWrapper ()
 		{
 			var obj = new AbstractContainer () { Value2 = new DerivedObject () { Foo = "x" } };

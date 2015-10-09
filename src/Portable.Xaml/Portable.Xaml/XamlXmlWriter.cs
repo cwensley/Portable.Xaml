@@ -244,14 +244,15 @@ namespace Portable.Xaml
 				}
 			}
 		}
-		
+
 		protected override void OnWriteStartObject ()
 		{
 			var tmp = object_states.Pop ();
 			XamlType xamlType = tmp.Type;
 
-			WritePendingValue (XamlNodeType.StartObject);
-			WritePendingStartMember (XamlNodeType.StartObject);
+			var nodeType = xamlType.IsMarkupExtension && !xamlType.ConstructionRequiresArguments ? XamlNodeType.Value : XamlNodeType.StartObject;
+			WritePendingStartMember (nodeType);
+			WritePendingValue (nodeType);
 
 			string ns = xamlType.PreferredXamlNamespace;
 			string prefix = GetPrefix (ns); // null prefix is not rejected...
@@ -294,10 +295,12 @@ namespace Portable.Xaml
 				if (!CurrentMember.Type.IsCollection)
 					throw new InvalidOperationException (String.Format ("WriteGetObject method can be invoked only when current member '{0}' is of collection type", CurrentMember));
 
+				WritePendingStartMember (XamlNodeType.GetObject);
+
 				object_states.Push (state);
 			}
-
-			WritePendingStartMember (XamlNodeType.GetObject);
+			else
+				WritePendingStartMember (XamlNodeType.GetObject);
 		}
 		
 		void WritePendingStartMember (XamlNodeType nodeType)
@@ -413,7 +416,7 @@ namespace Portable.Xaml
 			if (xm.IsContentValue (service_provider) || mt.IsContentValue (service_provider))
 				return AllowedMemberLocations.Attribute;
 
-			return AllowedMemberLocations.MemberElement;
+			return AllowedMemberLocations.Any;
 		}
 
 		void OnWriteStartMemberElement (XamlType xt, XamlMember xm)
