@@ -926,6 +926,79 @@ namespace MonoTests.Portable.Xaml
 			this.Items = new Dictionary<EnumValueType,int> ();
 		}
 	}
+
+	public class CollectionItemConverter : TypeConverter
+	{
+		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
+		{
+			return sourceType == typeof(OtherItem) || base.CanConvertFrom (context, sourceType);
+		}
+
+		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			var otherItem = value as OtherItem;
+			if (otherItem != null) {
+				return otherItem.CollectionItem;
+			}
+			return base.ConvertFrom (context, culture, value);
+		}
+	}
+
+	public class OtherItem
+	{
+		public CollectionItem CollectionItem { get { return new CollectionItem { Name = "FromOther" }; } }
+	}
+
+	[TypeConverter (typeof(CollectionItemConverter))]
+	public class CollectionItem
+	{
+		public string Name { get; set; }
+	}
+
+	public class CollectionItemCollectionAddOverride : Collection<CollectionItem>, IList
+	{
+		int IList.Add (object item)
+		{
+			var other = item as OtherItem;
+			if (other != null)
+				Add (other.CollectionItem);
+			else
+				Add ((CollectionItem)item);
+			return Count - 1;
+		}
+	}
+
+	public class CollectionItemCollection : Collection<CollectionItem>
+	{
+	}
+
+	[ContentProperty ("Items")]
+	public class CollectionParentCustomAddOverride
+	{
+		public CollectionItemCollectionAddOverride Items { get; } = new CollectionItemCollectionAddOverride();
+	}
+
+	[ContentProperty ("Items")]
+	public class CollectionParentGenericList
+	{
+		public List<CollectionItem> Items { get; } = new List<CollectionItem>();
+	}
+
+	[ContentProperty ("Items")]
+	public class CollectionParentCustomNoOverride
+	{
+		public CollectionItemCollection Items { get; } = new CollectionItemCollection();
+	}
+
+	[ContentProperty ("Items")]
+	public class CollectionParentItem
+	{
+		public bool OtherItem { get; set; }
+
+		public CollectionItem CollectionItem { get; set; }
+
+		public CollectionItemCollectionAddOverride Items { get; } = new CollectionItemCollectionAddOverride();
+	}
 }
 
 namespace XamlTest

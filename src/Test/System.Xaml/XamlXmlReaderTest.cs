@@ -726,6 +726,41 @@ namespace MonoTests.Portable.Xaml
 			Read_ContentPropertyContainer (r);
 		}
 
+		/// <summary>
+		/// Tests that when reading a content item element with the same name as a property of the parent
+		/// </summary>
+		[Test]
+		public void Read_ContentObjectSameAsPropertyName ()
+		{
+			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentItem>".UpdateXml ();
+			var parent = (CollectionParentItem)XamlServices.Load (new StringReader (xaml));
+
+			Assert.IsNotNull (parent, "#1");
+			Assert.IsInstanceOf<CollectionParentItem> (parent, "#2");
+			Assert.AreEqual (1, parent.Items.Count, "#3");
+			var item = parent.Items.FirstOrDefault ();
+			Assert.IsNotNull (item, "#4");
+			Assert.AreEqual ("FromOther", item.Name, "#5");
+		}
+
+		/// <summary>
+		/// Tests that when reading a content item element with the same name as a property of the parent
+		/// </summary>
+		[Test]
+		public void Read_ContentObjectSameAsPropertyName2 ()
+		{
+			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><CollectionItem Name='Direct'/></CollectionParentItem>".UpdateXml ();
+			var parent = (CollectionParentItem)XamlServices.Load (new StringReader (xaml));
+
+			Assert.IsNotNull (parent, "#1");
+			Assert.IsInstanceOf<CollectionParentItem> (parent, "#2");
+			Assert.AreEqual (1, parent.Items.Count, "#3");
+			var item = parent.Items.FirstOrDefault ();
+			Assert.IsNotNull (item, "#4");
+			Assert.AreEqual ("Direct", item.Name, "#5");
+		}
+
+
 		#region non-common tests
 		[Test]
 		public void Bug680385 ()

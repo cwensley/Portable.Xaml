@@ -315,7 +315,7 @@ namespace Portable.Xaml
 			yield return Node (XamlNodeType.StartObject, xt);
 
 			// process attribute members (including MarkupExtensions)
-			ProcessAttributesToMember (sctx, sti, xt);
+			ProcessAttributesToMember (sti, xt);
 
 			foreach (var pair in sti.Members) {
 				yield return Node (XamlNodeType.StartMember, pair.Key);
@@ -458,25 +458,37 @@ namespace Portable.Xaml
 			return atts;
 		}
 
+		XamlMember FindAttachableMember(string prefix, string name)
+		{
+			var idx = name.IndexOf ('.');
+			if (idx <= 0)
+				return null;
+			var typeName = name.Substring (0, idx);
+			var memberName = name.Substring (idx + 1);
+			return FindAttachableMember (prefix, typeName, memberName);
+		}
 
-		void ProcessAttributesToMember (XamlSchemaContext sctx, StartTagInfo sti, XamlType xt)
+		XamlMember FindAttachableMember(string prefix, string typeName, string memberName)
+		{
+			string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : r.NamespaceURI;
+			var axtn = new XamlTypeName (apns, typeName, null);
+			var at = sctx.GetXamlType (axtn);
+			return at?.GetAttachableMember (memberName);
+		}
+
+		void ProcessAttributesToMember (StartTagInfo sti, XamlType xt)
 		{
 			foreach (var p in sti.Attributes) {
 				int idx = p.Key.IndexOf (':');
 				string prefix = idx > 0 ? p.Key.Substring (0, idx) : String.Empty;
-				string aname = idx > 0 ? p.Key.Substring (idx + 1) : p.Key;
-				idx = aname.IndexOf ('.');
-				if (idx > 0) {
-					string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : r.NamespaceURI;
-					var apname = aname.Substring (0, idx);
-					var axtn = new XamlTypeName (apns, apname, null);
-					var at = sctx.GetXamlType (axtn);
-					var am = at.GetAttachableMember (aname.Substring (idx + 1));
-					if (am != null)
-						sti.Members.Add (new Pair (am, p.Value));
-					// ignore unknown attribute
+				string name = idx > 0 ? p.Key.Substring (idx + 1) : p.Key;
+
+				var am = FindAttachableMember (prefix, name);
+				if (am != null) {
+					sti.Members.Add (new Pair (am, p.Value));
+					continue;
 				}
-				var xm = xt.GetMember (aname);
+				var xm = xt.GetMember (name);
 				if (xm != null)
 					sti.Members.Add (new Pair (xm, p.Value));
 				// ignore unknown attribute
@@ -518,16 +530,18 @@ namespace Portable.Xaml
 			XamlMember xm = null;
 			var name = r.LocalName;
 			int idx = name.IndexOf ('.');
-			// FIXME: it skips strict type name check, as it could result in MarkupExtension mismatch (could be still checked, though)
-			if (idx >= 0/* && name.Substring (0, idx) == xt.Name*/) {
+			string typeName = null;
+			if (idx >= 0) {
+				typeName = name.Substring (0, idx);
 				name = name.Substring (idx + 1);
-				xm = xt.GetMember (name);
+				// check if it is an attachable member first, either of this type or another type
+				// Should this also check the namespace to find the correct type?
+				if (typeName == xt.GetInternalXmlName())
+					xm = xt.GetMember (name);
+				else
+					xm = FindAttachableMember (r.Prefix, typeName, name);
 			} else {
-				xm = (XamlMember) FindStandardDirective (name, AllowedMemberLocations.MemberElement) ??
-					// not a standard directive? then try attachable
-					xt.GetAttachableMember (name) ??
-					// still not? then try ordinal member
-					xt.GetMember (name);
+				xm = (XamlMember)FindStandardDirective (name, AllowedMemberLocations.MemberElement);
 				if (xm == null) {
 					// still not? could it be omitted as content property or items ?
 					if ((xm = GetExtraMember (xt)) != null) {
@@ -540,7 +554,10 @@ namespace Portable.Xaml
 			}
 			if (xm == null) {
 				// Current element could be for another member in the parent type (if exists)
-				if (parentType != null && parentType.GetMember (name) != null) {
+				if (parentType != null 
+					&& typeName != null
+					&& typeName == parentType.GetInternalXmlName ()
+					&& parentType.GetMember (name) != null) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
 					yield return Node (XamlNodeType.None, null);
 					yield break;
