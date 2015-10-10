@@ -692,8 +692,14 @@ namespace Portable.Xaml
 			}
 			if (!IsCollection)
 				return null;
-			if (!IsGeneric)
-				return SchemaContext.GetXamlType(typeof(object));
+            if (!IsGeneric)
+            {
+                // support custom collections that inherit ICollection<T>
+                var collectionType = type.GetTypeInfo().GetInterfaces().FirstOrDefault(r => r.GetTypeInfo().IsGenericType && r.GetGenericTypeDefinition() == typeof(ICollection<>));
+                if (collectionType != null)
+                    return SchemaContext.GetXamlType(collectionType.GetTypeInfo().GetGenericArguments()[0]);
+                return SchemaContext.GetXamlType(typeof(object));
+            }
 			return SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[0]);
 		}
 

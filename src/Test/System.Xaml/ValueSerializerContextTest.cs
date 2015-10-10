@@ -62,7 +62,7 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[Ignore ("Unfinished test")]
-		[Category ("NotWorking")]
+		[Category (Categories.NotWorking)]
 		public void GetService ()
 		{
 			var obj = new TestValueSerialized ();
@@ -115,7 +115,7 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[Ignore ("Unfinished test")]
-		[Category ("NotWorking")]
+		[Category (Categories.NotWorking)]
 		public void NameResolver ()
 		{
 			var nr = (IXamlNameResolver) Provider.GetService (typeof (IXamlNameResolver));

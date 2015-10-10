@@ -542,7 +542,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // not worthy of passing
+		[Category (Categories.NotWorking)] // not worthy of passing
 		public void StartMemberBeforeNamespace ()
 		{
 			var xw = new XamlObjectWriter (sctx, null);
@@ -1164,7 +1164,7 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (InvalidCastException))] // unable to cast string to MarkupExtension
-		[Category ("NotWorking")]
+		[Category (Categories.NotWorking)]
 		public void Write_MyExtension2 ()
 		{
 			//var obj = new MyExtension2 () { Foo = typeof (int), Bar = "v2"};

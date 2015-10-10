@@ -379,7 +379,7 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (XamlObjectReaderException))]
-		[Category ("NotWorking")]
+		[Category (Categories.NotWorking)]
 		public void Read_XData ()
 		{
 			var r = new XamlObjectReader (new XData () {Text = "xdata text"}); // XmlReader implementation is not visible.
@@ -389,7 +389,7 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (XamlObjectReaderException))]
-		[Category ("NotWorking")]
+		[Category (Categories.NotWorking)]
 		public void Read_XDataWrapper ()
 		{
 			var obj = new XDataWrapper () { Markup = new XData () {Text = "<my_xdata/>" } };
@@ -727,7 +727,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // only member ordering difference, maybe.
+		[Category (Categories.NotWorking)] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
@@ -741,7 +741,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category ("NotWorking")] // only member ordering difference, maybe.
+		[Category (Categories.NotWorking)] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer2 ()
 		{
 			var obj = new SecondTest.ResourcesDict ();

@@ -43,6 +43,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Categories.cs" />
     <Compile Include="System.Windows.Markup\ArrayExtensionTest.cs" />
     <Compile Include="System.Windows.Markup\ReferenceTest.cs" />
     <Compile Include="System.Windows.Markup\StaticExtensionTest.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="System.Xaml\AmbientPropertyValueTest.cs" />
     <Compile Include="System.Xaml\AttachableMemberIdentifierTest.cs" />
     <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
+    <Compile Include="System.Xaml\XamlObjectWriterCollectionTests.cs" />
     <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
     <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
     <Compile Include="System.Xaml\TestedTypes.cs" />
