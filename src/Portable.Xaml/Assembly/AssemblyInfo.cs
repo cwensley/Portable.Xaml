@@ -49,8 +49,8 @@ using System.Security.Permissions;
 [assembly: CLSCompliant (true)]
 //[assembly: ComVisible (false)]
 
-[assembly: AssemblyVersion ("0.3.*")]
-[assembly: AssemblyInformationalVersion ("0.4.0-alpha")]
+[assembly: AssemblyVersion ("0.4.0.0")]
+[assembly: AssemblyInformationalVersion ("0.4.0")]
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
 
