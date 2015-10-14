@@ -516,7 +516,7 @@ namespace Portable.Xaml
 				return value;
 			}
 
-			throw new XamlObjectWriterException (String.Format ("Value '{0}' (of type {1}) is not of or convertible to type {0} (member {3})", value, value != null ? (object) value.GetType () : "(null)", xt, xm));
+			throw new XamlObjectWriterException (String.Format ("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object) value.GetType () : "(null)", xt, xm));
 		}
 
 		XamlType ResolveTypeFromName (string name)
