@@ -931,11 +931,14 @@ namespace MonoTests.Portable.Xaml
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{
-			return sourceType == typeof(OtherItem) || base.CanConvertFrom (context, sourceType);
+			return sourceType == typeof(string) || sourceType == typeof(OtherItem) || base.CanConvertFrom (context, sourceType);
 		}
 
 		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
+			var text = value as string;
+			if (text != null)
+				return new CollectionItem { Name = text };
 			var otherItem = value as OtherItem;
 			if (otherItem != null) {
 				return otherItem.CollectionItem;
@@ -959,6 +962,9 @@ namespace MonoTests.Portable.Xaml
 	{
 		int IList.Add (object item)
 		{
+			var text = item as string;
+			if (text != null)
+				Add (new CollectionItem { Name = text });
 			var other = item as OtherItem;
 			if (other != null)
 				Add (other.CollectionItem);
