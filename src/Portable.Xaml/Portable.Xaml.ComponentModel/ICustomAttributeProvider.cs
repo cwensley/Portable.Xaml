@@ -17,12 +17,14 @@ namespace Portable.Xaml.ComponentModel
 
 		public object[] GetCustomAttributes(bool inherit)
 		{
-			return type.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
+			var attr = type.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
+			return (attr as object[]) ?? attr.ToArray();
 		}
 
 		public object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return type.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray();
+			var attr = type.GetTypeInfo().GetCustomAttributes(attributeType, inherit);
+			return (attr as object[]) ?? attr.ToArray();
 		}
 
 		public bool IsDefined(Type attributeType, bool inherit)
@@ -42,12 +44,14 @@ namespace Portable.Xaml.ComponentModel
 
 		public object[] GetCustomAttributes(bool inherit)
 		{
-			return info.GetCustomAttributes(inherit).ToArray();
+			var attr = info.GetCustomAttributes(inherit).ToArray();
+			return (attr as object[]) ?? attr.ToArray();
 		}
 
 		public object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return info.GetCustomAttributes(attributeType, inherit).ToArray();
+			var attr = info.GetCustomAttributes(attributeType, inherit);
+			return (attr as object[]) ?? attr.ToArray();
 		}
 
 		public bool IsDefined(Type attributeType, bool inherit)
