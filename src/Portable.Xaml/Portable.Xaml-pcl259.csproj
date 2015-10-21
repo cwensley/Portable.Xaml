@@ -183,6 +183,7 @@
     <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
+    <Compile Include="Portable.Xaml\EnhancedXamlAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />

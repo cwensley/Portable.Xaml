@@ -453,11 +453,11 @@ namespace Portable.Xaml
 				var g = gl.TryGetValue (name, out m) ? m : null;
 				var s = sl.TryGetValue (name, out m) ? m : null;
 				if (g != null || s != null)
-					yield return new XamlMember (name, g, s, SchemaContext);
+					yield return SchemaContext.GetAttachableProperty (name, g, s);
 				var a = al.TryGetValue (name, out m) ? m : null;
 				//var r = rl.TryGetValue (name, out m) ? m : null;
 				if (a != null)
-					yield return new XamlMember (name, a, SchemaContext);
+					yield return SchemaContext.GetAttachableEvent (name, a);
 			}
 		}
 
@@ -491,10 +491,10 @@ namespace Portable.Xaml
 				if (pi.Name.Contains (".")) // exclude explicit interface implementations.
 					continue;
 				if (pi.CanRead && (pi.CanWrite || IsCollectionType (pi.PropertyType) || typeof (IXmlSerializable).GetTypeInfo().IsAssignableFrom (pi.PropertyType.GetTypeInfo())) && pi.GetIndexParameters ().Length == 0)
-					yield return new XamlMember (pi, SchemaContext);
+					yield return SchemaContext.GetProperty (pi);
 			}
 			foreach (var ei in UnderlyingType.GetRuntimeEvents())
-				yield return new XamlMember (ei, SchemaContext);
+				yield return SchemaContext.GetEvent (ei);
 		}
 		
 		static bool IsPublicAccessor (MethodInfo mi)
