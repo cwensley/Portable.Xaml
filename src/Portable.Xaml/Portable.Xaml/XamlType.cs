@@ -698,17 +698,18 @@ namespace Portable.Xaml
 		{
 			if (itemType != null)
 				return itemType;
-			
-			if (!IsCollection)
-				return null;
-			else if (IsArray)
+
+			var kind = LookupCollectionKind ();
+			if (kind == XamlCollectionKind.Array)
 				itemType = SchemaContext.GetXamlType(type.GetElementType());
-			else if (IsDictionary) {
+			else if (kind == XamlCollectionKind.Dictionary) {
 				if (!IsGeneric)
 					itemType = SchemaContext.GetXamlType(typeof(object));
 				else
 					itemType = SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[1]);
 			}
+			else if (kind != XamlCollectionKind.Collection)
+				return null;
             else if (!IsGeneric)
             {
                 // support custom collections that inherit ICollection<T>
