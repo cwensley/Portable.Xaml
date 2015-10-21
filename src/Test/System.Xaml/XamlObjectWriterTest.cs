@@ -1509,5 +1509,15 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual ("two", ((SecondTest.TestObject2) res ["two"]).TestProperty, "#3");
 			}
 		}
+
+		[Test]
+		public void Write_NullableWithConverter ()
+		{
+			using (var xr = GetReader ("NullableWithConverter.xml")) {
+				var res = (NullableWithTypeConverterContainer) XamlServices.Load (xr);
+				Assert.IsNotNull (res.TestProp, "#1");
+				Assert.AreEqual ("SomeText", res.TestProp.Value.Text, "#2");
+			}
+		}
 	}
 }

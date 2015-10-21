@@ -902,6 +902,33 @@ namespace MonoTests.Portable.Xaml
 		public int? TestProp { get; set; }
 	}
 
+	class TestStructConverter : TypeConverter
+	{
+		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
+		{
+			return sourceType == typeof(string) || base.CanConvertFrom (context, sourceType);
+		}
+
+		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			var text = value as string;
+			if (text != null)
+				return new TestStruct { Text = text };
+			return base.ConvertFrom (context, culture, value);
+		}
+	}
+
+	[TypeConverter(typeof(TestStructConverter))]
+	public struct TestStruct
+	{
+		public string Text;
+	}
+
+	public class NullableWithTypeConverterContainer
+	{
+		public TestStruct? TestProp { get; set; }
+	}
+
 	public class DirectListContainer // for such xml that directly contains items in <*.Items> element.
 	{
 		public IList<DirectListContent> Items { get; set; }
