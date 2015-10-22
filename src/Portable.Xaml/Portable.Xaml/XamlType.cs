@@ -35,6 +35,22 @@ namespace Portable.Xaml
 {
 	public class XamlType : IEquatable<XamlType>
 	{
+		Type type, underlying_type;
+		string explicit_ns;
+		XamlType base_type;
+		XamlTypeInvoker invoker;
+		Dictionary<XamlDirective, XamlMember> aliased_property_cache;
+		List<XamlMember> all_members_cache;
+		List<XamlMember> all_attachable_members_cache;
+		XamlCollectionKind? collectionKind;
+		bool gotContentProperty;
+		XamlMember contentProperty;
+		TypeAttributeProvider attributeProvider;
+		bool? isAmbient;
+		XamlType itemType;
+		bool gotTypeConverter;
+		XamlValueConverter<TypeConverter> cachedTypeConverter;
+
 		public XamlType (Type underlyingType, XamlSchemaContext schemaContext)
 			: this (underlyingType, schemaContext, null)
 		{
@@ -106,13 +122,7 @@ namespace Portable.Xaml
 			this.invoker = invoker ?? new XamlTypeInvoker (this);
 		}
 
-		Type type, underlying_type;
-
-		string explicit_ns;
-
 		// populated properties
-		XamlType base_type;
-		XamlTypeInvoker invoker;
 
 		internal EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler {
 			get { return LookupSetMarkupExtensionHandler (); }
@@ -372,23 +382,30 @@ namespace Portable.Xaml
 
 		protected virtual XamlMember LookupAliasedProperty (XamlDirective directive)
 		{
+			XamlMember member = null;
+			if (aliased_property_cache == null)
+				aliased_property_cache = new Dictionary<XamlDirective, XamlMember> ();
+			else if (aliased_property_cache.TryGetValue(directive, out member))
+				return member;
+
 			if (directive == XamlLanguage.Key) {
 				var a = this.GetCustomAttribute<DictionaryKeyPropertyAttribute> ();
-				return a != null ? GetMember (a.Name) : null;
+				member = a != null ? GetMember (a.Name) : null;
 			}
-			if (directive == XamlLanguage.Name) {
+			else if (directive == XamlLanguage.Name) {
 				var a = this.GetCustomAttribute<RuntimeNamePropertyAttribute> ();
-				return a != null ? GetMember (a.Name) : null;
+				member = a != null ? GetMember (a.Name) : null;
 			}
-			if (directive == XamlLanguage.Uid) {
+			else if (directive == XamlLanguage.Uid) {
 				var a = this.GetCustomAttribute<UidPropertyAttribute> ();
-				return a != null ? GetMember (a.Name) : null;
+				member = a != null ? GetMember (a.Name) : null;
 			}
-			if (directive == XamlLanguage.Lang) {
+			else if (directive == XamlLanguage.Lang) {
 				var a = this.GetCustomAttribute<XmlLangPropertyAttribute> ();
-				return a != null ? GetMember (a.Name) : null;
+				member = a != null ? GetMember (a.Name) : null;
 			}
-			return null;
+			aliased_property_cache[directive] = member;
+			return member;
 		}
 
 		protected virtual IEnumerable<XamlMember> LookupAllAttachableMembers ()
@@ -473,9 +490,6 @@ namespace Portable.Xaml
 			}
 			return all_members_cache;
 		}
-		
-		List<XamlMember> all_members_cache;
-		List<XamlMember> all_attachable_members_cache;
 
 		IEnumerable<XamlMember> DoLookupAllMembers ()
 		{
@@ -543,7 +557,6 @@ namespace Portable.Xaml
 			return base_type;
 		}
 
-		XamlCollectionKind? collectionKind;
 		// This implementation is not verified. (No place to use.)
 		protected internal virtual XamlCollectionKind LookupCollectionKind ()
 		{
@@ -590,12 +603,12 @@ namespace Portable.Xaml
 			return typeInfo.GetConstructors().Where(r => r.IsPublic).All(r => r.GetParameters().Length > 0);
 		}
 
-		XamlMember contentProperty;
 		protected virtual XamlMember LookupContentProperty ()
 		{
-			if (contentProperty != null)
+			if (gotContentProperty)
 				return contentProperty;
-			
+			gotContentProperty = true;
+
 			var a = this.GetCustomAttribute<ContentPropertyAttribute> ();
 			contentProperty = a != null && a.Name != null ? GetMember (a.Name) : null;
 			return contentProperty;
@@ -620,7 +633,6 @@ namespace Portable.Xaml
 			return LookupCustomAttributeProvider ();
 		}
 
-		TypeAttributeProvider attributeProvider;
 		protected internal virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
 			return attributeProvider ?? (attributeProvider = UnderlyingType != null ? new TypeAttributeProvider(UnderlyingType) : null);
@@ -638,7 +650,7 @@ namespace Portable.Xaml
 
 		protected virtual bool LookupIsAmbient ()
 		{
-			return this.GetCustomAttribute<AmbientAttribute> () != null;
+			return isAmbient ?? (isAmbient = this.GetCustomAttribute<AmbientAttribute> () != null).Value;
 		}
 
 		// It is documented as if it were to reflect spec. section 5.2,
@@ -693,7 +705,6 @@ namespace Portable.Xaml
 			return CanAssignTo (SchemaContext.GetXamlType (typeof (IXmlSerializable)));
 		}
 
-		XamlType itemType;
 		protected virtual XamlType LookupItemType ()
 		{
 			if (itemType != null)
@@ -800,6 +811,11 @@ namespace Portable.Xaml
 
 		protected virtual XamlValueConverter<TypeConverter> LookupTypeConverter ()
 		{
+			if (gotTypeConverter)
+				return cachedTypeConverter;
+
+			gotTypeConverter = true;
+
 			var t = UnderlyingType;
 			if (t == null)
 				return null;
@@ -812,15 +828,15 @@ namespace Portable.Xaml
 			var a = GetCustomAttributeProvider ();
 			var ca = a?.GetCustomAttribute<TypeConverterAttribute>(false);
 			if (ca != null)
-				return SchemaContext.GetValueConverter<TypeConverter> (Type.GetType (ca.ConverterTypeName), this);
+				return cachedTypeConverter = SchemaContext.GetValueConverter<TypeConverter> (Type.GetType (ca.ConverterTypeName), this);
 
 			if (t == typeof (object)) // This is a special case. ConverterType is null.
-				return SchemaContext.GetValueConverter<TypeConverter> (null, this);
+				return cachedTypeConverter = SchemaContext.GetValueConverter<TypeConverter> (null, this);
 
 			// It's still not decent to check CollectionConverter.
 			var tct = t.GetTypeConverter ()?.GetType ();
 			if (tct != null && tct != typeof (TypeConverter)) //*PCL && tct != typeof (CollectionConverter)) //*PCL && tct != typeof (ReferenceConverter))
-				return SchemaContext.GetValueConverter<TypeConverter> (tct, this);
+				return cachedTypeConverter = SchemaContext.GetValueConverter<TypeConverter> (tct, this);
 			return null;
 		}
 

@@ -1141,16 +1141,13 @@ namespace SecondTest
 			List<AmbientPropertyValue> list = provider.GetAllAmbientValues (null, false, types) as List<AmbientPropertyValue>;
 			if (list.Count != 1)
 				throw new Exception ("expected ambient property count == 1 but " + list.Count);
-			for (int i = 0; i < list.Count; i++) {
-				AmbientPropertyValue value = list [i];
-				ResourcesDict dict = value.Value as ResourcesDict;
 
-				// For this example, we know that dict should not be null and that it is the only value in list.
-				object result = dict [this.Key];
-				return result;
-			}
+			AmbientPropertyValue value = list [0];
+			ResourcesDict dict = value.Value as ResourcesDict;
 
-			return null;
+			// For this example, we know that dict should not be null and that it is the only value in list.
+			object result = dict [this.Key];
+			return result;
 		}
 	}
 

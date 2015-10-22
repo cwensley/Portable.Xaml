@@ -399,28 +399,46 @@ namespace Portable.Xaml
 			return tfn;
 		}
 
+		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
+
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetProperty (PropertyInfo propertyInfo)
 		{
-			return new XamlMember (propertyInfo, this);
+			var key = new Tuple<MemberInfo, MemberInfo>(propertyInfo, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (propertyInfo, this);
 		}
 
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetEvent (EventInfo eventInfo)
 		{
-			return new XamlMember (eventInfo, this);
+			var key = new Tuple<MemberInfo, MemberInfo>(eventInfo, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (eventInfo, this);
 		}
 
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableProperty (string attachablePropertyName, MethodInfo getter, MethodInfo setter)
 		{
-			return new XamlMember (attachablePropertyName, getter, setter, this);
+			var key = new Tuple<MemberInfo, MemberInfo>(getter, setter);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (attachablePropertyName, getter, setter, this);
 		}
 
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableEvent (string attachablePropertyName, MethodInfo adder)
 		{
-			return new XamlMember (attachablePropertyName, adder, this);
+			var key = new Tuple<MemberInfo, MemberInfo>(adder, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (attachablePropertyName, adder, this);
 		}
 	}
 }
