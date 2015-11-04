@@ -258,10 +258,19 @@ namespace Portable.Xaml
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
 		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
-			if (r.NodeType != XmlNodeType.Element) {
+			if (r.NodeType == XmlNodeType.EndElement)
+				yield break;
+
+			if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) {
 				//throw new XamlParseException (String.Format ("Element is expected, but got {0}", r.NodeType));
 				yield return Node (XamlNodeType.Value, r.Value);
+				r.Read();
 				yield break;
+			}
+			
+			if (r.NodeType != XmlNodeType.Element)
+			{
+				throw new XamlParseException (String.Format ("Element is expected, but got {0}", r.NodeType));
 			}
 
 			if (r.MoveToFirstAttribute ()) {

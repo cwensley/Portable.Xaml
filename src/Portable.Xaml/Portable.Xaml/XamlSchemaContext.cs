@@ -81,7 +81,7 @@ namespace Portable.Xaml
 		Dictionary<string,string> compat_nss;
 		Dictionary<string,List<XamlType>> all_xaml_types;
 		XamlType [] empty_xaml_types = new XamlType [0];
-		List<XamlType> run_time_types = new List<XamlType> ();
+		Dictionary<Type, XamlType> run_time_types = new Dictionary<Type, XamlType>();
 
 		public bool FullyQualifyAssemblyNamesInClrNamespaces { get; private set; }
 
@@ -191,14 +191,16 @@ namespace Portable.Xaml
 		
 		public virtual XamlType GetXamlType (Type type)
 		{
-			XamlType xt = run_time_types.FirstOrDefault (t => t.UnderlyingType == type);
+			XamlType xt;
+			if (run_time_types.TryGetValue(type, out xt))
+				return xt;
 			if (xt == null)
 				foreach (var ns in GetAllXamlNamespaces ())
 					if ((xt = GetAllXamlTypes (ns).FirstOrDefault (t => t.UnderlyingType == type)) != null)
 						break;
 			if (xt == null) {
 				xt = new XamlType (type, this);
-				run_time_types.Add (xt);
+				run_time_types[type] = xt;
 			}
 			return xt;
 		}
@@ -218,14 +220,19 @@ namespace Portable.Xaml
 				typeArgs [i] = GetXamlType (n.TypeArguments [i]);
 			return GetXamlType (n.Namespace, n.Name, typeArgs);
 		}
-		
+
+		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
+
 		protected internal virtual XamlType GetXamlType (string xamlNamespace, string name, params XamlType [] typeArguments)
 		{
+			XamlType ret;
+			var key = Tuple.Create(xamlNamespace, name);
+			if ((typeArguments == null || typeArguments.Length == 0) && type_lookup.TryGetValue(key, out ret))
+				return ret;
 			string dummy;
 			if (TryGetCompatibleXamlNamespace (xamlNamespace, out dummy))
 				xamlNamespace = dummy;
 
-			XamlType ret;
 			if (xamlNamespace == XamlLanguage.Xaml2006Namespace) {
 				ret = XamlLanguage.SpecialNames.Find (name, xamlNamespace);
 				if (ret == null)
@@ -233,7 +240,7 @@ namespace Portable.Xaml
 				if (ret != null)
 					return ret;
 			}
-			ret = run_time_types.FirstOrDefault (t => TypeMatches (t, xamlNamespace, name, typeArguments));
+			ret = run_time_types.Values.FirstOrDefault (t => TypeMatches (t, xamlNamespace, name, typeArguments));
 			if (ret == null)
 				ret = GetAllXamlTypes (xamlNamespace).FirstOrDefault (t => TypeMatches (t, xamlNamespace, name, typeArguments));
 
@@ -242,6 +249,7 @@ namespace Portable.Xaml
 				if (type != null)
 					ret = GetXamlType (type);
 			}
+			type_lookup[key] = ret;
 
 			// If the type was not found, it just returns null.
 			return ret;
@@ -389,6 +397,48 @@ namespace Portable.Xaml
 			if (genArgs != null)
 				tfn += "`" + genArgs.Length;
 			return tfn;
+		}
+
+		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
+
+		[EnhancedXaml]
+		protected internal virtual XamlMember GetProperty (PropertyInfo propertyInfo)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(propertyInfo, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (propertyInfo, this);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual XamlMember GetEvent (EventInfo eventInfo)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(eventInfo, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (eventInfo, this);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual XamlMember GetAttachableProperty (string attachablePropertyName, MethodInfo getter, MethodInfo setter)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(getter, setter);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (attachablePropertyName, getter, setter, this);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual XamlMember GetAttachableEvent (string attachablePropertyName, MethodInfo adder)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(adder, null);
+			XamlMember member;
+			if (member_cache.TryGetValue (key, out member))
+				return member;
+			return member_cache[key] = new XamlMember (attachablePropertyName, adder, this);
 		}
 	}
 }

@@ -64,6 +64,8 @@ namespace Portable.Xaml.Schema
 			get { return type == null ? null : type.SetTypeConverterHandler; }
 		}
 
+		Dictionary<Tuple<Type, Type, Type>, MethodInfo> add_method_cache = new Dictionary<Tuple<Type, Type, Type>, MethodInfo>();
+
 		public virtual void AddToCollection (object instance, object item)
 		{
 			if (instance == null)
@@ -71,32 +73,43 @@ namespace Portable.Xaml.Schema
 			if (item == null)
 				throw new ArgumentNullException ("item");
 
-			var ct = instance.GetType ();
-			var xct = type == null ? null : type.SchemaContext.GetXamlType (ct);
-			MethodInfo mi = null;
+			var collectionType = instance.GetType ();
+			var itemType = item.GetType();
+			var key = Tuple.Create(collectionType, itemType, (Type)null);
 
-			// FIXME: this method lookup should be mostly based on GetAddMethod(). At least iface method lookup must be done there.
-			if (type != null && type.UnderlyingType != null) {
-				if (!xct.IsCollection) // not sure why this check is done only when UnderlyingType exists...
-					throw new NotSupportedException (String.Format ("Non-collection type '{0}' does not support this operation", xct));
-				if (ct.GetTypeInfo().IsAssignableFrom (type.UnderlyingType.GetTypeInfo()))
-					mi = GetAddMethod (type.SchemaContext.GetXamlType (item.GetType ()));
-			}
-
-			if (mi == null) {
-				if (ct.GetTypeInfo().IsGenericType) {
-					mi = ct.GetRuntimeMethod ("Add", ct.GetTypeInfo().GetGenericArguments());
-					if (mi == null)
-						mi = LookupAddMethod (ct, typeof (ICollection<>).MakeGenericType (ct.GetTypeInfo().GetGenericArguments()));
-				} else {
-					mi = ct.GetRuntimeMethod ("Add", new Type [] {typeof (object)});
-					if (mi == null)
-						mi = LookupAddMethod (ct, typeof (IList));
+            MethodInfo mi = null;
+			if (!add_method_cache.TryGetValue(key, out mi))
+			{
+				// FIXME: this method lookup should be mostly based on GetAddMethod(). At least iface method lookup must be done there.
+				if (type != null && type.UnderlyingType != null)
+				{
+					var xct = type.SchemaContext.GetXamlType(collectionType);
+					if (!xct.IsCollection) // not sure why this check is done only when UnderlyingType exists...
+						throw new NotSupportedException(String.Format("Non-collection type '{0}' does not support this operation", xct));
+					if (collectionType.GetTypeInfo().IsAssignableFrom(type.UnderlyingType.GetTypeInfo()))
+						mi = GetAddMethod(type.SchemaContext.GetXamlType(itemType));
 				}
-			}
 
-			if (mi == null)
-				throw new InvalidOperationException (String.Format ("The collection type '{0}' does not have 'Add' method", ct));
+				if (mi == null)
+				{
+					if (collectionType.GetTypeInfo().IsGenericType)
+					{
+						mi = collectionType.GetRuntimeMethod("Add", collectionType.GetTypeInfo().GetGenericArguments());
+						if (mi == null)
+							mi = LookupAddMethod(collectionType, typeof(ICollection<>).MakeGenericType(collectionType.GetTypeInfo().GetGenericArguments()));
+					}
+					else
+					{
+						mi = collectionType.GetRuntimeMethod("Add", new Type[] { typeof(object) });
+						if (mi == null)
+							mi = LookupAddMethod(collectionType, typeof(IList));
+					}
+				}
+
+				if (mi == null)
+					throw new InvalidOperationException(String.Format("The collection type '{0}' does not have 'Add' method", collectionType));
+				add_method_cache[key] = mi;
+            }
 			
 			mi.Invoke (instance, new object [] {item});
 		}
@@ -108,16 +121,24 @@ namespace Portable.Xaml.Schema
 
 			var t = instance.GetType ();
 			// FIXME: this likely needs similar method lookup to AddToCollection().
-
+			var lookupKey = Tuple.Create(t, key?.GetType(), item?.GetType());
 			MethodInfo mi = null;
-			if (t.GetTypeInfo().IsGenericType) {
-				mi = instance.GetType ().GetRuntimeMethod ("Add", t.GetTypeInfo().GetGenericArguments());
-				if (mi == null)
-					mi = LookupAddMethod (t, typeof (IDictionary<,>).MakeGenericType (t.GetTypeInfo().GetGenericArguments()));
-			} else {
-				mi = instance.GetType ().GetRuntimeMethod ("Add", new Type [] {typeof (object), typeof (object)});
-				if (mi == null)
-					mi = LookupAddMethod (t, typeof (IDictionary));
+			if (!add_method_cache.TryGetValue(lookupKey, out mi))
+			{
+
+				if (t.GetTypeInfo().IsGenericType)
+				{
+					mi = instance.GetType().GetRuntimeMethod("Add", t.GetTypeInfo().GetGenericArguments());
+					if (mi == null)
+						mi = LookupAddMethod(t, typeof(IDictionary<,>).MakeGenericType(t.GetTypeInfo().GetGenericArguments()));
+				}
+				else
+				{
+					mi = instance.GetType().GetRuntimeMethod("Add", new Type[] { typeof(object), typeof(object) });
+					if (mi == null)
+						mi = LookupAddMethod(t, typeof(IDictionary));
+				}
+				add_method_cache[lookupKey] = mi;
 			}
 			mi.Invoke (instance, new object [] {key, item});
 		}
@@ -134,7 +155,10 @@ namespace Portable.Xaml.Schema
 		public virtual object CreateInstance (object [] arguments)
 		{
 			ThrowIfUnknown ();
-			return Activator.CreateInstance (type.UnderlyingType, arguments);
+			if (arguments == null)
+				return Activator.CreateInstance(type.UnderlyingType);
+			else
+				return Activator.CreateInstance (type.UnderlyingType, arguments);
 		}
 
 		public virtual MethodInfo GetAddMethod (XamlType contentType)

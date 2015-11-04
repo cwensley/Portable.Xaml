@@ -199,7 +199,7 @@ namespace Portable.Xaml.Schema
 			Name = xamlType.Name;
 			if (xamlType.TypeArguments != null && xamlType.TypeArguments.Count > 0) {
 				var l = new List<XamlTypeName> ();
-				l.AddRange (from x in xamlType.TypeArguments.AsQueryable () select new XamlTypeName (x));
+				l.AddRange (from x in xamlType.TypeArguments select new XamlTypeName (x));
 				TypeArguments = l;
 			}
 		}

@@ -23,7 +23,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -760,6 +759,23 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual ("Direct", item.Name, "#5");
 		}
 
+		[Test]
+		[Category(Categories.NotOnSystemXaml)] // System.Xaml doesn't use typeconverters nor passes the value
+		public void Read_CollectionWithContentWithConverter()
+		{
+			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><CollectionItem Name='Item1'/>SomeContent</CollectionParentItem>".UpdateXml();
+			var parent = (CollectionParentItem)XamlServices.Load(new StringReader(xaml));
+
+			Assert.IsNotNull(parent, "#1");
+			Assert.IsInstanceOf<CollectionParentItem>(parent, "#2");
+			Assert.AreEqual(2, parent.Items.Count, "#3");
+			var item = parent.Items[0];
+			Assert.IsNotNull(item, "#4");
+			Assert.AreEqual("Item1", item.Name, "#5");
+			item = parent.Items[1];
+			Assert.IsNotNull(item, "#6");
+			Assert.AreEqual("SomeContent", item.Name, "#7");
+		}
 
 		#region non-common tests
 		[Test]

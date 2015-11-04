@@ -165,14 +165,16 @@ namespace Portable.Xaml
 				return true;
 			if (member == XamlLanguage.PositionalParameters || member == XamlLanguage.Arguments)
 				return false; // it's up to the argument (no need to check them though, as IList<object> is not of value)
-			if (member.TypeConverter != null && member.TypeConverter.ConverterInstance != null && member.TypeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
+			var typeConverter = member.TypeConverter;
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
 				return true;
 			return IsContentValue (member.Type,vsctx);
 		}
 
 		public static bool IsContentValue (this XamlType type, IValueSerializerContext vsctx)
 		{
-			if (type.TypeConverter != null && type.TypeConverter.ConverterInstance != null && type.TypeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
+			var typeConverter = type.TypeConverter;
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
 				return true;
 			return false;
 		}
@@ -196,7 +198,7 @@ namespace Portable.Xaml
 			// FIXME: find out why only TypeExtension and StaticExtension yield this directive. Seealso XamlObjectReaderTest.Read_CustomMarkupExtension*()
 			return  type == XamlLanguage.Type ||
 				type == XamlLanguage.Static ||
-				ExaminePositionalParametersApplicable (type, vsctx) && type.ConstructionRequiresArguments;
+				(type.ConstructionRequiresArguments && ExaminePositionalParametersApplicable(type, vsctx));
 		}
 		
 		static bool ExaminePositionalParametersApplicable (this XamlType type, IValueSerializerContext vsctx)

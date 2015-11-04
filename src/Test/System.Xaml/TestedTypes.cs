@@ -902,6 +902,33 @@ namespace MonoTests.Portable.Xaml
 		public int? TestProp { get; set; }
 	}
 
+	class TestStructConverter : TypeConverter
+	{
+		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
+		{
+			return sourceType == typeof(string) || base.CanConvertFrom (context, sourceType);
+		}
+
+		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			var text = value as string;
+			if (text != null)
+				return new TestStruct { Text = text };
+			return base.ConvertFrom (context, culture, value);
+		}
+	}
+
+	[TypeConverter(typeof(TestStructConverter))]
+	public struct TestStruct
+	{
+		public string Text;
+	}
+
+	public class NullableWithTypeConverterContainer
+	{
+		public TestStruct? TestProp { get; set; }
+	}
+
 	public class DirectListContainer // for such xml that directly contains items in <*.Items> element.
 	{
 		public IList<DirectListContent> Items { get; set; }
@@ -931,11 +958,14 @@ namespace MonoTests.Portable.Xaml
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{
-			return sourceType == typeof(OtherItem) || base.CanConvertFrom (context, sourceType);
+			return sourceType == typeof(string) || sourceType == typeof(OtherItem) || base.CanConvertFrom (context, sourceType);
 		}
 
 		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
+			var text = value as string;
+			if (text != null)
+				return new CollectionItem { Name = text };
 			var otherItem = value as OtherItem;
 			if (otherItem != null) {
 				return otherItem.CollectionItem;
@@ -959,6 +989,9 @@ namespace MonoTests.Portable.Xaml
 	{
 		int IList.Add (object item)
 		{
+			var text = item as string;
+			if (text != null)
+				Add (new CollectionItem { Name = text });
 			var other = item as OtherItem;
 			if (other != null)
 				Add (other.CollectionItem);
@@ -1108,16 +1141,13 @@ namespace SecondTest
 			List<AmbientPropertyValue> list = provider.GetAllAmbientValues (null, false, types) as List<AmbientPropertyValue>;
 			if (list.Count != 1)
 				throw new Exception ("expected ambient property count == 1 but " + list.Count);
-			for (int i = 0; i < list.Count; i++) {
-				AmbientPropertyValue value = list [i];
-				ResourcesDict dict = value.Value as ResourcesDict;
 
-				// For this example, we know that dict should not be null and that it is the only value in list.
-				object result = dict [this.Key];
-				return result;
-			}
+			AmbientPropertyValue value = list [0];
+			ResourcesDict dict = value.Value as ResourcesDict;
 
-			return null;
+			// For this example, we know that dict should not be null and that it is the only value in list.
+			object result = dict [this.Key];
+			return result;
 		}
 	}
 
