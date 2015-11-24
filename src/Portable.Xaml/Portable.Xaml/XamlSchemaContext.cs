@@ -341,8 +341,10 @@ namespace Portable.Xaml
 					l = new List<XamlType> ();
 					all_xaml_types.Add (xda.XmlNamespace, l);
 				}
+				if (!string.IsNullOrEmpty(xda.AssemblyName))
+					ass = Assembly.Load (new AssemblyName (xda.AssemblyName));
 				foreach (var t in ass.GetExportedTypes())
-					if (t.Namespace == xda.ClrNamespace)
+					if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
 						l.Add (GetXamlType (t));
 			}
 		}
