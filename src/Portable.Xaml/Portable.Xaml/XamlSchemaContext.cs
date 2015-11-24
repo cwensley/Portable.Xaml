@@ -404,6 +404,16 @@ namespace Portable.Xaml
 		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
 
 		[EnhancedXaml]
+		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo, XamlType type)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(parameterInfo.Member, null);
+			XamlMember member;
+			if (member_cache.TryGetValue(key, out member))
+				return member;
+			return member_cache[key] = new XamlMember(parameterInfo.Name, type, false);
+		}
+
+		[EnhancedXaml]
 		protected internal virtual XamlMember GetProperty (PropertyInfo propertyInfo)
 		{
 			var key = new Tuple<MemberInfo, MemberInfo>(propertyInfo, null);
