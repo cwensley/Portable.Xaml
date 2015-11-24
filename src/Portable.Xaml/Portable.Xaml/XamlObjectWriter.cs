@@ -271,14 +271,16 @@ namespace Portable.Xaml
 
 			var state = object_states.Pop ();
 			var obj = state.Value;
-			
-			if (obj is MarkupExtension) {
+
+			if (state.Type.IsMarkupExtension) {
+				// validate that the provided value is a markup extension, throws InvalidCastException if not
+				var markupExtension = (MarkupExtension)obj;
 				try {
-					obj = ((MarkupExtension) obj).ProvideValue (service_provider);
+					obj = markupExtension.ProvideValue (service_provider);
 				} catch (XamlObjectWriterException) {
 					throw;
 				} catch (Exception ex) {
-					throw new XamlObjectWriterException ("An error occured on getting provided value", ex);
+					throw new XamlObjectWriterException ("An error occured getting provided value", ex);
 				}
 			}
 			

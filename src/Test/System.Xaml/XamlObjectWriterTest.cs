@@ -1175,7 +1175,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (InvalidCastException))] // unable to cast string to MarkupExtension
-		[Category (Categories.NotWorking)]
 		public void Write_MyExtension2 ()
 		{
 			//var obj = new MyExtension2 () { Foo = typeof (int), Bar = "v2"};
