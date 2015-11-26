@@ -89,8 +89,22 @@ namespace Portable.Xaml
 			get { return reference_assemblies; }
 		}
 
-		IEnumerable<Assembly> AssembliesInScope {
-			get { return reference_assemblies ?? GetAppDomainAssemblies(); }
+		struct AssemblyInfo
+		{
+			public AssemblyName Name;
+			public Assembly Assembly;
+		}
+
+		IList<AssemblyInfo> assembliesInScope;
+
+		IEnumerable<AssemblyInfo> AssembliesInScope {
+			get {
+				if (assembliesInScope != null)
+					return assembliesInScope;
+				var assemblies = reference_assemblies ?? GetAppDomainAssemblies();
+				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Name = r.GetName(), Assembly = r }).ToList();
+				return assembliesInScope;
+			}
 		}
 
 		IEnumerable<Assembly> GetAppDomainAssemblies()
@@ -133,7 +147,7 @@ namespace Portable.Xaml
 			if (xaml_nss == null) {
 				xaml_nss = new Dictionary<string,List<string>> ();
 				foreach (var ass in AssembliesInScope)
-					FillXamlNamespaces (ass);
+					FillXamlNamespaces (ass.Assembly);
 			}
 			return xaml_nss.Values.SelectMany(r => r).Distinct();
 		}
@@ -145,7 +159,7 @@ namespace Portable.Xaml
 			if (all_xaml_types == null) {
 				all_xaml_types = new Dictionary<string,List<XamlType>> ();
 				foreach (var ass in AssembliesInScope)
-					FillAllXamlTypes (ass);
+					FillAllXamlTypes (ass.Assembly);
 			}
 
 			List<XamlType> l;
@@ -164,7 +178,7 @@ namespace Portable.Xaml
 			if (prefixes == null) {
 				prefixes = new Dictionary<string,string> ();
 				foreach (var ass in AssembliesInScope)
-					FillPrefixes (ass);
+					FillPrefixes (ass.Assembly);
 			}
 			string ret;
 			return prefixes.TryGetValue (xmlns, out ret) ? ret : "p"; // default
@@ -267,7 +281,32 @@ namespace Portable.Xaml
 
 		protected internal virtual Assembly OnAssemblyResolve (string assemblyName)
 		{
-			return Assembly.Load(new AssemblyName(assemblyName));
+			var aname = new AssemblyName(assemblyName);
+			foreach (var info in AssembliesInScope)
+			{
+				// compare against the various parts of AssemblyName, if specified from xaml
+				var curname = info.Name;
+				if (aname.Name != curname.Name)
+					continue;
+				if (aname.Version != null && aname.Version != curname.Version)
+					continue;
+				var pk = aname.GetPublicKey();
+				if (pk != null)
+				{
+					var curpk = curname.GetPublicKey();
+					if (curpk == null || !pk.SequenceEqual(curpk))
+						continue;
+				}
+
+				return info.Assembly;
+			}
+
+			// fallback if not found
+#if PCL136
+			return Assembly.Load(assemblyName);
+#else
+			return Assembly.Load(aname);
+#endif
 		}
 
 		public virtual bool TryGetCompatibleXamlNamespace (string xamlNamespace, out string compatibleNamespace)
@@ -277,7 +316,7 @@ namespace Portable.Xaml
 			if (compat_nss == null) {
 				compat_nss = new Dictionary<string,string> ();
 				foreach (var ass in AssembliesInScope)
-					FillCompatibilities (ass);
+					FillCompatibilities (ass.Assembly);
 			}
             if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace)
                 && GetAllXamlNamespaces().Contains(compatibleNamespace))
@@ -341,8 +380,14 @@ namespace Portable.Xaml
 					l = new List<XamlType> ();
 					all_xaml_types.Add (xda.XmlNamespace, l);
 				}
+				if (!string.IsNullOrEmpty(xda.AssemblyName))
+#if PCL136
+					ass = Assembly.Load (xda.AssemblyName);
+#else
+					ass = Assembly.Load (new AssemblyName (xda.AssemblyName));
+#endif
 				foreach (var t in ass.GetExportedTypes())
-					if (t.Namespace == xda.ClrNamespace)
+					if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
 						l.Add (GetXamlType (t));
 			}
 		}
@@ -400,6 +445,16 @@ namespace Portable.Xaml
 		}
 
 		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
+
+		[EnhancedXaml]
+		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo, XamlType type)
+		{
+			var key = new Tuple<MemberInfo, MemberInfo>(parameterInfo.Member, null);
+			XamlMember member;
+			if (member_cache.TryGetValue(key, out member))
+				return member;
+			return member_cache[key] = new XamlMember(parameterInfo.Name, type, false);
+		}
 
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetProperty (PropertyInfo propertyInfo)

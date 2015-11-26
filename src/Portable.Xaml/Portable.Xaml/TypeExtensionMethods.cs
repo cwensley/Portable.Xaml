@@ -225,27 +225,61 @@ namespace Portable.Xaml
 			return ci != null;
 		}
 		
-		public static IEnumerable<XamlMember> GetConstructorArguments (this XamlType type)
+		public static IEnumerable<XamlMember> GetSortedConstructorArguments (this XamlType type, IList<object> contents = null)
 		{
-			return type.GetAllMembers ().Where (m => m.UnderlyingMember != null && m.GetCustomAttributeProvider ().GetCustomAttribute<ConstructorArgumentAttribute> (false) != null);
-		}
+			var constructors = type.UnderlyingType.GetTypeInfo().GetConstructors();
+			if (contents != null && contents.Count > 0)
+			{
+				// find constructor based on supplied parameters
+				foreach (var constructor in constructors) {
+					var parameters = constructor.GetParameters ();
+					if (contents.Count > parameters.Length)
+						continue;
 
-		public static IEnumerable<XamlMember> GetSortedConstructorArguments (this XamlType type)
-		{
-			var args = type.GetConstructorArguments ().ToArray ();
-			foreach (var ci in type.UnderlyingType.GetTypeInfo().GetConstructors().Where (c => c.GetParameters ().Length == args.Length)) {
+					bool mismatch = false;
+					for (int i = 0; i < parameters.Length; i++) {
+						if (i >= contents.Count) {
+							// allow parameters with a default value to be omitted
+							#if PCL136
+							mismatch |= parameters [i].DefaultValue == null;
+							#else
+							mismatch |= !parameters [i].HasDefaultValue;
+							#endif
+							continue;
+						}
+						// check if the parameter value can be assigned to the required type
+						var posParameter = contents [i];
+						var paramXamlType = type.SchemaContext.GetXamlType (parameters [i].ParameterType);
+
+						// check if type input type can be converted to the parameter type
+						var inputType = posParameter == null ? XamlLanguage.Null : type.SchemaContext.GetXamlType (posParameter.GetType ());
+						mismatch |= !paramXamlType.CanConvertFrom (inputType);
+					}
+					if (mismatch)
+						continue;
+
+					// matches constructor arguments
+					return constructor
+						.GetParameters()
+						.Select(p => type.SchemaContext.GetParameter(p, type));
+				}
+			}
+
+			// find constructor based on ConstructorArgumentAttribute
+			var args = type.GetConstructorArguments ().ToList ();
+			foreach (var ci in constructors) {
 				var pis = ci.GetParameters ();
-				if (args.Length != pis.Length)
+				if (args.Count != pis.Length)
 					continue;
 				bool mismatch = false;
 				foreach (var pi in pis)
-				for (int i = 0; i < args.Length; i++)
-					if (!args.Any (a => a.ConstructorArgumentName () == pi.Name))
-						mismatch = true;
+					for (int i = 0; i < args.Count; i++)
+						mismatch |= args.All (a => a.ConstructorArgumentName () != pi.Name);
 				if (mismatch)
 					continue;
 				return args.OrderBy (c => pis.FindParameterWithName (c.ConstructorArgumentName ()).Position);
 			}
+
 			return null;
 		}
 

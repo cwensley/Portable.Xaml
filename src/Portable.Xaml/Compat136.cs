@@ -6,23 +6,6 @@ using System.Linq;
 
 namespace Portable.Xaml
 {
-	struct AssemblyName
-	{
-		string name;
-
-		public string Name { get { return name; } }
-
-		public AssemblyName(string name)
-		{
-			this.name = name;
-		}
-
-		public static implicit operator string(AssemblyName name)
-		{
-			return name.name;
-		}
-	}
-
 	struct InterfaceMapping
 	{
 		public Type TargetType;

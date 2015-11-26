@@ -310,12 +310,43 @@ namespace Portable.Xaml
 			//return String.IsNullOrEmpty (PreferredXamlNamespace) ? Name : String.Concat ("{", PreferredXamlNamespace, "}", Name);
 		}
 
+		internal bool CanConvertFrom (XamlType inputType)
+		{
+			if (CanAssignFrom (inputType))
+				return true;
+
+			var tc = TypeConverter;
+			if (tc != null) {
+				return tc.ConverterInstance.CanConvertFrom (inputType?.UnderlyingType ?? typeof(object));
+			}
+
+			return false;
+		}
+
+		internal bool CanAssignFrom (XamlType inputType)
+		{
+			return inputType.CanAssignTo (this);
+		}
+
 		public virtual bool CanAssignTo (XamlType xamlType)
 		{
-			if (this.UnderlyingType == null)
+			if (xamlType == null)
+				return false;
+			if (IsUnknown && xamlType.IsUnknown)
+				return Equals(xamlType);
+
+			if (UnderlyingType == null)
 				return xamlType == XamlLanguage.Object;
-			var ut = xamlType.UnderlyingType ?? typeof (object);
-			return ut.GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			var ut = (xamlType.UnderlyingType ?? typeof (object)).GetTypeInfo();
+
+			// if we are assigning to a nullable type, we allow null
+			if (ut.IsValueType 
+				&& ut.IsGenericType
+				&& ut.GetGenericTypeDefinition () == typeof(Nullable<>)
+				&& this == XamlLanguage.Null)
+				return true;
+
+			return ut.IsAssignableFrom (UnderlyingType.GetTypeInfo());
 		}
 
 		public XamlMember GetAliasedProperty (XamlDirective directive)
@@ -504,7 +535,13 @@ namespace Portable.Xaml
 					continue;
 				if (pi.Name.Contains (".")) // exclude explicit interface implementations.
 					continue;
-				if (pi.CanRead && (pi.CanWrite || IsCollectionType (pi.PropertyType) || typeof (IXmlSerializable).GetTypeInfo().IsAssignableFrom (pi.PropertyType.GetTypeInfo())) && pi.GetIndexParameters ().Length == 0)
+				if (pi.CanRead && 
+					(
+						pi.CanWrite 
+						|| IsCollectionType (pi.PropertyType)
+						|| typeof (IXmlSerializable).GetTypeInfo().IsAssignableFrom (pi.PropertyType.GetTypeInfo())
+					) 
+					&& pi.GetIndexParameters ().Length == 0)
 					yield return SchemaContext.GetProperty (pi);
 			}
 			foreach (var ei in UnderlyingType.GetRuntimeEvents())
@@ -893,6 +930,21 @@ namespace Portable.Xaml
 				return n.Substring (0, n.IndexOf ('`'));
 			else
 				return n;
+		}
+
+		XamlMember[] constructorArguments;
+		internal IEnumerable<XamlMember> GetConstructorArguments ()
+		{
+			if (constructorArguments != null)
+				return constructorArguments;
+			
+			constructorArguments = GetAllMembers ()
+				.Where (m => 
+					m.UnderlyingMember != null 
+					&& m.GetCustomAttributeProvider ().GetCustomAttribute<ConstructorArgumentAttribute> (false) != null
+				)
+				.ToArray ();
+			return constructorArguments;
 		}
 	}
 }

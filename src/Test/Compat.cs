@@ -40,7 +40,7 @@ namespace MonoTests.Portable.Xaml
 				.Replace ($" px:", $" {Compat.Prefix}:")
 				.Replace ($"xmlns:px", $"xmlns:{Compat.Prefix}")
 				.Replace ("\r", "")
-				.Replace("\n", "\r\n");
+				.Replace("\n", Environment.NewLine);
 		}
 
         public static bool IsMono

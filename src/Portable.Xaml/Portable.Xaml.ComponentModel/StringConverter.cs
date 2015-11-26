@@ -22,9 +22,10 @@ namespace Portable.Xaml.ComponentModel
 		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			var text = value as string;
-			if (text != null) {
+			if (text != null)
 				return text;
-			}
+			if (value == null)
+				return string.Empty;
 			return base.ConvertFrom (context, culture, value);
 		}
 

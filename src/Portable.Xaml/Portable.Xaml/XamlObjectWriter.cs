@@ -271,14 +271,16 @@ namespace Portable.Xaml
 
 			var state = object_states.Pop ();
 			var obj = state.Value;
-			
-			if (obj is MarkupExtension) {
+
+			if (state.Type.IsMarkupExtension) {
+				// validate that the provided value is a markup extension, throws InvalidCastException if not
+				var markupExtension = (MarkupExtension)obj;
 				try {
-					obj = ((MarkupExtension) obj).ProvideValue (service_provider);
+					obj = markupExtension.ProvideValue (service_provider);
 				} catch (XamlObjectWriterException) {
 					throw;
 				} catch (Exception ex) {
-					throw new XamlObjectWriterException ("An error occured on getting provided value", ex);
+					throw new XamlObjectWriterException ("An error occured getting provided value", ex);
 				}
 			}
 			
@@ -353,7 +355,7 @@ namespace Portable.Xaml
 					state.Value = mi.Invoke (null, contents.ToArray ());
 				}
 				else
-					PopulateObject (false, (List<object>) state.Value);
+					PopulateObject (true, (List<object>) state.Value);
 				state.IsInstantiated = true;
 				escaped_objects.Pop ();
 			} else if (xm == XamlLanguage.Initialization) {
@@ -389,8 +391,10 @@ namespace Portable.Xaml
 		{
 			var state = object_states.Peek ();
 
-			var args = state.Type.GetSortedConstructorArguments ().ToArray ();
-			var argt = args != null ? (IList<XamlType>) (from arg in args select arg.Type).ToArray () : considerPositionalParameters ? state.Type.GetPositionalParameters (contents.Count) : null;
+			var positionalParameters = considerPositionalParameters ? state.Type.GetPositionalParameters(contents.Count) : null;
+
+			var args = state.Type.GetSortedConstructorArguments(contents).ToArray();
+			var argt = args != null ? (from arg in args select arg.Type).ToArray () : positionalParameters;
 
 			var argv = new object [argt.Count];
 			for (int i = 0; i < argv.Length; i++)

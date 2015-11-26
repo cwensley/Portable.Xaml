@@ -1072,6 +1072,18 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_ArgumentNonAttributed()
+		{
+			//var obj = new ArgumentNonAttributed ("foo", "bar");
+			using (var xr = GetReader("ArgumentNonAttributed.xml"))
+			{
+				var des = (ArgumentNonAttributed)XamlServices.Load(xr);
+				Assert.AreEqual("foo", des.Arg1, "#1");
+				Assert.AreEqual("bar", des.Arg2, "#2");
+			}
+		}
+
+		[Test]
 		public void Write_ArrayExtension2 ()
 		{
 			//var obj = new ArrayExtension (typeof (int));
@@ -1163,7 +1175,6 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		[ExpectedException (typeof (InvalidCastException))] // unable to cast string to MarkupExtension
-		[Category (Categories.NotWorking)]
 		public void Write_MyExtension2 ()
 		{
 			//var obj = new MyExtension2 () { Foo = typeof (int), Bar = "v2"};

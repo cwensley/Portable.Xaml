@@ -61,10 +61,23 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[ConstructorArgument ("s1")]
-		public string Arg1 { get; set; }
+		public string Arg1 { get; private set; }
 
 		[ConstructorArgument ("s2")]
-		public string Arg2 { get; set; }
+		public string Arg2 { get; private set; }
+	}
+
+	public class ArgumentNonAttributed
+	{
+		public ArgumentNonAttributed(string s1, string s2)
+		{
+			Arg1 = s1;
+			Arg2 = s2;
+		}
+
+		public string Arg1 { get; private set; }
+
+		public string Arg2 { get; private set; }
 	}
 
 	public class ComplexPositionalParameterWrapper
