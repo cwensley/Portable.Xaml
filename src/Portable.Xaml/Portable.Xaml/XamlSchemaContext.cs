@@ -380,13 +380,14 @@ namespace Portable.Xaml
 					l = new List<XamlType> ();
 					all_xaml_types.Add (xda.XmlNamespace, l);
 				}
+				var assembly = ass;
 				if (!string.IsNullOrEmpty(xda.AssemblyName))
 #if PCL136
-					ass = Assembly.Load (xda.AssemblyName);
+					assembly = Assembly.Load (xda.AssemblyName);
 #else
-					ass = Assembly.Load (new AssemblyName (xda.AssemblyName));
+					assembly = Assembly.Load (new AssemblyName (xda.AssemblyName));
 #endif
-				foreach (var t in ass.GetExportedTypes())
+				foreach (var t in assembly.GetExportedTypes())
 					if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
 						l.Add (GetXamlType (t));
 			}
