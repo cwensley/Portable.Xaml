@@ -54,18 +54,37 @@ namespace Portable.Xaml.Markup
 		{
 			if (Member == null)
 				throw new InvalidOperationException ("Member property must be set to StaticExtension before calling ProvideValue method.");
-			if (MemberType != null) {
+
+			if (MemberType == null && serviceProvider != null)
+			{
+				// support [ns:]Type.Member
+				var typeResolver = (IXamlTypeResolver)serviceProvider.GetService(typeof(IXamlTypeResolver));
+				if (typeResolver != null)
+				{
+					var memberIndex = Member.IndexOf('.');
+					if (memberIndex > 0)
+					{
+						var typeName = Member.Substring(0, memberIndex);
+						MemberType = typeResolver.Resolve(typeName);
+						if (MemberType != null)
+						{
+							Member = Member.Substring(memberIndex + 1);
+						}
+					}
+				}
+			}
+
+			if (MemberType != null)
+			{
 				var pi = MemberType.GetRuntimeProperty(Member);
 				if (pi != null && (pi.GetPrivateGetMethod()?.IsStatic ?? false))
-					return pi.GetValue (null, null);
+					return pi.GetValue(null, null);
 				var fi = MemberType.GetRuntimeField(Member);
 				if (fi != null && fi.IsStatic)
-					return fi.GetValue (null);
+					return fi.GetValue(null);
 			}
-			// there might be some cases that it could still
-			// resolve a static member without MemberType, 
-			// but we don't know any of such so far.
-			throw new ArgumentException (String.Format ("Member '{0}' could not be resolved to a static member", Member));
+
+			throw new ArgumentException(String.Format("Member '{0}' could not be resolved to a static member", Member));
 		}
 	}
 }

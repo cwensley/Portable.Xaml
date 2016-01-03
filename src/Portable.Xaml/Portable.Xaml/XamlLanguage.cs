@@ -217,22 +217,24 @@ namespace Portable.Xaml
 		public static XamlType Uri { get; private set; }
 		public static XamlType XData { get; private set; }
 
-		internal static bool IsValidXamlName (string name)
+		internal static bool IsValidXamlName (string name, bool allowSubclass = false)
 		{
 			if (string.IsNullOrEmpty (name))
 				return false;
-			if (!IsValidXamlName (name [0], true))
+			if (!IsValidXamlName (name [0], true, allowSubclass))
 				return false;
 			foreach (char c in name)
-				if (!IsValidXamlName (c, false))
+				if (!IsValidXamlName (c, false, allowSubclass))
 					return false;
 			return true;
 		}
 
-		static bool IsValidXamlName (char c, bool first)
+		static bool IsValidXamlName (char c, bool first, bool allowSubclass)
 		{
 			if (c == '_')
 				return true;
+			if (c == '+')
+				return allowSubclass && !first;
 			switch (CharUnicodeInfo.GetUnicodeCategory (c)) {
 			case UnicodeCategory.LowercaseLetter:
 			case UnicodeCategory.UppercaseLetter:

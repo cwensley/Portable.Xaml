@@ -85,7 +85,7 @@ namespace Portable.Xaml.Schema
 				if (!XamlLanguage.IsValidXamlName (prefix))
 					return false;
 			}
-			if (!XamlLanguage.IsValidXamlName (local))
+			if (!XamlLanguage.IsValidXamlName (local, true))
 				return false;
 			string ns = namespaceResolver.GetNamespace (prefix);
 			if (ns == null)
