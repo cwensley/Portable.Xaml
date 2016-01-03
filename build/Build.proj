@@ -95,16 +95,33 @@
 		<Exec Command='git checkout develop' />
 		<Exec Command='git checkout -b "$(Branch)"' />
 		<Exec Command='git add -u' />
-		<Exec Command='git commit -m "Updating to $(AssemblyInformationalVersion)"' />
-		<Exec Command='git checkout master' />
-		<Exec Command='git merge --no-ff "$(Branch)"' />
-		<Exec Command='git tag "$(AssemblyInformationalVersion)"' />
+		<Exec Command='git commit -m "Updating to $(NewVersion)"' />
+		
+		<!-- update develop -->
 		<Exec Command='git checkout develop' />
 		<Exec Command='git merge --no-ff "$(Branch)"' />
+		
+		<!-- update master -->
+		<Exec Command='git checkout master' />
+		<Exec Command='git merge --no-ff "$(Branch)"' IgnoreExitCode="true">
+			<Output TaskParameter="ExitCode" PropertyName="MergeError" />
+		</Exec>
+		<Warning Text="Merge errors, using develop version.  Check merge result in master." Condition="$(MergeError) != '0'" />
+		<Exec Command='git reset --hard' Condition="$(MergeError) != '0'" />
+		 <!-- dangerous! using develop if any conflicts. -->
+		<Exec Command='git merge --no-ff --strategy-option theirs "$(Branch)"' Condition="$(MergeError) != '0'" />
+
+		<!-- tag version and delete release branch -->
+		<Exec Command='git tag "$(NewVersion)"' />
 		<Exec Command='git branch -d "$(Branch)"' />
+
+		<!-- update develop version -->
+		<Exec Command='git checkout develop' />
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="UpdateVersion" Properties="BuildVersion=$(NewDevelopVersion);BuildIncrement=0.1.0.0" />
 		<Exec Command='git add -u' />
 		<Exec Command='git commit -m "Updating to $(AssemblyInformationalVersion)"' />
+		
+		<!-- checkout master and build packages -->
 		<Exec Command='git checkout master' />
 		<MSBuild Projects="$(MSBuildProjectFile)" Targets="Package" />
 	</Target>
