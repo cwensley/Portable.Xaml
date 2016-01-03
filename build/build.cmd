@@ -17,6 +17,6 @@ if not defined VisualStudioVersion (
 
 :EnvSet
 
-msbuild -t:Package Build.targets
+msbuild -t:Package Build.proj
 
 pause

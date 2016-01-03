@@ -1,3 +1,3 @@
 #!/bin/bash
 
-xbuild /t:Package Build.targets
+xbuild /t:Package Build.proj
