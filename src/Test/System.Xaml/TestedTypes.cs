@@ -456,6 +456,12 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		public static string FooBar { get; set; }
+
+		public enum MyEnum
+		{
+			EnumValue1,
+			EnumValue2
+		}
 	}
 
 	public class StaticExtensionWrapper

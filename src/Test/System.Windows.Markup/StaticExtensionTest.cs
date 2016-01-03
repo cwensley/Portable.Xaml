@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using NUnit.Framework;
+using MonoTests.Portable.Xaml;
 #if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
@@ -116,5 +117,22 @@ namespace MonoTests.System.Windows.Markup
 		}
 
 		public static event EventHandler<EventArgs> FooEvent;
+
+
+		[Test]
+		public void ProvideValueWithMemberOnly()
+		{
+			const string xaml = "<x:Static xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:foo='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' Member='foo:StaticClass1.FooBar' />";
+			var result = XamlServices.Parse(xaml.UpdateXml());
+			Assert.AreEqual("test", result);
+		}
+
+		[Test]
+		public void ProvideValueFromChildEnum()
+		{
+			const string xaml = "<x:Static xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:foo='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' Member='foo:StaticClass1+MyEnum.EnumValue2' />";
+			var result = XamlServices.Parse(xaml.UpdateXml());
+			Assert.AreEqual(StaticClass1.MyEnum.EnumValue2, result);
+		}
 	}
 }
