@@ -236,6 +236,11 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class TestClass6
+	{
+		public DateTime TheDateAndTime { get; set; }
+	}
+
 	public class MyExtension : MarkupExtension
 	{
 		public MyExtension ()
@@ -919,6 +924,11 @@ namespace MonoTests.Portable.Xaml
 	public class NullableContainer
 	{
 		public int? TestProp { get; set; }
+	}
+
+	public class NullableContainer2
+	{
+		public DateTime? NullableDate { get; set; }
 	}
 
 	class TestStructConverter : TypeConverter

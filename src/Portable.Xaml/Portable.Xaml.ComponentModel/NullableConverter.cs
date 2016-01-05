@@ -49,5 +49,16 @@ namespace Portable.Xaml.ComponentModel
 				return UnderlyingTypeConverter.ConvertFrom(context, culture, value);
 			return base.ConvertFrom(context, culture, value);
 		}
+
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+
+			if (destinationType == typeof (string) && UnderlyingTypeConverter != null && value != null)
+			{
+				return UnderlyingTypeConverter.ConvertTo(context, culture, value, destinationType);
+			}
+			return GetConvertToException(value, destinationType);
+		}
 	}
 }
