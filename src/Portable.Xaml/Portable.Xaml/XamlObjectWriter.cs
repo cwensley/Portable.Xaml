@@ -361,9 +361,13 @@ namespace Portable.Xaml
 			} else if (xm == XamlLanguage.Initialization) {
 				// ... and no need to do anything. The object value to pop *is* the return value.
 			} else {
-				if (xm == XamlLanguage.Name || xm == state.Type.GetAliasedProperty (XamlLanguage.Name)) {
+				XamlMember aliasedName = state.Type.GetAliasedProperty (XamlLanguage.Name);
+				if (xm == XamlLanguage.Name || xm == aliasedName) {
 					string name = (string) CurrentMemberState.Value;
 					name_scope.RegisterName (name, state.Value);
+
+					// if x:Name is used, then we set the backing property defined by RuntimeNamePropertyAttribute
+					xm = aliasedName ?? xm;
 				}
 
 				if (!xm.IsReadOnly) // exclude read-only object such as collection item.
