@@ -11,12 +11,23 @@ namespace Portable.Xaml.Markup
 
 		public Type ValueSerializerType
 		{
-			get { return _valueSerializerType; }
+			get
+			{
+				if (_valueSerializerType == null && _valueSerializerTypeName != null)
+					_valueSerializerType = Type.GetType(_valueSerializerTypeName);
+				return _valueSerializerType;
+			}
 		}
 
 		public string ValueSerializerTypeName
 		{
-			get { return _valueSerializerTypeName; }
+			get
+			{
+				if (_valueSerializerType != null)
+					return _valueSerializerType.AssemblyQualifiedName;
+				else
+					return _valueSerializerTypeName;
+			}
 		}
 
 		public ValueSerializerAttribute(Type valueSerializerType)
