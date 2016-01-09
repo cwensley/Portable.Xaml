@@ -29,6 +29,7 @@ using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 
 using Pair = System.Collections.Generic.KeyValuePair<string,string>;
+using System.Diagnostics;
 
 namespace Portable.Xaml
 {
@@ -147,7 +148,7 @@ namespace Portable.Xaml
 			if (xaml_nss == null) {
 				xaml_nss = new Dictionary<string,List<string>> ();
 				foreach (var ass in AssembliesInScope)
-					FillXamlNamespaces (ass.Assembly);
+					FillXamlNamespaces (ass);
 			}
 			return xaml_nss.Values.SelectMany(r => r).Distinct();
 		}
@@ -159,7 +160,7 @@ namespace Portable.Xaml
 			if (all_xaml_types == null) {
 				all_xaml_types = new Dictionary<string,List<XamlType>> ();
 				foreach (var ass in AssembliesInScope)
-					FillAllXamlTypes (ass.Assembly);
+					FillAllXamlTypes (ass);
 			}
 
 			List<XamlType> l;
@@ -346,18 +347,25 @@ namespace Portable.Xaml
 		}*/
 
         // cache updater methods
-        void FillXamlNamespaces (Assembly ass)
+        void FillXamlNamespaces (AssemblyInfo ass)
 		{
-            foreach (XmlnsDefinitionAttribute xda in ass.GetCustomAttributes(typeof(XmlnsDefinitionAttribute)))
-            {
-                List<string> namespaces;
-                if (!xaml_nss.TryGetValue(xda.ClrNamespace, out namespaces))
-                {
-                    namespaces = new List<string>();
-                    xaml_nss.Add(xda.ClrNamespace, namespaces);
-                }
-                namespaces.Add(xda.XmlNamespace);
-            }
+			try
+			{
+				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes(typeof(XmlnsDefinitionAttribute)))
+				{
+					List<string> namespaces;
+					if (!xaml_nss.TryGetValue(xda.ClrNamespace, out namespaces))
+					{
+						namespaces = new List<string>();
+						xaml_nss.Add(xda.ClrNamespace, namespaces);
+					}
+					namespaces.Add(xda.XmlNamespace);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Error getting namespaces for assembly '{0}': {1}", ass.Name, ex);
+			}
 		}
 		
 		void FillPrefixes (Assembly ass)
@@ -372,24 +380,33 @@ namespace Portable.Xaml
 				compat_nss.Add (xca.OldNamespace, xca.NewNamespace);
 		}
 
-		void FillAllXamlTypes (Assembly ass)
+		void FillAllXamlTypes (AssemblyInfo ass)
 		{
-			foreach (XmlnsDefinitionAttribute xda in ass.GetCustomAttributes (typeof (XmlnsDefinitionAttribute))) {
-				var l = all_xaml_types.FirstOrDefault (p => p.Key == xda.XmlNamespace).Value;
-				if (l == null) {
-					l = new List<XamlType> ();
-					all_xaml_types.Add (xda.XmlNamespace, l);
-				}
-				var assembly = ass;
-				if (!string.IsNullOrEmpty(xda.AssemblyName))
+			try
+			{
+				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
+				{
+					var l = all_xaml_types.FirstOrDefault(p => p.Key == xda.XmlNamespace).Value;
+					if (l == null)
+					{
+						l = new List<XamlType>();
+						all_xaml_types.Add(xda.XmlNamespace, l);
+					}
+					var assembly = ass.Assembly;
+					if (!string.IsNullOrEmpty(xda.AssemblyName))
 #if PCL136
-					assembly = Assembly.Load (xda.AssemblyName);
+						assembly = Assembly.Load (xda.AssemblyName);
 #else
-					assembly = Assembly.Load (new AssemblyName (xda.AssemblyName));
+						assembly = Assembly.Load(new AssemblyName(xda.AssemblyName));
 #endif
-				foreach (var t in assembly.GetExportedTypes())
-					if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
-						l.Add (GetXamlType (t));
+					foreach (var t in assembly.GetExportedTypes())
+						if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
+							l.Add(GetXamlType(t));
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Error getting xaml types for assembly '{0}': {1}", ass.Name, ex);
 			}
 		}
 
