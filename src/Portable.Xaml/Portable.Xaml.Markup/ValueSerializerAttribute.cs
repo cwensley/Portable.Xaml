@@ -6,9 +6,28 @@ namespace Portable.Xaml.Markup
 	//[System.Runtime.CompilerServices.TypeForwardedFrom (Consts.AssemblyWindowsBase)]
 	public sealed class ValueSerializerAttribute : Attribute
 	{
-		public Type ValueSerializerType { get; }
+		private Type _valueSerializerType;
+		private string _valueSerializerTypeName;
 
-		public string ValueSerializerTypeName { get; }
+		public Type ValueSerializerType
+		{
+			get { return _valueSerializerType; }
+		}
+
+		public string ValueSerializerTypeName
+		{
+			get { return _valueSerializerTypeName; }
+		}
+
+		public ValueSerializerAttribute(Type valueSerializerType)
+		{
+			_valueSerializerType = valueSerializerType;
+		}
+
+		public ValueSerializerAttribute(string valueSerializerTypeName)
+		{
+			_valueSerializerTypeName = valueSerializerTypeName;
+		}
 	}
 }
 
