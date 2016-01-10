@@ -49,6 +49,7 @@
     <Compile Include="System.Windows.Markup\StaticExtensionTest.cs" />
     <Compile Include="System.Windows.Markup\TypeExtensionConverterTest.cs" />
     <Compile Include="System.Windows.Markup\TypeExtensionTest.cs" />
+    <Compile Include="System.Windows.Markup\ValueSerializerAttributeTest.cs" />
     <Compile Include="System.Windows.Markup\ValueSerializerTest.cs" />
     <Compile Include="System.Windows.Markup\XDataTest.cs" />
     <Compile Include="System.Xaml.Schema\XamlMemberInvokerTest.cs" />
