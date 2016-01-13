@@ -663,6 +663,52 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_DateTime_UtcWithNoMilliseconds()
+		{
+			var testData = new TestClass6 {TheDateAndTime = new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc)};
+			var result = XamlServices.Save(testData);
+			Assert.AreEqual(ReadXml("DateTime2.xml"), result, "#2");
+		}
+
+		[Test]
+		public void Write_DateTime_UtcWithMilliseconds()
+		{
+			var testData = new TestClass6 { TheDateAndTime = new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc) };
+			testData.TheDateAndTime = testData.TheDateAndTime.AddMilliseconds(11);
+			var result = XamlServices.Save(testData);
+			Assert.AreEqual(ReadXml("DateTime3.xml"), result, "#3");
+		}
+
+		[Test]
+		public void Write_DateTime_LocalWithMilliseconds()
+		{
+			var usTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+			var localisedDateTime = TimeZoneInfo.ConvertTimeFromUtc(
+				new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc),
+				usTimeZone);
+			var testData = new TestClass6 { TheDateAndTime = localisedDateTime };
+			testData.TheDateAndTime = testData.TheDateAndTime.AddMilliseconds(11);
+			var result = XamlServices.Save(testData);
+			Assert.AreEqual(ReadXml("DateTime4.xml"), result, "#4");
+		}
+
+		[Test]
+		public void Write_DateTime_WithNoTimeThatEndsWithZero()
+		{
+			var testData = new TestClass6 { TheDateAndTime = new DateTime(2015, 12, 30) };
+			var result = XamlServices.Save(testData);
+			Assert.AreEqual(ReadXml("DateTime5.xml"), result, "#5");
+		}
+
+		[Test]
+		public void Write_NullableDateTime_UtcWithNoMilliseconds()
+		{
+			var testData = new NullableContainer2 { NullableDate = new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc) };
+			var result = XamlServices.Save(testData);
+			Assert.AreEqual(ReadXml("DateTime6.xml"), result, "#6");
+		}
+
+		[Test]
 		public void Write_TimeSpan ()
 		{
 			Assert.AreEqual (ReadXml ("TimeSpan.xml"), XamlServices.Save (TimeSpan.FromMinutes (7)), "#1");

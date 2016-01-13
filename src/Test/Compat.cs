@@ -36,6 +36,7 @@ namespace MonoTests.Portable.Xaml
 		public static string UpdateXml(this string str)
 		{
 			return str.Replace ("net_4_0", Compat.Version)
+				.Replace("net_4_5", Compat.Version)
 				.Replace ("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", $"clr-namespace:{Compat.Namespace};assembly={Compat.Namespace}")
 				.Replace ($" px:", $" {Compat.Prefix}:")
 				.Replace ($"xmlns:px", $"xmlns:{Compat.Prefix}")
