@@ -1114,6 +1114,253 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (r.Read (), "#9");
 		}
 
+		protected void Read_CustomExtensionWithChildExtension(XamlReader r)
+		{
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read();
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase(r);
+
+			Assert.IsTrue(r.Read(), "#3");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(xt.GetMember("StringValue"), r.Member, "#4");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(MyExtension2)), xt = r.Type, "#2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(xt.GetMember("Foo"), r.Member, "#3-2");
+
+			// Child TypeExtension
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(TypeExtension)), xt = r.Type, "#2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual("TestClass1", r.Value, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			// Finish up MyExtension2
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue(r.Read(), "#7"); // EndMember
+			Assert.IsTrue(r.Read(), "#8"); // EndObject
+			Assert.IsFalse(r.Read(), "#9");
+			Assert.AreEqual(XamlNodeType.None, r.NodeType, "#3-2");
+			Assert.IsTrue(r.IsEof, "#3-2");
+		}
+
+
+		protected void Read_CustomExtensionWithPositionalChildExtension(XamlReader r)
+		{
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); 
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase (r);
+
+			Assert.IsTrue (r.Read (), "#3");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual (xt.GetMember ("StringValue"), r.Member, "#4");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (MyExtension2)), xt = r.Type, "#2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(XamlLanguage.PositionalParameters, r.Member, "#3-2");
+
+			// Child TypeExtension
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (TypeExtension)), xt = r.Type, "#2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual ("TestClass1", r.Value, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual("Value For Bar", r.Value, "#3-2");
+
+			// Finish up MyExtension2
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue (r.Read (), "#7"); // EndMember
+			Assert.IsTrue (r.Read (), "#8"); // EndObject
+			Assert.IsFalse (r.Read (), "#9");
+			Assert.AreEqual (XamlNodeType.None, r.NodeType, "#3-2");
+			Assert.IsTrue (r.IsEof, "#3-2");
+		}
+
+		protected void Read_CustomExtensionWithCommasInPositionalValue(XamlReader r)
+		{
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read();
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase(r);
+
+			Assert.IsTrue(r.Read(), "#3");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(xt.GetMember("StringValue"), r.Member, "#4");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(MyExtension6)), xt = r.Type, "#2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(XamlLanguage.PositionalParameters, r.Member, "#4");
+
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual("Some Value, With Commas", r.Value, "#3-2");
+
+
+			// Finish up MyExtension7
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue(r.Read(), "#7"); // EndMember
+			Assert.IsTrue(r.Read(), "#8"); // EndObject
+			Assert.IsFalse(r.Read(), "#9");
+			Assert.AreEqual(XamlNodeType.None, r.NodeType, "#3-2");
+			Assert.IsTrue(r.IsEof, "#3-2");
+		}
+
+		protected void Read_CustomExtensionWithCommasInNamedValue(XamlReader r)
+		{
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read(); // ns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read();
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase(r);
+
+			Assert.IsTrue(r.Read(), "#3");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(xt.GetMember("StringValue"), r.Member, "#4");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual(r.SchemaContext.GetXamlType(typeof(MyExtension6)), xt = r.Type, "#2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(xt.GetMember("Foo"), r.Member, "#4");
+
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual("Some Value, With Commas", r.Value, "#3-2");
+
+
+			// Finish up MyExtension7
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue(r.Read(), "#7"); // EndMember
+			Assert.IsTrue(r.Read(), "#8"); // EndObject
+			Assert.IsFalse(r.Read(), "#9");
+			Assert.AreEqual(XamlNodeType.None, r.NodeType, "#3-2");
+			Assert.IsTrue(r.IsEof, "#3-2");
+		}
+
+		public void Read_CustomExtensionWithPositonalAfterExplicitProperty(XamlReader r)
+		{
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); 
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase (r);
+
+			Assert.IsTrue (r.Read (), "#3");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual (xt.GetMember ("StringValue"), r.Member, "#4");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (MyExtension2)), xt = r.Type, "#2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.AreEqual(XamlLanguage.PositionalParameters, r.Member, "#3-2");
+
+			// Child TypeExtension
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#3-2");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (TypeExtension)), xt = r.Type, "#2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual ("TestClass1", r.Value, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue(r.Read(), "#5");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#3-2");
+			Assert.AreEqual("Value For Bar", r.Value, "#3-2");
+
+			// Finish up MyExtension2
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#3-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#3-2");
+
+			Assert.IsTrue (r.Read (), "#7"); // EndMember
+			Assert.IsTrue (r.Read (), "#8"); // EndObject
+			Assert.IsFalse (r.Read (), "#9");
+			Assert.AreEqual (XamlNodeType.None, r.NodeType, "#3-2");
+			Assert.IsTrue (r.IsEof, "#3-2");
+		}
+
+
 		protected void Read_ArgumentAttributed (XamlReader r, object obj)
 		{
 			Read_CommonClrType (r, obj, new KeyValuePair<string,string> ("x", XamlLanguage.Xaml2006Namespace));
@@ -3360,7 +3607,10 @@ if (i == 0) {
 
 		protected void ReadBase (XamlReader r)
 		{
-#if PCL
+#if !PCL
+			if (Type.GetType ("Mono.Runtime") == null)
+				return;
+#endif
             // we include the xml declaration, MS.NET does not?
             Assert.IsTrue(r.Read(), "sbase#1");
             Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "sbase#2");
@@ -3372,7 +3622,6 @@ if (i == 0) {
 
             Assert.IsTrue(r.Read(), "ebase#1");
             Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "ebase#2");
-#endif
         }
 
 		void ReadNamespace (XamlReader r, string prefix, string ns, string label)

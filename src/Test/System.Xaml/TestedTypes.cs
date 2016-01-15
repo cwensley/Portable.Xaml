@@ -236,6 +236,11 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class TestClass6
+	{
+		public DateTime TheDateAndTime { get; set; }
+	}
+
 	public class MyExtension : MarkupExtension
 	{
 		public MyExtension ()
@@ -373,6 +378,25 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	/// <summary>
+	/// No positional constructor arguments
+	/// </summary>
+	public class MyExtension7 : MarkupExtension
+	{
+		public MyExtension7()
+		{
+		}
+
+		public string Foo { get; set; }
+
+		public string Bar { get; set; }
+
+		public override object ProvideValue(IServiceProvider sp)
+		{
+			return Foo;
+		}
+	}
+
 	public class PositionalParametersClass1 : MarkupExtension
 	{
 		public PositionalParametersClass1 (string foo)
@@ -395,6 +419,15 @@ namespace MonoTests.Portable.Xaml
 		public override object ProvideValue (IServiceProvider sp)
 		{
 			return Foo;
+		}
+	}
+
+	public class ValueWrapper
+	{
+		public string StringValue { get; set; }
+
+		public ValueWrapper ()
+		{
 		}
 	}
 
@@ -919,6 +952,11 @@ namespace MonoTests.Portable.Xaml
 	public class NullableContainer
 	{
 		public int? TestProp { get; set; }
+	}
+
+	public class NullableContainer2
+	{
+		public DateTime? NullableDate { get; set; }
 	}
 
 	class TestStructConverter : TypeConverter

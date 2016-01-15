@@ -50,12 +50,12 @@ namespace MonoTests.Portable.Xaml
 	{
 		// read test
 
-		XamlReader GetReader (string filename)
+		XamlReader GetReader(string filename)
 		{
-			string xml = File.ReadAllText (Path.Combine ("XmlFiles", filename)).UpdateXml();
-			return new XamlXmlReader (XmlReader.Create (new StringReader (xml)));
+			string xml = File.ReadAllText(Path.Combine("XmlFiles", filename)).UpdateXml();
+			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)));
 		}
-
+		
 		void ReadTest (string filename)
 		{
 			var r = GetReader (filename);
@@ -486,6 +486,43 @@ namespace MonoTests.Portable.Xaml
 		{
 			var r = GetReader ("MyExtension6.xml");
 			Read_CustomMarkupExtension6 (r);
+		}
+
+		[Test]
+		public void Read_CustomExtensionWithPositionalChildExtension ()
+		{
+			var r = GetReader ("CustomExtensionWithPositionalChild.xml");
+			Read_CustomExtensionWithPositionalChildExtension(r);
+		}
+
+		[Test]
+		public void Read_CustomExtensionWithChildExtension()
+		{
+			var r = GetReader("CustomExtensionWithChild.xml");
+			Read_CustomExtensionWithChildExtension(r);
+		}
+
+		[Test]
+		public void Read_CustomExtensionWithCommasInPositionalValue()
+		{
+			var r = GetReader("CustomExtensionWithCommasInPositionalValue.xml");
+			Read_CustomExtensionWithCommasInPositionalValue(r);
+		}
+
+		[Test]
+		public void Read_CustomExtensionWithCommasInNamedValue()
+		{
+			var r = GetReader("CustomExtensionWithCommasInNamedValue.xml");
+			Read_CustomExtensionWithCommasInNamedValue(r);
+		}
+
+		[Test]
+		[ExpectedException(typeof(XamlParseException))]
+		public void Read_CustomExtensionWithPositonalAfterExplicitProperty()
+		{
+			// cannot have positional property after named property
+			var r = GetReader("CustomExtensionWithPositonalAfterExplicitProperty.xml");
+			Read_CustomExtensionWithPositonalAfterExplicitProperty(r);
 		}
 
 		[Test]

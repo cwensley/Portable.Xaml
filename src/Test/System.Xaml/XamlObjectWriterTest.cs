@@ -1305,6 +1305,42 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
+		/// <summary>
+		/// Issue #9 - When using x:Name, the property indicated by RuntimeNameProperty attribute should also be set.
+		/// </summary>
+		[Test]
+		public void Write_NamedItems3 ()
+		{
+			// i1
+			// - i2
+			// -- i3
+			// - i4
+			// -- i3
+			var obj = new NamedItem2 ("i1");
+			var obj2 = new NamedItem2 ("i2");
+			var obj3 = new NamedItem2 ("i3");
+			var obj4 = new NamedItem2 ("i4");
+			obj.References.Add (obj2);
+			obj.References.Add (obj4);
+			obj2.References.Add (obj3);
+			obj4.References.Add (obj3);
+
+			using (var xr = GetReader ("NamedItems3.xml")) {
+				var des = (NamedItem2) XamlServices.Load (xr);
+				Assert.IsNotNull (des, "#1");
+				Assert.AreEqual ("i1", des.ItemName, "#2");
+				Assert.AreEqual (2, des.References.Count, "#3");
+				Assert.AreEqual (typeof (NamedItem2), des.References [0].GetType (), "#4");
+				Assert.AreEqual (typeof (NamedItem2), des.References [1].GetType (), "#5");
+				Assert.AreEqual ("i2", des.References [0].ItemName, "#6");
+				Assert.AreEqual ("i4", des.References [1].ItemName, "#7");
+				Assert.AreEqual (1, des.References [0].References.Count, "#8");
+				Assert.AreEqual (1, des.References [1].References.Count, "#9");
+				Assert.AreEqual ("i3", des.References [0].References[0].ItemName, "#10");
+				Assert.AreEqual (des.References [0].References [0], des.References [1].References [0], "#11");
+			}
+		}
+
 		[Test]
 		public void Write_XmlSerializableWrapper ()
 		{
