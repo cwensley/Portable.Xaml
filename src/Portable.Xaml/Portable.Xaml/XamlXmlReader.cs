@@ -333,18 +333,10 @@ namespace Portable.Xaml
 				// FIXME: is this rule correct?
 				var v = pair.Value;
 				if (!String.IsNullOrEmpty (v) && v [0] == '{') {
-					var pai = ParsedMarkupExtensionInfo.Parse (v, xaml_namespace_resolver, sctx);
-					yield return Node (XamlNodeType.StartObject, pai.Type);
-					foreach (var xepair in pai.Arguments) {
-						yield return Node (XamlNodeType.StartMember, xepair.Key);
-						if (xepair.Value is List<string>)
-							foreach (var s in (List<string>) xepair.Value)
-								yield return Node (XamlNodeType.Value, s);
-						else
-							yield return Node (XamlNodeType.Value, xepair.Value);
-						yield return Node (XamlNodeType.EndMember, xepair.Key);
-					}
-					yield return Node (XamlNodeType.EndObject, pai.Type);
+					var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
+					pai.Parse ();
+					foreach (var node in ReadMarkup(pai))
+						yield return node;
 				}
 				else
 					yield return Node (XamlNodeType.Value, pair.Value);
@@ -363,6 +355,40 @@ namespace Portable.Xaml
 				r.Read (); // consume empty element.
 
 			yield return Node (XamlNodeType.EndObject, xt);
+		}
+
+		IEnumerable<XamlXmlNodeInfo> ReadMarkup(ParsedMarkupExtensionInfo pai)
+		{
+			yield return Node (XamlNodeType.StartObject, pai.Type);
+
+			foreach (var xepair in pai.Arguments) {
+				yield return Node (XamlNodeType.StartMember, xepair.Key);
+				var list = xepair.Value as List<object>;
+				if (list != null) {
+					foreach (var s in list) {
+						foreach (var node in ReadMarkupArgument(s))
+							yield return node;
+					}
+				}
+				else {
+					foreach (var node in ReadMarkupArgument(xepair.Value))
+						yield return node;
+				}
+				yield return Node (XamlNodeType.EndMember, xepair.Key);
+			}
+
+			yield return Node (XamlNodeType.EndObject, pai.Type);
+		}
+
+		IEnumerable<XamlXmlNodeInfo> ReadMarkupArgument(object value)
+		{
+			var markup = value as ParsedMarkupExtensionInfo;
+			if (markup != null) {
+				foreach (var node in ReadMarkup(markup))
+					yield return node;
+			}
+			else
+				yield return Node (XamlNodeType.Value, value);
 		}
 
 		IEnumerable<XamlXmlNodeInfo> ReadMembers (XamlType parentType, XamlType xt)
