@@ -682,11 +682,8 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_DateTime_LocalWithMilliseconds()
 		{
-			var usTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-			var localisedDateTime = TimeZoneInfo.ConvertTimeFromUtc(
-				new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc),
-				usTimeZone);
-			var testData = new TestClass6 { TheDateAndTime = localisedDateTime };
+			var localisedDateTime = new DateTimeOffset(new DateTime(2015, 12, 30, 15, 50, 51, DateTimeKind.Utc), new TimeSpan());
+			var testData = new TestClass6 { TheDateAndTime = localisedDateTime.DateTime };
 			testData.TheDateAndTime = testData.TheDateAndTime.AddMilliseconds(11);
 			var result = XamlServices.Save(testData);
 			Assert.AreEqual(ReadXml("DateTime4.xml"), result, "#4");
