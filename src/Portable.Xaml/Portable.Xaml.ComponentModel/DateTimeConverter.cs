@@ -1,19 +1,11 @@
 using System;
-using System.Collections;
 using System.Globalization;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace Portable.Xaml.ComponentModel
 {
 
 	public class DateTimeConverter : TypeConverter
 	{
-		private static readonly Regex UtcTidyUpPattern = new Regex(@"0+Z$");
-
-		private static readonly Regex LocalTidyUpPatterns = new Regex(@"0+$");
-
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
@@ -45,7 +37,7 @@ namespace Portable.Xaml.ComponentModel
 					if (hasTime)
 					{
 						// To exactly match the behaviour of System.Xaml unnecessary zeros must be removed from the end of the time.
-						return RemoveUnnecessaryZeros(date.ToString("o", culture), date.Kind);
+						return date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK");
 					}
 
 					return date.ToString("yyyy-MM-dd", culture);
@@ -59,25 +51,6 @@ namespace Portable.Xaml.ComponentModel
 				return date.ToString(format, culture);
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
-		}
-
-		private string RemoveUnnecessaryZeros(string dateFormatted, DateTimeKind kind)
-		{
-			string conciseDate = dateFormatted.Trim();
-			if (kind == DateTimeKind.Utc)
-			{
-				conciseDate = UtcTidyUpPattern.Replace(conciseDate, "Z");
-				if (conciseDate.EndsWith(".Z"))
-					conciseDate = conciseDate.Remove(conciseDate.Length - 2, 1);
-			}
-			else
-			{
-				conciseDate = LocalTidyUpPatterns.Replace(conciseDate, "");
-				if (conciseDate.EndsWith("."))
-					conciseDate = conciseDate.Substring(0, conciseDate.Length - 1);
-			}
-
-			return conciseDate;
 		}
 	}
 }
