@@ -624,7 +624,7 @@ namespace Portable.Xaml
 				if (xm.Type.IsXData)
 					foreach (var ni in ReadXData ())
 						yield return ni;
-				else if (xm.Type.IsCollection) {
+				else if (xm.Type.IsCollection || xm.Type.IsDictionary) {
 					yield return Node (XamlNodeType.GetObject, xm.Type);
 					yield return Node (XamlNodeType.StartMember, XamlLanguage.Items);
 					foreach (var ni in ReadCollectionItems (parentType, XamlLanguage.Items))
