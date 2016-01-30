@@ -73,8 +73,17 @@ namespace Portable.Xaml
 		string ReadRest()
 		{
 			var endidx = value.IndexOf ('}', index);
-			var val = endidx >= 0 ? value.Substring (index, endidx - index) : value.Substring (index);
-			index = value.Length;
+			string val;
+			if (endidx >= 0)
+			{
+				val = value.Substring(index, endidx - index);
+				index = endidx;
+			}
+			else
+			{
+				val = value.Substring(index);
+				index = value.Length;
+			}
 			return val;
 		}
 
@@ -163,9 +172,11 @@ namespace Portable.Xaml
 
 		bool ParseArgument ()
 		{
+			ReadWhitespace();
 			var escapedValue = ParseEscapedValue ();
 			if (escapedValue != null) {
 				AddPositionalParameter(escapedValue);
+				ParseArgument();
 				return true;
 			}
 
@@ -175,6 +186,7 @@ namespace Portable.Xaml
 			member = Type.GetMember (name) ?? new XamlMember (name, Type, false);
 			if (ReadUntil ('=') == null) {
 				AddPositionalParameter (name + ReadUntil (',', true).TrimEnd());
+				ParseArgument();
 				return true;
 			}
 			ReadWhitespace ();
@@ -224,10 +236,7 @@ namespace Portable.Xaml
 				throw Error ("Failed to parse type name '{0}'", Name);
 			Type = sctx.GetXamlType (xtn);
 
-			ReadWhitespace ();
-			while (Current != '}' && ParseArgument ()) {
-				ReadWhitespace ();
-			}
+			ParseArgument();
 			if (!Read('}'))
 				throw Error ("Expected '}}' in the markup extension attribute: '{0}'", value);
 		}
