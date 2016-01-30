@@ -37,7 +37,7 @@ namespace Portable.Xaml.ComponentModel
 					if (hasTime)
 					{
 						// To exactly match the behaviour of System.Xaml unnecessary zeros must be removed from the end of the time.
-						return date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK");
+						return date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK", culture);
 					}
 
 					return date.ToString("yyyy-MM-dd", culture);
