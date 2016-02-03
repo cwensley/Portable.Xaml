@@ -329,10 +329,11 @@ namespace Portable.Xaml
 		{
 			return invoker;
 		}
+
 		protected virtual bool LookupIsAmbient ()
 		{
-			var t = Type != null ? Type.UnderlyingType : null;
-			return t != null && t.GetTypeInfo().GetCustomAttributes (typeof (AmbientAttribute), false).Any();
+			var ambientAttribute = GetCustomAttributeProvider()?.GetCustomAttribute<AmbientAttribute>(true);
+			return ambientAttribute != null;
 		}
 
 		protected virtual bool LookupIsEvent ()

@@ -221,7 +221,6 @@ namespace Portable.Xaml
 		XamlSchemaContext sctx;
 		INameScope name_scope;
 		List<NameFixupRequired> pending_name_references = new List<NameFixupRequired> ();
-		AmbientProvider ambient_provider = new AmbientProvider ();
 
 		public INameScope NameScope {
 			get { return name_scope; }
@@ -300,10 +299,7 @@ namespace Portable.Xaml
 			else
 				StoreAppropriatelyTypedValue (obj, state.KeyValue);
 			
-			if (state.Type.IsAmbient)
-				ambient_provider.Pop ();
-			else
-				HandleEndInit (obj);
+			HandleEndInit (obj);
 			
 			object_states.Push (state);
 			if (object_states.Count == 1) {
@@ -405,8 +401,6 @@ namespace Portable.Xaml
 				argv [i] = GetCorrectlyTypedValue (args [i], argt [i], i < contents.Count ? contents [i] : null);
 			state.Value = state.Type.Invoker.CreateInstance (argv);
 			state.IsInstantiated = true;
-			if (state.Type.IsAmbient)
-				ambient_provider.Push (new AmbientPropertyValue (CurrentMember, state.Value));
 			HandleBeginInit (state.Value);
 		}
 
@@ -560,18 +554,11 @@ namespace Portable.Xaml
 				obj = state.Type.Invoker.CreateInstance (null);
 			state.Value = obj;
 			state.IsInstantiated = true;
-			if (state.Type.IsAmbient)
-				ambient_provider.Push (new AmbientPropertyValue (CurrentMember, obj));
-			else
-				HandleBeginInit (obj);
+			HandleBeginInit (obj);
 		}
 
 		internal IXamlNameResolver name_resolver {
 			get { return (IXamlNameResolver) service_provider.GetService (typeof (IXamlNameResolver)); }
-		}
-
-		internal override IAmbientProvider AmbientProvider {
-			get { return ambient_provider; }
 		}
 
 		void ResolvePendingReferences ()

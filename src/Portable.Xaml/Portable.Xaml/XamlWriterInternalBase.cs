@@ -41,14 +41,14 @@ namespace Mono.Xaml
 namespace Portable.Xaml
 #endif
 {
-	internal abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider
+	internal abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider, IAmbientProvider
 	{
 		public XamlWriterInternalBase (XamlSchemaContext schemaContext, XamlWriterStateManager manager)
 		{
 			this.sctx = schemaContext;
 			this.manager = manager;
 			var p = new PrefixLookup (sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
-			service_provider = new ValueSerializerContext (p, schemaContext, AmbientProvider, this, this, this);
+			service_provider = new ValueSerializerContext (p, schemaContext, this, this, this, this);
 		}
 
 		XamlSchemaContext sctx;
@@ -270,5 +270,69 @@ namespace Portable.Xaml
 			else
 				throw new XamlXmlWriterException (String.Format ("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType () : null));
 		}
+
+		#region IAmbientProvider
+
+		public IEnumerable<object> GetAllAmbientValues(params XamlType[] types)
+		{
+			return GetAllAmbientValues(null, false, types);
+		}
+
+		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties)
+		{
+			return GetAllAmbientValues(ceilingTypes, false, null, properties);
+		}
+
+		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, bool searchLiveStackOnly, IEnumerable<XamlType> types, params XamlMember[] properties)
+		{
+			// check arguments
+			if (properties == null)
+				throw new ArgumentNullException("properties");
+
+			var nonAmbientProperty = properties.FirstOrDefault(r => !r.IsAmbient);
+			if (nonAmbientProperty != null)
+				throw new ArgumentException(nonAmbientProperty.ToString() + "is not an ambient property", "properties");
+
+			return DoGetAllAmbientValues(ceilingTypes, searchLiveStackOnly, types, properties);
+		}
+
+		private IEnumerable<AmbientPropertyValue> DoGetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, bool searchLiveStackOnly, IEnumerable<XamlType> types, params XamlMember[] properties)
+		{
+			foreach (var state in object_states)
+			{
+				if (ceilingTypes != null && ceilingTypes.Contains(state.Type))
+					yield break;
+
+				if (types != null)
+				{
+					if (types.Any(xt => xt.UnderlyingType != null && xt.CanAssignFrom(state.Type)))
+						yield return new AmbientPropertyValue(null, state.Value);
+				}
+				if (properties != null)
+				{
+					// get ambient properties in the stack
+					foreach (var prop in properties)
+					{
+						if (prop.DeclaringType != state.Type)
+							continue;
+						if (prop.UnderlyingGetter == null)
+							continue;
+						var value = prop.UnderlyingGetter.Invoke(state.Value, null);
+						yield return new AmbientPropertyValue(prop, value);
+					}
+				}
+			}
+		}
+
+		public object GetFirstAmbientValue(params XamlType[] types)
+		{
+			return GetAllAmbientValues(types).FirstOrDefault();
+		}
+
+		public AmbientPropertyValue GetFirstAmbientValue(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties)
+		{
+			return GetAllAmbientValues(ceilingTypes, properties).FirstOrDefault();
+		}
+		#endregion
 	}
 }

@@ -646,9 +646,8 @@ namespace MonoTests.Portable.Xaml
 				Attachable.SetFoo (obj.Value, null);
 			}
 		}
-		
+
 		[Test]
-		[Ignore ("Foo does not work as attached properties in this test yet")]
 		public void Read_AttachedProperty2 ()
 		{
 			var obj = new AttachedWrapper2 ();
@@ -656,7 +655,7 @@ namespace MonoTests.Portable.Xaml
 			AttachedWrapper2.SetFoo (obj.Value, "y");
 			try {
 				new XamlObjectReader (obj);
-//while (xr.Read ()) Console.Error.WriteLine ("{0} {1} {2} {3}", xr.NodeType, xr.Type, xr.Member, xr.Value);
+				//while (xr.Read ()) Console.Error.WriteLine ("{0} {1} {2} {3}", xr.NodeType, xr.Type, xr.Member, xr.Value);
 			} finally {
 				AttachedWrapper2.SetFoo (obj, null);
 				AttachedWrapper2.SetFoo (obj.Value, null);
@@ -726,7 +725,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category (Categories.NotWorking)] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
@@ -740,7 +738,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category (Categories.NotWorking)] // only member ordering difference, maybe.
 		public void Read_AmbientPropertyContainer2 ()
 		{
 			var obj = new SecondTest.ResourcesDict ();

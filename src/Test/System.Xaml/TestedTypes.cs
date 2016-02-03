@@ -32,6 +32,9 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using NUnit.Framework;
+
+
 #if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
@@ -1192,20 +1195,99 @@ namespace SecondTest
 			Debug.Assert (provider != null, "The provider should not be null!");
 
 			XamlSchemaContext schemaContext = service.SchemaContext;
-			XamlType[] types = new XamlType [] { schemaContext.GetXamlType (typeof (ResourcesDict)) };
+			var types = new XamlType[] { schemaContext.GetXamlType (typeof (ResourcesDict)) };
 
 			// ResourceDict is marked as Ambient, so the instance current being deserialized should be in this list.
-			List<AmbientPropertyValue> list = provider.GetAllAmbientValues (null, false, types) as List<AmbientPropertyValue>;
-			if (list.Count != 1)
-				throw new Exception ("expected ambient property count == 1 but " + list.Count);
-
-			AmbientPropertyValue value = list [0];
-			ResourcesDict dict = value.Value as ResourcesDict;
-
-			// For this example, we know that dict should not be null and that it is the only value in list.
-			object result = dict [this.Key];
-			return result;
+			var values = provider.GetAllAmbientValues(null, false, types).ToList();
+			Assert.AreEqual(1, values.Count, "#1");
+			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			{
+				if (dict.ContainsKey(this.Key))
+					return dict[this.Key];
+			}
+			return null;
 		}
+	}
+
+	[MarkupExtensionReturnType(typeof(object))]
+	public class Resource2Extension : MarkupExtension
+	{
+		[ConstructorArgument("key")]
+		public object Key { get; set; }
+
+		public Resource2Extension(object key)
+		{
+			this.Key = key;
+		}
+
+		public override object ProvideValue(IServiceProvider serviceProvider)
+		{
+			IXamlSchemaContextProvider service = serviceProvider.GetService(typeof(IXamlSchemaContextProvider)) as IXamlSchemaContextProvider;
+			IAmbientProvider provider = serviceProvider.GetService(typeof(IAmbientProvider)) as IAmbientProvider;
+			Debug.Assert(provider != null, "The provider should not be null!");
+
+			XamlSchemaContext schemaContext = service.SchemaContext;
+
+			// odd, specifying a type that is not ambient does not throw...
+			provider.GetAllAmbientValues(null, false, new[] {
+					schemaContext.GetXamlType(typeof(ResourcesDict2))
+				});
+
+			Assert.Throws<ArgumentException>(() =>
+			{
+				// getting ambient values for a property that is not flagged as ambient throws
+				provider.GetAllAmbientValues(null, false, null, new[] {
+					schemaContext.GetXamlType(typeof(ResourceContainer)).GetMember("Resources3")
+					});
+			}, "#1");
+
+			var types = new XamlType[] { schemaContext.GetXamlType(typeof(ResourcesDict)) };
+			var properties = new XamlMember[]
+			{
+				schemaContext.GetXamlType(typeof(ResourceContainer)).GetMember("Resources"),
+				schemaContext.GetXamlType(typeof(ResourceContainer)).GetMember("Resources2")
+			};
+
+			var values = provider.GetAllAmbientValues(null, false, types, properties).ToList();
+			int count = 0;
+			if (Equals(Key, "TestDictItem"))
+			{
+				// inside ambient value, should be returned as well
+				Assert.AreEqual(3, values.Count, "#2");
+				Assert.IsInstanceOf<ResourcesDict>(values[count].Value);
+				Assert.IsNull(values[count++].RetrievedProperty);
+			}
+			else
+			{
+				Assert.AreEqual(2, values.Count, "#2");
+			}
+			Assert.IsInstanceOf<ResourcesDict>(values[count].Value, "#3");
+			Assert.AreEqual(properties[0], values[count++].RetrievedProperty, "#4");
+			Assert.IsNull(values[count].Value, "#5");
+			Assert.AreEqual(properties[1], values[count++].RetrievedProperty, "#6");
+
+			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			{
+				if (dict.ContainsKey(this.Key))
+					return dict[this.Key];
+			}
+			Assert.Fail("#7. Did not find resource");
+			return null;
+		}
+	}
+
+	public class ResourceContainer
+	{
+		[Ambient]
+		public ResourcesDict Resources { get; } = new ResourcesDict();
+
+		[Ambient]
+		public ResourcesDict2 Resources2 { get; set; }
+
+		// non-ambient, should throw exception when we try to get it
+		public ResourcesDict Resources3 { get; set; }
+
+		public TestObject TestObject { get; set; }
 	}
 
 	[UsableDuringInitialization (true), Ambient]

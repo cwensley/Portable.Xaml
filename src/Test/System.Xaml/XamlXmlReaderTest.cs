@@ -725,6 +725,15 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_AmbientPropertyContainer3()
+		{
+			var r = GetReader("AmbientPropertyContainer3.xml");
+			var writer = new XamlObjectWriter(new XamlSchemaContext());
+			XamlServices.Transform(r, writer);
+			//Read_AmbientPropertyContainer3(r, true);
+		}
+
+		[Test]
 		public void Read_NullableContainer ()
 		{
 			var r = GetReader ("NullableContainer.xml");

@@ -1090,7 +1090,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Category (Categories.NotWorking)] // TestProperty is written as element so far
 		public void Write_AmbientPropertyContainer ()
 		{
 			var obj = new SecondTest.ResourcesDict ();
