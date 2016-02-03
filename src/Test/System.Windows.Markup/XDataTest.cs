@@ -85,9 +85,10 @@ namespace MonoTests.System.Windows.Markup
 		public void SetNonXmlReader ()
 		{
 			var x = new XData ();
-			XmlReader r;
 			x.XmlReader = "<foo/>"; // not allowed. It does *not* raise an error, but the value becomes null.
-			r = x.XmlReader as XmlReader; // and thus it causes ANE.
+			#pragma warning disable 219
+			var r = x.XmlReader as XmlReader; // and thus it causes ANE.
+			#pragma warning restore 219
 		}
 
 		[Test]

@@ -302,7 +302,9 @@ namespace MonoTests.Portable.Xaml
 
 		class AttachableClass
 		{
+			#pragma warning disable 67
 			public event EventHandler<EventArgs> SimpleEvent;
+			#pragma warning restore 67
 			public void AddSimpleHandler (object o, EventHandler h)
 			{
 			}

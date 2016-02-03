@@ -116,8 +116,9 @@ namespace MonoTests.System.Windows.Markup
 			Assert.IsNotNull (x.ProvideValue (null), "#1");
 		}
 
+		#pragma warning disable 67
 		public static event EventHandler<EventArgs> FooEvent;
-
+		#pragma warning restore 67
 
 		[Test]
 		public void ProvideValueWithMemberOnly()

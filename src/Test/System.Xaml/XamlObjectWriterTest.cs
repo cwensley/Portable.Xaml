@@ -49,16 +49,14 @@ namespace MonoTests.Portable.Xaml
 	{
 		PropertyInfo str_len = typeof(string).GetProperty ("Length");
 		XamlSchemaContext sctx = new XamlSchemaContext (null, null);
-		XamlType xt, xt2, xt3, xt4;
-		XamlMember xm, xm2, xm3;
+		XamlType xt, xt3, xt4;
+		XamlMember xm2, xm3;
 
 		public XamlObjectWriterTest ()
 		{
 			xt = new XamlType (typeof(string), sctx);
-			xt2 = new XamlType (typeof(List<int>), sctx);
 			xt3 = new XamlType (typeof(TestClass1), sctx);
 			xt4 = new XamlType (typeof(Foo), sctx);
-			xm = new XamlMember (str_len, sctx);
 			xm2 = new XamlMember (typeof(TestClass1).GetProperty ("TestProp1"), sctx);
 			xm3 = new XamlMember (typeof(TestClass1).GetProperty ("TestProp2"), sctx);
 		}
@@ -1250,7 +1248,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var ex = Assert.Throws<XamlObjectWriterException> (() => {
 				using (var xr = GetReader ("StaticExtensionWrapper.xml")) {
+					#pragma warning disable 219
 					var des = (StaticExtensionWrapper)XamlServices.Load (xr);
+					#pragma warning restore 219
 				}
 			});
 			Assert.AreEqual (ex.InnerException.GetType (), typeof(ArgumentException));
@@ -1273,7 +1273,9 @@ namespace MonoTests.Portable.Xaml
 			var ex = Assert.Throws<XamlObjectWriterException> (() => {
 				// can't read a markup extension directly
 				using (var xr = GetReader ("TypeExtensionWrapper.xml")) {
+					#pragma warning disable 219
 					var des = (TypeExtensionWrapper)XamlServices.Load (xr);
+					#pragma warning restore 219
 				}
 			});
 			Assert.IsInstanceOf<XamlParseException> (ex.InnerException);

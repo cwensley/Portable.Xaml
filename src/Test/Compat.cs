@@ -15,12 +15,12 @@ namespace MonoTests.Portable.Xaml
 
 		public const string Namespace = "Portable.Xaml";
 		public const string Prefix = "px";
-		public const bool IsPortableXaml = true;
+		public static bool IsPortableXaml = true;
 		#else
 		public const string Version = "net_4_5";
 		public const string Namespace = "System.Xaml";
 		public const string Prefix = "sx";
-		public const bool IsPortableXaml = false;
+		public static bool IsPortableXaml = false;
 		#endif
 
 
