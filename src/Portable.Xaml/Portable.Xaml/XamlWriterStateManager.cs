@@ -109,10 +109,16 @@ namespace Portable.Xaml
 			allow_parallel_values = !isXmlWriter;
 			allow_empty_member = !isXmlWriter;
 			allow_multiple_results = !isXmlWriter;
+			allow_ns_before_endmember = !isXmlWriter;
 		}
 
 		// configuration
-		bool allow_ns_at_value, allow_object_after_value, allow_parallel_values, allow_empty_member, allow_multiple_results;
+		bool allow_ns_at_value;
+		bool allow_object_after_value;
+		bool allow_parallel_values;
+		bool allow_empty_member;
+		bool allow_multiple_results;
+		bool allow_ns_before_endmember;
 
 		// state
 		XamlWriteState state = XamlWriteState.Initial;
@@ -138,7 +144,10 @@ namespace Portable.Xaml
 
 		public void EndMember ()
 		{
-			RejectNamespaces (XamlNodeType.EndMember);
+			if (!allow_ns_before_endmember)
+				RejectNamespaces (XamlNodeType.EndMember);
+			else
+				ns_pushed = false;
 			CheckState (XamlNodeType.EndMember);
 			state = XamlWriteState.MemberDone;
 		}

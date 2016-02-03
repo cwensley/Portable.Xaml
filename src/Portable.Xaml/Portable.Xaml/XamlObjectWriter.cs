@@ -383,8 +383,12 @@ namespace Portable.Xaml
 		
 		void SetValue (XamlMember member, object target, object value)
 		{
-			if (!source.OnSetValue (target, member, value))
-				member.Invoker.SetValue (target, value);
+			try {
+				if (!source.OnSetValue (target, member, value))
+					member.Invoker.SetValue (target, value);
+			} catch (Exception ex) {
+				throw new XamlObjectWriterException ($"Set value of member '{member}' threw an exception", ex);
+			}
 		}
 
 		void PopulateObject (bool considerPositionalParameters, IList<object> contents)
