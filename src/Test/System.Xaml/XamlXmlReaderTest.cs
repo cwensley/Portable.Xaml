@@ -725,6 +725,15 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_AmbientPropertyContainer3()
+		{
+			var r = GetReader("AmbientPropertyContainer3.xml");
+			var writer = new XamlObjectWriter(new XamlSchemaContext());
+			XamlServices.Transform(r, writer);
+			//Read_AmbientPropertyContainer3(r, true);
+		}
+
+		[Test]
 		public void Read_NullableContainer ()
 		{
 			var r = GetReader ("NullableContainer.xml");
@@ -800,6 +809,9 @@ namespace MonoTests.Portable.Xaml
 		[Category(Categories.NotOnSystemXaml)] // System.Xaml doesn't use typeconverters nor passes the value
 		public void Read_CollectionWithContentWithConverter()
 		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("System.Xaml doesn't use typeconverters nor passes the value");
+
 			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><CollectionItem Name='Item1'/>SomeContent</CollectionParentItem>".UpdateXml();
 			var parent = (CollectionParentItem)XamlServices.Load(new StringReader(xaml));
 

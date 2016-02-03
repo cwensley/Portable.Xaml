@@ -36,15 +36,6 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-[assembly:XmlnsDefinition ("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
-[assembly:XmlnsDefinition ("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
-
-// comment out the following to get mono's System.Xaml to go further in the tests
-[assembly: XmlnsDefinition("urn:bar", "MonoTests.Portable.Xaml.NamespaceTest")]
-
-[assembly:XmlnsCompatibleWith ("urn:foo", "urn:bar")]
-[assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
-
 namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]

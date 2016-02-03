@@ -2893,6 +2893,22 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (r.Read (), "end");
 		}
 
+		protected void Read_AmbientPropertyContainer3(XamlReader r, bool extensionBased)
+		{
+			Assert.IsTrue(r.Read(), "ns#1-1");
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
+			Assert.IsNotNull(r.Namespace, "ns#1-3");
+			Assert.AreEqual("", r.Namespace.Prefix, "ns#1-4");
+			Assert.AreEqual("http://www.domain.com/path", r.Namespace.Namespace, "ns#1-5");
+
+			Assert.IsTrue(r.Read(), "ns#2-1");
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#2-2");
+			Assert.IsNotNull(r.Namespace, "ns#2-3");
+			Assert.AreEqual("x", r.Namespace.Prefix, "ns#2-4");
+			Assert.AreEqual(XamlLanguage.Xaml2006Namespace, r.Namespace.Namespace, "ns#2-5");
+
+		}
+
 		void ReadKey_AmbientPropertyContainer (XamlReader r, int i, bool extensionBased)
 		{
 			// m:Key

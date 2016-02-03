@@ -162,49 +162,46 @@ namespace Portable.Xaml
 					yield return xn;
 			} else {
 				// Object - could become Reference
-				var val = xobj.GetRawValue ();
-				if (!xobj.Type.IsContentValue (value_serializer_ctx) && val != null) {
-					string refName = NameResolver.GetName (val);
-					if (refName != null) {
-						// The target object is already retrieved, so we don't return the same object again.
-						NameResolver.SaveAsReferenced (val); // Record it as named object.
-						// Then return Reference object instead.
-						foreach (var xn in GetNodes (null, new XamlObject (XamlLanguage.Reference, new Reference (refName))))
-							yield return xn;
-						yield break;
-					} else {
-						// The object appeared in the xaml tree for the first time. So we store the reference with a unique name so that it could be referenced later.
-						refName = GetReferenceName (xobj);
-						if (NameResolver.IsCollectingReferences && NameResolver.Contains (refName))
-							throw new InvalidOperationException (String.Format ("There is already an object of type {0} named as '{1}'. Object names must be unique.", val.GetType (), refName));
-						NameResolver.SetNamedObject (refName, val, true); // probably fullyInitialized is always true here.
+				var val2 = xobj.GetRawValue ();
+				if (val2 != null && xobj.Type != XamlLanguage.Reference) {
+					
+					if (!xobj.Type.IsContentValue (value_serializer_ctx)) {
+						string refName = NameResolver.GetReferenceName (xobj, val2);
+						if (refName != null) {
+							// The target object is already retrieved, so we don't return the same object again.
+							NameResolver.SaveAsReferenced (val2); // Record it as named object.
+							// Then return Reference object instead.
+							foreach (var xn in GetNodes (null, new XamlObject (XamlLanguage.Reference, new Reference (refName))))
+								yield return xn;
+							yield break;
+						} else {
+							// The object appeared in the xaml tree for the first time. So we store the reference with a unique name so that it could be referenced later.
+							NameResolver.SetNamedObject (val2, true); // probably fullyInitialized is always true here.
+						}
+					}
+					yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
+
+					// If this object is referenced and there is no [RuntimeNameProperty] member, then return Name property in addition.
+					if (!NameResolver.IsCollectingReferences && xobj.Type.GetAliasedProperty (XamlLanguage.Name) == null) {
+						string name = NameResolver.GetReferencedName (xobj, val2);
+						if (name != null) {
+							var sobj = new XamlObject (XamlLanguage.String, name);
+							foreach (var cn in GetMemberNodes (new XamlNodeMember (sobj, XamlLanguage.Name), new [] { new XamlNodeInfo (name)}))
+								yield return cn;
+						}
 					}
 				}
-				yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
-				// If this object is referenced and there is no [RuntimeNameProperty] member, then return Name property in addition.
-				if (val != null && xobj.Type.GetAliasedProperty (XamlLanguage.Name) == null) {
-					string name = NameResolver.GetReferencedName (val);
-					if (name != null) {
-						var sobj = new XamlObject (XamlLanguage.String, name);
-						foreach (var cn in GetMemberNodes (new XamlNodeMember (sobj, XamlLanguage.Name), new XamlNodeInfo [] { new XamlNodeInfo (name)}))
-							yield return cn;
-					}
-				}
+				else
+					yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
+
+
 				foreach (var xn in GetObjectMemberNodes (xobj))
 					yield return xn;
+				
 				yield return new XamlNodeInfo (XamlNodeType.EndObject, xobj);
 			}
 		}
 		
-		int used_reference_ids;
-		
-		string GetReferenceName (XamlObject xobj)
-		{
-			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
-			if (xm != null)
-				return (string) xm.Invoker.GetValue (xobj.GetRawValue ());
-			return "__ReferenceID" + used_reference_ids++;
-		}
 
 		IEnumerable<XamlNodeInfo> GetMemberNodes (XamlNodeMember member, IEnumerable<XamlNodeInfo> contents)
 		{
@@ -294,58 +291,63 @@ namespace Portable.Xaml
 				var wobj = TypeExtensionMethods.GetExtensionWrapped (iobj);
 				var xiobj = new XamlObject (GetType (wobj), wobj);
 				if (ikey != null) {
-					// Key member is written *inside* the item object.
-					//
-					// It is messy, but Key and Value are *sorted*. In most cases Key goes first, but for example PositionalParameters comes first.
-					// To achieve this behavior, we compare XamlLanguage.Key and value's Member and returns in order. It's all nasty hack, but at least it could be achieved like this!
 
-					var en = GetNodes (null, xiobj).ToArray ();
+					var en = GetNodes (null, xiobj).ToList ();
 					yield return en [0]; // StartObject
 
 					var xknm = new XamlNodeMember (xobj, XamlLanguage.Key);
-					var nodes1 = en.Skip (1).Take (en.Length - 2);
+					var nodes1 = en.Skip (1).Take (en.Count - 2);
 					var nodes2 = GetKeyNodes (ikey, xobj.Type.KeyType, xknm);
-					foreach (var xn in EnumerateMixingMember (nodes1, XamlLanguage.Key, nodes2))
-						yield return xn;
-					yield return en [en.Length - 1];
+
+					// group the members then sort to put the key nodes in the correct order
+					var grouped = GroupMemberNodes (nodes1.Concat (nodes2))
+            .OrderBy (r => r.Item1, TypeExtensionMethods.MemberComparer);
+					foreach (var item in grouped) {
+						foreach (var node in item.Item2)
+							yield return node;
+					}
+
+					yield return en [en.Count - 1]; // EndObject
 				}
 				else
 					foreach (var xn in GetNodes (null, xiobj))
 						yield return xn;
 			}
 		}
-		
-		IEnumerable<XamlNodeInfo> EnumerateMixingMember (IEnumerable<XamlNodeInfo> nodes1, XamlMember m2, IEnumerable<XamlNodeInfo> nodes2)
-		{
-			if (nodes2 == null) {
-				foreach (var cn in nodes1)
-					yield return cn;
-				yield break;
-			}
 
-			var e1 = nodes1.GetEnumerator ();
-			var e2 = nodes2.GetEnumerator ();
-			int nest = 0;
-			while (e1.MoveNext ()) {
-				if (e1.Current.NodeType == XamlNodeType.StartMember) {
-					if (nest > 0)
-						nest++;
-					else
-						if (TypeExtensionMethods.CompareMembers (m2, e1.Current.Member.Member) < 0) {
-							while (e2.MoveNext ())
-								yield return e2.Current;
-						}
-						else
-							nest++;
-				}
-				else if (e1.Current.NodeType == XamlNodeType.EndMember)
+		IEnumerable<XamlNodeInfo> GetMemberNodes(IEnumerator<XamlNodeInfo> e)
+		{
+			int nest = 1;
+			yield return e.Current;
+			while (e.MoveNext ()) {
+				if (e.Current.NodeType == XamlNodeType.StartMember) {
+					nest++;
+				} else if (e.Current.NodeType == XamlNodeType.EndMember) {
 					nest--;
-				yield return e1.Current;
+					if (nest == 0) {
+						yield return e.Current;
+						break;
+					}
+				}
+				yield return e.Current;
 			}
-			while (e2.MoveNext ())
-				yield return e2.Current;
 		}
 
+		IEnumerable<Tuple<XamlMember, IEnumerable<XamlNodeInfo>>> GroupMemberNodes(IEnumerable<XamlNodeInfo> nodes)
+		{
+			var e1 = nodes.GetEnumerator ();
+
+			while (e1.MoveNext ()) {
+        if (e1.Current.NodeType == XamlNodeType.StartMember)
+        {
+          // split into chunks by member
+          yield return Tuple.Create(e1.Current.Member.Member, (IEnumerable<XamlNodeInfo>)GetMemberNodes(e1).ToList());
+        }
+        else
+          throw new InvalidOperationException("Unexpected node");
+			}
+		}
+		
 		IEnumerable<XamlNodeInfo> GetKeyNodes (object ikey, XamlType keyType, XamlNodeMember xknm)
 		{
 			foreach (var xn in GetMemberNodes (xknm, GetNodes (XamlLanguage.Key, new XamlObject (GetType (ikey), ikey), keyType, false)))

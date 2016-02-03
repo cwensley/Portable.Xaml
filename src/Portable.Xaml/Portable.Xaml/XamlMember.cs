@@ -114,6 +114,24 @@ namespace Portable.Xaml
 			is_attachable = true;
 		}
 
+		[EnhancedXaml]
+		public XamlMember(ParameterInfo parameterInfo, XamlSchemaContext schemaContext)
+			: this(parameterInfo, schemaContext, null)
+		{
+		}
+
+		[EnhancedXaml]
+		public XamlMember(ParameterInfo parameterInfo, XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
+			: this(schemaContext, invoker)
+		{
+			var declaringType = schemaContext.GetXamlType (parameterInfo.Member.DeclaringType);
+			Name = parameterInfo.Name;
+			context = declaringType.SchemaContext;
+			DeclaringType = declaringType;
+			target_type = DeclaringType;
+			type = schemaContext.GetXamlType (parameterInfo.ParameterType);
+		}
+
 		public XamlMember (string name, XamlType declaringType, bool isAttachable)
 		{
 			if (name == null)
@@ -329,10 +347,11 @@ namespace Portable.Xaml
 		{
 			return invoker;
 		}
+
 		protected virtual bool LookupIsAmbient ()
 		{
-			var t = Type != null ? Type.UnderlyingType : null;
-			return t != null && t.GetTypeInfo().GetCustomAttributes (typeof (AmbientAttribute), false).Any();
+			var ambientAttribute = GetCustomAttributeProvider()?.GetCustomAttribute<AmbientAttribute>(true);
+			return ambientAttribute != null;
 		}
 
 		protected virtual bool LookupIsEvent ()

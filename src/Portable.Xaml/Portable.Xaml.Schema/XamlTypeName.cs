@@ -32,7 +32,7 @@ namespace Portable.Xaml.Schema
 		{
 			XamlTypeName n;
 			if (!TryParse (typeName, namespaceResolver, out n))
-				throw new FormatException (String.Format ("Invalid typeName: '{0}'", typeName));
+				throw new XamlParseException (String.Format ("Invalid typeName: '{0}'", typeName));
 			return n;
 		}
 

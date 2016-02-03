@@ -39,7 +39,7 @@ namespace Portable.Xaml
 		public static T GetCustomAttribute<T> (this ICustomAttributeProvider type, bool inherit) where T : Attribute
 		{
 			foreach (var a in type.GetCustomAttributes (typeof(T), inherit))
-				return (T) (object) a;
+				return (T)(object)a;
 			return null;
 		}
 
@@ -56,7 +56,7 @@ namespace Portable.Xaml
 			return null;
 		}
 
-		public static bool ImplementsAnyInterfacesOf (this Type type, params Type [] definitions)
+		public static bool ImplementsAnyInterfacesOf (this Type type, params Type[] definitions)
 		{
 			return definitions.Any (t => ImplementsInterface (type, t));
 		}
@@ -70,19 +70,19 @@ namespace Portable.Xaml
 			if (type == definition)
 				return true;
 
-			if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition () == definition)
+			if (type.GetTypeInfo ().IsGenericType && type.GetGenericTypeDefinition () == definition)
 				return true;
 
 			foreach (var iface in type.GetTypeInfo().GetInterfaces())
-				if (iface == definition || (iface.GetTypeInfo().IsGenericType && iface.GetGenericTypeDefinition () == definition))
+				if (iface == definition || (iface.GetTypeInfo ().IsGenericType && iface.GetGenericTypeDefinition () == definition))
 					return true;
 			return false;
 		}
-		
+
 		#endregion
-		
+
 		#region type conversion and member value retrieval
-		
+
 		static readonly NullExtension null_value = new NullExtension ();
 
 		public static object GetExtensionWrapped (object o)
@@ -92,18 +92,18 @@ namespace Portable.Xaml
 			if (o == null)
 				return null_value;
 			if (o is Array)
-				return new ArrayExtension ((Array) o);
+				return new ArrayExtension ((Array)o);
 			if (o is Type)
-				return new TypeExtension ((Type) o);
+				return new TypeExtension ((Type)o);
 			return o;
 		}
-		
+
 		public static string GetStringValue (XamlType xt, XamlMember xm, object obj, IValueSerializerContext vsctx)
 		{
 			if (obj == null)
 				return String.Empty;
 			if (obj is Type)
-				return new XamlTypeName (xt.SchemaContext.GetXamlType ((Type) obj)).ToString (vsctx != null ? vsctx.GetService (typeof (INamespacePrefixLookup)) as INamespacePrefixLookup : null);
+				return new XamlTypeName (xt.SchemaContext.GetXamlType ((Type)obj)).ToString (vsctx != null ? vsctx.GetService (typeof(INamespacePrefixLookup)) as INamespacePrefixLookup : null);
 
 			var vs = (xm != null ? xm.ValueSerializer : null) ?? xt.ValueSerializer;
 			if (vs != null)
@@ -112,13 +112,13 @@ namespace Portable.Xaml
 			// FIXME: does this make sense?
 			var vc = (xm != null ? xm.TypeConverter : null) ?? xt.TypeConverter;
 			var tc = vc != null ? vc.ConverterInstance : null;
-			if (tc != null && typeof (string) != null && tc.CanConvertTo (vsctx, typeof (string)))
-				return (string) tc.ConvertTo (vsctx, CultureInfo.InvariantCulture, obj, typeof (string));
+			if (tc != null && typeof(string) != null && tc.CanConvertTo (vsctx, typeof(string)))
+				return (string)tc.ConvertTo (vsctx, CultureInfo.InvariantCulture, obj, typeof(string));
 			if (obj is string || obj == null)
-				return (string) obj;
+				return (string)obj;
 			throw new InvalidCastException (String.Format ("Cannot cast object '{0}' to string", obj.GetType ()));
 		}
-		
+
 		public static TypeConverter GetTypeConverter (this Type type)
 		{
 			return TypeDescriptor.GetConverter (type);
@@ -166,15 +166,15 @@ namespace Portable.Xaml
 			if (member == XamlLanguage.PositionalParameters || member == XamlLanguage.Arguments)
 				return false; // it's up to the argument (no need to check them though, as IList<object> is not of value)
 			var typeConverter = member.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof(string)))
 				return true;
-			return IsContentValue (member.Type,vsctx);
+			return IsContentValue (member.Type, vsctx);
 		}
 
 		public static bool IsContentValue (this XamlType type, IValueSerializerContext vsctx)
 		{
 			var typeConverter = type.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof (string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof(string)))
 				return true;
 			return false;
 		}
@@ -197,10 +197,10 @@ namespace Portable.Xaml
 		{
 			// FIXME: find out why only TypeExtension and StaticExtension yield this directive. Seealso XamlObjectReaderTest.Read_CustomMarkupExtension*()
 			return  type == XamlLanguage.Type ||
-				type == XamlLanguage.Static ||
-				(type.ConstructionRequiresArguments && ExaminePositionalParametersApplicable(type, vsctx));
+			type == XamlLanguage.Static ||
+			(type.ConstructionRequiresArguments && ExaminePositionalParametersApplicable (type, vsctx));
 		}
-		
+
 		static bool ExaminePositionalParametersApplicable (this XamlType type, IValueSerializerContext vsctx)
 		{
 			if (!type.IsMarkupExtension || type.UnderlyingType == null)
@@ -214,22 +214,22 @@ namespace Portable.Xaml
 				if (arg.Type != null && !arg.Type.IsContentValue (vsctx))
 					return false;
 
-			Type [] argTypes = (from arg in args select arg.Type.UnderlyingType).ToArray ();
+			Type[] argTypes = (from arg in args
+			                    select arg.Type.UnderlyingType).ToArray ();
 			if (argTypes.Any (at => at == null))
 				return false;
 			var ci = type.UnderlyingType
-				.GetTypeInfo()
-				.GetConstructors().FirstOrDefault(c => 
-					c.GetParameters().Select(r => r.ParameterType).SequenceEqual(argTypes)
-				);
+				.GetTypeInfo ()
+				.GetConstructors ().FirstOrDefault (c => 
+					c.GetParameters ().Select (r => r.ParameterType).SequenceEqual (argTypes)
+			         );
 			return ci != null;
 		}
-		
+
 		public static IEnumerable<XamlMember> GetSortedConstructorArguments (this XamlType type, IList<object> contents = null)
 		{
-			var constructors = type.UnderlyingType.GetTypeInfo().GetConstructors();
-			if (contents != null && contents.Count > 0)
-			{
+			var constructors = type.UnderlyingType.GetTypeInfo ().GetConstructors ();
+			if (contents != null && contents.Count > 0) {
 				// find constructor based on supplied parameters
 				foreach (var constructor in constructors) {
 					var parameters = constructor.GetParameters ();
@@ -260,8 +260,8 @@ namespace Portable.Xaml
 
 					// matches constructor arguments
 					return constructor
-						.GetParameters()
-						.Select(p => type.SchemaContext.GetParameter(p, type));
+						.GetParameters ()
+						.Select (p => type.SchemaContext.GetParameter (p, type));
 				}
 			}
 
@@ -293,15 +293,33 @@ namespace Portable.Xaml
 			var caa = xm.GetCustomAttributeProvider ().GetCustomAttribute<ConstructorArgumentAttribute> (false);
 			return caa.ArgumentName;
 		}
-		
 
-		internal static int CompareMembers (XamlMember m1, XamlMember m2)
+    class InternalMemberComparer : IComparer<XamlMember>
+    {
+      public int Compare(XamlMember x, XamlMember y)
+      {
+        return CompareMembers(x, y);
+      }
+    }
+
+    internal static IComparer<XamlMember> MemberComparer = new InternalMemberComparer();
+
+    internal static int CompareMembers (XamlMember m1, XamlMember m2)
 		{
-			// ConstructorArguments and PositionalParameters go first.
+			if (m1 == null)
+				return m2 == null ? 0 : 1;
+			if (m2 == null)
+				return 0;
+
+			// these come before non-content properties
+
+			// 1. PositionalParameters comes first
 			if (m1 == XamlLanguage.PositionalParameters)
-				return -1;
-			if (m2 == XamlLanguage.PositionalParameters)
+				return m2 == XamlLanguage.PositionalParameters ? 0 : -1;
+			else if (m2 == XamlLanguage.PositionalParameters)
 				return 1;
+
+			// 2. constructor arguments
 			if (m1.IsConstructorArgument ()) {
 				if (!m2.IsConstructorArgument ())
 					return -1;
@@ -309,11 +327,36 @@ namespace Portable.Xaml
 			else if (m2.IsConstructorArgument ())
 				return 1;
 
-			// ContentProperty is returned at last.
-			if (m1.DeclaringType != null && m1.DeclaringType.ContentProperty == m1)
-				return 1;
-			if (m2.DeclaringType != null && m2.DeclaringType.ContentProperty == m2)
+
+			// these come AFTER non-content properties
+
+			// 1. initialization
+
+			if (m1 == XamlLanguage.Initialization)
+				return m2 == XamlLanguage.Initialization ? 0 : 1;
+			else if (m2 == XamlLanguage.Initialization)
 				return -1;
+
+			// 2. key
+			if (m1 == XamlLanguage.Key)
+				return m2 == XamlLanguage.Key ? 0 : 1;
+			else if (m2 == XamlLanguage.Key)
+				return -1;
+
+			// 3. Name
+			if (m1 == XamlLanguage.Name)
+				return m2 == XamlLanguage.Name ? 0 : 1;
+			else if (m2 == XamlLanguage.Name)
+				return -1;
+
+			// 4. ContentProperty is always returned last
+			if (m1.DeclaringType != null && m1.DeclaringType.ContentProperty == m1) {
+				if (!(m2.DeclaringType != null && m2.DeclaringType.ContentProperty == m2))
+					return 1;
+			}
+			else if (m2.DeclaringType != null && m2.DeclaringType.ContentProperty == m2)
+				return -1;
+
 
 			// then, compare names.
 			return String.CompareOrdinal (m1.Name, m2.Name);
@@ -322,7 +365,7 @@ namespace Portable.Xaml
 		internal static bool IsConstructorArgument (this XamlMember xm)
 		{
 			var ap = xm.GetCustomAttributeProvider ();
-			return ap != null && ap.GetCustomAttributes (typeof (ConstructorArgumentAttribute), false).Length > 0;
+			return ap != null && ap.GetCustomAttributes (typeof(ConstructorArgumentAttribute), false).Length > 0;
 		}
 
 		internal static string GetInternalXmlName (this XamlMember xm)
@@ -330,7 +373,7 @@ namespace Portable.Xaml
 			return xm.IsAttachable ? String.Concat (xm.DeclaringType.GetInternalXmlName (), ".", xm.Name) : xm.Name;
 		}
 
-#if DOTNET
+		#if DOTNET
 		internal static ICustomAttributeProvider GetCustomAttributeProvider (this XamlType type)
 		{
 			return type.UnderlyingType;

@@ -45,11 +45,12 @@ namespace Portable.Xaml
 				FullyInitialized = fullyInitialized;
 			}
 			public string Name { get; set; }
-			public object Value { get; set; }
-			public bool FullyInitialized { get; set; }
+			public object Value { get; private set; }
+			public bool FullyInitialized { get; private set; }
 		}
 
-		Dictionary<string,NamedObject> objects = new Dictionary<string,NamedObject> ();
+		Dictionary<string, NamedObject> objects = new Dictionary<string, NamedObject> ();
+		List<NamedObject> unnamed = new List<NamedObject>();
 		List<object> referenced = new List<object> ();
 
 		[MonoTODO]
@@ -64,43 +65,50 @@ namespace Portable.Xaml
 			if (OnNameScopeInitializationComplete != null)
 				OnNameScopeInitializationComplete (sender, EventArgs.Empty);
 			objects.Clear ();
+			unnamed.Clear ();
+			used_reference_ids = 0;
 		}
 		
-		int saved_count, saved_referenced_count;
+		int saved_count, saved_referenced_count, saved_unnamed, saved_used_reference_ids;
 		public void Save ()
 		{
 			if (saved_count != 0)
 				throw new Exception ();
 			saved_count = objects.Count;
 			saved_referenced_count = referenced.Count;
+			saved_unnamed = unnamed.Count;
+			saved_used_reference_ids = used_reference_ids;
 		}
 		public void Restore ()
 		{
-			while (saved_count < objects.Count)
-				objects.Remove (objects.Last ().Key);
-				referenced.Remove (objects.Last ().Key);
+			while (saved_count < objects.Count) {
+				objects.Remove (objects.Last().Key);
+			}
 			saved_count = 0;
-			referenced.RemoveRange (saved_referenced_count, referenced.Count - saved_referenced_count);
+
+			if (saved_referenced_count < referenced.Count)
+				referenced.RemoveRange (saved_referenced_count, referenced.Count - saved_referenced_count);
 			saved_referenced_count = 0;
+
+			if (saved_unnamed < unnamed.Count)
+				unnamed.RemoveRange (saved_unnamed, unnamed.Count - saved_unnamed);
+			saved_unnamed = 0;
+
+			used_reference_ids = saved_used_reference_ids;
 		}
 
-		internal void SetNamedObject (string name, object value, bool fullyInitialized)
+		internal void SetNamedObject (object value, bool fullyInitialized)
 		{
 			if (value == null)
 				throw new ArgumentNullException ("value");
-			objects [name] = new NamedObject (name, value, fullyInitialized);
-		}
-		
-		internal bool Contains (string name)
-		{
-			return objects.ContainsKey (name);
+			unnamed.Add (new NamedObject (null, value, fullyInitialized));
 		}
 		
 		public string GetName (object value)
 		{
-			foreach (var no in objects.Values)
-				if (object.ReferenceEquals (no.Value, value))
-					return no.Name;
+			foreach (var no in objects)
+				if (ReferenceEquals (no.Value.Value, value))
+					return no.Value.Name;
 			return null;
 		}
 
@@ -108,12 +116,41 @@ namespace Portable.Xaml
 		{
 			referenced.Add (val);
 		}
-		
-		internal string GetReferencedName (object val)
+
+		int used_reference_ids;
+
+		internal string GetReferenceName (XamlObject xobj, object value)
 		{
-			if (!referenced.Contains (val))
+			var name = GetName (value);
+			if (name != null)
+				return name;
+
+			var un = unnamed.FirstOrDefault (r => ReferenceEquals (r.Value, value));
+			if (un == null)
 				return null;
-			return GetName (val);
+			
+			// generate a name for it, only when needed.
+			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
+			if (xm != null)
+				name = (string) xm.Invoker.GetValue (xobj.GetRawValue ());
+			else
+				name = "__ReferenceID" + used_reference_ids++;
+			un.Name = name;
+			objects [name] = un;
+
+			return name;
+		}
+
+		internal bool Contains(string name)
+		{
+			return objects.ContainsKey (name);
+		}
+
+		internal string GetReferencedName (XamlObject xobj, object value)
+		{
+			if (!referenced.Contains (value))
+				return null;
+			return GetReferenceName (xobj, value);
 		}
 		
 		public object GetFixupToken (IEnumerable<string> names)
