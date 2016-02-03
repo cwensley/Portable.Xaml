@@ -49,6 +49,9 @@ namespace MonoTests.Portable.Xaml
 		[Test, n.Category (Categories.NotOnSystemXaml)] // doesn't work in MS.NET, but theoretically should
         public void TestListCollectionItemConverter ()
 		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("doesn't work in MS.NET, it does not use type converters for items in a list");
+
 			var xaml = @"<CollectionParentGenericList xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentGenericList>".UpdateXml ();
 			var parent = (CollectionParentGenericList)XamlServices.Load (new StringReader (xaml));
 
@@ -66,6 +69,9 @@ namespace MonoTests.Portable.Xaml
 		[Test, n.Category (Categories.NotOnSystemXaml)] // New in Portable.Xaml, doesn't work in MS.NET, but should
         public void TestCustomCollectionItemConverter ()
 		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("New in Portable.Xaml, doesn't work in MS.NET, but should");
+
 			var xaml = @"<CollectionParentCustomNoOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentCustomNoOverride>".UpdateXml ();
 			var parent = (CollectionParentCustomNoOverride)XamlServices.Load (new StringReader (xaml));
 

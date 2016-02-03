@@ -809,6 +809,9 @@ namespace MonoTests.Portable.Xaml
 		[Category(Categories.NotOnSystemXaml)] // System.Xaml doesn't use typeconverters nor passes the value
 		public void Read_CollectionWithContentWithConverter()
 		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("System.Xaml doesn't use typeconverters nor passes the value");
+
 			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><CollectionItem Name='Item1'/>SomeContent</CollectionParentItem>".UpdateXml();
 			var parent = (CollectionParentItem)XamlServices.Load(new StringReader(xaml));
 
