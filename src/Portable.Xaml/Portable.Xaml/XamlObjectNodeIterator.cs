@@ -291,20 +291,23 @@ namespace Portable.Xaml
 				var wobj = TypeExtensionMethods.GetExtensionWrapped (iobj);
 				var xiobj = new XamlObject (GetType (wobj), wobj);
 				if (ikey != null) {
-					// Key member is written *inside* the item object.
-					//
-					// It is messy, but Key and Value are *sorted*. In most cases Key goes first, but for example PositionalParameters comes first.
-					// To achieve this behavior, we compare XamlLanguage.Key and value's Member and returns in order. It's all nasty hack, but at least it could be achieved like this!
 
-					var en = GetNodes (null, xiobj).ToArray ();
+					var en = GetNodes (null, xiobj).ToList ();
 					yield return en [0]; // StartObject
 
 					var xknm = new XamlNodeMember (xobj, XamlLanguage.Key);
-					var nodes1 = en.Skip (1).Take (en.Length - 2);
+					var nodes1 = en.Skip (1).Take (en.Count - 2);
 					var nodes2 = GetKeyNodes (ikey, xobj.Type.KeyType, xknm);
-					foreach (var xn in EnumerateMixingMember (nodes1, XamlLanguage.Key, nodes2))
-						yield return xn;
-					yield return en [en.Length - 1];
+
+					// group the members then sort to put the key nodes in the correct order
+					var grouped = GroupMemberNodes (nodes1.Concat (nodes2))
+            .OrderBy (r => r.Item1, TypeExtensionMethods.MemberComparer);
+					foreach (var item in grouped) {
+						foreach (var node in item.Item2)
+							yield return node;
+					}
+
+					yield return en [en.Count - 1]; // EndObject
 				}
 				else
 					foreach (var xn in GetNodes (null, xiobj))
@@ -312,35 +315,37 @@ namespace Portable.Xaml
 			}
 		}
 
-		IEnumerable<XamlNodeInfo> EnumerateMixingMember (IEnumerable<XamlNodeInfo> nodes1, XamlMember m2, IEnumerable<XamlNodeInfo> nodes2)
+		IEnumerable<XamlNodeInfo> GetMemberNodes(IEnumerator<XamlNodeInfo> e)
 		{
-			if (nodes2 == null) {
-				foreach (var cn in nodes1)
-					yield return cn;
-				yield break;
+			int nest = 1;
+			yield return e.Current;
+			while (e.MoveNext ()) {
+				if (e.Current.NodeType == XamlNodeType.StartMember) {
+					nest++;
+				} else if (e.Current.NodeType == XamlNodeType.EndMember) {
+					nest--;
+					if (nest == 0) {
+						yield return e.Current;
+						break;
+					}
+				}
+				yield return e.Current;
+			}
 		}
 
-			var e1 = nodes1.GetEnumerator ();
-			var e2 = nodes2.GetEnumerator ();
-			int nest = 0;
+		IEnumerable<Tuple<XamlMember, IEnumerable<XamlNodeInfo>>> GroupMemberNodes(IEnumerable<XamlNodeInfo> nodes)
+		{
+			var e1 = nodes.GetEnumerator ();
+
 			while (e1.MoveNext ()) {
-				if (e1.Current.NodeType == XamlNodeType.StartMember) {
-					if (nest > 0)
-						nest++;
-					else
-						if (TypeExtensionMethods.CompareMembers (m2, e1.Current.Member.Member) < 0) {
-							while (e2.MoveNext ())
-								yield return e2.Current;
+        if (e1.Current.NodeType == XamlNodeType.StartMember)
+        {
+          // split into chunks by member
+          yield return Tuple.Create(e1.Current.Member.Member, (IEnumerable<XamlNodeInfo>)GetMemberNodes(e1).ToList());
         }
         else
-							nest++;
-				}
-				else if (e1.Current.NodeType == XamlNodeType.EndMember)
-					nest--;
-				yield return e1.Current;
+          throw new InvalidOperationException("Unexpected node");
 			}
-			while (e2.MoveNext ())
-				yield return e2.Current;
 		}
 		
 		IEnumerable<XamlNodeInfo> GetKeyNodes (object ikey, XamlType keyType, XamlNodeMember xknm)
