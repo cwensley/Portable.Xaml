@@ -162,49 +162,46 @@ namespace Portable.Xaml
 					yield return xn;
 			} else {
 				// Object - could become Reference
-				var val = xobj.GetRawValue ();
-				if (!xobj.Type.IsContentValue (value_serializer_ctx) && val != null) {
-					string refName = NameResolver.GetName (val);
-					if (refName != null) {
-						// The target object is already retrieved, so we don't return the same object again.
-						NameResolver.SaveAsReferenced (val); // Record it as named object.
-						// Then return Reference object instead.
-						foreach (var xn in GetNodes (null, new XamlObject (XamlLanguage.Reference, new Reference (refName))))
-							yield return xn;
-						yield break;
-					} else {
-						// The object appeared in the xaml tree for the first time. So we store the reference with a unique name so that it could be referenced later.
-						refName = GetReferenceName (xobj);
-						if (NameResolver.IsCollectingReferences && NameResolver.Contains (refName))
-							throw new InvalidOperationException (String.Format ("There is already an object of type {0} named as '{1}'. Object names must be unique.", val.GetType (), refName));
-						NameResolver.SetNamedObject (refName, val, true); // probably fullyInitialized is always true here.
+				var val2 = xobj.GetRawValue ();
+				if (val2 != null && xobj.Type != XamlLanguage.Reference) {
+					
+					if (!xobj.Type.IsContentValue (value_serializer_ctx)) {
+						string refName = NameResolver.GetReferenceName (xobj, val2);
+						if (refName != null) {
+							// The target object is already retrieved, so we don't return the same object again.
+							NameResolver.SaveAsReferenced (val2); // Record it as named object.
+							// Then return Reference object instead.
+							foreach (var xn in GetNodes (null, new XamlObject (XamlLanguage.Reference, new Reference (refName))))
+								yield return xn;
+							yield break;
+						} else {
+							// The object appeared in the xaml tree for the first time. So we store the reference with a unique name so that it could be referenced later.
+							NameResolver.SetNamedObject (val2, true); // probably fullyInitialized is always true here.
+						}
+					}
+					yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
+
+					// If this object is referenced and there is no [RuntimeNameProperty] member, then return Name property in addition.
+					if (!NameResolver.IsCollectingReferences && xobj.Type.GetAliasedProperty (XamlLanguage.Name) == null) {
+						string name = NameResolver.GetReferencedName (xobj, val2);
+						if (name != null) {
+							var sobj = new XamlObject (XamlLanguage.String, name);
+							foreach (var cn in GetMemberNodes (new XamlNodeMember (sobj, XamlLanguage.Name), new [] { new XamlNodeInfo (name)}))
+								yield return cn;
+						}
 					}
 				}
-				yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
-				// If this object is referenced and there is no [RuntimeNameProperty] member, then return Name property in addition.
-				if (val != null && xobj.Type.GetAliasedProperty (XamlLanguage.Name) == null) {
-					string name = NameResolver.GetReferencedName (val);
-					if (name != null) {
-						var sobj = new XamlObject (XamlLanguage.String, name);
-						foreach (var cn in GetMemberNodes (new XamlNodeMember (sobj, XamlLanguage.Name), new XamlNodeInfo [] { new XamlNodeInfo (name)}))
-							yield return cn;
-					}
-				}
+				else
+					yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
+
+
 				foreach (var xn in GetObjectMemberNodes (xobj))
 					yield return xn;
+				
 				yield return new XamlNodeInfo (XamlNodeType.EndObject, xobj);
 			}
 		}
 		
-		int used_reference_ids;
-		
-		string GetReferenceName (XamlObject xobj)
-		{
-			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
-			if (xm != null)
-				return (string) xm.Invoker.GetValue (xobj.GetRawValue ());
-			return "__ReferenceID" + used_reference_ids++;
-		}
 
 		IEnumerable<XamlNodeInfo> GetMemberNodes (XamlNodeMember member, IEnumerable<XamlNodeInfo> contents)
 		{
@@ -314,14 +311,14 @@ namespace Portable.Xaml
 						yield return xn;
 			}
 		}
-		
+
 		IEnumerable<XamlNodeInfo> EnumerateMixingMember (IEnumerable<XamlNodeInfo> nodes1, XamlMember m2, IEnumerable<XamlNodeInfo> nodes2)
 		{
 			if (nodes2 == null) {
 				foreach (var cn in nodes1)
 					yield return cn;
 				yield break;
-			}
+		}
 
 			var e1 = nodes1.GetEnumerator ();
 			var e2 = nodes2.GetEnumerator ();
@@ -334,8 +331,8 @@ namespace Portable.Xaml
 						if (TypeExtensionMethods.CompareMembers (m2, e1.Current.Member.Member) < 0) {
 							while (e2.MoveNext ())
 								yield return e2.Current;
-						}
-						else
+        }
+        else
 							nest++;
 				}
 				else if (e1.Current.NodeType == XamlNodeType.EndMember)
@@ -345,7 +342,7 @@ namespace Portable.Xaml
 			while (e2.MoveNext ())
 				yield return e2.Current;
 		}
-
+		
 		IEnumerable<XamlNodeInfo> GetKeyNodes (object ikey, XamlType keyType, XamlNodeMember xknm)
 		{
 			foreach (var xn in GetMemberNodes (xknm, GetNodes (XamlLanguage.Key, new XamlObject (GetType (ikey), ikey), keyType, false)))
