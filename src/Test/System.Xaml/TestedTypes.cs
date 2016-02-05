@@ -1347,6 +1347,10 @@ namespace SecondTest
 		public TestObject TestObject { get; set; }
 	}
 
+	public class ResourceContainerSubclass : ResourceContainer
+	{
+	}
+
 	[UsableDuringInitialization(true), Ambient]
 	public class ResourcesDict : Dictionary<object, object>
 	{

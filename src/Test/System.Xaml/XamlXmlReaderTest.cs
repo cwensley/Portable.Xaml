@@ -733,6 +733,17 @@ namespace MonoTests.Portable.Xaml
 			//Read_AmbientPropertyContainer3(r, true);
 		}
 
+		/// <summary>
+		/// Test ambient properties on a subclass of the container that defines the ambient property
+		/// </summary>
+		[Test]
+		public void Read_AmbientPropertyContainer4()
+		{
+			var r = GetReader("AmbientPropertyContainer4.xml");
+			var writer = new XamlObjectWriter(new XamlSchemaContext());
+			XamlServices.Transform(r, writer);
+		}
+
 		[Test]
 		public void Read_NullableContainer ()
 		{
