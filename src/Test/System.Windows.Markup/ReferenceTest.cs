@@ -137,7 +137,9 @@ namespace MonoTests.System.Windows.Markup
 				get { throw new NotImplementedException (); }
 			}
 			
+			#pragma warning disable 67
 			public event EventHandler OnNameScopeInitializationComplete;
+			#pragma warning restore 67
 
 			// both X and Y calls this.
 			public object Resolve (string name)

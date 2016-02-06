@@ -313,7 +313,7 @@ namespace Portable.Xaml
 					// get ambient properties in the stack
 					foreach (var prop in properties)
 					{
-						if (prop.DeclaringType != state.Type)
+						if (!prop.DeclaringType.CanAssignFrom(state.Type))
 							continue;
 						if (prop.UnderlyingGetter == null)
 							continue;
