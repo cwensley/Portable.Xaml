@@ -510,6 +510,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_CustomExtensionWithPositionalAndNamed()
+		{
+			var r = GetReader("CustomExtensionWithPositionalAndNamed.xml");
+			Read_CustomExtensionWithPositionalAndNamed(r);
+		}
+
+		[Test]
 		public void Read_CustomExtensionWithCommasInNamedValue()
 		{
 			var r = GetReader("CustomExtensionWithCommasInNamedValue.xml");

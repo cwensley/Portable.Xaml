@@ -118,6 +118,21 @@ namespace Portable.Xaml
 			}
 		}
 
+		bool ReadWhitespaceUntil (char ch)
+		{
+			var old = index;
+			while (index < value.Length && char.IsWhiteSpace (value [index])) {
+				index++;
+			}
+			if (Current == ch)
+			{
+				index++;
+				return true;
+			}
+			index = old;
+			return false;
+		}
+
 		bool Read(char ch)
 		{
 			if (Current == ch) {
@@ -180,15 +195,16 @@ namespace Portable.Xaml
 				return true;
 			}
 
-			var name = ReadUntil (new [] { '=', ' ', ',' }, readToEnd:true, skip: false);
-			if (string.IsNullOrEmpty (name))
+			var name = ReadUntil(new [] { '=', ' ', ',' }, readToEnd: true, skip: false);
+			if (string.IsNullOrEmpty(name))
 				return false;
-			member = Type.GetMember (name) ?? new XamlMember (name, Type, false);
-			if (ReadUntil ('=') == null) {
-				AddPositionalParameter (name + ReadUntil (',', true).TrimEnd());
+			if (!ReadWhitespaceUntil('='))
+			{
+				AddPositionalParameter(name + ReadUntil(',', true).TrimEnd());
 				ParseArgument();
 				return true;
 			}
+			member = Type.GetMember (name) ?? new XamlMember (name, Type, false);
 			ReadWhitespace ();
 			ParseValue ();
 			return true;
