@@ -426,7 +426,8 @@ namespace Portable.Xaml
 
 		// XamlTypeName -> Type resolution
 
-		static readonly int clr_ns_len = "clr-namespace:".Length;
+		const string clr_ns = "clr-namespace:";
+		static readonly int clr_ns_len = clr_ns.Length;
 		static readonly int clr_ass_len = "assembly=".Length;
 
 		Type ResolveXamlTypeName(string xmlNamespace, string xmlLocalName, IList<XamlType> typeArguments)
@@ -443,7 +444,7 @@ namespace Portable.Xaml
 					throw new FormatException(string.Format("There is no type '{0}' in XAML namespace", name));
 				return xt.UnderlyingType;
 			}
-			else if (!ns.StartsWith("clr-namespace:", StringComparison.Ordinal))
+			else if (!ns.StartsWith(clr_ns, StringComparison.Ordinal))
 				return null;
 
 			Type[] genArgs = null;

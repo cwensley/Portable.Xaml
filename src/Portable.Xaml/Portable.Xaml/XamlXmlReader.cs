@@ -254,7 +254,16 @@ namespace Portable.Xaml
 				yield return xi;
 			yield return Node (XamlNodeType.None, null);
 		}
-		
+
+		string ResolveLocalNamespace(string ns)
+		{
+			if (settings.LocalAssembly != null && ns.StartsWith("clr-namespace:", StringComparison.Ordinal) && ns.IndexOf(';') == -1)
+			{
+				ns += ";assembly=" + settings.LocalAssembly.GetName().Name;
+			}
+			return ns;
+		}
+
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
 		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
@@ -276,7 +285,7 @@ namespace Portable.Xaml
 			if (r.MoveToFirstAttribute ()) {
 				do {
 					if (r.NamespaceURI == XamlLanguage.Xmlns2000Namespace)
-						yield return Node (XamlNodeType.NamespaceDeclaration, new NamespaceDeclaration (r.Value, r.Prefix == "xmlns" ? r.LocalName : String.Empty));
+						yield return Node (XamlNodeType.NamespaceDeclaration, new NamespaceDeclaration (ResolveLocalNamespace(r.Value), r.Prefix == "xmlns" ? r.LocalName : String.Empty));
 				} while (r.MoveToNextAttribute ());
 				r.MoveToElement ();
 			}
@@ -414,7 +423,7 @@ namespace Portable.Xaml
 		StartTagInfo GetStartTagInfo ()
 		{
 			string name = r.LocalName;
-			string ns = r.NamespaceURI;
+			string ns = ResolveLocalNamespace(r.NamespaceURI);
 			string typeArgNames = null;
 
 			var members = new List<Pair> ();
@@ -505,7 +514,7 @@ namespace Portable.Xaml
 
 		XamlMember FindAttachableMember(string prefix, string typeName, string memberName)
 		{
-			string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : r.NamespaceURI;
+			string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : ResolveLocalNamespace(r.NamespaceURI);
 			var axtn = new XamlTypeName (apns, typeName, null);
 			var at = sctx.GetXamlType (axtn);
 			return at?.GetAttachableMember (memberName);
