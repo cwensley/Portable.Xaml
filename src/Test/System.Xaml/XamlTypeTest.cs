@@ -182,9 +182,10 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore ("It results in NRE on .NET 4.0 RTM")]
 		public void EmptyTypeArguments ()
 		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("results in NRE on .NET 4.0 RTM, but should be treated the same");
 			var t1 = new MyXamlType ("System.Int32", null, sctx);
 			var t2 = new MyXamlType ("System.Int32", new XamlType [0], sctx);
 			Assert.IsTrue (t1 == t2, "#1");
