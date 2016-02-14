@@ -510,6 +510,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_CustomExtensionWithPositionalAndNamed()
+		{
+			var r = GetReader("CustomExtensionWithPositionalAndNamed.xml");
+			Read_CustomExtensionWithPositionalAndNamed(r);
+		}
+
+		[Test]
 		public void Read_CustomExtensionWithCommasInNamedValue()
 		{
 			var r = GetReader("CustomExtensionWithCommasInNamedValue.xml");
@@ -848,5 +855,27 @@ namespace MonoTests.Portable.Xaml
 			#endif
 		}
 		#endregion
+
+		[Test]
+		public void LocalAssemblyShouldApplyToNamespace()
+		{
+			var settings = new XamlXmlReaderSettings();
+			settings.LocalAssembly = typeof(TestClass1).Assembly;
+			string xml = File.ReadAllText(Path.Combine("XmlFiles", "LocalAssembly.xml")).UpdateXml();
+			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.IsInstanceOf<TestClass1>(obj, "#2");
+		}
+
+		[Test]
+		[ExpectedException] // not checking type of exception due to differences in implementation 
+		public void LocalAssemblyShouldNotApplyToNamespace()
+		{
+			var settings = new XamlXmlReaderSettings();
+			string xml = File.ReadAllText(Path.Combine("XmlFiles", "LocalAssembly.xml")).UpdateXml();
+			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.IsInstanceOf<TestClass1>(obj, "#2");
+		}
 	}
 }

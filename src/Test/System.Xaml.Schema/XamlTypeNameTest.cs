@@ -91,10 +91,13 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[Ignore (".NET causes NRE on ToString(). It is not really intended and should raise an error")]
-		public void ConstructorTypeArgumentsNullEntry ()
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructorTypeArgumentsNullEntry()
 		{
-			new XamlTypeName ("urn:foo", "FooBar", new XamlTypeName [] {null});
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore(".NET causes NRE on ToString().It is not really intended and should raise an error when constructed");
+			var type = new XamlTypeName("urn:foo", "FooBar", new XamlTypeName[] { null });
+			Assert.DoesNotThrow(() => type.ToString());
 		}
 
 		[Test]
@@ -144,7 +147,11 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[Ignore (".NET raises NRE")]
+		#if PCL
+		[ExpectedException(typeof(ArgumentNullException))]
+		#else
+		[ExpectedException(typeof(NullReferenceException))]
+		#endif
 		public void ToStringTypeArgumentsNullEntry ()
 		{
 			var n = new XamlTypeName ("urn:foo", "FooBar", new XamlTypeName [] {null, new XamlTypeName ("urn:bar", "FooBarBaz")});
