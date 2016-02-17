@@ -231,13 +231,14 @@ namespace Portable.Xaml
 			var escapedValue = ParseEscapedValue ();
 			if (escapedValue != null) {
 				Arguments.Add (member, escapedValue);
+				ParseArgument();
 				return;
 			}
 
 			var val = ReadUntil (',', true);
 			val = val.Trim ();
 			Arguments.Add (member, val);
-			if (!ParseArgument ()) {
+			if (!ParseArgument()) {
 				Arguments [member] = val + ReadRest ();
 			}
 		}

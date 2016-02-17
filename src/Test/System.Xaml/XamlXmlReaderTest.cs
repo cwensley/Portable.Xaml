@@ -496,6 +496,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_CustomExtensionWithChildExtensionAndNamedProperty ()
+		{
+			var r = GetReader ("CustomExtensionWithChildExtensionAndNamedProperty.xml");
+			Read_CustomExtensionWithChildExtensionAndNamedProperty(r);
+		}
+
+		[Test]
 		public void Read_CustomExtensionWithChildExtension()
 		{
 			var r = GetReader("CustomExtensionWithChild.xml");
