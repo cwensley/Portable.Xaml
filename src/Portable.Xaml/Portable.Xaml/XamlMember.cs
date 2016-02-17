@@ -315,7 +315,9 @@ namespace Portable.Xaml
 
 		public virtual IList<string> GetXamlNamespaces ()
 		{
-			throw new NotImplementedException ();
+			if (DeclaringType == null)
+				return null;
+			return DeclaringType.GetXamlNamespaces();
 		}
 
 		// lookups

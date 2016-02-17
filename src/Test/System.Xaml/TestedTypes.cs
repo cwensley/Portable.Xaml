@@ -67,8 +67,17 @@ using System.Xaml.Schema;
 [assembly:XmlnsCompatibleWith("urn:foo", "urn:bar")]
 [assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
+namespace MonoTests.Portable.Xaml.NamespaceTest
+{
+	public class NamespaceTestClass
+	{
+		public string Foo { get; set; }
+	}
+}
+
 namespace MonoTests.Portable.Xaml
 {
+
 	public class ArgumentAttributed
 	{
 		public ArgumentAttributed(string s1, string s2)
