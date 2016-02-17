@@ -25,55 +25,53 @@ using System.Collections.Generic;
 
 namespace Portable.Xaml
 {
-	public class XamlNodeList
+	class XamlNodeListWriter : XamlWriter
 	{
-		readonly List<XamlNodeInfo> nodes;
+		readonly XamlNodeList source;
 
-		internal XamlSchemaContext SchemaContext { get; }
-
-		public XamlNodeList(XamlSchemaContext schemaContext)
+		public XamlNodeListWriter(XamlNodeList source)
 		{
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			Writer = new XamlNodeListWriter(this);
-			SchemaContext = schemaContext;
-			nodes = new List<XamlNodeInfo>();
+			this.source = source;
 		}
 
-		public XamlNodeList(XamlSchemaContext schemaContext, int size)
+		public override XamlSchemaContext SchemaContext
 		{
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			Writer = new XamlNodeListWriter(this);
-			SchemaContext = schemaContext;
-			nodes = new List<XamlNodeInfo>(size);
+			get { return source.SchemaContext; }
 		}
 
-		public int Count
+		public override void WriteEndMember ()
 		{
-			get { return nodes.Count; }
+			source.Add (new XamlNodeInfo (XamlNodeType.EndMember, default (XamlNodeMember)));
 		}
 
-		public XamlWriter Writer { get; }
-
-		public void Clear()
+		public override void WriteEndObject ()
 		{
-			nodes.Clear();
+			source.Add (new XamlNodeInfo (XamlNodeType.EndObject, default (XamlObject)));
 		}
 
-		public XamlReader GetReader()
+		public override void WriteGetObject ()
 		{
-			return new XamlNodeListReader(this);
+			source.Add (new XamlNodeInfo (XamlNodeType.GetObject, default (XamlObject)));
 		}
 
-		internal void Add(XamlNodeInfo node)
+		public override void WriteNamespace (NamespaceDeclaration ns)
 		{
-			nodes.Add(node);
+			source.Add (new XamlNodeInfo (ns));
 		}
 
-		internal XamlNodeInfo GetNode(int position)
+		public override void WriteStartMember (XamlMember xamlMember)
 		{
-			return nodes[position];
+			source.Add (new XamlNodeInfo (XamlNodeType.StartMember, new XamlNodeMember (default (XamlObject), xamlMember)));
+		}
+
+		public override void WriteStartObject (XamlType type)
+		{
+			source.Add (new XamlNodeInfo (XamlNodeType.StartObject, new XamlObject (type, null)));
+		}
+
+		public override void WriteValue (object value)
+		{
+			source.Add (new XamlNodeInfo (value));
 		}
 	}
 }

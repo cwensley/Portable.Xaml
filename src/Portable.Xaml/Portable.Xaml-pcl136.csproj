@@ -67,6 +67,8 @@
     <Compile Include="Portable.Xaml\XamlNameResolver.cs" />
     <Compile Include="Portable.Xaml\XamlNode.cs" />
     <Compile Include="Portable.Xaml\XamlNodeList.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeListReader.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeListWriter.cs" />
     <Compile Include="Portable.Xaml\XamlNodeQueue.cs" />
     <Compile Include="Portable.Xaml\XamlNodeQueueReader.cs" />
     <Compile Include="Portable.Xaml\XamlNodeQueueWriter.cs" />
