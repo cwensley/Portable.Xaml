@@ -95,7 +95,7 @@ namespace Portable.Xaml
 				if (!type.GetTypeInfo().IsPublic)
 					throw new XamlObjectReaderException (String.Format ("instance type '{0}' must be public and non-nested.", type));
 				var xt = SchemaContext.GetXamlType (type);
-				if (xt.ConstructionRequiresArguments && !xt.GetConstructorArguments ().Any () && xt.TypeConverter == null)
+				if (xt.ConstructionRequiresArguments && xt.GetConstructorArguments ().Count == 0 && xt.TypeConverter == null)
 					throw new XamlObjectReaderException (String.Format ("instance type '{0}' has no default constructor.", type));
 			}
 

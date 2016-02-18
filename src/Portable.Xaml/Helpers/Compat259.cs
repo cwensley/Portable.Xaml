@@ -15,7 +15,7 @@ namespace Portable.Xaml
 
 		public static IEnumerable<ConstructorInfo> GetConstructors(this TypeInfo typeInfo)
 		{
-			return typeInfo.DeclaredConstructors;
+			return typeInfo.DeclaredConstructors.Where(r => !r.IsStatic);
 		}
 
 		public static Type[] GetGenericArguments(this TypeInfo typeInfo)

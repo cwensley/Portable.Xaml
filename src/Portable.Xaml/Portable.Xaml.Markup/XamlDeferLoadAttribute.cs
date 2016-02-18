@@ -33,21 +33,53 @@ namespace Portable.Xaml.Markup
 	[AttributeUsageAttribute(AttributeTargets.Class|AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 	public sealed class XamlDeferLoadAttribute : Attribute
 	{
+		Type contentType;
+		Type loaderType;
+
 		public XamlDeferLoadAttribute (string loaderType, string contentType)
 		{
+			if (loaderType == null)
+				throw new ArgumentNullException(nameof(loaderType));
+			if (contentType == null)
+				throw new ArgumentNullException(nameof(contentType));
 			LoaderTypeName = loaderType;
 			ContentTypeName = contentType;
 		}
 
 		public XamlDeferLoadAttribute (Type loaderType, Type contentType)
 		{
-			LoaderType = loaderType;
-			ContentType = contentType;
+			if (loaderType == null)
+				throw new ArgumentNullException(nameof(loaderType));
+			if (contentType == null)
+				throw new ArgumentNullException(nameof(contentType));
+			this.loaderType = loaderType;
+			LoaderTypeName = loaderType.AssemblyQualifiedName;
+			this.contentType = contentType;
+			ContentTypeName = contentType.AssemblyQualifiedName;
 		}
-		
-		public Type ContentType { get; private set; }
+
+		public Type ContentType
+		{
+			get
+			{ 
+				if (contentType == null && ContentTypeName != null)
+					contentType = Type.GetType(ContentTypeName);
+				return contentType; 
+			}
+		}
+
 		public string ContentTypeName { get; private set; }
-		public Type LoaderType { get; private set; }
+
+		public Type LoaderType
+		{
+			get
+			{ 
+				if (loaderType == null && LoaderTypeName != null)
+					loaderType = Type.GetType(LoaderTypeName);
+				return loaderType; 
+			}
+		}
+
 		public string LoaderTypeName { get; private set; }
 
 	}

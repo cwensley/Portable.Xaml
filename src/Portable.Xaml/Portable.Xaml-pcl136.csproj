@@ -33,6 +33,11 @@
     <DefineConstants>PCL;PCL136</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Helpers\Compat136.cs" />
+    <Compile Include="Helpers\Compat259.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\FlagValue.cs" />
+    <Compile Include="Helpers\ReferenceValue.cs" />
     <Compile Include="Portable.Xaml\AmbientPropertyValue.cs" />
     <Compile Include="Portable.Xaml\AttachableMemberIdentifier.cs" />
     <Compile Include="Portable.Xaml\AttachablePropertyServices.cs" />
@@ -167,8 +172,6 @@
     <Compile Include="Portable.Xaml.Schema\XamlValueConverter.cs" />
     <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Assembly\AssemblyInfo.cs" />
-    <Compile Include="Compat136.cs" />
-    <Compile Include="Compat259.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\DoubleConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\CharConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\Int16Converter.cs" />

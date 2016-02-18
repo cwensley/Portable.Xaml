@@ -266,7 +266,7 @@ namespace Portable.Xaml
 			}
 
 			// find constructor based on ConstructorArgumentAttribute
-			var args = type.GetConstructorArguments ().ToList ();
+			var args = type.GetConstructorArguments ();
 			foreach (var ci in constructors) {
 				var pis = ci.GetParameters ();
 				if (args.Count != pis.Length)

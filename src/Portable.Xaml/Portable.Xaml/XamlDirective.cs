@@ -77,7 +77,8 @@ namespace Portable.Xaml
 
 		public override int GetHashCode ()
 		{
-			return ToString ().GetHashCode ();
+			var name = string.IsNullOrEmpty(PreferredXamlNamespace) ? Name : PreferredXamlNamespace;
+			return name.GetHashCode();
 		}
 
 		public override IList<string> GetXamlNamespaces ()
