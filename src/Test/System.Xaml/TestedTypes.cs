@@ -33,6 +33,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
+using sc = System.ComponentModel;
 
 
 #if PCL
@@ -275,6 +276,42 @@ namespace MonoTests.Portable.Xaml
 	public class TestClass6
 	{
 		public DateTime TheDateAndTime { get; set; }
+	}
+
+	public class TestClassWithDefaultValuesString
+	{
+		public string NoDefaultValue { get; set; }
+
+		[sc.DefaultValue("")]
+		public string NullDefaultValue { get; set; } = "";
+
+		[sc.DefaultValue("Some Default")]
+		public string SpecificDefaultValue { get; set; } = "Some Default";
+	}
+
+	public class TestClassWithDefaultValuesInt
+	{
+		public int NoDefaultValue { get; set; }
+
+		[sc.DefaultValue(0)]
+		public int ZeroDefaultValue { get; set; }
+
+		[sc.DefaultValue(100)]
+		public int SpecificDefaultValue { get; set; } = 100;
+	}
+
+	public class TestClassWithDefaultValuesNullableInt
+	{
+		public int? NoDefaultValue { get; set; }
+
+		[sc.DefaultValue(null)]
+		public int? NullDefaultValue { get; set; }
+
+		[sc.DefaultValue(0)]
+		public int? ZeroDefaultValue { get; set; } = 0;
+
+		[sc.DefaultValue(100)]
+		public int? SpecificDefaultValue { get; set; } = 100;
 	}
 
 	public class MyExtension : MarkupExtension

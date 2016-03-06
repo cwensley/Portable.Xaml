@@ -123,20 +123,24 @@ namespace Portable.Xaml
 					yield break;
 				}
 
+				var val = xobj.GetRawValue();
 				if (xm.DeferringLoader != null)
 				{
-					var val = xobj.GetRawValue();
 					foreach (var xn in GetDeferredNodes(xm, val))
 						yield return xn;
 					yield break;
 				}
+
+				// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
+				if (!partOfPositionalParameters && xm.DefaultValue != null && Equals(xm.DefaultValue.Value, val))
+					yield break;
 
 				// overrideMemberType is (so far) used for XamlLanguage.Key.
 				var xtt = overrideMemberType ?? xm.Type;
 				if (!xtt.IsMarkupExtension && // this condition is to not serialize MarkupExtension whose type has TypeConverterAttribute (e.g. StaticExtension) as a string.
 					(xtt.IsContentValue(value_serializer_ctx) || xm.IsContentValue(value_serializer_ctx))) {
 					// though null value is special: it is written as a standalone object.
-					var val = xobj.GetRawValue();
+
 					if (val == null)
 					{
 						if (!partOfPositionalParameters)
@@ -173,10 +177,10 @@ namespace Portable.Xaml
 				{
 					var sw = new StringWriter();
 					var xw = XmlWriter.Create(sw, new XmlWriterSettings() { OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Auto });
-					var val = xobj.GetRawValue() as IXmlSerializable;
-					if (val == null)
+					var val3 = val as IXmlSerializable;
+					if (val3 == null)
 						yield break; // do not output anything
-					val.WriteXml(xw);
+					val3.WriteXml(xw);
 					xw.Dispose();
 					var obj = new XData() { Text = sw.ToString() };
 					foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.XData, obj)))
@@ -260,12 +264,20 @@ namespace Portable.Xaml
 			}
 		}
 
-		IEnumerable<XamlNodeInfo> GetMemberNodes (XamlNodeMember member, IEnumerable<XamlNodeInfo> contents)
+		IEnumerable<XamlNodeInfo> GetMemberNodes(XamlNodeMember member, IEnumerable<XamlNodeInfo> contents)
 		{
-				yield return new XamlNodeInfo (XamlNodeType.StartMember, member);
-				foreach (var cn in contents)
-					yield return cn;
-				yield return new XamlNodeInfo (XamlNodeType.EndMember, member);
+			bool hasData = false;
+			foreach (var cn in contents)
+			{
+				if (!hasData)
+				{
+					hasData = true;
+					yield return new XamlNodeInfo(XamlNodeType.StartMember, member);
+				}
+				yield return cn;
+			}
+			if (hasData)
+				yield return new XamlNodeInfo(XamlNodeType.EndMember, member);
 		}
 
 		IEnumerable<XamlNodeMember> GetNodeMembers (XamlObject xobj, IValueSerializerContext vsctx)

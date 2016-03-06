@@ -25,6 +25,8 @@ namespace MonoTests.Portable.Xaml
 
 		public const string TestAssemblyName = "Portable.Xaml_test_" + Version;
 
+		public const string TestAssemblyNamespace = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + TestAssemblyName;
+
 
 		public static string Fixup(this string str)
 		{

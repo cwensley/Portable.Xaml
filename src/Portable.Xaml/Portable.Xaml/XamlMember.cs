@@ -513,5 +513,15 @@ namespace Portable.Xaml
 			if (method.GetParameters ().Length != 2)
 				throw new ArgumentException (String.Format ("Property getter or event adder for {0} must have exactly one argument and must have non-void return type.", Name));
 		}
+
+		ReferenceValue<DefaultValueAttribute> defaultValue;
+		internal DefaultValueAttribute DefaultValue
+		{
+			get
+			{
+				return defaultValue.Get(() => GetCustomAttributeProvider()?.GetCustomAttribute<DefaultValueAttribute>(true));
+			}
+		}
+
 	}
 }
