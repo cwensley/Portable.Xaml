@@ -174,12 +174,10 @@ namespace Portable.Xaml
 			: base (schemaContext, manager)
 		{
 			this.w = w;
-//			this.sctx = schemaContext;
 		}
-		
+
 		XmlWriter w;
-//		XamlSchemaContext sctx;
-		
+
 		// Here's a complication.
 		// - local_nss holds namespace declarations that are written *before* current element.
 		// - local_nss2 holds namespace declarations that are wrtten *after* current element.

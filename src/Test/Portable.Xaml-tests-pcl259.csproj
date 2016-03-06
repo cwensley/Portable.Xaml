@@ -90,6 +90,8 @@
     <Compile Include="System.Xaml\XamlXmlWriterTest.cs" />
     <Compile Include="Compat.cs" />
     <Compile Include="System.Xaml\XamlNodeListTest.cs" />
+    <Compile Include="System.Windows.Markup\XamlDeferLoadTest.cs" />
+    <Compile Include="System.Xaml\XamlDeferringLoaderTest.cs" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -41,9 +41,9 @@ namespace Mono.Xaml
 namespace Portable.Xaml
 #endif
 {
-	internal abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider, IAmbientProvider
+	abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider, IAmbientProvider
 	{
-		public XamlWriterInternalBase (XamlSchemaContext schemaContext, XamlWriterStateManager manager)
+		protected XamlWriterInternalBase (XamlSchemaContext schemaContext, XamlWriterStateManager manager)
 		{
 			this.sctx = schemaContext;
 			this.manager = manager;
@@ -51,8 +51,8 @@ namespace Portable.Xaml
 			service_provider = new ValueSerializerContext (p, schemaContext, this, this, this, this);
 		}
 
-		XamlSchemaContext sctx;
-		XamlWriterStateManager manager;
+		internal XamlSchemaContext sctx;
+		internal XamlWriterStateManager manager;
 
 		internal ValueSerializerContext service_provider;
 
@@ -217,6 +217,7 @@ namespace Portable.Xaml
 				state.PositionalParameterIndex = 0;
 
 			OnWriteStartMember (property);
+
 		}
 		
 		public void WriteEndObject ()
@@ -230,6 +231,7 @@ namespace Portable.Xaml
 
 		public void WriteEndMember ()
 		{
+
 			manager.EndMember ();
 
 			OnWriteEndMember ();

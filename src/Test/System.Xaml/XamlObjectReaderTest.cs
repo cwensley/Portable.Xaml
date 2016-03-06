@@ -756,7 +756,26 @@ namespace MonoTests.Portable.Xaml
 		{
 			var obj = new NullableContainer () { TestProp = 5 };
 			var xr = new XamlObjectReader (obj);
-			Read_NullableContainer (xr);
+			Read_NullableContainer(xr);
+		}
+
+		[Test]
+		public void Read_DeferredLoadingContainerMember ()
+		{
+			var child = new DeferredLoadingChild();
+			var ctx = new XamlSchemaContext();
+			child.List = new XamlNodeList(ctx);
+			var xt = ctx.GetXamlType(typeof(DeferredLoadingChild));
+			child.List.Writer.WriteStartObject(xt);
+			child.List.Writer.WriteStartMember(xt.GetMember("Foo"));
+			child.List.Writer.WriteValue("Some value");
+			child.List.Writer.WriteEndMember();
+			child.List.Writer.WriteEndObject();
+			child.List.Writer.Close();
+			var obj = new DeferredLoadingContainerMember { Child = child };
+
+			var xr = new XamlObjectReader (obj);
+			Read_DeferredLoadingContainerMember(xr);
 		}
 	}
 }

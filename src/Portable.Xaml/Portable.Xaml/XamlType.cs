@@ -700,7 +700,11 @@ namespace Portable.Xaml
 			var attr = this.GetCustomAttribute<XamlDeferLoadAttribute>();
 			if (attr == null)
 				return null;
-			return new XamlValueConverter<XamlDeferringLoader>(attr.LoaderType, SchemaContext.GetXamlType(attr.ContentType));
+			var loaderType = attr.GetLoaderType();
+			var contentType = attr.GetContentType();
+			if (loaderType == null || contentType == null)
+				throw new XamlSchemaException("Invalid metadata for attribute XamlDeferLoadAttribute");
+			return new XamlValueConverter<XamlDeferringLoader>(loaderType, null); // Why is the targetType null in System.Xaml?
 		}
 
 		protected virtual XamlTypeInvoker LookupInvoker ()

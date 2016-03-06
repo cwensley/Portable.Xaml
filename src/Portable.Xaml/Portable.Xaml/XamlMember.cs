@@ -27,6 +27,7 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
@@ -365,8 +366,12 @@ namespace Portable.Xaml
 		{
 			var attr = GetCustomAttributeProvider()?.GetCustomAttribute<XamlDeferLoadAttribute>(true);
 			if (attr == null)
-				return DeclaringType?.DeferringLoader;
-			return new XamlValueConverter<XamlDeferringLoader>(attr.LoaderType, context.GetXamlType(attr.ContentType));
+				return Type?.DeferringLoader;
+			var loaderType = attr.GetLoaderType();
+			var contentType = attr.GetContentType();
+			if (loaderType == null || contentType == null)
+				throw new XamlSchemaException("Invalid metadata for attribute XamlDeferLoadAttribute");
+			return new XamlValueConverter<XamlDeferringLoader>(loaderType, null); // why is the target type null here? thought it would be the contentType.
 		}
 
 		static readonly XamlMember [] empty_list = new XamlMember [0];

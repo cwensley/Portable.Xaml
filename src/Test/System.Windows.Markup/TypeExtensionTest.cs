@@ -39,7 +39,7 @@ using System.Xaml.Schema;
 
 using Category = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.System.Windows.Markup
+namespace MonoTests.Portable.Xaml.Markup
 {
 	[TestFixture]
 	public class TypeExtensionTest

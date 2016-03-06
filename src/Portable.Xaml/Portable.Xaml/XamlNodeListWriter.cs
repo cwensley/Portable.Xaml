@@ -29,6 +29,8 @@ namespace Portable.Xaml
 	{
 		readonly XamlNodeList source;
 
+		public bool IsClosed { get { return IsDisposed; } }
+
 		public XamlNodeListWriter(XamlNodeList source)
 		{
 			this.source = source;

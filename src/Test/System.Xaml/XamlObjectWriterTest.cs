@@ -1605,5 +1605,68 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual("SomeText", res.TestProp.Value.Text, "#2");
 			}
 		}
+
+		[Test]
+		public void Write_DeferredLoadingContainerMember()
+		{
+			using (var xr = GetReader ("DeferredLoadingContainerMember.xml")) {
+				var res = (DeferredLoadingContainerMember)XamlServices.Load(xr);
+				Assert.IsNotNull(res, "#1");
+				Assert.IsNotNull(res.Child, "#2");
+				Assert.IsNull(res.Child.Foo, "#3");
+				Assert.IsNotNull(res.Child.List, "#4");
+				Assert.AreEqual(5, res.Child.List.Count, "#5");
+
+				var obj = XamlServices.Load(res.Child.List.GetReader());
+				Assert.IsNotNull(obj, "#6");
+				Assert.IsInstanceOf<DeferredLoadingChild>(obj, "#7");
+				Assert.AreEqual("Blah", ((DeferredLoadingChild)obj).Foo, "#8");
+			}
+		}
+
+		[Test]
+		public void Write_DeferredLoadingContainerType()
+		{
+			using (var xr = GetReader ("DeferredLoadingContainerType.xml")) {
+				var res = (DeferredLoadingContainerType)XamlServices.Load(xr);
+				Assert.IsNotNull(res, "#1");
+				Assert.IsNotNull(res.Child, "#2");
+				Assert.IsNull(res.Child.Foo, "#3");
+				Assert.IsNotNull(res.Child.List, "#4");
+				Assert.AreEqual(5, res.Child.List.Count, "#5");
+
+				var obj = XamlServices.Load(res.Child.List.GetReader());
+				Assert.IsNotNull(obj, "#6");
+				Assert.IsInstanceOf<DeferredLoadingChild2>(obj, "#7");
+				Assert.AreEqual("Blah", ((DeferredLoadingChild2)obj).Foo, "#8");
+			}
+		}
+
+		[Test]
+		[ExpectedException(typeof(XamlSchemaException))]
+		public void Write_DeferredLoadingWithInvalidType()
+		{
+			using (var xr = GetReader ("DeferredLoadingWithInvalidType.xml")) {
+				XamlServices.Load(xr);
+			}
+		}
+
+		[Test]
+		public void Write_DeferredLoadingContainerMemberStringType()
+		{
+			using (var xr = GetReader ("DeferredLoadingContainerMemberStringType.xml")) {
+				var res = (DeferredLoadingContainerMemberStringType)XamlServices.Load(xr);
+				Assert.IsNotNull(res, "#1");
+				Assert.IsNotNull(res.Child, "#2");
+				Assert.IsNull(res.Child.Foo, "#3");
+				Assert.IsNotNull(res.Child.List, "#4");
+				Assert.AreEqual(5, res.Child.List.Count, "#5");
+
+				var obj = XamlServices.Load(res.Child.List.GetReader());
+				Assert.IsNotNull(obj, "#6");
+				Assert.IsInstanceOf<DeferredLoadingChild>(obj, "#7");
+				Assert.AreEqual("Blah", ((DeferredLoadingChild)obj).Foo, "#8");
+			}
+		}
 	}
 }

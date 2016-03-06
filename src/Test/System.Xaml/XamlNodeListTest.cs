@@ -63,6 +63,27 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual("bar", ((TestClass4)writer.Result).Bar, "#9");
 		}
 
+		[Test]
+		[ExpectedException(typeof(XamlException))]
+		public void WriterShouldThrowExceptionIfNotClosed()
+		{
+			var sc = new XamlSchemaContext();
+			var list = new XamlNodeList(sc);
+			list.Writer.WriteStartObject(sc.GetXamlType(typeof(TestClass4)));
+			list.Writer.WriteEndObject();
+			list.GetReader();
+		}
+
+		[Test]
+		public void WriterShouldNotThrowExceptionIfClosed()
+		{
+			var sc = new XamlSchemaContext();
+			var list = new XamlNodeList(sc);
+			list.Writer.WriteStartObject(sc.GetXamlType(typeof(TestClass4)));
+			list.Writer.WriteEndObject();
+			list.Writer.Close();
+			var reader = list.GetReader();
+		}
 	}
 }
 

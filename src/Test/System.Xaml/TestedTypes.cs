@@ -1151,6 +1151,93 @@ namespace MonoTests.Portable.Xaml
 
 		public CollectionItemCollectionAddOverride Items { get; } = new CollectionItemCollectionAddOverride();
 	}
+
+	public class TestDeferredLoader : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			return new DeferredLoadingChild(xamlReader);
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			return ((DeferredLoadingChild)value).List.GetReader();
+		}
+	}
+
+	public class TestDeferredLoader2 : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			return new DeferredLoadingChild2(xamlReader);
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+
+	public class DeferredLoadingChild
+	{
+		public XamlNodeList List { get; set; }
+		public string Foo { get; set; }
+
+		public DeferredLoadingChild()
+		{
+		}
+
+		public DeferredLoadingChild(XamlReader reader)
+		{
+			List = new XamlNodeList(reader.SchemaContext);
+			XamlServices.Transform(reader, List.Writer);
+		}
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMember
+	{
+		[XamlDeferLoad(typeof(TestDeferredLoader), typeof(DeferredLoadingChild))]
+		public DeferredLoadingChild Child { get; set; }
+	}
+
+	[XamlDeferLoad(typeof(TestDeferredLoader2), typeof(DeferredLoadingChild2))]
+	public class DeferredLoadingChild2
+	{
+		public XamlNodeList List { get; set; }
+		public string Foo { get; set; }
+
+		public DeferredLoadingChild2()
+		{
+		}
+
+		public DeferredLoadingChild2(XamlReader reader)
+		{
+			List = new XamlNodeList(reader.SchemaContext);
+			XamlServices.Transform(reader, List.Writer);
+		}
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerType
+	{
+		public DeferredLoadingChild2 Child { get; set; }
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingWithInvalidType
+	{
+		[XamlDeferLoad("Some.Invalid.Type", "Some.Invalid.Type")]
+		public DeferredLoadingChild Child { get; set; }
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMemberStringType
+	{
+		[XamlDeferLoad("MonoTests.Portable.Xaml.TestDeferredLoader," + Compat.TestAssemblyName, "MonoTests.Portable.Xaml.DeferredLoadingChild," + Compat.TestAssemblyName)]
+		public DeferredLoadingChild Child { get; set; }
+	}
 }
 
 namespace XamlTest

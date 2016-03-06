@@ -63,6 +63,8 @@ namespace Portable.Xaml
 
 		public XamlReader GetReader()
 		{
+			if (!((XamlNodeListWriter)Writer).IsClosed)
+				throw new XamlException("Writer must be closed");
 			return new XamlNodeListReader(this);
 		}
 

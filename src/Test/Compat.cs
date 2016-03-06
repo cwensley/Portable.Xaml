@@ -23,6 +23,8 @@ namespace MonoTests.Portable.Xaml
 		public static bool IsPortableXaml = false;
 		#endif
 
+		public const string TestAssemblyName = "Portable.Xaml_test_" + Version;
+
 
 		public static string Fixup(this string str)
 		{

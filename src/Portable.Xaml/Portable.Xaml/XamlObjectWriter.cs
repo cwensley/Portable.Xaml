@@ -87,8 +87,21 @@ namespace Portable.Xaml
 
 		XamlSchemaContext sctx;
 		XamlObjectWriterSettings settings;
-
 		XamlObjectWriterInternal intl;
+		DeferredWriter deferredWriter;
+
+		class DeferredWriter
+		{
+			public XamlDeferringLoader Loader { get; }
+			public XamlNodeList List { get; }
+			public XamlWriter Writer { get { return List.Writer; } }
+			public int DeferCount { get; set; }
+			public DeferredWriter(XamlSchemaContext context, XamlDeferringLoader loader)
+			{
+				List = new XamlNodeList(context);
+				Loader = loader;
+			}
+		}
 
 		//int line, column;
 		bool lineinfo_was_given;
@@ -169,36 +182,96 @@ namespace Portable.Xaml
 
 		public override void WriteGetObject ()
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteGetObject();
+				return;
+			}
+
 			intl.WriteGetObject ();
 		}
 
 		public override void WriteNamespace (NamespaceDeclaration namespaceDeclaration)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteNamespace(namespaceDeclaration);
+				return;
+			}
+
 			intl.WriteNamespace (namespaceDeclaration);
 		}
 
 		public override void WriteStartObject (XamlType xamlType)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteStartObject(xamlType);
+				deferredWriter.DeferCount++;
+				return;
+			}
+
 			intl.WriteStartObject (xamlType);
 		}
 		
 		public override void WriteValue (object value)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteValue(value);
+				return;
+			}
+
 			intl.WriteValue (value);
 		}
 		
 		public override void WriteStartMember (XamlMember property)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteStartMember(property);
+				deferredWriter.DeferCount++;
+				return;
+			}
+
 			intl.WriteStartMember (property);
+
+			var defer = property.DeferringLoader;
+			if (defer != null)
+			{
+				deferredWriter = new DeferredWriter(sctx, defer.ConverterInstance);
+				deferredWriter.DeferCount++;
+				return;
+			}
 		}
 		
 		public override void WriteEndObject ()
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteEndObject();
+				if (--deferredWriter.DeferCount > 0)
+					return;
+				intl.WriteDeferred(deferredWriter.Loader, deferredWriter.List, false);
+				deferredWriter = null;
+			}
+
 			intl.WriteEndObject ();
 		}
 
 		public override void WriteEndMember ()
 		{
+			if (deferredWriter != null)
+			{
+				if (--deferredWriter.DeferCount > 0)
+				{
+					deferredWriter.Writer.WriteEndMember();
+					return;
+				}
+				intl.WriteDeferred(deferredWriter.Loader, deferredWriter.List, true);
+				deferredWriter = null;
+			}
+
 			intl.WriteEndMember ();
 		}
 	}
@@ -212,13 +285,11 @@ namespace Portable.Xaml
 			: base (schemaContext, manager)
 		{
 			this.source = source;
-			this.sctx = schemaContext;
 			var ext = source.Settings.ExternalNameScope;
 			name_scope = ext != null && source.Settings.RegisterNamesOnExternalNamescope ? ext : new NameScope (ext);
 		}
 		
 		XamlObjectWriter source;
-		XamlSchemaContext sctx;
 		INameScope name_scope;
 		List<NameFixupRequired> pending_name_references = new List<NameFixupRequired> ();
 
@@ -595,6 +666,23 @@ namespace Portable.Xaml
 				return;
 			si.EndInit ();
 			source.OnAfterEndInit (value);
+		}
+
+		public void WriteDeferred(XamlDeferringLoader loader, XamlNodeList nodeList, bool setValue)
+		{
+			nodeList.Writer.Close();
+			var obj = loader.Load(nodeList.GetReader(), service_provider);
+			var cms = CurrentMemberState;
+			if (cms != null)
+				cms.Value = obj;
+			else
+			{
+				var state = object_states.Peek();
+				state.Value = obj;
+				state.IsInstantiated = true;
+			}
+			if (setValue)
+				manager.Value();
 		}
 	}
 }
