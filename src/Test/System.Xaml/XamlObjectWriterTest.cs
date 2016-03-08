@@ -1668,5 +1668,147 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual("Blah", ((DeferredLoadingChild)obj).Foo, "#8");
 			}
 		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeSingleArgument()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeSingleArgument.xml")) {
+				var res = (ImmutableTypeSingleArgument)XamlServices.Load(xr);
+				Assert.NotNull(res, "#1");
+				Assert.AreEqual("hello", res.Name, "#2");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeMultipleArguments()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeMultipleArguments.xml")) {
+				var res = (ImmutableTypeMultipleArguments)XamlServices.Load(xr);
+				Assert.NotNull(res, "#1");
+				Assert.AreEqual("hello", res.Name, "#2");
+				Assert.IsTrue(res.Flag, "#3");
+				Assert.AreEqual(100, res.Num, "#4");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeMultipleConstructors1()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeMultipleConstructors1.xml")) {
+				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+				Assert.NotNull(res, "#1");
+				Assert.AreEqual("hello", res.Name, "#2");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeMultipleConstructors2()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeMultipleConstructors2.xml")) {
+				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+				Assert.NotNull(res, "#1");
+				Assert.AreEqual("hello", res.Name, "#2");
+				Assert.IsTrue(res.Flag, "#3");
+				Assert.AreEqual(100, res.Num, "#4");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		[ExpectedException(typeof(XamlObjectWriterException))]
+		public void Write_ImmutableTypeMultipleConstructors3()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			// can't find constructor
+			using (var xr = GetReader ("ImmutableTypeMultipleConstructors3.xml")) {
+				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		[ExpectedException(typeof(XamlObjectWriterException))]
+		public void Write_ImmutableTypeMultipleConstructors4()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			// found constructor, but one of the properties set is read only
+			using (var xr = GetReader ("ImmutableTypeMultipleConstructors4.xml")) {
+				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeOptionalParameters1()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeOptionalParameters1.xml")) {
+				var res = (ImmutableTypeOptionalParameters)XamlServices.Load(xr);
+				Assert.AreEqual("hello", res.Name, "#1");
+				Assert.AreEqual(true, res.Flag, "#2");
+				Assert.AreEqual(100, res.Num, "#3");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeOptionalParameters2()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeOptionalParameters2.xml")) {
+				var res = (ImmutableTypeOptionalParameters)XamlServices.Load(xr);
+				Assert.AreEqual("hello", res.Name, "#1");
+				Assert.AreEqual(true, res.Flag, "#2");
+				Assert.AreEqual(200, res.Num, "#3");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeWithCollectionProperty()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeWithCollectionProperty.xml")) {
+				var res = (ImmutableTypeWithCollectionProperty)XamlServices.Load(xr);
+				Assert.AreEqual("hello", res.Name, "#1");
+				Assert.AreEqual(true, res.Flag, "#2");
+				Assert.AreEqual(200, res.Num, "#3");
+				Assert.AreEqual(2, res.Collection.Count, "#4");
+				Assert.AreEqual("Hello", res.Collection[0].Foo, "#5");
+				Assert.AreEqual("There", res.Collection[1].Foo, "#6");
+			}
+		}
+
+		[Test]
+		[Category(Categories.NotOnSystemXaml)]
+		public void Write_ImmutableTypeWithWritableProperty()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+			using (var xr = GetReader ("ImmutableTypeWithWritableProperty.xml")) {
+				var res = (ImmutableTypeWithWritableProperty)XamlServices.Load(xr);
+				Assert.AreEqual("hello", res.Name, "#1");
+				Assert.AreEqual(true, res.Flag, "#2");
+				Assert.AreEqual(200, res.Num, "#3");
+				Assert.AreEqual("There", res.Foo, "#4");
+			}
+		}
 	}
 }

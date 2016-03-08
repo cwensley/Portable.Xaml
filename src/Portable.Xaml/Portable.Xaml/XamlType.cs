@@ -571,6 +571,7 @@ namespace Portable.Xaml
 						pi.CanWrite 
 						|| IsCollectionType (pi.PropertyType)
 						|| typeof (IXmlSerializable).GetTypeInfo().IsAssignableFrom (pi.PropertyType.GetTypeInfo())
+						|| pi.GetCustomAttribute<ConstructorArgumentAttribute>() != null
 					) 
 					&& pi.GetIndexParameters ().Length == 0)
 					yield return SchemaContext.GetProperty (pi);

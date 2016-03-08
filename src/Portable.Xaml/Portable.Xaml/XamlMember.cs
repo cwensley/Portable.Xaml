@@ -43,7 +43,8 @@ namespace Portable.Xaml
 			IsUnknown = 1 << 4,
 			IsWriteOnly = 1 << 5,
 			IsWritePublic = 1 << 6,
-			IsNameValid = 1 << 7
+			IsNameValid = 1 << 7,
+			IsConstructorArgument = 1 << 8
 		}
 		XamlType target_type;
 		MemberInfo underlying_member;
@@ -523,5 +524,16 @@ namespace Portable.Xaml
 			}
 		}
 
+		internal bool IsConstructorArgument
+		{
+			get
+			{
+				return flags.Get((int)MemberFlags.IsConstructorArgument, () =>
+					{
+						var ap = GetCustomAttributeProvider();
+						return ap != null && ap.GetCustomAttributes(typeof(ConstructorArgumentAttribute), false).Length > 0;
+					});
+			}
+		}
 	}
 }

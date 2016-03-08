@@ -226,58 +226,115 @@ namespace Portable.Xaml
 			return ci != null;
 		}
 
-		public static IEnumerable<XamlMember> GetSortedConstructorArguments (this XamlType type, IList<object> contents = null)
+		public static IEnumerable<XamlWriterInternalBase.MemberAndValue> GetSortedConstructorArguments (this XamlType type, IList<XamlWriterInternalBase.MemberAndValue> members)
 		{
 			var constructors = type.UnderlyingType.GetTypeInfo ().GetConstructors ();
-			if (contents != null && contents.Count > 0) {
+			var preferredParameterCount = 0;
+			ConstructorInfo preferredConstructor = null;
+			foreach (var constructor in constructors)
+			{
+				var parameters = constructor.GetParameters();
+				var matchedParameterCount = 0;
+				bool mismatch = false;
+				for (int i = 0; i < parameters.Length; i++) {
+					var parameter = parameters[i];
+					var member = members.FirstOrDefault(r => r.Member.ConstructorArgumentName() == parameter.Name);
+					if (member == null) {
+						// allow parameters with a default value to be omitted
+						mismatch = !parameter.HasDefaultValue();
+						if (mismatch)
+							break;
+						continue;
+					}
+					var paramXamlType = type.SchemaContext.GetXamlType (parameter.ParameterType);
+
+					// check if type input type can be converted to the parameter type
+					mismatch = !paramXamlType.CanConvertFrom (member.Member.Type);
+					if (mismatch)
+						break;
+					matchedParameterCount++;
+				}
+				// prefer the constructor that accepts the most parameters
+				if (!mismatch && matchedParameterCount > preferredParameterCount)
+				{
+					preferredConstructor = constructor;
+					preferredParameterCount = matchedParameterCount;
+				}
+			}
+			if (preferredConstructor == null)
+				return null;
+			return preferredConstructor
+				.GetParameters ()
+				.Select (p => {
+					var mem = members.FirstOrDefault(r => r.Member.ConstructorArgumentName() == p.Name);
+					if (mem == null && p.HasDefaultValue())
+					{
+						mem = new XamlWriterInternalBase.MemberAndValue(type.SchemaContext.GetParameter(p, type));
+						mem.Value = p.DefaultValue;
+					}
+					return mem;
+				});
+		}
+
+
+		public static IEnumerable<XamlMember> GetSortedConstructorArguments(this XamlType type, IList<object> contents = null)
+		{
+			var constructors = type.UnderlyingType.GetTypeInfo().GetConstructors();
+			if (contents != null && contents.Count > 0)
+			{
 				// find constructor based on supplied parameters
-				foreach (var constructor in constructors) {
-					var parameters = constructor.GetParameters ();
+				foreach (var constructor in constructors)
+				{
+					var parameters = constructor.GetParameters();
 					if (contents.Count > parameters.Length)
 						continue;
 
 					bool mismatch = false;
-					for (int i = 0; i < parameters.Length; i++) {
-						if (i >= contents.Count) {
+					for (int i = 0; i < parameters.Length; i++)
+					{
+						var parameter = parameters[i];
+						if (i >= contents.Count)
+						{
 							// allow parameters with a default value to be omitted
-							#if PCL136
-							mismatch |= parameters [i].DefaultValue == null;
-							#else
-							mismatch |= !parameters [i].HasDefaultValue;
-							#endif
+							mismatch = !parameter.HasDefaultValue();
+							if (mismatch)
+								break;
 							continue;
 						}
 						// check if the parameter value can be assigned to the required type
-						var posParameter = contents [i];
-						var paramXamlType = type.SchemaContext.GetXamlType (parameters [i].ParameterType);
+						var posParameter = contents[i];
+						var paramXamlType = type.SchemaContext.GetXamlType(parameter.ParameterType);
 
 						// check if type input type can be converted to the parameter type
-						var inputType = posParameter == null ? XamlLanguage.Null : type.SchemaContext.GetXamlType (posParameter.GetType ());
-						mismatch |= !paramXamlType.CanConvertFrom (inputType);
+						var inputType = posParameter == null ? XamlLanguage.Null : type.SchemaContext.GetXamlType(posParameter.GetType());
+						mismatch = !paramXamlType.CanConvertFrom(inputType);
+						if (mismatch)
+							break;
 					}
 					if (mismatch)
 						continue;
 
 					// matches constructor arguments
 					return constructor
-						.GetParameters ()
-						.Select (p => type.SchemaContext.GetParameter (p, type));
+						.GetParameters()
+						.Select(p => type.SchemaContext.GetParameter(p, type));
 				}
 			}
 
 			// find constructor based on ConstructorArgumentAttribute
-			var args = type.GetConstructorArguments ();
-			foreach (var ci in constructors) {
-				var pis = ci.GetParameters ();
+			var args = type.GetConstructorArguments();
+			foreach (var ci in constructors)
+			{
+				var pis = ci.GetParameters();
 				if (args.Count != pis.Length)
 					continue;
 				bool mismatch = false;
 				foreach (var pi in pis)
 					for (int i = 0; i < args.Count; i++)
-						mismatch |= args.All (a => a.ConstructorArgumentName () != pi.Name);
+						mismatch |= args.All(a => a.ConstructorArgumentName() != pi.Name);
 				if (mismatch)
 					continue;
-				return args.OrderBy (c => pis.FindParameterWithName (c.ConstructorArgumentName ()).Position);
+				return args.OrderBy(c => pis.FindParameterWithName(c.ConstructorArgumentName()).Position);
 			}
 
 			return null;
@@ -320,11 +377,11 @@ namespace Portable.Xaml
 				return 1;
 
 			// 2. constructor arguments
-			if (m1.IsConstructorArgument ()) {
-				if (!m2.IsConstructorArgument ())
+			if (m1.IsConstructorArgument) {
+				if (!m2.IsConstructorArgument)
 					return -1;
 			}
-			else if (m2.IsConstructorArgument ())
+			else if (m2.IsConstructorArgument)
 				return 1;
 
 
@@ -360,12 +417,6 @@ namespace Portable.Xaml
 
 			// then, compare names.
 			return String.CompareOrdinal (m1.Name, m2.Name);
-		}
-
-		internal static bool IsConstructorArgument (this XamlMember xm)
-		{
-			var ap = xm.GetCustomAttributeProvider ();
-			return ap != null && ap.GetCustomAttributes (typeof(ConstructorArgumentAttribute), false).Length > 0;
 		}
 
 		internal static string GetInternalXmlName (this XamlMember xm)

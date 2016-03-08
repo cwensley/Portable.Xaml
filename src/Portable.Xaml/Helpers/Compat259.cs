@@ -47,6 +47,11 @@ namespace Portable.Xaml
 		{
 			return assembly.ExportedTypes;
 		}
+
+		public static bool HasDefaultValue(this ParameterInfo parameterInfo)
+		{
+			return parameterInfo.HasDefaultValue;
+		}
 	}
 }
 #endif

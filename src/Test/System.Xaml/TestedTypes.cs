@@ -1275,6 +1275,121 @@ namespace MonoTests.Portable.Xaml
 		[XamlDeferLoad("MonoTests.Portable.Xaml.TestDeferredLoader," + Compat.TestAssemblyName, "MonoTests.Portable.Xaml.DeferredLoadingChild," + Compat.TestAssemblyName)]
 		public DeferredLoadingChild Child { get; set; }
 	}
+
+	public class ImmutableTypeSingleArgument
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		public ImmutableTypeSingleArgument(string name)
+		{
+			Name = name;
+		}
+	}
+	public class ImmutableTypeMultipleArguments
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeMultipleArguments(string name, bool flag, int num)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	public class ImmutableTypeMultipleConstructors
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeMultipleConstructors(string name)
+		{
+			Name = name;
+		}
+
+		public ImmutableTypeMultipleConstructors(string name, bool flag, int num)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	public class ImmutableTypeOptionalParameters
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeOptionalParameters(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	[ContentProperty("Collection")]
+	public class ImmutableTypeWithCollectionProperty
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeWithCollectionProperty(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+
+		public IList<TestClass4> Collection { get; } = new List<TestClass4>();
+	}
+
+	public class ImmutableTypeWithWritableProperty
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeWithWritableProperty(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+
+		public string Foo { get; set; }
+	}
 }
 
 namespace XamlTest

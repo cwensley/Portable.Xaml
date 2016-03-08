@@ -109,6 +109,12 @@ namespace Portable.Xaml
 		{
 			return propertyInfo.GetGetMethod(true);
 		}
+
+		public static bool HasDefaultValue(this ParameterInfo parameterInfo)
+		{
+			var val = parameterInfo.DefaultValue;
+			return val == null || val.GetType().FullName != "System.DBNull";
+		}
 	}
 }
 #endif
