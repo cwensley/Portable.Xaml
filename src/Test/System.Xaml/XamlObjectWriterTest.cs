@@ -950,17 +950,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[Ignore("Not sure why MemberType is NOT serialized. Needs investigation")]
-		public void Write_StaticExtension2()
-		{
-			var obj = new StaticExtension("FooBar"); //incorrect
-			using (var xr = GetReader ("StaticExtension2.xml")) {
-				var des = XamlServices.Load(xr);
-				Assert.AreEqual(obj, des, "#1");
-			}
-		}
-
-		[Test]
 		public void Write_Reference()
 		{
 			using (var xr = GetReader ("Reference.xml")) {
