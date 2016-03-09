@@ -33,6 +33,7 @@ using Portable.Xaml.Schema;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
@@ -40,13 +41,15 @@ namespace Portable.Xaml
 	{
 		static readonly XamlObject null_object = new XamlObject (XamlLanguage.Null, null);
 
-		public XamlObjectNodeIterator (object root, XamlSchemaContext schemaContext, IValueSerializerContext vctx)
+		public XamlObjectNodeIterator (object root, XamlSchemaContext schemaContext, IValueSerializerContext vctx, XamlObjectReaderSettings settings)
 		{
 			ctx = schemaContext;
 			this.root = root;
 			value_serializer_ctx = vctx;
+			this.settings = settings;
 		}
-		
+
+		XamlObjectReaderSettings settings;
 		XamlSchemaContext ctx;
 		object root;
 		IValueSerializerContext value_serializer_ctx;
@@ -82,6 +85,7 @@ namespace Portable.Xaml
 
 		IEnumerable<XamlNodeInfo> GetNodes (XamlMember xm, XamlObject xobj, XamlType overrideMemberType, bool partOfPositionalParameters)
 		{
+			object val;
 			// Value - only for non-top-level node (thus xm != null)
 			if (xm != null)
 			{
@@ -123,7 +127,7 @@ namespace Portable.Xaml
 					yield break;
 				}
 
-				var val = xobj.GetRawValue();
+				val = xobj.GetRawValue();
 				if (xm.DeferringLoader != null)
 				{
 					foreach (var xn in GetDeferredNodes(xm, val))
@@ -188,29 +192,34 @@ namespace Portable.Xaml
 					yield break;
 				}
 			}
+			else
+				val = xobj.GetRawValue();
 			// Object - could become Reference
-			var val2 = xobj.GetRawValue ();
-			if (val2 != null && xobj.Type != XamlLanguage.Reference) {
-					
+			if (val != null && xobj.Type != XamlLanguage.Reference) {
+
+				if (xm != null && !xm.IsReadOnly && !IsPublicOrVisible(val.GetType()))
+					throw new XamlObjectReaderException($"Cannot read from internal type {xobj.Type}");
+
 				if (!xobj.Type.IsContentValue (value_serializer_ctx)) {
-					string refName = NameResolver.GetReferenceName (xobj, val2);
+					string refName = NameResolver.GetReferenceName (xobj, val);
 					if (refName != null) {
 						// The target object is already retrieved, so we don't return the same object again.
-						NameResolver.SaveAsReferenced (val2); // Record it as named object.
+						NameResolver.SaveAsReferenced (val); // Record it as named object.
 						// Then return Reference object instead.
 						foreach (var xn in GetNodes (null, new XamlObject (XamlLanguage.Reference, new Reference (refName))))
 							yield return xn;
 						yield break;
 					} else {
 						// The object appeared in the xaml tree for the first time. So we store the reference with a unique name so that it could be referenced later.
-						NameResolver.SetNamedObject (val2, true); // probably fullyInitialized is always true here.
+						NameResolver.SetNamedObject (val, true); // probably fullyInitialized is always true here.
 					}
 				}
+
 				yield return new XamlNodeInfo (XamlNodeType.StartObject, xobj);
 
 				// If this object is referenced and there is no [RuntimeNameProperty] member, then return Name property in addition.
 				if (!NameResolver.IsCollectingReferences && xobj.Type.GetAliasedProperty (XamlLanguage.Name) == null) {
-					string name = NameResolver.GetReferencedName (xobj, val2);
+					string name = NameResolver.GetReferencedName (xobj, val);
 					if (name != null) {
 						var sobj = new XamlObject (XamlLanguage.String, name);
 						foreach (var cn in GetMemberNodes (new XamlNodeMember (sobj, XamlLanguage.Name), new [] { new XamlNodeInfo (name)}))
@@ -226,6 +235,28 @@ namespace Portable.Xaml
 				yield return xn;
 				
 			yield return new XamlNodeInfo (XamlNodeType.EndObject, xobj);
+		}
+
+		bool IsPublicOrVisible(Type type)
+		{
+			if (type.GetTypeInfo().IsPublic)
+				return true;
+			if (settings.LocalAssembly != null)
+			{
+				var typeAssembly = type.GetTypeInfo().Assembly;
+				if (settings.LocalAssembly == typeAssembly)
+					return true;
+				var typeName = typeAssembly.GetName();
+				var typePk = typeName.GetPublicKeyToken();
+				var internalsVisible = type.GetTypeInfo().Assembly.GetCustomAttributes<InternalsVisibleToAttribute>();
+				foreach (var iv in internalsVisible)
+				{
+					var name = new AssemblyName(iv.AssemblyName);
+					if (typeName.Matches(name))
+						return true;
+				}
+			}
+			return false;
 		}
 
 		IEnumerable<XamlNodeInfo> GetDeferredNodes (XamlMember xm, object val)

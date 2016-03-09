@@ -85,6 +85,11 @@ namespace Portable.Xaml
 			return property.GetCustomAttributes(typeof(T), inherit).OfType<T>().FirstOrDefault();
 		}
 
+		public static IEnumerable<T> GetCustomAttributes<T>(this Assembly assembly, bool inherit = true)
+		{
+			return assembly.GetCustomAttributes(typeof(T), inherit).Cast<T>();
+		}
+
 		public static FieldInfo GetRuntimeField(this Type type, string name)
 		{
 			return type.GetField(name);

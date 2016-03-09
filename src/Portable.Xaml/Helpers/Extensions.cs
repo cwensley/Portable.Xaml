@@ -13,6 +13,23 @@ namespace Portable.Xaml
 		{
 			return new ReadOnlyCollection<T>(enumerable.ToList());
 		}
+
+		public static bool Matches(this AssemblyName name, AssemblyName other)
+		{
+			if (ReferenceEquals(name, other))
+				return true;
+			// Name should match
+			if (name.Name != other.Name)
+				return false;
+
+			// pk should match, if one is specified
+			var namePk = name.GetPublicKeyToken();
+			var otherPk = name.GetPublicKeyToken();
+			if (namePk == null)
+				return otherPk == null;
+
+			return namePk.SequenceEqual(otherPk);
+		}
 	}
 }
 

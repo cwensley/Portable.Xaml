@@ -836,5 +836,28 @@ namespace MonoTests.Portable.Xaml
 			Read_DefaultValueMemberShouldBeOmittedNullableIntNonDefault(xr);
 		}
 
+
+		[Test]
+		[ExpectedException(typeof(XamlObjectReaderException))]
+		public void Read_InternalType()
+		{
+			var obj = new TestClassInternal();
+			var xr = new XamlObjectReader(obj);
+			while (xr.Read())
+			{
+			}
+		}
+
+		[Test]
+		[ExpectedException(typeof(XamlObjectReaderException))]
+		public void Read_InternalPropertyType()
+		{
+			var obj = new TestClassPropertyInternal();
+			obj.Bar = new TestClassInternal();
+			var xr = new XamlObjectReader(obj);
+			while (xr.Read())
+			{
+			}
+		}
 	}
 }

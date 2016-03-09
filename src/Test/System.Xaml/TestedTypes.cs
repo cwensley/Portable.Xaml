@@ -278,6 +278,23 @@ namespace MonoTests.Portable.Xaml
 		public DateTime TheDateAndTime { get; set; }
 	}
 
+	public class TestClassBase
+	{
+
+	}
+
+	class TestClassInternal : TestClassBase
+	{
+		public string Foo { get; set; }
+	}
+
+	public class TestClassPropertyInternal
+	{
+		public string Foo { get; set; }
+
+		public TestClassBase Bar { get; set; }
+	}
+
 	public class TestClassWithDefaultValuesString
 	{
 		public string NoDefaultValue { get; set; }
