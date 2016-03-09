@@ -269,7 +269,7 @@ namespace Portable.Xaml
 					var mem = members.FirstOrDefault(r => r.Member.ConstructorArgumentName() == p.Name);
 					if (mem == null && p.HasDefaultValue())
 					{
-						mem = new XamlWriterInternalBase.MemberAndValue(type.SchemaContext.GetParameter(p, type));
+						mem = new XamlWriterInternalBase.MemberAndValue(type.SchemaContext.GetParameter(p));
 						mem.Value = p.DefaultValue;
 					}
 					return mem;
@@ -317,7 +317,7 @@ namespace Portable.Xaml
 					// matches constructor arguments
 					return constructor
 						.GetParameters()
-						.Select(p => type.SchemaContext.GetParameter(p, type));
+						.Select(p => type.SchemaContext.GetParameter(p));
 				}
 			}
 

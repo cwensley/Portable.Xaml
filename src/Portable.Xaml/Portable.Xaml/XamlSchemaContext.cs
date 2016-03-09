@@ -520,7 +520,7 @@ namespace Portable.Xaml
 		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
 
 		[EnhancedXaml]
-		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo, XamlType type)
+		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo)
 		{
 			XamlMember member;
 			if (parameter_cache.TryGetValue(parameterInfo, out member))
