@@ -691,7 +691,7 @@ namespace Portable.Xaml
 
 		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
-			return UnderlyingType != null ? new TypeAttributeProvider(UnderlyingType) : null;
+			return UnderlyingType != null ? SchemaContext.GetCustomAttributeProvider(UnderlyingType) : null;
 		}
 		
 		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()

@@ -567,5 +567,17 @@ namespace Portable.Xaml
 				return member;
 			return member_cache[key] = new XamlMember(attachablePropertyName, adder, this);
 		}
+
+		[EnhancedXaml]
+		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(Type type)
+		{
+			return new TypeAttributeProvider(type);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(MemberInfo member)
+		{
+			return new MemberAttributeProvider(member);
+		}
 	}
 }

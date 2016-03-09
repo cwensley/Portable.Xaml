@@ -360,7 +360,7 @@ namespace Portable.Xaml
 
 		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
-			return UnderlyingMember != null ? new MemberAttributeProvider(UnderlyingMember) : null;
+			return UnderlyingMember != null ? context.GetCustomAttributeProvider(UnderlyingMember) : null;
 		}
 
 		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()
