@@ -781,7 +781,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedString()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesString();
 			var xr = new XamlObjectReader(test);
 			Read_DefaultValueMemberShouldBeOmittedString(xr);
@@ -790,7 +789,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedStringNonDefault()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesString();
 			test.NoDefaultValue = "Hello";
 			test.NullDefaultValue = "There";
@@ -802,7 +800,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedInt()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesInt();
 			var xr = new XamlObjectReader(test);
 			Read_DefaultValueMemberShouldBeOmittedInt(xr);
@@ -811,7 +808,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedIntNonDefault()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesInt();
 			test.NoDefaultValue = 1;
 			test.ZeroDefaultValue = 2;
@@ -823,7 +819,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedNullableInt()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesNullableInt();
 			var xr = new XamlObjectReader(test);
 			Read_DefaultValueMemberShouldBeOmittedNullableInt(xr);
@@ -832,7 +827,6 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_DefaultValueMemberShouldBeOmittedNullableIntNonDefault()
 		{
-			var sc = new XamlSchemaContext();
 			var test = new TestClassWithDefaultValuesNullableInt();
 			test.NoDefaultValue = 1;
 			test.NullDefaultValue = 2;
