@@ -34,6 +34,8 @@
     <WarningLevel>4</WarningLevel>
     <NoStdLib>false</NoStdLib>
     <OutputPath>..\..\artifacts\net_4_5\Release</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <!-- Set AddAdditionalExplicitAssemblyReferences to false, otherwise if targetting .NET4.0, 
   Microsoft.NETFramework.props will force a dependency on the assembly System.Core. This
@@ -51,6 +53,7 @@
     <Compile Include="System.Windows.Markup\TypeExtensionTest.cs" />
     <Compile Include="System.Windows.Markup\ValueSerializerAttributeTest.cs" />
     <Compile Include="System.Windows.Markup\ValueSerializerTest.cs" />
+    <Compile Include="System.Windows.Markup\XamlDeferLoadTest.cs" />
     <Compile Include="System.Windows.Markup\XDataTest.cs" />
     <Compile Include="System.Xaml.Schema\XamlMemberInvokerTest.cs" />
     <Compile Include="System.Xaml.Schema\XamlTypeInvokerTest.cs" />
@@ -65,10 +68,12 @@
     <Compile Include="System.Xaml\TestedTypes.cs" />
     <Compile Include="System.Xaml\ValueSerializerContextTest.cs" />
     <Compile Include="System.Xaml\XamlBackgroundReaderTest.cs" />
+    <Compile Include="System.Xaml\XamlDeferringLoaderTest.cs" />
     <Compile Include="System.Xaml\XamlDirectiveTest.cs" />
     <Compile Include="System.Xaml\XamlDuplicateMemberExceptionTest.cs" />
     <Compile Include="System.Xaml\XamlLanguageTest.cs" />
     <Compile Include="System.Xaml\XamlMemberTest.cs" />
+    <Compile Include="System.Xaml\XamlNodeListTest.cs" />
     <Compile Include="System.Xaml\XamlNodeQueueTest.cs" />
     <Compile Include="System.Xaml\XamlObjectEventArgsTest.cs" />
     <Compile Include="System.Xaml\XamlObjectReaderSettingsTest.cs" />

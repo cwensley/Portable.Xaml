@@ -35,20 +35,43 @@ namespace Portable.Xaml.Markup
 	{
 		public XamlDeferLoadAttribute (string loaderType, string contentType)
 		{
+			if (loaderType == null)
+				throw new ArgumentNullException(nameof(loaderType));
+			if (contentType == null)
+				throw new ArgumentNullException(nameof(contentType));
 			LoaderTypeName = loaderType;
 			ContentTypeName = contentType;
 		}
 
 		public XamlDeferLoadAttribute (Type loaderType, Type contentType)
 		{
+			if (loaderType == null)
+				throw new ArgumentNullException(nameof(loaderType));
+			if (contentType == null)
+				throw new ArgumentNullException(nameof(contentType));
 			LoaderType = loaderType;
+			LoaderTypeName = loaderType.AssemblyQualifiedName;
 			ContentType = contentType;
+			ContentTypeName = contentType.AssemblyQualifiedName;
 		}
-		
-		public Type ContentType { get; private set; }
+
+		public Type ContentType { get; set; }
+
 		public string ContentTypeName { get; private set; }
-		public Type LoaderType { get; private set; }
+
+		public Type LoaderType { get; set; }
+
 		public string LoaderTypeName { get; private set; }
+
+		internal Type GetLoaderType()
+		{
+			return LoaderType ?? Type.GetType(LoaderTypeName);
+		}
+
+		internal Type GetContentType()
+		{
+			return ContentType ?? Type.GetType(ContentTypeName);
+		}
 
 	}
 }

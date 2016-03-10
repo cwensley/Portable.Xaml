@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -23,47 +23,33 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using Portable.Xaml.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
-using MonoTests.Portable.Xaml;
-#if PCL
 using Portable.Xaml.Markup;
-using Portable.Xaml.ComponentModel;
-using Portable.Xaml;
 using Portable.Xaml.Schema;
-#else
-using System.Windows.Markup;
-using System.ComponentModel;
-using System.Xaml;
-using System.Xaml.Schema;
-#endif
+using System.Xml.Serialization;
+using System.Collections.ObjectModel;
 
-using Category = NUnit.Framework.CategoryAttribute;
-
-namespace MonoTests.Portable.Xaml.Markup
+namespace Portable.Xaml
 {
-    [TestFixture]
-    public class ValueSerializerAttributeTest
-    {
-        private static string TestTypeTypeName = typeof(TestType).AssemblyQualifiedName;
-        private class TestType { }
+	/// <summary>
+	/// Struct to store flags and cache their value
+	/// </summary>
+	struct FlagValue
+	{
+		int hasValue;
+		int values;
+		public bool Get(int flag, Func<bool> getFlag)
+		{
+			if ((hasValue & flag) != 0)
+				return (values & flag) != 0;
 
-        [Test]
-        public void ConstructedWithType()
-        {
-            var vsa = new ValueSerializerAttribute(typeof(TestType));
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#2");
-        }
-
-        [Test]
-        public void ConstructedWithTypeName()
-        {
-            var vsa = new ValueSerializerAttribute(TestTypeTypeName);
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#1");
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-        }
-    }
+			var value = getFlag();
+			hasValue |= flag;
+			if (value)
+				values |= flag;
+			return value;
+		}
+	}
 }

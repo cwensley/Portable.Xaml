@@ -1221,6 +1221,68 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (r.IsEof, "#3-2");
 		}
 
+		protected void Read_CustomExtensionWithChildExtensionAndNamedProperty(XamlReader r)
+		{
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); // ns
+			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
+			r.Read (); 
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#2-0");
+			var xt = r.Type;
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (ValueWrapper)), xt, "#2");
+
+			if (r is XamlXmlReader)
+				ReadBase (r);
+
+			Assert.IsTrue (r.Read (), "#3");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#3-1");
+			Assert.AreEqual (xt.GetMember ("StringValue"), r.Member, "#3-2");
+			Assert.IsTrue (r.Read (), "#4");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#4-1");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (MyExtension2)), xt = r.Type, "#4-2");
+			Assert.IsTrue (r.Read (), "#5");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#5-1");
+			Assert.AreEqual(xt.GetMember("Foo"), r.Member, "#5-2");
+
+			// Child TypeExtension
+			Assert.IsTrue (r.Read (), "#6");
+			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "#6-1");
+			Assert.AreEqual (r.SchemaContext.GetXamlType (typeof (TypeExtension)), r.Type, "#6-2");
+			Assert.IsTrue (r.Read (), "#7");
+			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "#7-1");
+			Assert.IsTrue (r.Read (), "#8");
+			Assert.AreEqual (XamlNodeType.Value, r.NodeType, "#8-1");
+			Assert.AreEqual ("TestClass1", r.Value, "#8-2");
+			Assert.IsTrue (r.Read (), "#9");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#9-1");
+			Assert.IsTrue (r.Read (), "#10");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#10-1");
+
+			Assert.IsTrue (r.Read (), "#11");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#11-1");
+			Assert.IsTrue (r.Read (), "#12");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "#12-1");
+			Assert.AreEqual(xt.GetMember("Bar"), r.Member, "#12-2");
+
+			Assert.IsTrue(r.Read(), "#13");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "#13-1");
+			Assert.AreEqual("Value For Bar", r.Value, "#13-2");
+
+			// Finish up MyExtension2
+			Assert.IsTrue (r.Read (), "#14");
+			Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "#14-1");
+			Assert.IsTrue (r.Read (), "#15");
+			Assert.AreEqual (XamlNodeType.EndObject, r.NodeType, "#15-1");
+
+			Assert.IsTrue (r.Read (), "#16"); // EndMember
+			Assert.IsTrue (r.Read (), "#17"); // EndObject
+			Assert.IsFalse (r.Read (), "#18");
+			Assert.AreEqual (XamlNodeType.None, r.NodeType, "#18-1");
+			Assert.IsTrue (r.IsEof, "#19");
+		}
+
+
 		protected void Read_CustomExtensionWithCommasInPositionalValue(XamlReader r)
 		{
 			r.Read(); // ns
@@ -1261,23 +1323,6 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse(r.Read(), "#9");
 			Assert.AreEqual(XamlNodeType.None, r.NodeType, "#3-2");
 			Assert.IsTrue(r.IsEof, "#3-2");
-		}
-
-		protected void ReadMemberWithValue(XamlReader r, XamlMember member, string msg, params object[] values)
-		{
-			Assert.IsTrue(r.Read(), msg + "-1");
-			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, msg + "-2");
-			Assert.AreEqual(member, r.Member, msg + "-3");
-
-			foreach (var value in values)
-			{
-				Assert.IsTrue(r.Read(), msg + "-4");
-				Assert.AreEqual(XamlNodeType.Value, r.NodeType, msg + "-5");
-				Assert.AreEqual(value, r.Value, msg + "-6");
-			}
-
-			Assert.IsTrue(r.Read(), msg + "-7");
-			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, msg + "-8");
 		}
 
 		protected void Read_CustomExtensionWithPositionalAndNamed(XamlReader r)
@@ -3148,6 +3193,56 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (r.Read (), "end");
 		}
 
+		protected void Read_DeferredLoadingContainerMember(XamlReader r)
+		{
+			Assert.IsTrue(r.Read(), "ns#1-1");
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
+			Assert.IsNotNull(r.Namespace, "ns#1-3");
+			Assert.AreEqual("", r.Namespace.Prefix, "ns#1-4");
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().Assembly.GetName().Name;
+			Assert.AreEqual(assns, r.Namespace.Namespace, "ns#1-5");
+
+			// t:DeferredLoadingContainerMember
+			Assert.IsTrue(r.Read(), "so#1-1");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "so#1-2");
+			var xt = new XamlType(typeof(DeferredLoadingContainerMember), r.SchemaContext);
+			Assert.AreEqual(xt, r.Type, "so#1-3");
+
+			if (r is XamlXmlReader)
+				ReadBase(r);
+
+			Assert.IsTrue(r.Read(), "sm1#1");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "sm1#2");
+			Assert.AreEqual(xt.GetMember("Child"), r.Member, "sm1#3");
+
+			Assert.IsTrue(r.Read(), "v#1-1");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "v#1-2");
+			Assert.AreEqual(xt = r.SchemaContext.GetXamlType(typeof(DeferredLoadingChild)), r.Type, "v#1-3");
+
+			Assert.IsTrue(r.Read(), "sm1#1");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, "sm1#2");
+			Assert.AreEqual(xt.GetMember("Foo"), r.Member, "sm1#3");
+
+			Assert.IsTrue(r.Read(), "em#1-1");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, "em#1-2");
+			Assert.AreEqual("Some value", r.Value, "em#1-2");
+
+			Assert.IsTrue(r.Read(), "em#1-1");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "em#1-2");
+
+			Assert.IsTrue(r.Read(), "em#1-1");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "em#1-2");
+
+			Assert.IsTrue(r.Read(), "em#1-1");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "em#1-2");
+
+			// /t:NullableContainer
+			Assert.IsTrue(r.Read(), "eo#1-1");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "eo#1-2");
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
 		protected void Read_DirectListContainer (XamlReader r)
 		{
 			var assns1 = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
@@ -3676,8 +3771,118 @@ if (i == 0) {
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "ct#8");
 		}
 
+
+		protected void Read_DefaultValueMemberShouldBeOmittedString(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadNamespace(r, "x", XamlLanguage.Xaml2006Namespace, "ns2");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesString));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMember(r, xt.GetMember("NoDefaultValue"), "m1", () =>
+				{
+					ReadObject(r, XamlLanguage.Null, "o2");
+				});
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
+		protected void Read_DefaultValueMemberShouldBeOmittedStringNonDefault(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesString));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMemberWithValue(r, xt.GetMember("NoDefaultValue"), "m1", "Hello");
+				ReadMemberWithValue(r, xt.GetMember("NullDefaultValue"), "m2", "There");
+				ReadMemberWithValue(r, xt.GetMember("SpecificDefaultValue"), "m3", "Friend");
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
+		protected void Read_DefaultValueMemberShouldBeOmittedInt(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesInt));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMemberWithValue(r, xt.GetMember("NoDefaultValue"), "m1", "0");
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
+		protected void Read_DefaultValueMemberShouldBeOmittedIntNonDefault(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesInt));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMemberWithValue(r, xt.GetMember("NoDefaultValue"), "m1", "1");
+				ReadMemberWithValue(r, xt.GetMember("SpecificDefaultValue"), "m3", "3");
+				ReadMemberWithValue(r, xt.GetMember("ZeroDefaultValue"), "m2", "2");
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
+		protected void Read_DefaultValueMemberShouldBeOmittedNullableInt(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadNamespace(r, "x", XamlLanguage.Xaml2006Namespace, "ns2");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesNullableInt));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMember(r, xt.GetMember("NoDefaultValue"), "m1", () =>
+				{
+					ReadObject(r, XamlLanguage.Null, "o2");
+				});
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
+		protected void Read_DefaultValueMemberShouldBeOmittedNullableIntNonDefault(XamlReader r)
+		{
+			ReadNamespace(r, "", Compat.TestAssemblyNamespace, "ns1");
+
+			var xt = r.SchemaContext.GetXamlType(typeof(TestClassWithDefaultValuesNullableInt));
+			ReadObject(r, xt, "o1", () =>
+			{
+				ReadBase(r);
+
+				ReadMemberWithValue(r, xt.GetMember("NoDefaultValue"), "m1", "1");
+				ReadMemberWithValue(r, xt.GetMember("NullDefaultValue"), "m2", "2");
+				ReadMemberWithValue(r, xt.GetMember("SpecificDefaultValue"), "m3", "3");
+				ReadMemberWithValue(r, xt.GetMember("ZeroDefaultValue"), "m4", "4");
+			});
+
+			Assert.IsFalse(r.Read(), "end");
+		}
+
 		protected void ReadBase (XamlReader r)
 		{
+			if (!(r is XamlXmlReader))
+				return;
 #if !PCL
 			if (Type.GetType ("Mono.Runtime") == null)
 				return;
@@ -3702,6 +3907,47 @@ if (i == 0) {
 			Assert.IsNotNull (r.Namespace, label + "-3");
 			Assert.AreEqual (prefix, r.Namespace.Prefix, label + "-4");
 			Assert.AreEqual (ns, r.Namespace.Namespace, label + "-5");
+		}
+
+		void ReadMemberWithValue (XamlReader r, XamlMember member, string label, params object[] values)
+		{
+			ReadMember(r, member, label, () => {
+				for (int i = 0; i < values.Length; i++)
+				{
+					ReadValue(r, values[i], label + "-v" + i);
+				}
+			});
+		}
+
+		void ReadObject(XamlReader r, XamlType type, string label, Action readContent = null)
+		{
+			Assert.IsTrue(r.Read(), "so#1-1");
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "so#1-2");
+			Assert.AreEqual(type, r.Type, "so#1-3");
+
+			if (readContent != null)
+				readContent();
+
+			Assert.IsTrue(r.Read(), "eo#1-1");
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "eo#1-2");
+		}
+
+		void ReadValue(XamlReader r, object value, string label)
+		{
+			Assert.IsTrue(r.Read(), label + "-1");
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType, label + "-2");
+			Assert.AreEqual(value, r.Value, label + "-3");
+		}
+
+		void ReadMember (XamlReader r, XamlMember member, string label, Action readContent = null)
+		{
+			Assert.IsTrue(r.Read(), label + "-1");
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, label + "-2");
+			Assert.AreEqual(member, r.Member, label + "-3");
+			if (readContent != null)
+				readContent();
+			Assert.IsTrue(r.Read(), label + "-5");
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, label + "-6");
 		}
 	}
 }

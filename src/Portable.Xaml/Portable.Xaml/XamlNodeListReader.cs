@@ -25,57 +25,61 @@ using System.Collections.Generic;
 
 namespace Portable.Xaml
 {
-	public class XamlNodeList
+	class XamlNodeListReader : XamlReader
 	{
-		readonly List<XamlNodeInfo> nodes;
+		XamlNodeList source;
+		XamlNodeInfo node;
+		int position = -1;
 
-		internal XamlSchemaContext SchemaContext { get; }
-
-		public XamlNodeList(XamlSchemaContext schemaContext)
+		public XamlNodeListReader(XamlNodeList source)
 		{
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			Writer = new XamlNodeListWriter(this);
-			SchemaContext = schemaContext;
-			nodes = new List<XamlNodeInfo>();
+			this.source = source;
 		}
 
-		public XamlNodeList(XamlSchemaContext schemaContext, int size)
+		public override bool Read()
 		{
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			Writer = new XamlNodeListWriter(this);
-			SchemaContext = schemaContext;
-			nodes = new List<XamlNodeInfo>(size);
+			position++;
+			if (position >= source.Count)
+				return false;
+
+			node = source.GetNode(position);
+			return true;
 		}
 
-		public int Count
+		public override bool IsEof
 		{
-			get { return nodes.Count; }
+			get { return position >= source.Count; }
 		}
 
-		public XamlWriter Writer { get; }
-
-		public void Clear()
+		public override XamlMember Member
 		{
-			nodes.Clear();
+			get { return NodeType == XamlNodeType.StartMember ? node.Member.Member : null; }
 		}
 
-		public XamlReader GetReader()
+		public override NamespaceDeclaration Namespace
 		{
-			if (!((XamlNodeListWriter)Writer).IsClosed)
-				throw new XamlException("Writer must be closed");
-			return new XamlNodeListReader(this);
+			get { return NodeType == XamlNodeType.NamespaceDeclaration ? node.Value as NamespaceDeclaration : null; }
 		}
 
-		internal void Add(XamlNodeInfo node)
+		public override XamlNodeType NodeType
 		{
-			nodes.Add(node);
+			get { return node.NodeType; }
 		}
 
-		internal XamlNodeInfo GetNode(int position)
+		public override XamlSchemaContext SchemaContext
 		{
-			return nodes[position];
+			get { return source.SchemaContext; }
+		}
+
+		public override XamlType Type
+		{
+			get { return NodeType == XamlNodeType.StartObject ? node.Object.Type : null; }
+		}
+
+		public override object Value
+		{
+			get { return NodeType == XamlNodeType.Value ? node.Value : null; }
 		}
 	}
+	
 }

@@ -756,7 +756,108 @@ namespace MonoTests.Portable.Xaml
 		{
 			var obj = new NullableContainer () { TestProp = 5 };
 			var xr = new XamlObjectReader (obj);
-			Read_NullableContainer (xr);
+			Read_NullableContainer(xr);
+		}
+
+		[Test]
+		public void Read_DeferredLoadingContainerMember ()
+		{
+			var child = new DeferredLoadingChild();
+			var ctx = new XamlSchemaContext();
+			child.List = new XamlNodeList(ctx);
+			var xt = ctx.GetXamlType(typeof(DeferredLoadingChild));
+			child.List.Writer.WriteStartObject(xt);
+			child.List.Writer.WriteStartMember(xt.GetMember("Foo"));
+			child.List.Writer.WriteValue("Some value");
+			child.List.Writer.WriteEndMember();
+			child.List.Writer.WriteEndObject();
+			child.List.Writer.Close();
+			var obj = new DeferredLoadingContainerMember { Child = child };
+
+			var xr = new XamlObjectReader (obj);
+			Read_DeferredLoadingContainerMember(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedString()
+		{
+			var test = new TestClassWithDefaultValuesString();
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedString(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedStringNonDefault()
+		{
+			var test = new TestClassWithDefaultValuesString();
+			test.NoDefaultValue = "Hello";
+			test.NullDefaultValue = "There";
+			test.SpecificDefaultValue = "Friend";
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedStringNonDefault(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedInt()
+		{
+			var test = new TestClassWithDefaultValuesInt();
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedInt(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedIntNonDefault()
+		{
+			var test = new TestClassWithDefaultValuesInt();
+			test.NoDefaultValue = 1;
+			test.ZeroDefaultValue = 2;
+			test.SpecificDefaultValue = 3;
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedIntNonDefault(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedNullableInt()
+		{
+			var test = new TestClassWithDefaultValuesNullableInt();
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedNullableInt(xr);
+		}
+
+		[Test]
+		public void Read_DefaultValueMemberShouldBeOmittedNullableIntNonDefault()
+		{
+			var test = new TestClassWithDefaultValuesNullableInt();
+			test.NoDefaultValue = 1;
+			test.NullDefaultValue = 2;
+			test.SpecificDefaultValue = 3;
+			test.ZeroDefaultValue = 4;
+			var xr = new XamlObjectReader(test);
+			Read_DefaultValueMemberShouldBeOmittedNullableIntNonDefault(xr);
+		}
+
+
+		[Test]
+		[ExpectedException(typeof(XamlObjectReaderException))]
+		public void Read_InternalType()
+		{
+			var obj = new TestClassInternal();
+			var xr = new XamlObjectReader(obj);
+			while (xr.Read())
+			{
+			}
+		}
+
+		[Test]
+		[ExpectedException(typeof(XamlObjectReaderException))]
+		public void Read_InternalPropertyType()
+		{
+			var obj = new TestClassPropertyInternal();
+			obj.Bar = new TestClassInternal();
+			var xr = new XamlObjectReader(obj);
+			while (xr.Read())
+			{
+			}
 		}
 	}
 }

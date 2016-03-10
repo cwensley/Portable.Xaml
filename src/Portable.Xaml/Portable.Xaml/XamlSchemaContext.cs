@@ -166,9 +166,10 @@ namespace Portable.Xaml
 				throw new ArgumentNullException("xamlNamespace");
 			if (all_xaml_types == null)
 			{
-				all_xaml_types = new Dictionary<string,List<XamlType>>();
+				var types = new Dictionary<string,List<XamlType>>();
 				foreach (var ass in AssembliesInScope)
-					FillAllXamlTypes(ass);
+					FillAllXamlTypes(types, ass);
+				all_xaml_types = types;
 			}
 
 			List<XamlType> l;
@@ -219,15 +220,10 @@ namespace Portable.Xaml
 			XamlType xt;
 			if (run_time_types.TryGetValue(type, out xt))
 				return xt;
-			if (xt == null)
-				foreach (var ns in GetAllXamlNamespaces ())
-					if ((xt = GetAllXamlTypes(ns).FirstOrDefault(t => t.UnderlyingType == type)) != null)
-						break;
-			if (xt == null)
-			{
-				xt = new XamlType(type, this);
-				run_time_types[type] = xt;
-			}
+
+			xt = new XamlType(type, this);
+
+			run_time_types[type] = xt;
 			return xt;
 		}
 
@@ -253,31 +249,18 @@ namespace Portable.Xaml
 		{
 			XamlType ret;
 			var key = Tuple.Create(xamlNamespace, name);
-			if ((typeArguments == null || typeArguments.Length == 0) && type_lookup.TryGetValue(key, out ret))
+			var useLookup = typeArguments == null || typeArguments.Length == 0;
+			if (useLookup && type_lookup.TryGetValue(key, out ret))
 				return ret;
+			
 			string dummy;
 			if (TryGetCompatibleXamlNamespace(xamlNamespace, out dummy))
 				xamlNamespace = dummy;
 
-			if (xamlNamespace == XamlLanguage.Xaml2006Namespace)
-			{
-				ret = XamlLanguage.SpecialNames.Find(name, xamlNamespace);
-				if (ret == null)
-					ret = XamlLanguage.AllTypes.FirstOrDefault(t => TypeMatches(t, xamlNamespace, name, typeArguments));
-				if (ret != null)
-					return ret;
-			}
-			ret = run_time_types.Values.FirstOrDefault(t => TypeMatches(t, xamlNamespace, name, typeArguments));
-			if (ret == null)
-				ret = GetAllXamlTypes(xamlNamespace).FirstOrDefault(t => TypeMatches(t, xamlNamespace, name, typeArguments));
+			ret = ResolveXamlTypeName(xamlNamespace, name, typeArguments, false);
 
-			if (reference_assemblies == null)
-			{
-				var type = ResolveXamlTypeName(xamlNamespace, name, typeArguments);
-				if (type != null)
-					ret = GetXamlType(type);
-			}
-			type_lookup[key] = ret;
+			if (useLookup)
+				type_lookup[key] = ret;
 
 			// If the type was not found, it just returns null.
 			return ret;
@@ -288,7 +271,7 @@ namespace Portable.Xaml
 			if (t.PreferredXamlNamespace == ns && t.Name == name && t.TypeArguments.ListEquals(typeArgs))
 				return true;
 			if (t.IsMarkupExtension)
-				return t.PreferredXamlNamespace == ns && t.Name.Substring(0, t.Name.Length - 9) == name && t.TypeArguments.ListEquals(typeArgs);
+				return t.PreferredXamlNamespace == ns && t.GetInternalXmlName() == name && t.TypeArguments.ListEquals(typeArgs);
 			else
 				return false;
 		}
@@ -394,17 +377,57 @@ namespace Portable.Xaml
 				compat_nss.Add(xca.OldNamespace, xca.NewNamespace);
 		}
 
-		void FillAllXamlTypes(AssemblyInfo ass)
+		Type FindType(string xamlNamespace, string name, Type[] genArgs)
+		{
+			if (genArgs != null)
+				name += "`" + genArgs.Length;
+			foreach (var ass in AssembliesInScope)
+				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
+				{
+					if (xamlNamespace != xda.XmlNamespace)
+						continue;
+
+					var assembly = ass.Assembly;
+					if (!string.IsNullOrEmpty(xda.AssemblyName))
+						#if PCL136
+						assembly = Assembly.Load (xda.AssemblyName);
+						#else
+						assembly = Assembly.Load(new AssemblyName(xda.AssemblyName));
+					#endif
+					var n = xda.ClrNamespace + "." + name;
+					var t = assembly.GetType(n);
+					if (t == null)
+					{
+						t = assembly.GetType(n + "Extension");
+						if (t != null && !GetXamlType(t).IsMarkupExtension)
+							continue;
+					}
+					if (t != null && t.Namespace == xda.ClrNamespace)
+					{
+						var ti = t.GetTypeInfo();
+						if (!ti.IsNested && !ti.IsAbstract)
+						{
+							if (genArgs != null && (!ti.IsGenericType || !ti.GetGenericArguments().SequenceEqual(genArgs)))
+								continue;
+						
+							return t;
+						}
+					}
+				}
+			return null;
+		}
+
+		void FillAllXamlTypes(Dictionary<string,List<XamlType>> types, AssemblyInfo ass)
 		{
 			try
 			{
 				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
 				{
-					var l = all_xaml_types.FirstOrDefault(p => p.Key == xda.XmlNamespace).Value;
+					var l = types.FirstOrDefault(p => p.Key == xda.XmlNamespace).Value;
 					if (l == null)
 					{
 						l = new List<XamlType>();
-						all_xaml_types.Add(xda.XmlNamespace, l);
+						types.Add(xda.XmlNamespace, l);
 					}
 					var assembly = ass.Assembly;
 					if (!string.IsNullOrEmpty(xda.AssemblyName))
@@ -430,46 +453,59 @@ namespace Portable.Xaml
 		static readonly int clr_ns_len = clr_ns.Length;
 		static readonly int clr_ass_len = "assembly=".Length;
 
-		Type ResolveXamlTypeName(string xmlNamespace, string xmlLocalName, IList<XamlType> typeArguments)
+		XamlType ResolveXamlTypeName(string xmlNamespace, string xmlLocalName, XamlType[] typeArguments, bool required)
 		{
-			string ns = xmlNamespace;
-			string name = xmlLocalName;
-
-			if (ns == XamlLanguage.Xaml2006Namespace)
+			if (xmlNamespace == XamlLanguage.Xaml2006Namespace)
 			{
-				var xt = XamlLanguage.SpecialNames.Find(name, ns);
+				var xt = XamlLanguage.SpecialNames.Find(xmlLocalName, xmlNamespace);
 				if (xt == null)
-					xt = XamlLanguage.AllTypes.FirstOrDefault(t => t.Name == xmlLocalName);
-				if (xt == null)
-					throw new FormatException(string.Format("There is no type '{0}' in XAML namespace", name));
-				return xt.UnderlyingType;
+					xt = XamlLanguage.AllTypes.FirstOrDefault(t => TypeMatches(t, xmlNamespace, xmlLocalName, typeArguments));
+				if (xt != null)
+					return xt;
 			}
-			else if (!ns.StartsWith(clr_ns, StringComparison.Ordinal))
-				return null;
 
 			Type[] genArgs = null;
-			if (typeArguments != null && typeArguments.Count > 0)
+			if (typeArguments != null && typeArguments.Length > 0)
 			{
 				genArgs = (from t in typeArguments
-				           select t.UnderlyingType).ToArray();
+					select t.UnderlyingType).ToArray();
 				if (genArgs.Any(t => t == null))
 					return null;
 			}
 
-			// convert xml namespace to clr namespace and assembly
-			string[] split = ns.Split(';');
-			if (split.Length != 2 || split[0].Length < clr_ns_len || split[1].Length <= clr_ass_len)
-				throw new XamlParseException(string.Format("Cannot resolve runtime namespace from XML namespace '{0}'", ns));
-			string tns = split[0].Substring(clr_ns_len);
-			string aname = split[1].Substring(clr_ass_len);
+			Type ret;
+			if (!xmlNamespace.StartsWith(clr_ns, StringComparison.Ordinal))
+			{
+				ret = FindType(xmlNamespace, xmlLocalName, genArgs);
+				if (ret == null)
+					return null;
+			}
+			else
+			{
+				// convert xml namespace to clr namespace and assembly
+				string[] split = xmlNamespace.Split(';');
+				if (split.Length != 2 || split[0].Length < clr_ns_len || split[1].Length <= clr_ass_len)
+					throw new XamlParseException(string.Format("Cannot resolve runtime namespace from XML namespace '{0}'", xmlNamespace));
+				string tns = split[0].Substring(clr_ns_len);
+				string aname = split[1].Substring(clr_ass_len);
 
-			string taqn = GetTypeName(tns, name, genArgs);
-			var ass = OnAssemblyResolve(aname);
-			// MarkupExtension type could omit "Extension" part in XML name.
-			Type ret = ass == null ? null : ass.GetType(taqn) ?? ass.GetType(GetTypeName(tns, name + "Extension", genArgs));
-			if (ret == null)
-				throw new XamlParseException(string.Format("Cannot resolve runtime type from XML namespace '{0}', local name '{1}' with {2} type arguments ({3})", ns, name, typeArguments != null ? typeArguments.Count : 0, taqn));
-			return genArgs == null ? ret : ret.MakeGenericType(genArgs);
+				string taqn = GetTypeName(tns, xmlLocalName, genArgs);
+				var ass = OnAssemblyResolve(aname);
+				// MarkupExtension type could omit "Extension" part in XML name.
+				ret = ass?.GetType(taqn) ?? ass?.GetType(taqn + "Extension");
+				if (required && ret == null)
+					throw new XamlParseException(string.Format("Cannot resolve runtime type from XML namespace '{0}', local name '{1}' with {2} type arguments ({3})", xmlNamespace, xmlLocalName, typeArguments != null ? typeArguments.Length : 0, taqn));
+			}
+
+
+			// ensure only the referenced types are allowed
+			if (
+				ret == null
+				|| (reference_assemblies != null && !reference_assemblies.Contains(ret.GetTypeInfo().Assembly))
+			)
+				return null;
+
+			return GetXamlType(genArgs == null ? ret : ret.MakeGenericType(genArgs));
 		}
 
 		static string GetTypeName(string tns, string name, Type[] genArgs)
@@ -484,7 +520,7 @@ namespace Portable.Xaml
 		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
 
 		[EnhancedXaml]
-		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo, XamlType type)
+		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo)
 		{
 			XamlMember member;
 			if (parameter_cache.TryGetValue(parameterInfo, out member))
@@ -530,6 +566,18 @@ namespace Portable.Xaml
 			if (member_cache.TryGetValue(key, out member))
 				return member;
 			return member_cache[key] = new XamlMember(attachablePropertyName, adder, this);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(Type type)
+		{
+			return new TypeAttributeProvider(type);
+		}
+
+		[EnhancedXaml]
+		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(MemberInfo member)
+		{
+			return new MemberAttributeProvider(member);
 		}
 	}
 }

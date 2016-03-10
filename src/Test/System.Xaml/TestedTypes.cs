@@ -33,6 +33,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
+using sc = System.ComponentModel;
 
 
 #if PCL
@@ -67,8 +68,17 @@ using System.Xaml.Schema;
 [assembly:XmlnsCompatibleWith("urn:foo", "urn:bar")]
 [assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
+namespace MonoTests.Portable.Xaml.NamespaceTest
+{
+	public class NamespaceTestClass
+	{
+		public string Foo { get; set; }
+	}
+}
+
 namespace MonoTests.Portable.Xaml
 {
+
 	public class ArgumentAttributed
 	{
 		public ArgumentAttributed(string s1, string s2)
@@ -266,6 +276,59 @@ namespace MonoTests.Portable.Xaml
 	public class TestClass6
 	{
 		public DateTime TheDateAndTime { get; set; }
+	}
+
+	public class TestClassBase
+	{
+
+	}
+
+	class TestClassInternal : TestClassBase
+	{
+		public string Foo { get; set; }
+	}
+
+	public class TestClassPropertyInternal
+	{
+		public string Foo { get; set; }
+
+		public TestClassBase Bar { get; set; }
+	}
+
+	public class TestClassWithDefaultValuesString
+	{
+		public string NoDefaultValue { get; set; }
+
+		[sc.DefaultValue("")]
+		public string NullDefaultValue { get; set; } = "";
+
+		[sc.DefaultValue("Some Default")]
+		public string SpecificDefaultValue { get; set; } = "Some Default";
+	}
+
+	public class TestClassWithDefaultValuesInt
+	{
+		public int NoDefaultValue { get; set; }
+
+		[sc.DefaultValue(0)]
+		public int ZeroDefaultValue { get; set; }
+
+		[sc.DefaultValue(100)]
+		public int SpecificDefaultValue { get; set; } = 100;
+	}
+
+	public class TestClassWithDefaultValuesNullableInt
+	{
+		public int? NoDefaultValue { get; set; }
+
+		[sc.DefaultValue(null)]
+		public int? NullDefaultValue { get; set; }
+
+		[sc.DefaultValue(0)]
+		public int? ZeroDefaultValue { get; set; } = 0;
+
+		[sc.DefaultValue(100)]
+		public int? SpecificDefaultValue { get; set; } = 100;
 	}
 
 	public class MyExtension : MarkupExtension
@@ -1141,6 +1204,208 @@ namespace MonoTests.Portable.Xaml
 		public CollectionItem CollectionItem { get; set; }
 
 		public CollectionItemCollectionAddOverride Items { get; } = new CollectionItemCollectionAddOverride();
+	}
+
+	public class TestDeferredLoader : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			return new DeferredLoadingChild(xamlReader);
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			return ((DeferredLoadingChild)value).List.GetReader();
+		}
+	}
+
+	public class TestDeferredLoader2 : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			return new DeferredLoadingChild2(xamlReader);
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+
+	public class DeferredLoadingChild
+	{
+		public XamlNodeList List { get; set; }
+		public string Foo { get; set; }
+
+		public DeferredLoadingChild()
+		{
+		}
+
+		public DeferredLoadingChild(XamlReader reader)
+		{
+			List = new XamlNodeList(reader.SchemaContext);
+			XamlServices.Transform(reader, List.Writer);
+		}
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMember
+	{
+		[XamlDeferLoad(typeof(TestDeferredLoader), typeof(DeferredLoadingChild))]
+		public DeferredLoadingChild Child { get; set; }
+	}
+
+	[XamlDeferLoad(typeof(TestDeferredLoader2), typeof(DeferredLoadingChild2))]
+	public class DeferredLoadingChild2
+	{
+		public XamlNodeList List { get; set; }
+		public string Foo { get; set; }
+
+		public DeferredLoadingChild2()
+		{
+		}
+
+		public DeferredLoadingChild2(XamlReader reader)
+		{
+			List = new XamlNodeList(reader.SchemaContext);
+			XamlServices.Transform(reader, List.Writer);
+		}
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerType
+	{
+		public DeferredLoadingChild2 Child { get; set; }
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingWithInvalidType
+	{
+		[XamlDeferLoad("Some.Invalid.Type", "Some.Invalid.Type")]
+		public DeferredLoadingChild Child { get; set; }
+	}
+
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMemberStringType
+	{
+		[XamlDeferLoad("MonoTests.Portable.Xaml.TestDeferredLoader," + Compat.TestAssemblyName, "MonoTests.Portable.Xaml.DeferredLoadingChild," + Compat.TestAssemblyName)]
+		public DeferredLoadingChild Child { get; set; }
+	}
+
+	public class ImmutableTypeSingleArgument
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		public ImmutableTypeSingleArgument(string name)
+		{
+			Name = name;
+		}
+	}
+	public class ImmutableTypeMultipleArguments
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeMultipleArguments(string name, bool flag, int num)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	public class ImmutableTypeMultipleConstructors
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeMultipleConstructors(string name)
+		{
+			Name = name;
+		}
+
+		public ImmutableTypeMultipleConstructors(string name, bool flag, int num)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	public class ImmutableTypeOptionalParameters
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeOptionalParameters(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+	}
+
+	[ContentProperty("Collection")]
+	public class ImmutableTypeWithCollectionProperty
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeWithCollectionProperty(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+
+		public IList<TestClass4> Collection { get; } = new List<TestClass4>();
+	}
+
+	public class ImmutableTypeWithWritableProperty
+	{
+		[ConstructorArgument("name")]
+		public string Name { get; }
+
+		[ConstructorArgument("flag")]
+		public bool Flag { get; }
+
+		[ConstructorArgument("num")]
+		public int Num { get; }
+
+		public ImmutableTypeWithWritableProperty(string name, bool flag = true, int num = 100)
+		{
+			Name = name;
+			Flag = flag;
+			Num = num;
+		}
+
+		public string Foo { get; set; }
 	}
 }
 

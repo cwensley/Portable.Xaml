@@ -27,11 +27,40 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
 	public class XamlMember : IEquatable<XamlMember>
 	{
+		FlagValue flags;
+		[Flags]
+		enum MemberFlags {
+			IsAmbient = 1 << 0,
+			IsEvent = 1 << 1,
+			IsReadOnly = 1 << 2,
+			IsReadPublic = 1 << 3,
+			IsUnknown = 1 << 4,
+			IsWriteOnly = 1 << 5,
+			IsWritePublic = 1 << 6,
+			IsNameValid = 1 << 7,
+			IsConstructorArgument = 1 << 8
+		}
+		XamlType target_type;
+		MemberInfo underlying_member;
+		MethodInfo underlying_getter, underlying_setter;
+		XamlSchemaContext context;
+		XamlMemberInvoker invoker;
+		bool is_attachable, is_event, is_directive;
+		bool is_predefined_directive = XamlLanguage.InitializingDirectives;
+		string directive_ns;
+		ReferenceValue<XamlType> targetType;
+		ReferenceValue<XamlType> type;
+		ReferenceValue<XamlValueConverter<TypeConverter>> typeConverter;
+		ReferenceValue<XamlValueConverter<ValueSerializer>> valueSerializer;
+		ReferenceValue<ICustomAttributeProvider> customAttributeProvider;
+		ReferenceValue<XamlValueConverter<XamlDeferringLoader>> deferringLoader;
+
 		public XamlMember (EventInfo eventInfo, XamlSchemaContext schemaContext)
 			: this (eventInfo, schemaContext, null)
 		{
@@ -139,7 +168,6 @@ namespace Portable.Xaml
 			if (declaringType == null)
 				throw new ArgumentNullException ("declaringType");
 			Name = name;
-			this.invoker = new XamlMemberInvoker (this);
 			context = declaringType.SchemaContext;
 			DeclaringType = declaringType;
 			target_type = DeclaringType;
@@ -151,7 +179,7 @@ namespace Portable.Xaml
 			if (schemaContext == null)
 				throw new ArgumentNullException ("schemaContext");
 			context = schemaContext;
-			this.invoker = invoker ?? new XamlMemberInvoker (this);
+			this.invoker = invoker;
 		}
 
 		internal XamlMember (bool isDirective, string ns, string name)
@@ -161,14 +189,6 @@ namespace Portable.Xaml
 			is_directive = isDirective;
 		}
 
-		XamlType type, target_type;
-		MemberInfo underlying_member;
-		MethodInfo underlying_getter, underlying_setter;
-		XamlSchemaContext context;
-		XamlMemberInvoker invoker;
-		bool is_attachable, is_event, is_directive;
-		bool is_predefined_directive = XamlLanguage.InitializingDirectives;
-		string directive_ns;
 
 		internal MethodInfo UnderlyingGetter {
 			get { return LookupUnderlyingGetter (); }
@@ -205,11 +225,11 @@ namespace Portable.Xaml
 		}
 
 		public bool IsNameValid {
-			get { return XamlLanguage.IsValidXamlName (Name); }
+			get { return flags.Get((int)MemberFlags.IsNameValid, () => XamlLanguage.IsValidXamlName (Name)); }
 		}
 
 		public XamlValueConverter<XamlDeferringLoader> DeferringLoader {
-			get { return LookupDeferringLoader (); }
+			get { return deferringLoader.Get(LookupDeferringLoader); }
 		}
 		
 		static readonly XamlMember [] empty_members = new XamlMember [0];
@@ -219,43 +239,46 @@ namespace Portable.Xaml
 		}
 
 		public XamlMemberInvoker Invoker {
-			get { return LookupInvoker (); }
+			get { return invoker ?? (invoker = LookupInvoker()); }
 		}
+
 		public bool IsAmbient {
-			get { return LookupIsAmbient (); }
+			get { return flags.Get((int)MemberFlags.IsAmbient, LookupIsAmbient); }
 		}
 		public bool IsEvent {
-			get { return LookupIsEvent (); }
+			get { return flags.Get((int)MemberFlags.IsEvent, LookupIsEvent); }
 		}
 		public bool IsReadOnly {
-			get { return LookupIsReadOnly (); }
+			get { return flags.Get((int)MemberFlags.IsReadOnly, LookupIsReadOnly); }
 		}
 		public bool IsReadPublic {
-			get { return LookupIsReadPublic (); }
+			get { return flags.Get((int)MemberFlags.IsReadPublic, LookupIsReadPublic); }
 		}
 		public bool IsUnknown {
-			get { return LookupIsUnknown (); }
+			get { return flags.Get((int)MemberFlags.IsUnknown, LookupIsUnknown); }
 		}
 		public bool IsWriteOnly {
-			get { return LookupIsWriteOnly (); }
+			get { return flags.Get((int)MemberFlags.IsWriteOnly, LookupIsWriteOnly); }
 		}
 		public bool IsWritePublic {
-			get { return LookupIsWritePublic (); }
+			get { return flags.Get((int)MemberFlags.IsWritePublic, LookupIsWritePublic); }
 		}
 		public XamlType TargetType {
-			get { return LookupTargetType (); }
+			get { return targetType.Get(LookupTargetType); }
 		}
 		public XamlType Type {
-			get { return LookupType (); }
+			get { return type.Get(LookupType); }
 		}
+
 		public XamlValueConverter<TypeConverter> TypeConverter {
-			get { return LookupTypeConverter (); }
+			get { return typeConverter.Get(LookupTypeConverter); }
 		}
 		public MemberInfo UnderlyingMember {
 			get { return LookupUnderlyingMember (); }
 		}
+
 		public XamlValueConverter<ValueSerializer> ValueSerializer {
-			get { return LookupValueSerializer (); }
+			get { return valueSerializer.Get(LookupValueSerializer); }
 		}
 
 		public static bool operator == (XamlMember left, XamlMember right)
@@ -297,7 +320,15 @@ namespace Portable.Xaml
 
 		public override int GetHashCode ()
 		{
-			return ToString ().GetHashCode (); // should in general work.
+			if (is_attachable || string.IsNullOrEmpty(PreferredXamlNamespace))
+			{
+				if (DeclaringType == null)
+					return Name.GetHashCode();
+				else
+					return DeclaringType.UnderlyingType.FullName.GetHashCode() ^ Name.GetHashCode();
+			}
+			else
+				return PreferredXamlNamespace.GetHashCode() ^ DeclaringType.Name.GetHashCode() ^ Name.GetHashCode();
 		}
 
 		[MonoTODO ("there are some patterns that return different kind of value: e.g. List<int>.Capacity")]
@@ -315,25 +346,33 @@ namespace Portable.Xaml
 
 		public virtual IList<string> GetXamlNamespaces ()
 		{
-			throw new NotImplementedException ();
+			if (DeclaringType == null)
+				return null;
+			return DeclaringType.GetXamlNamespaces();
 		}
 
 		// lookups
 
 		internal ICustomAttributeProvider GetCustomAttributeProvider ()
 		{
-			return LookupCustomAttributeProvider ();
+			return customAttributeProvider.Get(LookupCustomAttributeProvider);
 		}
 
 		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
-			return UnderlyingMember != null ? new MemberAttributeProvider(UnderlyingMember) : null;
+			return UnderlyingMember != null ? context.GetCustomAttributeProvider(UnderlyingMember) : null;
 		}
 
 		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()
 		{
-			// FIXME: use XamlDeferLoadAttribute.
-			return null;
+			var attr = GetCustomAttributeProvider()?.GetCustomAttribute<XamlDeferLoadAttribute>(true);
+			if (attr == null)
+				return Type?.DeferringLoader;
+			var loaderType = attr.GetLoaderType();
+			var contentType = attr.GetContentType();
+			if (loaderType == null || contentType == null)
+				throw new XamlSchemaException("Invalid metadata for attribute XamlDeferLoadAttribute");
+			return new XamlValueConverter<XamlDeferringLoader>(loaderType, null); // why is the target type null here? thought it would be the contentType.
 		}
 
 		static readonly XamlMember [] empty_list = new XamlMember [0];
@@ -345,7 +384,7 @@ namespace Portable.Xaml
 
 		protected virtual XamlMemberInvoker LookupInvoker ()
 		{
-			return invoker;
+			return new XamlMemberInvoker(this);
 		}
 
 		protected virtual bool LookupIsAmbient ()
@@ -401,12 +440,9 @@ namespace Portable.Xaml
 
 		protected virtual XamlType LookupType ()
 		{
-			if (type == null)
-				type = context.GetXamlType (DoGetType ());
-			return type;
+			return context.GetXamlType (DoGetType ());
 		}
 		
-
 		Type DoGetType ()
 		{
 			var pi = underlying_member as PropertyInfo;
@@ -460,7 +496,7 @@ namespace Portable.Xaml
 			if (Type == null)
 				return null;
 
-			return XamlType.LookupValueSerializer (Type, LookupCustomAttributeProvider ()) ?? Type.ValueSerializer;
+			return XamlType.LookupValueSerializer (Type, GetCustomAttributeProvider()) ?? Type.ValueSerializer;
 		}
 
 		void VerifyGetter (MethodInfo method)
@@ -477,6 +513,27 @@ namespace Portable.Xaml
 				return;
 			if (method.GetParameters ().Length != 2)
 				throw new ArgumentException (String.Format ("Property getter or event adder for {0} must have exactly one argument and must have non-void return type.", Name));
+		}
+
+		ReferenceValue<DefaultValueAttribute> defaultValue;
+		internal DefaultValueAttribute DefaultValue
+		{
+			get
+			{
+				return defaultValue.Get(() => GetCustomAttributeProvider()?.GetCustomAttribute<DefaultValueAttribute>(true));
+			}
+		}
+
+		internal bool IsConstructorArgument
+		{
+			get
+			{
+				return flags.Get((int)MemberFlags.IsConstructorArgument, () =>
+					{
+						var ap = GetCustomAttributeProvider();
+						return ap != null && ap.GetCustomAttributes(typeof(ConstructorArgumentAttribute), false).Length > 0;
+					});
+			}
 		}
 	}
 }

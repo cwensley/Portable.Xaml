@@ -85,6 +85,11 @@ namespace Portable.Xaml
 			return property.GetCustomAttributes(typeof(T), inherit).OfType<T>().FirstOrDefault();
 		}
 
+		public static IEnumerable<T> GetCustomAttributes<T>(this Assembly assembly, bool inherit = true)
+		{
+			return assembly.GetCustomAttributes(typeof(T), inherit).Cast<T>();
+		}
+
 		public static FieldInfo GetRuntimeField(this Type type, string name)
 		{
 			return type.GetField(name);
@@ -108,6 +113,12 @@ namespace Portable.Xaml
 		public static MethodInfo GetPrivateGetMethod(this PropertyInfo propertyInfo)
 		{
 			return propertyInfo.GetGetMethod(true);
+		}
+
+		public static bool HasDefaultValue(this ParameterInfo parameterInfo)
+		{
+			var val = parameterInfo.DefaultValue;
+			return val == null || val.GetType().FullName != "System.DBNull";
 		}
 	}
 }

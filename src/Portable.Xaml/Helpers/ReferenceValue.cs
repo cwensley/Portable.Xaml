@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -23,47 +23,63 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using Portable.Xaml.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using NUnit.Framework;
-using MonoTests.Portable.Xaml;
-#if PCL
 using Portable.Xaml.Markup;
-using Portable.Xaml.ComponentModel;
-using Portable.Xaml;
 using Portable.Xaml.Schema;
-#else
-using System.Windows.Markup;
-using System.ComponentModel;
-using System.Xaml;
-using System.Xaml.Schema;
-#endif
+using System.Xml.Serialization;
+using System.Collections.ObjectModel;
 
-using Category = NUnit.Framework.CategoryAttribute;
-
-namespace MonoTests.Portable.Xaml.Markup
+namespace Portable.Xaml
 {
-    [TestFixture]
-    public class ValueSerializerAttributeTest
-    {
-        private static string TestTypeTypeName = typeof(TestType).AssemblyQualifiedName;
-        private class TestType { }
+	/// <summary>
+	/// Struct to store a reference type and cache its value (even if null).
+	/// </summary>
+	struct ReferenceValue<T>
+		where T: class
+	{
+		object value;
 
-        [Test]
-        public void ConstructedWithType()
-        {
-            var vsa = new ValueSerializerAttribute(typeof(TestType));
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#2");
-        }
+		static readonly object NullValue = new object();
 
-        [Test]
-        public void ConstructedWithTypeName()
-        {
-            var vsa = new ValueSerializerAttribute(TestTypeTypeName);
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#1");
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-        }
-    }
+		public T Value
+		{
+			get
+			{ 
+				if (ReferenceEquals(value, NullValue))
+					return default(T);
+				return (T)value;
+			} 
+		}
+
+		public bool HasValue { get { return value != null; } }
+
+		public ReferenceValue(T value)
+		{
+			this.value = value ?? NullValue;
+		}
+
+		public T Get(Func<T> getValue)
+		{
+			if (ReferenceEquals(value, NullValue))
+				return default(T);
+			if (value != null)
+				return (T)value;
+			
+			value = getValue();
+			if (value == null)
+			{
+				value = NullValue;
+				return default(T);
+			}
+			return (T)value;
+		}
+
+		public static implicit operator ReferenceValue<T>(T value)
+		{
+			return new ReferenceValue<T>(value);
+		}
+	}
+	
 }

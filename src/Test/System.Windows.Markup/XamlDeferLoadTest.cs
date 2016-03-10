@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -23,19 +23,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-using MonoTests.Portable.Xaml;
 #if PCL
 using Portable.Xaml.Markup;
-using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 #else
 using System.Windows.Markup;
-using System.ComponentModel;
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
@@ -44,26 +41,43 @@ using Category = NUnit.Framework.CategoryAttribute;
 
 namespace MonoTests.Portable.Xaml.Markup
 {
-    [TestFixture]
-    public class ValueSerializerAttributeTest
-    {
-        private static string TestTypeTypeName = typeof(TestType).AssemblyQualifiedName;
-        private class TestType { }
+	[TestFixture]
+	public class XamlDeferLoadTest
+	{
+		[Test]
+		[TestCase("something", null)]
+		[TestCase(null, "something")]
+		[TestCase(null, null)]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructorNullName (string loaderType, string contentType)
+		{
+			new XamlDeferLoadAttribute(loaderType, contentType);
+		}
 
-        [Test]
-        public void ConstructedWithType()
-        {
-            var vsa = new ValueSerializerAttribute(typeof(TestType));
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#2");
-        }
+		[Test]
+		[TestCase(typeof(TestDeferredLoader), null)]
+		[TestCase(null, typeof(DeferredLoadingChild))]
+		[TestCase(null, null)]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructorNullName (Type loaderType, Type contentType)
+		{
+			new XamlDeferLoadAttribute(loaderType, contentType);
+		}
 
-        [Test]
-        public void ConstructedWithTypeName()
-        {
-            var vsa = new ValueSerializerAttribute(TestTypeTypeName);
-            Assert.AreEqual(typeof(TestType).AssemblyQualifiedName, vsa.ValueSerializerTypeName, "#1");
-            Assert.AreEqual(typeof(TestType), vsa.ValueSerializerType, "#1");
-        }
-    }
+		[Test]
+		public void TypeShouldReturnName()
+		{
+			var attr = new XamlDeferLoadAttribute(typeof(TestDeferredLoader), typeof(DeferredLoadingChild));
+			Assert.AreEqual(typeof(TestDeferredLoader).AssemblyQualifiedName, attr.LoaderTypeName, "#1");
+			Assert.AreEqual(typeof(DeferredLoadingChild).AssemblyQualifiedName, attr.ContentTypeName, "#2");
+		}
+
+		[Test]
+		public void TypeNameShouldNotSetType()
+		{
+			var attr = new XamlDeferLoadAttribute(typeof(TestDeferredLoader).AssemblyQualifiedName, typeof(DeferredLoadingChild).AssemblyQualifiedName);
+			Assert.IsNull(attr.LoaderType, "#1");
+			Assert.IsNull(attr.ContentType, "#2");
+		}
+	}
 }

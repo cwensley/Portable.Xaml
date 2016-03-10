@@ -11,6 +11,8 @@
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -165,8 +167,6 @@
     <Compile Include="Portable.Xaml.Schema\XamlTypeTypeConverter.cs" />
     <Compile Include="Portable.Xaml.Schema\XamlValueConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\ICustomAttributeProvider.cs" />
-    <Compile Include="Compat136.cs" />
-    <Compile Include="Compat259.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\Int32Converter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\Int64Converter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\UInt64Converter.cs" />
@@ -184,6 +184,13 @@
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
     <Compile Include="Portable.Xaml\EnhancedXamlAttribute.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeListWriter.cs" />
+    <Compile Include="Portable.Xaml\XamlNodeListReader.cs" />
+    <Compile Include="Helpers\Compat136.cs" />
+    <Compile Include="Helpers\Compat259.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\FlagValue.cs" />
+    <Compile Include="Helpers\ReferenceValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />

@@ -87,7 +87,7 @@ namespace Portable.Xaml
 			this.root = instance;
 
 			sctx = schemaContext;
-//			this.settings = settings;
+			this.settings = settings ?? new XamlObjectReaderSettings();
 
 			// check type validity. Note that some checks also needs done at Read() phase. (it is likely FIXME:)
 			if (instance != null) {
@@ -95,18 +95,18 @@ namespace Portable.Xaml
 				if (!type.GetTypeInfo().IsPublic)
 					throw new XamlObjectReaderException (String.Format ("instance type '{0}' must be public and non-nested.", type));
 				var xt = SchemaContext.GetXamlType (type);
-				if (xt.ConstructionRequiresArguments && !xt.GetConstructorArguments ().Any () && xt.TypeConverter == null)
+				if (xt.ConstructionRequiresArguments && xt.GetConstructorArguments ().Count == 0 && xt.TypeConverter == null)
 					throw new XamlObjectReaderException (String.Format ("instance type '{0}' has no default constructor.", type));
 			}
 
 			value_serializer_context = new ValueSerializerContext (new PrefixLookup (sctx), sctx, null, null, null, null);
-			new XamlObjectNodeIterator (instance, sctx, value_serializer_context).PrepareReading ();
+			new XamlObjectNodeIterator (instance, sctx, value_serializer_context, this.settings).PrepareReading ();
 		}
 		
 		bool is_eof;
 		object root, root_raw;
 		XamlSchemaContext sctx;
-//		XamlObjectReaderSettings settings;
+		XamlObjectReaderSettings settings;
 		IValueSerializerContext value_serializer_context;
 
 		IEnumerator<NamespaceDeclaration> ns_iterator;
@@ -181,7 +181,7 @@ namespace Portable.Xaml
 			if (ns_iterator.MoveNext ())
 				return true;
 			if (nodes == null)
-				nodes = new XamlObjectNodeIterator (root, sctx, value_serializer_context).GetNodes ().GetEnumerator ();
+				nodes = new XamlObjectNodeIterator (root, sctx, value_serializer_context, settings).GetNodes ().GetEnumerator ();
 			if (nodes.MoveNext ())
 				return true;
 			if (!is_eof)

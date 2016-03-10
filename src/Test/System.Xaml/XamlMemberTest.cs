@@ -27,6 +27,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using NUnit.Framework;
+using MonoTests.Portable.Xaml.NamespaceTest;
+
+
 #if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
@@ -431,6 +434,28 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (Compat.Namespace + ".XamlSchemaContext.FooBar", new XamlMember ("FooBar", typeof (XamlSchemaContext).GetMethod ("GetPreferredPrefix"), null, sctx).ToString (), "#4");
 
 			Assert.AreEqual ("{urn:foo}bar", new XamlDirective ("urn:foo", "bar").ToString (), "#5");
+		}
+
+		[Test]
+		public void GetXamlNamespacesTest()
+		{
+			var member = sctx.GetXamlType(typeof(TestClass4)).GetMember("Foo");
+
+			var namespaces = member.GetXamlNamespaces();
+			Assert.AreEqual(1, namespaces.Count, "#1");
+			Assert.AreEqual("clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5".UpdateXml(), namespaces[0], "#2");
+		}
+
+		[Test]
+		public void GetXamlNamespacesTest2()
+		{
+			var member = sctx.GetXamlType(typeof(NamespaceTestClass)).GetMember("Foo");
+
+			var namespaces = member.GetXamlNamespaces().OrderBy(r => r).ToList();
+			Assert.AreEqual(3, namespaces.Count, "#1");
+			Assert.AreEqual("clr-namespace:MonoTests.Portable.Xaml.NamespaceTest;assembly=Portable.Xaml_test_net_4_5".UpdateXml(), namespaces[0], "#2");
+			Assert.AreEqual("urn:bar", namespaces[1], "#3");
+			Assert.AreEqual("urn:mono-test", namespaces[2], "#4");
 		}
 	}
 }

@@ -87,8 +87,21 @@ namespace Portable.Xaml
 
 		XamlSchemaContext sctx;
 		XamlObjectWriterSettings settings;
-
 		XamlObjectWriterInternal intl;
+		DeferredWriter deferredWriter;
+
+		class DeferredWriter
+		{
+			public XamlDeferringLoader Loader { get; }
+			public XamlNodeList List { get; }
+			public XamlWriter Writer { get { return List.Writer; } }
+			public int DeferCount { get; set; }
+			public DeferredWriter(XamlSchemaContext context, XamlDeferringLoader loader)
+			{
+				List = new XamlNodeList(context);
+				Loader = loader;
+			}
+		}
 
 		//int line, column;
 		bool lineinfo_was_given;
@@ -169,36 +182,96 @@ namespace Portable.Xaml
 
 		public override void WriteGetObject ()
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteGetObject();
+				return;
+			}
+
 			intl.WriteGetObject ();
 		}
 
 		public override void WriteNamespace (NamespaceDeclaration namespaceDeclaration)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteNamespace(namespaceDeclaration);
+				return;
+			}
+
 			intl.WriteNamespace (namespaceDeclaration);
 		}
 
 		public override void WriteStartObject (XamlType xamlType)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteStartObject(xamlType);
+				deferredWriter.DeferCount++;
+				return;
+			}
+
 			intl.WriteStartObject (xamlType);
 		}
 		
 		public override void WriteValue (object value)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteValue(value);
+				return;
+			}
+
 			intl.WriteValue (value);
 		}
 		
 		public override void WriteStartMember (XamlMember property)
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteStartMember(property);
+				deferredWriter.DeferCount++;
+				return;
+			}
+
 			intl.WriteStartMember (property);
+
+			var defer = property.DeferringLoader;
+			if (defer != null)
+			{
+				deferredWriter = new DeferredWriter(sctx, defer.ConverterInstance);
+				deferredWriter.DeferCount++;
+				return;
+			}
 		}
 		
 		public override void WriteEndObject ()
 		{
+			if (deferredWriter != null)
+			{
+				deferredWriter.Writer.WriteEndObject();
+				if (--deferredWriter.DeferCount > 0)
+					return;
+				intl.WriteDeferred(deferredWriter.Loader, deferredWriter.List, false);
+				deferredWriter = null;
+			}
+
 			intl.WriteEndObject ();
 		}
 
 		public override void WriteEndMember ()
 		{
+			if (deferredWriter != null)
+			{
+				if (--deferredWriter.DeferCount > 0)
+				{
+					deferredWriter.Writer.WriteEndMember();
+					return;
+				}
+				intl.WriteDeferred(deferredWriter.Loader, deferredWriter.List, true);
+				deferredWriter = null;
+			}
+
 			intl.WriteEndMember ();
 		}
 	}
@@ -212,13 +285,11 @@ namespace Portable.Xaml
 			: base (schemaContext, manager)
 		{
 			this.source = source;
-			this.sctx = schemaContext;
 			var ext = source.Settings.ExternalNameScope;
 			name_scope = ext != null && source.Settings.RegisterNamesOnExternalNamescope ? ext : new NameScope (ext);
 		}
 		
 		XamlObjectWriter source;
-		XamlSchemaContext sctx;
 		INameScope name_scope;
 		List<NameFixupRequired> pending_name_references = new List<NameFixupRequired> ();
 
@@ -255,6 +326,7 @@ namespace Portable.Xaml
 		protected override void OnWriteGetObject ()
 		{
 			var state = object_states.Pop ();
+			InitializeObjectIfRequired(false, true);
 			var xm = CurrentMember;
 			var instance = xm.Invoker.GetValue (object_states.Peek ().Value);
 			if (instance == null)
@@ -266,7 +338,7 @@ namespace Portable.Xaml
 
 		protected override void OnWriteEndObject ()
 		{
-			InitializeObjectIfRequired (false); // this is required for such case that there was no StartMember call.
+			InitializeObjectIfRequired (false, true); // this is required for such case that there was no StartMember call.
 
 			var state = object_states.Pop ();
 			var obj = state.Value;
@@ -323,8 +395,7 @@ namespace Portable.Xaml
 			// FIXME: this condition needs to be examined. What is known to be prevented are: PositionalParameters, Initialization and Base (the last one sort of indicates there's a lot more).
 			else
 			{
-				var directive = property as XamlDirective;
-				if (directive == null || directive.Name == "Name") // x:Name requires an object instance
+				if (!property.IsDirective || property == XamlLanguage.Name) // x:Name requires an object instance
 					InitializeObjectIfRequired(false);
 			}
 		}
@@ -374,11 +445,16 @@ namespace Portable.Xaml
 		void SetValue (XamlMember member, object value)
 		{
 			if (member == XamlLanguage.FactoryMethod)
-				object_states.Peek ().FactoryMethod = (string) value;
+				object_states.Peek().FactoryMethod = (string)value;
 			else if (member.IsDirective)
 				return;
 			else
-				SetValue (member, object_states.Peek ().Value, value);
+			{
+				var state = object_states.Peek();
+				// won't be instantiated yet if dealing with a type that has no default constructor
+				if (state.IsInstantiated)
+					SetValue(member, state.Value, value);
+			}
 		}
 		
 		void SetValue (XamlMember member, object target, object value)
@@ -445,7 +521,7 @@ namespace Portable.Xaml
 					state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
 				else {
 					if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
-						if (!xm.IsReadOnly)
+						if (!xm.IsReadOnly || xm.IsConstructorArgument)
 							ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
 					}
 				}
@@ -540,22 +616,53 @@ namespace Portable.Xaml
 				xt.IsMarkupExtension && IsAllowedType (xt.MarkupExtensionReturnType, value);
 		}
 		
-		void InitializeObjectIfRequired (bool waitForParameters)
+		void InitializeObjectIfRequired (bool waitForParameters, bool required = false)
 		{
 			var state = object_states.Peek ();
 			if (state.IsInstantiated)
 				return;
 
-			if (waitForParameters && (state.Type.ConstructionRequiresArguments || state.Type.HasPositionalParameters (service_provider)))
+			if ((state.Type.ConstructionRequiresArguments && !required) 
+				|| (waitForParameters && state.Type.HasPositionalParameters (service_provider)))
 				return;
 
 			// FIXME: "The default techniques in absence of a factory method are to attempt to find a default constructor, then attempt to find an identified type converter on type, member, or destination type."
-			// http://msdn.microsoft.com/en-us/library/Portable.Xaml.xamllanguage.factorymethod%28VS.100%29.aspx
-			object obj;
+			// http://msdn.microsoft.com/en-us/library/System.Xaml.xamllanguage.factorymethod%28VS.100%29.aspx
+			object obj = null;
 			if (state.FactoryMethod != null) // FIXME: it must be implemented and verified with tests.
-				throw new NotImplementedException ();
+				throw new NotImplementedException();
 			else
-				obj = state.Type.Invoker.CreateInstance (null);
+			{
+				if (state.Type.ConstructionRequiresArguments)
+				{
+					var constructorProps = state.WrittenProperties.Where(r => r.Member.IsConstructorArgument).ToList();
+
+					// immutable type (no default constructor), so we create based on supplied constructor arguments 
+					var args = state.Type.GetSortedConstructorArguments(constructorProps)?.ToList();
+					if (args == null)
+						throw new XamlObjectWriterException($"Could not find constructor for {state.Type} based on supplied members");
+
+					var argValues = args.Select(r => r.Value).ToArray();
+
+					obj = state.Type.Invoker.CreateInstance(argValues);
+					state.Value = obj;
+					state.IsInstantiated = true;
+					HandleBeginInit (obj);
+
+					// set other writable properties now that the object is instantiated
+					foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
+					{
+						if (prop.Member.IsReadOnly && prop.Member.IsConstructorArgument)
+							throw new XamlObjectWriterException($"Member {prop.Member} is read only and cannot be used in any constructor");
+						if (!prop.Member.IsReadOnly)
+							SetValue(prop.Member, prop.Value);
+					}
+					return;
+				}
+				else
+					obj = state.Type.Invoker.CreateInstance(null);
+			}
+
 			state.Value = obj;
 			state.IsInstantiated = true;
 			HandleBeginInit (obj);
@@ -596,6 +703,23 @@ namespace Portable.Xaml
 				return;
 			si.EndInit ();
 			source.OnAfterEndInit (value);
+		}
+
+		public void WriteDeferred(XamlDeferringLoader loader, XamlNodeList nodeList, bool setValue)
+		{
+			nodeList.Writer.Close();
+			var obj = loader.Load(nodeList.GetReader(), service_provider);
+			var cms = CurrentMemberState;
+			if (cms != null)
+				cms.Value = obj;
+			else
+			{
+				var state = object_states.Peek();
+				state.Value = obj;
+				state.IsInstantiated = true;
+			}
+			if (setValue)
+				manager.Value();
 		}
 	}
 }

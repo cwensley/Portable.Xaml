@@ -163,12 +163,12 @@ namespace Portable.Xaml.Schema
 
 		public virtual MethodInfo GetAddMethod (XamlType contentType)
 		{
-			return type == null || type.UnderlyingType == null || type.ItemType == null || type.LookupCollectionKind () == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod ("Add", new Type [] {contentType.UnderlyingType});
+			return type == null || type.UnderlyingType == null || type.ItemType == null || type.CollectionKind == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod ("Add", new Type [] {contentType.UnderlyingType});
 		}
 
 		public virtual MethodInfo GetEnumeratorMethod ()
 		{
-			return type.UnderlyingType == null || type.LookupCollectionKind() == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod("GetEnumerator", new Type[0]);
+			return type.UnderlyingType == null || type.CollectionKind == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod("GetEnumerator", new Type[0]);
 		}
 		
 		public virtual IEnumerator GetItems (object instance)
