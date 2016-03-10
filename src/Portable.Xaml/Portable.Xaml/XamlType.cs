@@ -50,7 +50,9 @@ namespace Portable.Xaml
 			IsWhitespaceSignificantCollection = 1 << 9,
 			IsXData = 1 << 10,
 			TrimSurroundingWhitespace = 1 << 11,
-			ConstructionRequiresArguments = 1 << 12
+			ConstructionRequiresArguments = 1 << 12,
+			IsImmutable = 1 << 13,
+			IsImmutableCollection = 1 << 14,
 		}
 
 		Type type, underlying_type;
@@ -361,6 +363,41 @@ namespace Portable.Xaml
 			return inputType.CanAssignTo (this);
 		}
 
+		[EnhancedXaml]
+		public bool IsImmutable
+		{
+			get { return flags.Get((int)TypeFlags.IsImmutable, LookupIsImmutable); }
+		}
+
+		[EnhancedXaml]
+		protected virtual bool LookupIsImmutable()
+		{
+			return IsImmutableCollection;
+		}
+
+		internal bool IsImmutableCollection
+		{
+			get
+			{
+				return flags.Get((int)TypeFlags.IsImmutableCollection, () =>
+					{
+						if (UnderlyingType == null)
+							return false;
+
+						var ti = UnderlyingType.GetTypeInfo();
+						if (!ti.IsGenericType || ti.Assembly.GetName().Name != "System.Collections.Immutable")
+							return false;
+						
+						var typeDef = ti.GetGenericTypeDefinition();
+						var name = typeDef.FullName;
+						if (!name.StartsWith("System.Collections.Immutable.Immutable", StringComparison.Ordinal))
+							return false;
+
+						return name.EndsWith("`1", StringComparison.Ordinal) || name.EndsWith("`2", StringComparison.Ordinal);
+					});
+			}
+		}
+
 		public virtual bool CanAssignTo (XamlType xamlType)
 		{
 			if (xamlType == null)
@@ -377,6 +414,9 @@ namespace Portable.Xaml
 				&& ut.IsGenericType
 				&& ut.GetGenericTypeDefinition () == typeof(Nullable<>)
 				&& this == XamlLanguage.Null)
+				return true;
+
+			if (xamlType.IsImmutableCollection && (IsCollection || IsDictionary))
 				return true;
 
 			return ut.IsAssignableFrom (UnderlyingType.GetTypeInfo());
@@ -635,6 +675,8 @@ namespace Portable.Xaml
 				return XamlCollectionKind.Dictionary;
 
 			else if (type.ImplementsAnyInterfacesOf (typeof (IList), typeof (ICollection<>)))
+				return XamlCollectionKind.Collection;
+			else if (IsImmutableCollection && type.ImplementsAnyInterfacesOf(typeof(IEnumerable))) // stack/queue
 				return XamlCollectionKind.Collection;
 			else
 				return XamlCollectionKind.None;

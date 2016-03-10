@@ -34,6 +34,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
 using sc = System.ComponentModel;
+using System.Collections.Immutable;
 
 
 #if PCL
@@ -1406,6 +1407,28 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		public string Foo { get; set; }
+	}
+
+	public class ImmutableCollectionItem : IComparable
+	{
+		public string Foo { get; set; }
+
+		public int CompareTo(object obj)
+		{
+			return string.Compare(Foo, ((ImmutableCollectionItem)obj)?.Foo);
+		}
+	}
+
+	public class ImmutableCollectionContainer
+	{
+		public ImmutableArray<ImmutableCollectionItem> ImmutableArray { get; set; }
+		public ImmutableList<ImmutableCollectionItem> ImmutableList { get; set; }
+		public ImmutableHashSet<ImmutableCollectionItem> ImmutableHashSet { get; set; }
+		public ImmutableQueue<ImmutableCollectionItem> ImmutableQueue { get; set; }
+		public ImmutableStack<ImmutableCollectionItem> ImmutableStack { get; set; }
+		public ImmutableSortedSet<ImmutableCollectionItem> ImmutableSortedSet { get; set; }
+		public ImmutableDictionary<string, ImmutableCollectionItem> ImmutableDictionary { get; set; }
+		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
 	}
 }
 

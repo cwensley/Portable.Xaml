@@ -49,6 +49,11 @@ namespace Portable.Xaml.Schema
 		}
 		
 		XamlType type;
+		Type mutableType;
+		MethodInfo createImmutableFromMutable;
+
+		[EnhancedXaml]
+		protected XamlType Type { get { return type; } }
 
 		void ThrowIfUnknown ()
 		{
@@ -159,6 +164,45 @@ namespace Portable.Xaml.Schema
 				return Activator.CreateInstance(type.UnderlyingType);
 			else
 				return Activator.CreateInstance (type.UnderlyingType, arguments);
+		}
+
+		[EnhancedXaml]
+		public virtual object ToMutable(object instance)
+		{
+			if (!type.IsImmutableCollection)
+				return instance;
+
+			// Use a List<> or Dictionary<,> to collect values for immutable collections
+			if (mutableType == null)
+			{
+				var typeArgs = type.UnderlyingType.GetTypeInfo().GetGenericArguments();
+				var listType = typeArgs.Length == 2 ? typeof(Dictionary<,>) : typeof(List<>);
+				mutableType = listType.MakeGenericType(typeArgs);
+			}
+			if (instance == null || type.UnderlyingType.GetTypeInfo().IsValueType)
+				return Activator.CreateInstance(mutableType);
+			
+			return Activator.CreateInstance(mutableType, instance);
+		}
+
+		[EnhancedXaml]
+		public virtual object ToImmutable(object instance)
+		{
+			if (!type.IsImmutableCollection)
+				return instance;
+
+			// create immutable collection from List<> or Dictionary<,> using the Immutable[Type].CreateRange static method
+			if (createImmutableFromMutable == null)
+			{
+				var ti = type.UnderlyingType.GetTypeInfo();
+				var typeArgs = ti.GetGenericArguments();
+				var assembly = ti.Assembly;
+				var name = ti.GetGenericTypeDefinition().FullName;
+				var builderType = assembly.GetType(name.Substring(0, name.Length - 2)); // remove `1 or `2
+				var mi = builderType.GetTypeInfo().GetDeclaredMethods("CreateRange").FirstOrDefault(r => r.GetParameters().Length == 1);
+				createImmutableFromMutable = mi.MakeGenericMethod(typeArgs);
+			}
+			return createImmutableFromMutable.Invoke(null, new[] { instance });
 		}
 
 		public virtual MethodInfo GetAddMethod (XamlType contentType)

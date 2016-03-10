@@ -23,72 +23,83 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 namespace Portable.Xaml.Schema
 {
 	public class XamlMemberInvoker
 	{
-		static readonly XamlMemberInvoker unknown = new XamlMemberInvoker ();
-		public static XamlMemberInvoker UnknownInvoker {
+		static readonly XamlMemberInvoker unknown = new XamlMemberInvoker();
+
+		public static XamlMemberInvoker UnknownInvoker
+		{
 			get { return unknown; }
 		}
 
-		protected XamlMemberInvoker ()
+		protected XamlMemberInvoker()
 		{
 		}
 
-		public XamlMemberInvoker (XamlMember member)
+		public XamlMemberInvoker(XamlMember member)
 		{
 			if (member == null)
-				throw new ArgumentNullException ("member");
+				throw new ArgumentNullException("member");
 			this.member = member;
 		}
 
 		XamlMember member;
 
-		public MethodInfo UnderlyingGetter {
+		[EnhancedXaml]
+		protected XamlMember Member { get { return member; } }
+
+		public MethodInfo UnderlyingGetter
+		{
 			get { return member != null ? member.UnderlyingGetter : null; }
 		}
 
-		public MethodInfo UnderlyingSetter {
+		public MethodInfo UnderlyingSetter
+		{
 			get { return member != null ? member.UnderlyingSetter : null; }
 		}
 
-		void ThrowIfUnknown ()
+		void ThrowIfUnknown()
 		{
 			if (member == null)
-				throw new NotSupportedException ("Current operation is invalid for unknown member.");
+				throw new NotSupportedException("Current operation is invalid for unknown member.");
 		}
 
-		public virtual object GetValue (object instance)
+		public virtual object GetValue(object instance)
 		{
-			ThrowIfUnknown ();
+			ThrowIfUnknown();
 			if (instance == null)
-				throw new ArgumentNullException ("instance");
-			if (member is XamlDirective)
-				throw new NotSupportedException (String.Format ("not supported operation on directive member {0}", member));
+				throw new ArgumentNullException("instance");
+			if (member.IsDirective)
+				throw new NotSupportedException(String.Format("not supported operation on directive member {0}", member));
 			if (UnderlyingGetter == null)
-				throw new NotSupportedException (String.Format ("Attempt to get value from write-only property or event {0}", member));
-			return UnderlyingGetter.Invoke (instance, new object [0]);
-		}
-		public virtual void SetValue (object instance, object value)
-		{
-			ThrowIfUnknown ();
-			if (instance == null)
-				throw new ArgumentNullException ("instance");
-			if (member is XamlDirective)
-				throw new NotSupportedException (String.Format ("not supported operation on directive member {0}", member));
-			if (UnderlyingSetter == null)
-				throw new NotSupportedException (String.Format ("Attempt to set value from read-only property {0}", member));
-			if (member.IsAttachable)
-				UnderlyingSetter.Invoke (null, new object [] {instance, value});
-			else
-				UnderlyingSetter.Invoke (instance, new object [] {value});
+				throw new NotSupportedException(String.Format("Attempt to get value from write-only property or event {0}", member));
+
+			return UnderlyingGetter.Invoke(instance, null);
 		}
 
-		public virtual ShouldSerializeResult ShouldSerializeValue (object instance)
+		public virtual void SetValue(object instance, object value)
 		{
-			throw new NotImplementedException ();
+			ThrowIfUnknown();
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+			if (member.IsDirective)
+				throw new NotSupportedException(String.Format("not supported operation on directive member {0}", member));
+			if (UnderlyingSetter == null)
+				throw new NotSupportedException(String.Format("Attempt to set value from read-only property {0}", member));
+
+			if (member.IsAttachable)
+				UnderlyingSetter.Invoke(null, new object [] { instance, value });
+			else
+				UnderlyingSetter.Invoke(instance, new object [] { value });
+		}
+
+		public virtual ShouldSerializeResult ShouldSerializeValue(object instance)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
