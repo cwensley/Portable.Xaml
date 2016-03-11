@@ -1723,7 +1723,7 @@ namespace MonoTests.Portable.Xaml
 				Assert.Ignore("Not supported in System.Xaml");
 			// can't find constructor
 			using (var xr = GetReader ("ImmutableTypeMultipleConstructors3.xml")) {
-				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+				XamlServices.Load(xr);
 			}
 		}
 
@@ -1736,7 +1736,7 @@ namespace MonoTests.Portable.Xaml
 				Assert.Ignore("Not supported in System.Xaml");
 			// found constructor, but one of the properties set is read only
 			using (var xr = GetReader ("ImmutableTypeMultipleConstructors4.xml")) {
-				var res = (ImmutableTypeMultipleConstructors)XamlServices.Load(xr);
+				XamlServices.Load(xr);
 			}
 		}
 
