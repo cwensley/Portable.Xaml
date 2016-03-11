@@ -34,7 +34,9 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
 using sc = System.ComponentModel;
+#if !PCL136
 using System.Collections.Immutable;
+#endif
 
 
 #if PCL
@@ -1419,6 +1421,8 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	#if !PCL136
+
 	public class ImmutableCollectionContainer
 	{
 		public ImmutableArray<ImmutableCollectionItem> ImmutableArray { get; set; }
@@ -1430,6 +1434,8 @@ namespace MonoTests.Portable.Xaml
 		public ImmutableDictionary<string, ImmutableCollectionItem> ImmutableDictionary { get; set; }
 		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
 	}
+
+	#endif
 }
 
 namespace XamlTest

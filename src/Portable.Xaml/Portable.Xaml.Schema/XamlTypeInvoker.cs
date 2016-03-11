@@ -199,7 +199,7 @@ namespace Portable.Xaml.Schema
 				var assembly = ti.Assembly;
 				var name = ti.GetGenericTypeDefinition().FullName;
 				var builderType = assembly.GetType(name.Substring(0, name.Length - 2)); // remove `1 or `2
-				var mi = builderType.GetTypeInfo().GetDeclaredMethods("CreateRange").FirstOrDefault(r => r.GetParameters().Length == 1);
+				var mi = builderType.GetRuntimeMethods().FirstOrDefault(r => r.Name == "CreateRange" && r.GetParameters().Length == 1);
 				createImmutableFromMutable = mi.MakeGenericMethod(typeArgs);
 			}
 			return createImmutableFromMutable.Invoke(null, new[] { instance });

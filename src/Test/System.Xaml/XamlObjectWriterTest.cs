@@ -1800,6 +1800,7 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
+		#if !PCL136
 		[Test]
 		public void Write_ImmutableCollectionContainer()
 		{
@@ -1829,5 +1830,6 @@ namespace MonoTests.Portable.Xaml
 				CollectionAssert.AreEqual(expected, res.ImmutableSortedSet.Select(r => r.Foo), "#7-2");
 			}
 		}
+		#endif
 	}
 }
