@@ -247,7 +247,6 @@ namespace Portable.Xaml
 				if (settings.LocalAssembly == typeAssembly)
 					return true;
 				var typeName = typeAssembly.GetName();
-				var typePk = typeName.GetPublicKeyToken();
 				var internalsVisible = type.GetTypeInfo().Assembly.GetCustomAttributes<InternalsVisibleToAttribute>();
 				foreach (var iv in internalsVisible)
 				{
