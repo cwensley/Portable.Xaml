@@ -405,7 +405,7 @@ namespace Portable.Xaml
 					if (t != null && t.Namespace == xda.ClrNamespace)
 					{
 						var ti = t.GetTypeInfo();
-						if (!ti.IsNested && !ti.IsAbstract)
+						if (!ti.IsNested)
 						{
 							if (genArgs != null && (!ti.IsGenericType || !ti.GetGenericArguments().SequenceEqual(genArgs)))
 								continue;

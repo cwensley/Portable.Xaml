@@ -74,6 +74,16 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	{
 		public string Foo { get; set; }
 	}
+
+	public abstract class AbstractObject
+	{
+		public abstract string Foo { get; set; }
+	}
+
+	public class DerivedObject : AbstractObject
+	{
+		public override string Foo { get; set; }
+	}
 }
 
 namespace MonoTests.Portable.Xaml
