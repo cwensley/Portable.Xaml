@@ -329,6 +329,8 @@ namespace Portable.Xaml
 			InitializeObjectIfRequired(false, true);
 			var xm = CurrentMember;
 			var instance = xm.Invoker.GetValue (object_states.Peek ().Value);
+			if (state.Type.IsImmutable)
+				instance = state.Type.Invoker.ToMutable(instance);
 			if (instance == null)
 				throw new XamlObjectWriterException (String.Format ("The value  for '{0}' property is null", xm.Name));
 			state.Value = instance;
@@ -342,6 +344,8 @@ namespace Portable.Xaml
 
 			var state = object_states.Pop ();
 			var obj = state.Value;
+			if (state.Type.IsImmutable)
+				obj = state.Type.Invoker.ToImmutable(obj);
 
 			if (state.Type.IsMarkupExtension) {
 				// validate that the provided value is a markup extension, throws InvalidCastException if not
@@ -534,6 +538,7 @@ namespace Portable.Xaml
 			if (xm == XamlLanguage.Items ||
 			    xm == XamlLanguage.PositionalParameters ||
 			    xm == XamlLanguage.Arguments) {
+
 				if (xt.IsDictionary)
 					mt.Invoker.AddToDictionary (parent, GetCorrectlyTypedValue (null, xt.KeyType, keyObj), GetCorrectlyTypedValue (null, xt.ItemType, obj));
 				else // collection. Note that state.Type isn't usable for PositionalParameters to identify collection kind.
@@ -622,45 +627,58 @@ namespace Portable.Xaml
 			if (state.IsInstantiated)
 				return;
 
-			if ((state.Type.ConstructionRequiresArguments && !required) 
-				|| (waitForParameters && state.Type.HasPositionalParameters (service_provider)))
-				return;
-
-			// FIXME: "The default techniques in absence of a factory method are to attempt to find a default constructor, then attempt to find an identified type converter on type, member, or destination type."
-			// http://msdn.microsoft.com/en-us/library/System.Xaml.xamllanguage.factorymethod%28VS.100%29.aspx
 			object obj = null;
-			if (state.FactoryMethod != null) // FIXME: it must be implemented and verified with tests.
-				throw new NotImplementedException();
-			else
+			if ((state.Type.ConstructionRequiresArguments && !required)
+			    || (waitForParameters && state.Type.HasPositionalParameters(service_provider)))
 			{
-				if (state.Type.ConstructionRequiresArguments)
-				{
-					var constructorProps = state.WrittenProperties.Where(r => r.Member.IsConstructorArgument).ToList();
-
-					// immutable type (no default constructor), so we create based on supplied constructor arguments 
-					var args = state.Type.GetSortedConstructorArguments(constructorProps)?.ToList();
-					if (args == null)
-						throw new XamlObjectWriterException($"Could not find constructor for {state.Type} based on supplied members");
-
-					var argValues = args.Select(r => r.Value).ToArray();
-
-					obj = state.Type.Invoker.CreateInstance(argValues);
-					state.Value = obj;
-					state.IsInstantiated = true;
-					HandleBeginInit (obj);
-
-					// set other writable properties now that the object is instantiated
-					foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
-					{
-						if (prop.Member.IsReadOnly && prop.Member.IsConstructorArgument)
-							throw new XamlObjectWriterException($"Member {prop.Member} is read only and cannot be used in any constructor");
-						if (!prop.Member.IsReadOnly)
-							SetValue(prop.Member, prop.Value);
-					}
+				if (!state.Type.IsImmutable)
 					return;
-				}
+				
+				obj = state.Type.Invoker.ToMutable(null);
+				if (obj == null)
+					return;
+			}
+
+			if (obj == null)
+			{
+				// FIXME: "The default techniques in absence of a factory method are to attempt to find a default constructor, then attempt to find an identified type converter on type, member, or destination type."
+				// http://msdn.microsoft.com/en-us/library/System.Xaml.xamllanguage.factorymethod%28VS.100%29.aspx
+				if (state.FactoryMethod != null) // FIXME: it must be implemented and verified with tests.
+					throw new NotImplementedException();
 				else
-					obj = state.Type.Invoker.CreateInstance(null);
+				{
+					if (state.Type.ConstructionRequiresArguments)
+					{
+						var constructorProps = state.WrittenProperties.Where(r => r.Member.IsConstructorArgument).ToList();
+
+						// immutable type (no default constructor), so we create based on supplied constructor arguments 
+						var args = state.Type.GetSortedConstructorArguments(constructorProps)?.ToList();
+						if (args == null)
+							throw new XamlObjectWriterException($"Could not find constructor for {state.Type} based on supplied members");
+
+						var argValues = args.Select(r => r.Value).ToArray();
+
+						obj = state.Type.Invoker.CreateInstance(argValues);
+						state.Value = obj;
+						state.IsInstantiated = true;
+						HandleBeginInit(obj);
+
+						// set other writable properties now that the object is instantiated
+						foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
+						{
+							if (prop.Member.IsReadOnly && prop.Member.IsConstructorArgument)
+								throw new XamlObjectWriterException($"Member {prop.Member} is read only and cannot be used in any constructor");
+							if (!prop.Member.IsReadOnly)
+								SetValue(prop.Member, prop.Value);
+						}
+						return;
+					}
+					else
+						obj = state.Type.Invoker.CreateInstance(null);
+					
+					if (state.Type.IsImmutable)
+						obj = state.Type.Invoker.ToMutable(obj);
+				}
 			}
 
 			state.Value = obj;

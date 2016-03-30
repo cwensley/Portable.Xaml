@@ -82,7 +82,7 @@ namespace MonoTests.Portable.Xaml
 			list.Writer.WriteStartObject(sc.GetXamlType(typeof(TestClass4)));
 			list.Writer.WriteEndObject();
 			list.Writer.Close();
-			var reader = list.GetReader();
+			list.GetReader();
 		}
 	}
 }

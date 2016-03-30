@@ -34,6 +34,9 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
 using sc = System.ComponentModel;
+#if !PCL136
+using System.Collections.Immutable;
+#endif
 
 
 #if PCL
@@ -73,6 +76,16 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	public class NamespaceTestClass
 	{
 		public string Foo { get; set; }
+	}
+
+	public abstract class AbstractObject
+	{
+		public abstract string Foo { get; set; }
+	}
+
+	public class DerivedObject : AbstractObject
+	{
+		public override string Foo { get; set; }
 	}
 }
 
@@ -1407,6 +1420,32 @@ namespace MonoTests.Portable.Xaml
 
 		public string Foo { get; set; }
 	}
+
+	public class ImmutableCollectionItem : IComparable
+	{
+		public string Foo { get; set; }
+
+		public int CompareTo(object obj)
+		{
+			return string.Compare(Foo, ((ImmutableCollectionItem)obj)?.Foo);
+		}
+	}
+
+	#if !PCL136
+
+	public class ImmutableCollectionContainer
+	{
+		public ImmutableArray<ImmutableCollectionItem> ImmutableArray { get; set; }
+		public ImmutableList<ImmutableCollectionItem> ImmutableList { get; set; }
+		public ImmutableHashSet<ImmutableCollectionItem> ImmutableHashSet { get; set; }
+		public ImmutableQueue<ImmutableCollectionItem> ImmutableQueue { get; set; }
+		public ImmutableStack<ImmutableCollectionItem> ImmutableStack { get; set; }
+		public ImmutableSortedSet<ImmutableCollectionItem> ImmutableSortedSet { get; set; }
+		public ImmutableDictionary<string, ImmutableCollectionItem> ImmutableDictionary { get; set; }
+		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
+	}
+
+	#endif
 }
 
 namespace XamlTest

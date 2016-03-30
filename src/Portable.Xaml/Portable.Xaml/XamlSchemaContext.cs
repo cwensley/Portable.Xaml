@@ -279,24 +279,9 @@ namespace Portable.Xaml
 		protected internal virtual Assembly OnAssemblyResolve(string assemblyName)
 		{
 			var aname = new AssemblyName(assemblyName);
-			foreach (var info in AssembliesInScope)
-			{
-				// compare against the various parts of AssemblyName, if specified from xaml
-				var curname = info.Name;
-				if (aname.Name != curname.Name)
-					continue;
-				if (aname.Version != null && aname.Version != curname.Version)
-					continue;
-				var pk = aname.GetPublicKey();
-				if (pk != null)
-				{
-					var curpk = curname.GetPublicKey();
-					if (curpk == null || !pk.SequenceEqual(curpk))
-						continue;
-				}
-
-				return info.Assembly;
-			}
+			var ainfo = AssembliesInScope.FirstOrDefault(r => r.Name.Matches(aname));
+			if (ainfo.Assembly != null)
+				return ainfo.Assembly;
 
 			// fallback if not found
 #if PCL136
@@ -405,7 +390,7 @@ namespace Portable.Xaml
 					if (t != null && t.Namespace == xda.ClrNamespace)
 					{
 						var ti = t.GetTypeInfo();
-						if (!ti.IsNested && !ti.IsAbstract)
+						if (!ti.IsNested)
 						{
 							if (genArgs != null && (!ti.IsGenericType || !ti.GetGenericArguments().SequenceEqual(genArgs)))
 								continue;

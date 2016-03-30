@@ -282,5 +282,33 @@ namespace MonoTests.Portable.Xaml
 			xt = ctx.GetXamlType (xn);
 			Assert.IsNotNull (xt, "#2");
 		}
+
+		[Test]
+		public void GetAbstractType()
+		{
+			var ctx = new XamlSchemaContext ();
+			var xt = ctx.GetXamlType (typeof(AbstractObject));
+			Assert.IsNotNull (xt, "#1");
+		}
+
+		[Test]
+		public void GetAbstractTypeFromClrNamespace()
+		{
+			var ctx = new XamlSchemaContext();
+			var tn = new XamlTypeName(Compat.TestAssemblyNamespace, "AbstractObject");
+			var xt = ctx.GetXamlType(tn);
+			Assert.IsNotNull(xt, "#1");
+			Assert.IsNotNull(xt.UnderlyingType, "#2");
+		}
+
+		[Test]
+		public void GetAbstractTypeFromUriNamespace()
+		{
+			var ctx = new XamlSchemaContext();
+			var tn = new XamlTypeName("urn:mono-test", "AbstractObject");
+			var xt = ctx.GetXamlType(tn);
+			Assert.IsNotNull(xt, "#1");
+			Assert.IsNotNull(xt.UnderlyingType, "#2");
+		}
 	}
 }
