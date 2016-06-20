@@ -1332,7 +1332,7 @@ namespace MonoTests.Portable.Xaml
         {
             ValueWrapper o = XamlServices.Load(r) as ValueWrapper;
             Assert.IsNotNull(o, "Null, or not a ValueWrapper");
-            Assert.AreEqual("Quoted string: 'test'; Embedded braces: {test}; Two Backslashes: \\\\", o.StringValue, "Escape character not parsed properly");
+            Assert.AreEqual("Quoted string: 'test'; Embedded braces: {test}; Two Backslashes: \\\\ (test after last escape)", o.StringValue, "Escape character not parsed properly");
         }
 
         protected void Read_CustomExtensionWithPositionalAndNamed(XamlReader r)

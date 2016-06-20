@@ -144,7 +144,7 @@ namespace Portable.Xaml
 				idx = s.IndexOf (escape.Value, startIndex, numCharacters);
 			}
 
-			if (idx > 0)
+			if (numCharacters > 0)
 				sb.Append (s.Substring (startIndex, numCharacters));
 
 			return sb.ToString ();
