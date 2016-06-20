@@ -233,27 +233,27 @@ namespace Portable.Xaml
 		{
 			switch (Current)
 			{
-				case '{':
-					var markup = ReadMarkup();
-					if (markup != null)
-					{
-						ReadUntil(',', true, escape: '\\');
-						return markup;
-					}
-					break;
-				case '\'':
-				case '"':
-					var idx = index;
-					var endch = Current;
-					index++;
-					var val = ReadUntil(endch, escape: '\\');
-					if (val != null)
-					{
-						ReadUntil(',', true, escape: '\\');
-						return val;
-					}
-					index = idx;
-					break;
+			case '{':
+				var markup = ReadMarkup();
+				if (markup != null)
+				{
+					ReadUntil(',', true, escape: '\\');
+					return markup;
+				}
+				break;
+			case '\'':
+			case '"':
+				var idx = index;
+				var endch = Current;
+				index++;
+				var val = ReadUntil(endch, escape: '\\');
+				if (val != null)
+				{
+					ReadUntil(',', true, escape: '\\');
+					return val;
+				}
+				index = idx;
+				break;
 			}
 			return null;
 		}
