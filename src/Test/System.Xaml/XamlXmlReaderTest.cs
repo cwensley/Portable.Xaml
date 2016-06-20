@@ -516,7 +516,14 @@ namespace MonoTests.Portable.Xaml
 			Read_CustomExtensionWithCommasInPositionalValue(r);
 		}
 
-		[Test]
+        [Test]
+        public void Load_CustomExtensionWithEscapeChars()
+        {
+            var r = GetReader("CustomExtensionWithEscapeChars.xml");
+            Load_CustomExtensionWithEscapeChars(r);
+        }
+
+        [Test]
 		public void Read_CustomExtensionWithPositionalAndNamed()
 		{
 			var r = GetReader("CustomExtensionWithPositionalAndNamed.xml");
