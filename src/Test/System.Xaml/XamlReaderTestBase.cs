@@ -1325,7 +1325,17 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue(r.IsEof, "#3-2");
 		}
 
-		protected void Read_CustomExtensionWithPositionalAndNamed(XamlReader r)
+        // cf. https://msdn.microsoft.com/en-us/library/ee200269.aspx
+        //     "If the next character is a "\" (Unicode code point 005C), consume that "\" without adding 
+        //     it to the text value, then consume the following character and append that to the value."
+        protected void Load_CustomExtensionWithEscapeChars(XamlReader r)
+        {
+            ValueWrapper o = XamlServices.Load(r) as ValueWrapper;
+            Assert.IsNotNull(o, "Null, or not a ValueWrapper");
+            Assert.AreEqual("Quoted string: 'test'; Embedded braces: {test}; Two Backslashes: \\\\", o.StringValue, "Escape character not parsed properly");
+        }
+
+        protected void Read_CustomExtensionWithPositionalAndNamed(XamlReader r)
 		{
 			r.Read(); // ns
 			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType, "#1");
