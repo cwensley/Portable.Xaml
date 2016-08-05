@@ -32,6 +32,8 @@
     <ConsolePause>false</ConsolePause>
     <DefineConstants>PCL;PCL136</DefineConstants>
   </PropertyGroup>
+  <Import Project="..\Shared\Common.props" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Helpers\Compat136.cs" />
     <Compile Include="Helpers\Compat259.cs" />
@@ -189,11 +191,11 @@
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <None Include="Portable.Xaml\ChangeLog" />
     <None Include="Portable.Xaml.Markup\ChangeLog" />
     <None Include="Portable.Xaml.Schema\ChangeLog" />
     <None Include="Assembly\ChangeLog" />
   </ItemGroup>
+  <Import Project="..\Shared\Common.targets" />
 </Project>
