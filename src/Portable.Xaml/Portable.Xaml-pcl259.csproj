@@ -34,6 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <Import Project="..\Shared\Common.props" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <Compile Include="MonoTODOAttribute.cs" />
@@ -197,5 +198,5 @@
     <None Include="Portable.Xaml\ChangeLog" />
     <None Include="Portable.Xaml.Schema\ChangeLog" />
   </ItemGroup>
-  <ItemGroup />
+  <Import Project="..\Shared\Common.targets" />
 </Project>
