@@ -51,26 +51,24 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ProvideValueWithoutTypeOrName ()
 		{
-			new Reference ().ProvideValue (null);
+			var reference = new Reference ();
+			Assert.Throws<ArgumentNullException> (() => reference.ProvideValue (null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ProvideValueWithNameWithoutResolver ()
 		{
 			var x = new Reference ("X");
-			x.ProvideValue (null); // serviceProvider is required.
+			Assert.Throws<ArgumentNullException> (() => x.ProvideValue (null)); // serviceProvider is required.
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ProvideValueWithNameWithProviderNoResolver ()
 		{
 			var x = new Reference ("X");
-			x.ProvideValue (new NameServiceProvider (false, false));
+			Assert.Throws<InvalidOperationException> (() => x.ProvideValue (new NameServiceProvider (false, false)));
 		}
 
 		[Test]

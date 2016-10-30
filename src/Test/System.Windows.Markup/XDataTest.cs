@@ -48,12 +48,11 @@ namespace MonoTests.Portable.Xaml.Markup
 	public class XDataTest
 	{
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void GetXmlReaderWithNullText ()
 		{
 			var x = new XData ();
 			Assert.IsNull (x.Text, "#1");
-			Assert.IsNull (x.XmlReader, "#2");
+			Assert.Throws<ArgumentNullException> (() => { var xr = x.XmlReader; }, "#2");
 		}
 
 		[Test]
@@ -81,13 +80,14 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void SetNonXmlReader ()
 		{
 			var x = new XData ();
 			x.XmlReader = "<foo/>"; // not allowed. It does *not* raise an error, but the value becomes null.
 			#pragma warning disable 219
-			var r = x.XmlReader as XmlReader; // and thus it causes ANE.
+			Assert.Throws<ArgumentNullException> (() => {
+				var r = x.XmlReader as XmlReader; // and thus it causes ANE.
+			});
 			#pragma warning restore 219
 		}
 

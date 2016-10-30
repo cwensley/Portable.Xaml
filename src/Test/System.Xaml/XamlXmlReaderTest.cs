@@ -52,7 +52,7 @@ namespace MonoTests.Portable.Xaml
 
 		XamlReader GetReader(string filename)
 		{
-			string xml = File.ReadAllText(Path.Combine("XmlFiles", filename)).UpdateXml();
+			string xml = File.ReadAllText(Compat.GetTestFile (filename)).UpdateXml();
 			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)));
 		}
 		
@@ -531,12 +531,14 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException(typeof(XamlParseException))]
 		public void Read_CustomExtensionWithPositonalAfterExplicitProperty()
 		{
 			// cannot have positional property after named property
-			var r = GetReader("CustomExtensionWithPositonalAfterExplicitProperty.xml");
-			Read_CustomExtensionWithPositonalAfterExplicitProperty(r);
+			Assert.Throws<XamlParseException>(() =>
+			{
+				var r = GetReader("CustomExtensionWithPositonalAfterExplicitProperty.xml");
+				Read_CustomExtensionWithPositonalAfterExplicitProperty(r);
+			});
 		}
 
 		[Test]
@@ -856,9 +858,9 @@ namespace MonoTests.Portable.Xaml
 		public void Bug680385 ()
 		{
 			#if PCL136
-			XamlServices.Load (new StreamReader("XmlFiles/CurrentVersion.xaml"));
+			XamlServices.Load (new StreamReader(Compat.GetTestFile("CurrentVersion.xaml")));
 			#else
-			XamlServices.Load ("XmlFiles/CurrentVersion.xaml");
+			XamlServices.Load (Compat.GetTestFile("CurrentVersion.xaml"));
 			#endif
 		}
 		#endregion
@@ -868,21 +870,28 @@ namespace MonoTests.Portable.Xaml
 		{
 			var settings = new XamlXmlReaderSettings();
 			settings.LocalAssembly = typeof(TestClass1).Assembly;
-			string xml = File.ReadAllText(Path.Combine("XmlFiles", "LocalAssembly.xml")).UpdateXml();
+			string xml = File.ReadAllText(Compat.GetTestFile ("LocalAssembly.xml")).UpdateXml();
 			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
 			Assert.IsNotNull(obj, "#1");
 			Assert.IsInstanceOf<TestClass1>(obj, "#2");
 		}
 
 		[Test]
-		[ExpectedException] // not checking type of exception due to differences in implementation 
+		// not checking type of exception due to differences in implementation 
 		public void LocalAssemblyShouldNotApplyToNamespace()
 		{
 			var settings = new XamlXmlReaderSettings();
-			string xml = File.ReadAllText(Path.Combine("XmlFiles", "LocalAssembly.xml")).UpdateXml();
-			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
-			Assert.IsNotNull(obj, "#1");
-			Assert.IsInstanceOf<TestClass1>(obj, "#2");
+			string xml = File.ReadAllText(Compat.GetTestFile ("LocalAssembly.xml")).UpdateXml();
+#if PCL
+			var exType = typeof(XamlParseException);
+#else
+			var exType = typeof(XamlObjectWriterException);
+#endif
+			Assert.Throws(exType, () => {
+				var obj = XamlServices.Load (new XamlXmlReader (new StringReader (xml), settings));
+				Assert.IsNotNull (obj, "#1");
+				Assert.IsInstanceOf<TestClass1> (obj, "#2");
+			});
 		}
 	}
 }

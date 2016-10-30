@@ -44,17 +44,15 @@ namespace MonoTests.Portable.Xaml.Markup
 	public class ArrayExtensionTest
 	{
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNullType ()
 		{
-			new ArrayExtension ((Type) null);
+			Assert.Throws<ArgumentNullException>(() => new ArrayExtension ((Type) null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNullElement ()
 		{
-			new ArrayExtension ((object []) null);
+			Assert.Throws<ArgumentNullException> (() => new ArrayExtension ((object []) null));
 		}
 
 		[Test]
@@ -86,12 +84,11 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ProvideValueInconsistent ()
 		{
 			var x = new ArrayExtension (typeof (int));
 			x.AddChild (new object ());
-			x.ProvideValue (null);
+			Assert.Throws<InvalidOperationException> (() => x.ProvideValue (null));
 		}
 
 		[Test]
@@ -104,11 +101,10 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ProvideValueWithoutType ()
 		{
 			var x = new ArrayExtension ();
-			x.ProvideValue (null); // Type must be set first.
+			Assert.Throws<InvalidOperationException> (() => x.ProvideValue (null)); // Type must be set first.
 		}
 
 		[Test]
@@ -119,14 +115,13 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ProvideValueInconsistent2 ()
 		{
 			var x = new ArrayExtension (new int [] {1, 3});
 			x.AddChild (new object ());
 			x.AddChild (null); // allowed
 			Assert.AreEqual (4, x.Items.Count);
-			x.ProvideValue (null);
+			Assert.Throws<InvalidOperationException> (() => x.ProvideValue (null));
 		}
 
 		[Test]
@@ -155,12 +150,11 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ProvideValueInconsistent3 ()
 		{
 			var x = new ArrayExtension (new int [] {1, 3});
 			x.AddText ("test");
-			x.ProvideValue (null);
+			Assert.Throws<InvalidOperationException> (() => x.ProvideValue (null));
 		}
 	}
 }

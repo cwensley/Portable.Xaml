@@ -52,10 +52,9 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorXamlTypeNull ()
 		{
-			new XamlTypeName (null);
+			Assert.Throws<ArgumentNullException> (() => new XamlTypeName (null));
 		}
 
 		[Test]
@@ -91,13 +90,14 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructorTypeArgumentsNullEntry()
 		{
 			if (!Compat.IsPortableXaml)
 				Assert.Ignore(".NET causes NRE on ToString().It is not really intended and should raise an error when constructed");
-			var type = new XamlTypeName("urn:foo", "FooBar", new XamlTypeName[] { null });
-			Assert.DoesNotThrow(() => type.ToString());
+			Assert.Throws<ArgumentNullException> (() => {
+				var type = new XamlTypeName ("urn:foo", "FooBar", new XamlTypeName [] { null });
+				Assert.DoesNotThrow (() => type.ToString ());
+			});
 		}
 
 		[Test]
@@ -115,28 +115,25 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ToStringDefault ()
 		{
 			var n = new XamlTypeName ();
-			n.ToString ();
+			Assert.Throws<InvalidOperationException> (() => n.ToString ());
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ToStringNameNull ()
 		{
 			var n = new XamlTypeName ("urn:foo", null);
-			n.ToString ();
+			Assert.Throws<InvalidOperationException> (() => n.ToString ());
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ToStringNamespaceNull ()
 		{
 			// allowed.
 			var n = new XamlTypeName (null, "FooBar");
-			n.ToString ();
+			Assert.Throws<InvalidOperationException> (() => n.ToString ());
 		}
 
 		[Test]
@@ -147,15 +144,16 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		#if PCL
-		[ExpectedException(typeof(ArgumentNullException))]
-		#else
-		[ExpectedException(typeof(NullReferenceException))]
-		#endif
 		public void ToStringTypeArgumentsNullEntry ()
 		{
-			var n = new XamlTypeName ("urn:foo", "FooBar", new XamlTypeName [] {null, new XamlTypeName ("urn:bar", "FooBarBaz")});
-			Assert.AreEqual ("{urn:foo}FooBar()", n.ToString (), "#1");
+			#if PCL
+			Assert.Throws<ArgumentNullException> (() => {
+			#else
+			Assert.Throws<NullReferenceException> (() => {
+			#endif
+				var n = new XamlTypeName ("urn:foo", "FooBar", new XamlTypeName [] { null, new XamlTypeName ("urn:bar", "FooBarBaz") });
+				Assert.AreEqual ("{urn:foo}FooBar()", n.ToString (), "#1");
+			});
 		}
 
 		[Test]
@@ -187,7 +185,6 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (InvalidOperationException))]
 		public void ToStringNamespaceLookupInsufficient ()
 		{
 			var n = new XamlTypeName ("urn:foo", "Foo", new XamlTypeName [] {new XamlTypeName ("urn:bar", "Bar"), new XamlTypeName ("urn:baz", "Baz")});
@@ -195,7 +192,7 @@ namespace MonoTests.Portable.Xaml.Schema
 			lookup.Add ("a", "urn:foo");
 			lookup.Add ("c", "urn:baz");
 			// it fails because there is missing mapping for urn:bar.
-			Assert.AreEqual ("a:Foo({urn:bar}Bar, c:Baz)", n.ToString (lookup), "#1");
+			Assert.Throws<InvalidOperationException> (() => n.ToString (lookup), "#1");
 		}
 
 		[Test]
@@ -232,17 +229,15 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void StaticToStringNullLookup ()
 		{
-			XamlTypeName.ToString (new XamlTypeName [] {new XamlTypeName ("urn:foo", "bar")}, null);
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.ToString (new XamlTypeName [] {new XamlTypeName ("urn:foo", "bar")}, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void StaticToStringNullTypeNameList ()
 		{
-			XamlTypeName.ToString (null, new MyNamespaceLookup ());
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.ToString (null, new MyNamespaceLookup ()));
 		}
 
 		[Test]
@@ -270,17 +265,15 @@ namespace MonoTests.Portable.Xaml.Schema
 		XamlTypeName dummy;
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void TryParseNullName ()
 		{
-			XamlTypeName.TryParse (null, new MyNSResolver (), out dummy);
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.TryParse (null, new MyNSResolver (), out dummy));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void TryParseNullResolver ()
 		{
-			XamlTypeName.TryParse ("Foo", null, out dummy);
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.TryParse ("Foo", null, out dummy));
 		}
 
 		[Test]
@@ -367,38 +360,33 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ParseListNullNames ()
 		{
-			XamlTypeName.ParseList (null, new MyNSResolver ());
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.ParseList (null, new MyNSResolver ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ParseListNullResolver ()
 		{
-			XamlTypeName.ParseList ("foo", null);
+			Assert.Throws<ArgumentNullException> (() => XamlTypeName.ParseList ("foo", null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (FormatException))]
 		public void ParseListInvalid ()
 		{
-			XamlTypeName.ParseList ("foo bar", new MyNSResolver ());
+			Assert.Throws<FormatException> (() => XamlTypeName.ParseList ("foo bar", new MyNSResolver ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof (FormatException))]
 		public void ParseListInvalid2 ()
 		{
-			XamlTypeName.ParseList ("foo,", new MyNSResolver ());
+			Assert.Throws<FormatException> (() => XamlTypeName.ParseList ("foo,", new MyNSResolver ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof (FormatException))]
 		public void ParseListInvalid3 ()
 		{
-			XamlTypeName.ParseList ("", new MyNSResolver ());
+			Assert.Throws<FormatException> (() => XamlTypeName.ParseList ("", new MyNSResolver ()));
 		}
 
 		[Test]

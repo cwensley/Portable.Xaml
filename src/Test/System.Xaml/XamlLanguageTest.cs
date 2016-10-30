@@ -202,10 +202,9 @@ namespace MonoTests.Portable.Xaml
 		}
 		
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void InitializationGetValue ()
 		{
-			XamlLanguage.Initialization.Invoker.GetValue ("foo");
+			Assert.Throws<NotSupportedException> (() => XamlLanguage.Initialization.Invoker.GetValue ("foo"));
 		}
 
 		[Test]

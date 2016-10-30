@@ -64,10 +64,9 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(ArgumentNullException))]
 		public void SchemaContextNull ()
 		{
-			new XamlXmlWriter (new MemoryStream (), null);
+			Assert.Throws<ArgumentNullException> (() => new XamlXmlWriter (new MemoryStream (), null));
 		}
 
 		[Test]
@@ -80,38 +79,38 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void InitWriteEndMember ()
 		{
-			new XamlXmlWriter (new MemoryStream (), sctx, null).WriteEndMember ();
+			var writer = new XamlXmlWriter (new MemoryStream (), sctx, null);
+			Assert.Throws<XamlXmlWriterException> (() => writer.WriteEndMember ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void InitWriteEndObject ()
 		{
-			new XamlXmlWriter (new MemoryStream (), sctx, null).WriteEndObject ();
+			var writer = new XamlXmlWriter (new MemoryStream (), sctx, null);
+			Assert.Throws<XamlXmlWriterException> (() => writer.WriteEndObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void InitWriteGetObject ()
 		{
-			new XamlXmlWriter (new MemoryStream (), sctx, null).WriteGetObject ();
+			var writer = new XamlXmlWriter (new MemoryStream (), sctx, null);
+			Assert.Throws<XamlXmlWriterException> (() => writer.WriteGetObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void InitWriteValue ()
 		{
-			new XamlXmlWriter (new StringWriter (), sctx, null).WriteValue ("foo");
+			var writer = new XamlXmlWriter (new StringWriter (), sctx, null);
+			Assert.Throws<XamlXmlWriterException> (() => writer.WriteValue ("foo"));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void InitWriteStartMember ()
 		{
-			new XamlXmlWriter (new StringWriter (), sctx, null).WriteStartMember (new XamlMember (str_len, sctx));
+			var writer = new XamlXmlWriter (new StringWriter (), sctx, null);
+			Assert.Throws<XamlXmlWriterException> (() => writer.WriteStartMember (new XamlMember (str_len, sctx)));
 		}
 
 		[Test]
@@ -125,10 +124,10 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(ArgumentNullException))]
 		public void WriteNamespaceNull ()
 		{
-			new XamlXmlWriter (new StringWriter (), sctx, null).WriteNamespace (null);
+			var writer = new XamlXmlWriter (new StringWriter (), sctx, null);
+			Assert.Throws<ArgumentNullException> (() => writer.WriteNamespace (null));
 		}
 
 		[Test]
@@ -143,17 +142,15 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void GetObjectAfterStartObject ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteGetObject ();
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteGetObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void WriteStartObjectAfterTopLevel ()
 		{
 			var sw = new StringWriter ();
@@ -161,28 +158,26 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (xt);
 			xw.WriteEndObject ();
 			// writing another root is not allowed.
-			xw.WriteStartObject (xt);
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteStartObject (xt));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void WriteEndObjectExcess ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteEndObject ();
-			xw.WriteEndObject ();
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartObjectWriteEndMember ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteEndMember ();
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndMember ());
 		}
 
 		[Test]
@@ -200,25 +195,23 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartMemberWriteEndMember ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (xm);
-			xw.WriteEndMember (); // wow, really?
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndMember ()); // wow, really?
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartMemberWriteStartMember ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (xm);
-			xw.WriteStartMember (xm);
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteStartMember (xm));
 		}
 
 		[Test]
@@ -291,40 +284,36 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(ArgumentException))]
 		public void WriteValueTypeNonString ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (xm);
-			xw.WriteValue (5); // even the type matches the member type, writing non-string value is rejected.
+			Assert.Throws<ArgumentException> (() => xw.WriteValue (5)); // even the type matches the member type, writing non-string value is rejected.
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void WriteValueAfterValue ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteValue ("foo");
-			xw.WriteValue ("bar");
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteValue ("foo"));
+			//xw.WriteValue ("bar");
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void WriteValueAfterNullValue ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteValue (null);
-			xw.WriteValue ("bar");
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteValue (null));
+			//xw.WriteValue ("bar");
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void WriteValueList ()
 		{
 			var sw = new StringWriter ();
@@ -332,17 +321,16 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (new XamlType (typeof(List<string>), sctx));
 			xw.WriteStartMember (XamlLanguage.Items);
 			xw.WriteValue ("foo");
-			xw.WriteValue ("bar");
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteValue ("bar"));
 		}
 
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartMemberWriteEndObject ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (xm);
-			xw.WriteEndObject ();
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndObject ());
 		}
 
 		[Test]
@@ -360,23 +348,21 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartObjectStartObject ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteStartObject (xt);
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteStartObject (xt));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartObjectValue ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
-			xw.WriteValue ("foo");
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteValue ("foo"));
 		}
 
 		[Test]
@@ -401,18 +387,17 @@ namespace MonoTests.Portable.Xaml
 		// from state transition (and borks when the next write is not
 		// appropriate).
 		[Test]
-		[ExpectedException (typeof(InvalidOperationException))]
 		public void EndObjectAfterNamespace ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteNamespace (new NamespaceDeclaration ("urn:foo", "y"));
-			xw.WriteEndObject ();
+			Assert.Throws<InvalidOperationException> (() => xw.WriteEndObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(InvalidOperationException))] // ... shouldn't it be XamlXmlWriterException?
+		// ... shouldn't it be XamlXmlWriterException?
 		public void WriteValueAfterNamespace ()
 		{
 			var sw = new StringWriter ();
@@ -420,7 +405,7 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (XamlLanguage.Initialization);
 			xw.WriteNamespace (new NamespaceDeclaration ("urn:foo", "y"));
-			xw.WriteValue ("foo");
+			Assert.Throws<InvalidOperationException> (() => xw.WriteValue ("foo"));
 		}
 
 		[Test]
@@ -449,7 +434,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))] // strange, this does *not* result in IOE...
 		public void ValueThenNamespaceThenEndMember ()
 		{
 			var sw = new StringWriter ();
@@ -458,7 +442,7 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartMember (xm);
 			xw.WriteValue ("foo");
 			xw.WriteNamespace (new NamespaceDeclaration ("y", "urn:foo"));
-			xw.WriteEndMember ();
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndMember ());
 		}
 
 		[Test]
@@ -480,7 +464,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void EndMemberThenStartObject ()
 		{
 			var sw = new StringWriter ();
@@ -489,29 +472,27 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartMember (xm);
 			xw.WriteValue ("foo");
 			xw.WriteEndMember ();
-			xw.WriteStartObject (xt);
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteStartObject (xt));
 		}
 
 		[Test]
-		[ExpectedException (typeof(InvalidOperationException))]
 		public void GetObjectOnNonCollection ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (xm);
-			xw.WriteGetObject ();
+			Assert.Throws<InvalidOperationException> (() => xw.WriteGetObject ());
 		}
 
 		[Test]
-		[ExpectedException (typeof(InvalidOperationException))]
 		public void GetObjectOnNonCollection2 ()
 		{
 			var sw = new StringWriter ();
 			var xw = new XamlXmlWriter (sw, sctx, null);
 			xw.WriteStartObject (xt);
 			xw.WriteStartMember (new XamlMember (typeof(string).GetProperty ("Length"), sctx)); // Length is of type int, which is not a collection
-			xw.WriteGetObject ();
+			Assert.Throws<InvalidOperationException> (() => xw.WriteGetObject ());
 		}
 
 		[Test]
@@ -529,7 +510,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void ValueAfterGetObject ()
 		{
 			var sw = new StringWriter ();
@@ -537,11 +517,10 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (xt2);
 			xw.WriteStartMember (new XamlMember (typeof(Foo).GetProperty ("Bar"), sctx));
 			xw.WriteGetObject ();
-			xw.WriteValue ("foo");
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteValue ("foo"));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void StartObjectAfterGetObject ()
 		{
 			var sw = new StringWriter ();
@@ -549,11 +528,10 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (xt2);
 			xw.WriteStartMember (new XamlMember (typeof(Foo).GetProperty ("Bar"), sctx));
 			xw.WriteGetObject ();
-			xw.WriteStartObject (xt);
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteStartObject (xt));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void EndMemberAfterGetObject ()
 		{
 			var sw = new StringWriter ();
@@ -561,7 +539,7 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject (xt2);
 			xw.WriteStartMember (new XamlMember (typeof(Foo).GetProperty ("Bar"), sctx));
 			xw.WriteGetObject ();
-			xw.WriteEndMember (); // ...!?
+			Assert.Throws<XamlXmlWriterException> (() => xw.WriteEndMember ()); // ...!?
 		}
 
 		[Test]
@@ -641,7 +619,7 @@ namespace MonoTests.Portable.Xaml
 
 		string ReadXml (string name)
 		{
-			return File.ReadAllText ("XmlFiles/" + name).Trim ().UpdateXml ();
+			return File.ReadAllText (Compat.GetTestFile(name)).Trim ().UpdateXml ();
 		}
 
 		[Test]
@@ -822,7 +800,6 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlXmlWriterException))]
 		public void Write_PositionalParameters1 ()
 		{
 			// PositionalParameters can only be written when the 
@@ -834,7 +811,7 @@ namespace MonoTests.Portable.Xaml
 			// A default constructor could be used to not use
 			// PositionalParameters, but there isn't in this type.
 			var obj = new PositionalParametersClass1 ("foo", 5);
-			XamlServices.Save (obj);
+			Assert.Throws<XamlXmlWriterException> (() => XamlServices.Save (obj));
 		}
 
 		[Test]

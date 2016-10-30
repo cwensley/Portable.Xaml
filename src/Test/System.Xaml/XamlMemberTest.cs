@@ -58,59 +58,51 @@ namespace MonoTests.Portable.Xaml
 		MethodInfo dummy_set2 = typeof (Dummy).GetMethod ("DummySetMethod");
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorEventInfoNullEventInfo ()
 		{
-			new XamlMember ((EventInfo) null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ((EventInfo) null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorEventInfoNullSchemaContext ()
 		{
-			new XamlMember (ass_load, null);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (ass_load, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorPropertyInfoNullPropertyInfo ()
 		{
-			new XamlMember ((PropertyInfo) null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ((PropertyInfo) null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorPropertyInfoNullSchemaContext ()
 		{
-			new XamlMember (str_len, null);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (str_len, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorAddMethodNullName ()
 		{
-			new XamlMember (null, GetType ().GetMethod ("DummyAddMEthod"), sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (null, GetType ().GetMethod ("DummyAddMEthod"), sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorAddMethodNullMethod ()
 		{
-			new XamlMember ("DummyAddMethod", null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ("DummyAddMethod", null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorAddMethodNullSchemaContext ()
 		{
-			new XamlMember ("DummyAddMethod", dummy_add, null);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ("DummyAddMethod", dummy_add, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorGetSetMethodNullName ()
 		{
-			new XamlMember (null, dummy_get, dummy_set, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (null, dummy_get, dummy_set, sctx));
 		}
 
 		[Test]
@@ -126,58 +118,51 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorGetSetMethodNullGetSetMethod ()
 		{
-			new XamlMember ("DummyProp", null, null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ("DummyProp", null, null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorGetSetMethodNullSchemaContext ()
 		{
-			new XamlMember ("DummyProp", dummy_get, dummy_set, null);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ("DummyProp", dummy_get, dummy_set, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNameTypeNullName ()
 		{
-			new XamlMember (null, new XamlType (typeof (string), sctx), false);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (null, new XamlType (typeof (string), sctx), false));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNameTypeNullType ()
 		{
-			new XamlMember ("Length", null, false);
+			Assert.Throws<ArgumentNullException> (() => new XamlMember ("Length", null, false));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void AddMethodInvalid ()
 		{
 			// It is not of expected kind of member here:
 			// "Attached property setter and attached event adder methods must have two parameters."
-			new XamlMember ("AssemblyLoad", ass_load.GetAddMethod (), sctx);
+			Assert.Throws<ArgumentException> (() => new XamlMember ("AssemblyLoad", ass_load.GetAddMethod (), sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void GetMethodInvlaid ()
 		{
 			// It is not of expected kind of member here:
 			// "Attached property getter methods must have one parameter and a non-void return type."
-			new XamlMember ("Length", sb_len.GetGetMethod (), null, sctx);
+			Assert.Throws<ArgumentException> (() => new XamlMember ("Length", sb_len.GetGetMethod (), null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void SetMethodInvalid ()
 		{
 			// It is not of expected kind of member here:
 			// "Attached property setter and attached event adder methods must have two parameters."
-			new XamlMember ("Length", null, sb_len.GetSetMethod (), sctx);
+			Assert.Throws<ArgumentException> (() => new XamlMember ("Length", null, sb_len.GetSetMethod (), sctx));
 		}
 
 		[Test]
