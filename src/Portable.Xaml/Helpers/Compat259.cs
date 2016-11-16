@@ -23,6 +23,11 @@ namespace Portable.Xaml
 			return typeInfo.GenericTypeArguments;
 		}
 
+		public static Type[] GetGenericParameters(this TypeInfo typeInfo)
+		{
+			return typeInfo.GenericTypeParameters;
+		}
+
 		public static MethodInfo GetAddMethod(this EventInfo methodInfo)
 		{
 			return methodInfo.AddMethod;

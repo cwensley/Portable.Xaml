@@ -1068,6 +1068,66 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_ArgumentMultipleTypesFromString ()
+		{
+			using (var xr = GetReader ("ArgumentMultipleTypesFromString.xml")) {
+				var des = (ArgumentMultipleTypes)XamlServices.Load (xr);
+				Assert.AreEqual ("foo", des.StringArg, "#1");
+				Assert.AreEqual (0, des.IntArg, "#2");
+			}
+		}
+		[Test]
+		public void Write_ArgumentMultipleTypesFromInt ()
+		{
+			using (var xr = GetReader ("ArgumentMultipleTypesFromInt.xml")) {
+				var des = (ArgumentMultipleTypes)XamlServices.Load (xr);
+				Assert.AreEqual (null, des.StringArg, "#1");
+				Assert.AreEqual (10, des.IntArg, "#2");
+			}
+		}
+
+		[Test]
+		public void Write_ArgumentMultipleTypesFromAttribute ()
+		{
+			using (var xr = GetReader ("ArgumentMultipleTypesFromAttribute.xml")) {
+				var des = (ArgumentMultipleTypes)XamlServices.Load (xr);
+				Assert.AreEqual ("foo", des.StringArg, "#1");
+				Assert.AreEqual (0, des.IntArg, "#2");
+			}
+		}
+
+		[Test]
+		public void Write_ArgumentWithIntConstructorFromAttribute ()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Portable.Xaml will convert the types if needed");
+			using (var xr = GetReader ("ArgumentWithIntConstructorFromAttribute.xml")) {
+				var des = (ArgumentWithIntConstructor)XamlServices.Load (xr);
+				Assert.AreEqual (10, des.IntArg, "#2");
+			}
+		}
+
+		[Test]
+		public void Write_ArgumentWithIntConstructorFromInt ()
+		{
+			using (var xr = GetReader ("ArgumentWithIntConstructorFromInt.xml")) {
+				var des = (ArgumentWithIntConstructor)XamlServices.Load (xr);
+				Assert.AreEqual (11, des.IntArg, "#2");
+			}
+		}
+
+		[Test]
+		public void Write_ArgumentWithIntConstructorFromString ()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Portable.Xaml will convert the types if needed");
+			using (var xr = GetReader ("ArgumentWithIntConstructorFromString.xml")) {
+				var des = (ArgumentWithIntConstructor)XamlServices.Load (xr);
+				Assert.AreEqual (12, des.IntArg, "#2");
+			}
+		}
+
+		[Test]
 		public void Write_ArrayExtension2()
 		{
 			//var obj = new ArrayExtension (typeof (int));
@@ -1816,6 +1876,32 @@ namespace MonoTests.Portable.Xaml
 				CollectionAssert.AreEqual(expected, res.ImmutableSortedSet.Select(r => r.Foo), "#7-2");
 			}
 		}
-		#endif
+#endif
+
+		[Test]
+		public void Write_GenericTypeWithClrNamespace ()
+		{
+			using (var xr = GetReader ("GenericTypeWithClrNamespace.xml")) {
+				var des = (CustomGenericType<TestStruct>)XamlServices.Load (xr);
+				Assert.AreEqual (4, des.Contents.Count, "#1");
+				Assert.AreEqual ("1", des.Contents[0].Text, "#2");
+				Assert.AreEqual ("2", des.Contents[1].Text, "#3");
+				Assert.AreEqual ("3", des.Contents[2].Text, "#4");
+				Assert.AreEqual ("4", des.Contents[3].Text, "#5");
+			}
+		}
+
+		[Test]
+		public void Write_GenericTypeWithXamlNamespace ()
+		{
+			using (var xr = GetReader ("GenericTypeWithXamlNamespace.xml")) {
+				var des = (NamespaceTest.CustomGenericType<NamespaceTest.NamespaceTestClass>)XamlServices.Load (xr);
+				Assert.AreEqual (4, des.Contents.Count, "#1");
+				Assert.AreEqual ("1", des.Contents [0].Foo, "#2");
+				Assert.AreEqual ("2", des.Contents [1].Foo, "#3");
+				Assert.AreEqual ("3", des.Contents [2].Foo, "#4");
+				Assert.AreEqual ("4", des.Contents [3].Foo, "#5");
+			}
+		}
 	}
 }
