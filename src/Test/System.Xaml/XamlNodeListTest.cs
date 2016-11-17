@@ -18,17 +18,15 @@ namespace MonoTests.Portable.Xaml
 	public class XamlNodeListTest
 	{
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructorNull()
 		{
-			new XamlNodeList(null);
+			Assert.Throws<ArgumentNullException> (() => new XamlNodeList(null));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void NegativeSize()
 		{
-			new XamlNodeList(new XamlSchemaContext(), -100);
+			Assert.Throws<ArgumentOutOfRangeException> (() => new XamlNodeList(new XamlSchemaContext(), -100));
 		}
 
 		[Test]
@@ -64,14 +62,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException(typeof(XamlException))]
 		public void WriterShouldThrowExceptionIfNotClosed()
 		{
 			var sc = new XamlSchemaContext();
 			var list = new XamlNodeList(sc);
 			list.Writer.WriteStartObject(sc.GetXamlType(typeof(TestClass4)));
 			list.Writer.WriteEndObject();
-			list.GetReader();
+			Assert.Throws<XamlException> (() => list.GetReader());
 		}
 
 		[Test]

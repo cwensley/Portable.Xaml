@@ -282,43 +282,15 @@ namespace Portable.Xaml
 			var constructors = type.UnderlyingType.GetTypeInfo().GetConstructors();
 			if (contents != null && contents.Count > 0)
 			{
-				// find constructor based on supplied parameters
-				foreach (var constructor in constructors)
-				{
-					var parameters = constructor.GetParameters();
-					if (contents.Count > parameters.Length)
-						continue;
+				var context = type.SchemaContext;
 
-					bool mismatch = false;
-					for (int i = 0; i < parameters.Length; i++)
-					{
-						var parameter = parameters[i];
-						if (i >= contents.Count)
-						{
-							// allow parameters with a default value to be omitted
-							mismatch = !parameter.HasDefaultValue();
-							if (mismatch)
-								break;
-							continue;
-						}
-						// check if the parameter value can be assigned to the required type
-						var posParameter = contents[i];
-						var paramXamlType = type.SchemaContext.GetXamlType(parameter.ParameterType);
+				// find constructor that matches content type directly first, then by ones that can be converted by type
+				var constructorArguments =
+					FindConstructorArguments(context, constructors, contents, (type1, type2) => type1.UnderlyingType.GetTypeInfo().IsAssignableFrom(type2.UnderlyingType.GetTypeInfo()))
+					?? FindConstructorArguments(context, constructors, contents, (type1, type2) => type1.CanConvertFrom(type2));
 
-						// check if type input type can be converted to the parameter type
-						var inputType = posParameter == null ? XamlLanguage.Null : type.SchemaContext.GetXamlType(posParameter.GetType());
-						mismatch = !paramXamlType.CanConvertFrom(inputType);
-						if (mismatch)
-							break;
-					}
-					if (mismatch)
-						continue;
-
-					// matches constructor arguments
-					return constructor
-						.GetParameters()
-						.Select(p => type.SchemaContext.GetParameter(p));
-				}
+				if (constructorArguments != null)
+					return constructorArguments;
 			}
 
 			// find constructor based on ConstructorArgumentAttribute
@@ -343,6 +315,47 @@ namespace Portable.Xaml
 		static ParameterInfo FindParameterWithName (this IEnumerable<ParameterInfo> pis, string name)
 		{
 			return pis.FirstOrDefault (pi => pi.Name == name);
+		}
+
+		static IEnumerable<XamlMember> FindConstructorArguments(XamlSchemaContext context, IEnumerable<ConstructorInfo> constructors, IList<object> contents, Func<XamlType, XamlType, bool> compare)
+		{
+			foreach (var constructor in constructors)
+			{
+				var parameters = constructor.GetParameters();
+				if (contents.Count > parameters.Length)
+					continue;
+
+				bool mismatch = false;
+				for (int i = 0; i < parameters.Length; i++)
+				{
+					var parameter = parameters[i];
+					if (i >= contents.Count)
+					{
+						// allow parameters with a default value to be omitted
+						mismatch = !parameter.HasDefaultValue();
+						if (mismatch)
+							break;
+						continue;
+					}
+					// check if the parameter value can be assigned to the required type
+					var posParameter = contents[i];
+					var paramXamlType = context.GetXamlType(parameter.ParameterType);
+
+					// check if type input type can be converted to the parameter type
+					var inputType = posParameter == null ? XamlLanguage.Null : context.GetXamlType(posParameter.GetType());
+					mismatch = !compare(paramXamlType, inputType);
+					if (mismatch)
+						break;
+				}
+				if (mismatch)
+					continue;
+
+				// matches constructor arguments
+				return constructor
+					.GetParameters()
+					.Select(p => context.GetParameter(p));
+			}
+			return null;
 		}
 
 		public static string ConstructorArgumentName (this XamlMember xm)

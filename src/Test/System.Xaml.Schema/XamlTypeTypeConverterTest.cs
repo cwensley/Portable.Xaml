@@ -70,38 +70,33 @@ namespace MonoTests.Portable.Xaml.Schema
 		// ConvertFrom() is not supported in either way.
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertFrom ()
 		{
-			c.ConvertFrom (null, null, XamlLanguage.String);
+			Assert.Throws<NotSupportedException> (() => c.ConvertFrom (null, null, XamlLanguage.String));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertFrom2 ()
 		{
-			c.ConvertFrom (null, null, "System.Int32");
+			Assert.Throws<NotSupportedException> (() => c.ConvertFrom (null, null, "System.Int32"));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertXamlTypeToXamlType ()
 		{
-			Assert.AreEqual ("", c.ConvertTo (null, null, XamlLanguage.String, typeof (XamlType)), "#1");
+			Assert.Throws<NotSupportedException> (() => c.ConvertTo (null, null, XamlLanguage.String, typeof (XamlType)), "#1");
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertXamlTypeToXamlType2 ()
 		{
-			Assert.AreEqual ("", c.ConvertTo (new DummyValueSerializerContext (), null, XamlLanguage.String, typeof (XamlType)), "#1");
+			Assert.Throws<NotSupportedException> (() => c.ConvertTo (new DummyValueSerializerContext (), null, XamlLanguage.String, typeof (XamlType)), "#1");
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertXamlTypeToType ()
 		{
-			c.ConvertTo (null, null, XamlLanguage.String, typeof (Type));
+			Assert.Throws<NotSupportedException> (() => c.ConvertTo (null, null, XamlLanguage.String, typeof (Type)));
 		}
 
 		[Test]
@@ -126,10 +121,9 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertStringToXamlType ()
 		{
-			Assert.AreEqual ("", c.ConvertTo (new DummyValueSerializerContext (), null, "System.String", typeof (XamlType)), "#1");
+			Assert.Throws<NotSupportedException> (() => c.ConvertTo (new DummyValueSerializerContext (), null, "System.String", typeof (XamlType)), "#1");
 		}
 	}
 }

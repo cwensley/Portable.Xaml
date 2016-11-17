@@ -477,8 +477,10 @@ namespace Portable.Xaml
 
 			var positionalParameters = considerPositionalParameters ? state.Type.GetPositionalParameters(contents.Count) : null;
 
-			var args = state.Type.GetSortedConstructorArguments(contents).ToArray();
+			var args = state.Type.GetSortedConstructorArguments(contents)?.ToArray();
 			var argt = args != null ? (from arg in args select arg.Type).ToArray () : positionalParameters;
+			if (argt == null)
+				throw new XamlObjectWriterException ($"Could not find matching constructor for type {state.Type}");
 
 			var argv = new object [argt.Count];
 			for (int i = 0; i < argv.Length; i++)

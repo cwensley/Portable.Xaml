@@ -43,11 +43,10 @@ namespace MonoTests.Portable.Xaml
 	public class XamlObjectEventArgsTest
 	{
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNullArg ()
 		{
 			// allowed.
-			new XamlObjectEventArgs (null);
+			Assert.Throws<ArgumentNullException> (() => new XamlObjectEventArgs (null));
 		}
 	}
 }

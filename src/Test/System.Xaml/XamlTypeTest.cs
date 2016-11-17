@@ -50,17 +50,15 @@ namespace MonoTests.Portable.Xaml
 		XamlSchemaContext sctx = new XamlSchemaContext (null, null);
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorTypeNullType ()
 		{
-			new XamlType (null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlType (null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorTypeNullSchemaContext ()
 		{
-			new XamlType (typeof (int), null);
+			Assert.Throws<ArgumentNullException> (() => new XamlType (typeof (int), null));
 		}
 
 		[Test]
@@ -93,17 +91,15 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNamesNullName ()
 		{
-			new XamlType (String.Empty, null, null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new XamlType (String.Empty, null, null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNamesNullSchemaContext ()
 		{
-			new XamlType ("System", "Int32", null, null);
+			Assert.Throws<ArgumentNullException> (() => new XamlType ("System", "Int32", null, null));
 		}
 
 		[Test]
@@ -114,17 +110,15 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNameNullName ()
 		{
-			new MyXamlType (null, null, sctx);
+			Assert.Throws<ArgumentNullException> (() => new MyXamlType (null, null, sctx));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNameNullSchemaContext ()
 		{
-			new MyXamlType ("System.Int32", null, null);
+			Assert.Throws<ArgumentNullException> (() => new MyXamlType ("System.Int32", null, null));
 		}
 
 		[Test]
@@ -792,14 +786,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void AttachablePropertySetValueNullObject ()
 		{
 			var xt = new XamlType (typeof (Attachable), sctx);
 			var apl = xt.GetAllAttachableMembers ();
 			var foo = apl.First (ap => ap.Name == "Foo");
 			Assert.IsTrue (foo.IsAttachable, "#7");
-			foo.Invoker.SetValue (null, "xxx");
+			Assert.Throws<ArgumentNullException> (() => foo.Invoker.SetValue (null, "xxx"));
 		}
 
 		[Test]

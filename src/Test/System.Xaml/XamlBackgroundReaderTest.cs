@@ -49,7 +49,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		XamlReader GetReader (string filename)
 		{
-			return new XamlXmlReader (XmlReader.Create (Path.Combine ("XmlFiles", filename), new XmlReaderSettings () { CloseInput =true }));
+			return new XamlXmlReader (XmlReader.Create (Compat.GetTestFile (filename), new XmlReaderSettings () { CloseInput =true }));
 		}
 
 		void ReadTest (string filename)

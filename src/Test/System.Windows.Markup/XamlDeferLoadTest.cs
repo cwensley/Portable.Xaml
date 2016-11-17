@@ -48,20 +48,18 @@ namespace MonoTests.Portable.Xaml.Markup
 		[TestCase("something", null)]
 		[TestCase(null, "something")]
 		[TestCase(null, null)]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructorNullName (string loaderType, string contentType)
 		{
-			new XamlDeferLoadAttribute(loaderType, contentType);
+			Assert.Throws<ArgumentNullException> (() => new XamlDeferLoadAttribute(loaderType, contentType));
 		}
 
 		[Test]
 		[TestCase(typeof(TestDeferredLoader), null)]
 		[TestCase(null, typeof(DeferredLoadingChild))]
 		[TestCase(null, null)]
-		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructorNullName (Type loaderType, Type contentType)
 		{
-			new XamlDeferLoadAttribute(loaderType, contentType);
+			Assert.Throws<ArgumentNullException> (() => new XamlDeferLoadAttribute(loaderType, contentType));
 		}
 
 		[Test]
