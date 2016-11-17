@@ -1597,10 +1597,15 @@ namespace SecondTest
 			XamlSchemaContext schemaContext = service.SchemaContext;
 			var types = new XamlType[] { schemaContext.GetXamlType(typeof(ResourcesDict)) };
 
+			// Getting based on types alone should return the value, not the AmbientPropertyValue
+			var objectValues = provider.GetAllAmbientValues(types).ToList();
+			Assert.AreEqual (1, objectValues.Count, "#1");
+
 			// ResourceDict is marked as Ambient, so the instance current being deserialized should be in this list.
-			var values = provider.GetAllAmbientValues(null, false, types).ToList();
-			Assert.AreEqual(1, values.Count, "#1");
-			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			var ambientValues = provider.GetAllAmbientValues(null, false, types).ToList();
+			Assert.AreEqual(1, ambientValues.Count, "#2");
+			CollectionAssert.AreEqual (objectValues, ambientValues.Select (r => r.Value), "#3");
+			foreach (var dict in ambientValues.Select(r => r.Value).OfType<ResourcesDict>())
 			{
 				if (dict.ContainsKey(this.Key))
 					return dict[this.Key];
@@ -1650,30 +1655,40 @@ namespace SecondTest
 				schemaContext.GetXamlType(typeof(ResourceContainer)).GetMember("Resources2")
 			};
 
-			var values = provider.GetAllAmbientValues(null, false, types, properties).ToList();
+			var values = provider.GetAllAmbientValues (types).ToList ();
 			int count = 0;
+			if (Equals (Key, "TestDictItem")) {
+				// inside ambient value, should be returned as well
+				Assert.AreEqual (1, values.Count, "#2");
+				Assert.IsInstanceOf<ResourcesDict> (values [0]);
+			} else {
+				Assert.AreEqual (0, values.Count, "#3");
+			}
+
+			var ambientValues = provider.GetAllAmbientValues(null, false, types, properties).ToList();
+			count = 0;
 			if (Equals(Key, "TestDictItem"))
 			{
 				// inside ambient value, should be returned as well
-				Assert.AreEqual(3, values.Count, "#2");
-				Assert.IsInstanceOf<ResourcesDict>(values[count].Value);
-				Assert.IsNull(values[count++].RetrievedProperty);
+				Assert.AreEqual(3, ambientValues.Count, "#4");
+				Assert.IsInstanceOf<ResourcesDict>(ambientValues[count].Value);
+				Assert.IsNull(ambientValues[count++].RetrievedProperty);
 			}
 			else
 			{
-				Assert.AreEqual(2, values.Count, "#2");
+				Assert.AreEqual(2, ambientValues.Count, "#5");
 			}
-			Assert.IsInstanceOf<ResourcesDict>(values[count].Value, "#3");
-			Assert.AreEqual(properties[0], values[count++].RetrievedProperty, "#4");
-			Assert.IsNull(values[count].Value, "#5");
-			Assert.AreEqual(properties[1], values[count++].RetrievedProperty, "#6");
+			Assert.IsInstanceOf<ResourcesDict>(ambientValues[count].Value, "#6");
+			Assert.AreEqual(properties[0], ambientValues[count++].RetrievedProperty, "#7");
+			Assert.IsNull(ambientValues[count].Value, "#8");
+			Assert.AreEqual(properties[1], ambientValues[count++].RetrievedProperty, "#9");
 
-			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			foreach (var dict in ambientValues.Select(r => r.Value).OfType<ResourcesDict>())
 			{
 				if (dict.ContainsKey(this.Key))
 					return dict[this.Key];
 			}
-			Assert.Fail("#7. Did not find resource");
+			Assert.Fail("#10. Did not find resource");
 			return null;
 		}
 	}

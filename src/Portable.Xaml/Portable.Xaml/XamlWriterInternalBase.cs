@@ -277,7 +277,7 @@ namespace Portable.Xaml
 
 		public IEnumerable<object> GetAllAmbientValues(params XamlType[] types)
 		{
-			return GetAllAmbientValues(null, false, types);
+			return GetAllAmbientValues (null, false, types).Select(r => r.Value);
 		}
 
 		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties)
