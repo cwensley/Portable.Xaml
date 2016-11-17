@@ -44,19 +44,17 @@ namespace MonoTests.Portable.Xaml.Schema
 	public class XamlValueConverterTest
 	{
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void ConstructorNullConverterTypeTargetType ()
 		{
 			// either of them must be non-null.
-			new XamlValueConverter<TypeConverter> (null, null);
+			Assert.Throws<ArgumentException> (() => new XamlValueConverter<TypeConverter> (null, null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void ConstructorNullConverterTypeTargetTypeNull ()
 		{
 			// either of them must be non-null.
-			new XamlValueConverter<TypeConverter> (null, null, null);
+			Assert.Throws<ArgumentException> (() => new XamlValueConverter<TypeConverter> (null, null, null));
 		}
 
 		[Test]
@@ -98,11 +96,10 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (XamlSchemaException))]
 		public void InconsistentConverterType ()
 		{
 			var c = new XamlValueConverter<TypeConverter> (typeof (int), XamlLanguage.String, null);
-			Assert.IsNull (c.ConverterInstance, "#1");
+			Assert.Throws<XamlSchemaException> (() => { var t = c.ConverterInstance; }, "#1");
 		}
 
 		[Test]

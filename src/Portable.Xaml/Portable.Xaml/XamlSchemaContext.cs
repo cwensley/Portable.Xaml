@@ -374,14 +374,14 @@ namespace Portable.Xaml
 
 					var assembly = ass.Assembly;
 					if (!string.IsNullOrEmpty(xda.AssemblyName))
-						#if PCL136
+#if PCL136
 						assembly = Assembly.Load (xda.AssemblyName);
-						#else
+#else
 						assembly = Assembly.Load(new AssemblyName(xda.AssemblyName));
-					#endif
+#endif
 					var n = xda.ClrNamespace + "." + name;
 					var t = assembly.GetType(n);
-					if (t == null)
+					if (t == null && genArgs == null)
 					{
 						t = assembly.GetType(n + "Extension");
 						if (t != null && !GetXamlType(t).IsMarkupExtension)
@@ -392,9 +392,6 @@ namespace Portable.Xaml
 						var ti = t.GetTypeInfo();
 						if (!ti.IsNested)
 						{
-							if (genArgs != null && (!ti.IsGenericType || !ti.GetGenericArguments().SequenceEqual(genArgs)))
-								continue;
-						
 							return t;
 						}
 					}
@@ -452,8 +449,7 @@ namespace Portable.Xaml
 			Type[] genArgs = null;
 			if (typeArguments != null && typeArguments.Length > 0)
 			{
-				genArgs = (from t in typeArguments
-					select t.UnderlyingType).ToArray();
+				genArgs = typeArguments.Select (t => t?.UnderlyingType).ToArray ();
 				if (genArgs.Any(t => t == null))
 					return null;
 			}

@@ -106,11 +106,10 @@ namespace MonoTests.Portable.Xaml
         }
 
         [Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void GetPreferredPrefixNull ()
 		{
 			var ctx = new XamlSchemaContext (null, null);
-			ctx.GetPreferredPrefix (null);
+			Assert.Throws<ArgumentNullException> (() => ctx.GetPreferredPrefix (null));
 		}
 
 		[Test]
@@ -123,12 +122,11 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void TryGetCompatibleXamlNamespaceNull ()
 		{
 			var ctx = new XamlSchemaContext (null, null);
 			string dummy;
-			ctx.TryGetCompatibleXamlNamespace (null, out dummy);
+			Assert.Throws<ArgumentNullException> (() => ctx.TryGetCompatibleXamlNamespace (null, out dummy));
 		}
 
 		[Test]
@@ -183,11 +181,10 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))] // it is read-only
 		public void AddGetAllXamlTypesToEmpty ()
 		{
 			var ctx = NewStandardContext ();
-			ctx.GetAllXamlTypes ("urn:foo").Add (new XamlType (typeof (int), ctx));
+			Assert.Throws<NotSupportedException> (() => ctx.GetAllXamlTypes ("urn:foo").Add (new XamlType (typeof (int), ctx)));
 		}
 
 		[Test]

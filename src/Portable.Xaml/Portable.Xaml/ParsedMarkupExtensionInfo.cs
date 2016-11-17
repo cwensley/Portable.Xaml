@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Portable.Xaml.Schema;
+using System.Text;
 
 namespace Portable.Xaml
 {
@@ -87,28 +88,100 @@ namespace Portable.Xaml
 			return val;
 		}
 
-		string ReadUntil (char ch, bool readToEnd = false, bool skip = true)
+		string ReadUntil (char ch, bool readToEnd = false, bool skip = true, char? escape = null)
 		{
-			return ReadUntil (new [] { ch }, readToEnd, skip);
+			return ReadUntil (new [] { ch }, readToEnd, skip, escape);
 		}
 
-		string ReadUntil (char[] ch, bool readToEnd = false, bool skip = true)
+		string ReadUntil (char[] ch, bool readToEnd = false, bool skip = true, char? escape = null)
 		{
-			var endidx = value.IndexOf ('}', index);
-			var idx = value.IndexOfAny (ch, index);
+			var endidx = IndexOfAnyEscaped (new char[] { '}' }, value, escape, index);
+			var idx = IndexOfAnyEscaped (ch, value, escape, index);
 			string val = null;
-			if (idx >= 0 && idx <= endidx) {
-				val = value.Substring (index, idx - index);
+			if (idx >= 0 && idx <= endidx)
+			{
+				val = SubstringWithEscape (value, index, idx - index, escape);
 				index = skip ? idx + 1 : idx;
 			}
-			else if (readToEnd) {
+			else if (readToEnd)
+			{
 				if (endidx >= 0)
-					val = value.Substring (index, endidx - index);
+					val = SubstringWithEscape (value, index, endidx - index, escape);
 				else
-					val = value.Substring (index);
+					val = SubstringWithEscape (value, index, escape);
 				index = endidx == -1 ? value.Length : endidx;
 			}
+
 			return val;
+		}
+
+		string SubstringWithEscape (string s, int startIndex, char? escape)
+		{
+			return SubstringWithEscape (s, startIndex, s.Length - startIndex, escape);
+		}
+
+		string SubstringWithEscape (string s, int startIndex, int numCharacters, char? escape)
+		{
+			// If we aren't even using escapes, use the faster method
+			if (escape == null)
+				return s.Substring (startIndex, numCharacters);
+
+			int idx = s.IndexOf (escape.Value, startIndex, numCharacters);
+
+			// If the string contains no escape characters, use the faster method
+			if (idx < 0 || idx >= startIndex + numCharacters)
+				return s.Substring (startIndex, numCharacters);
+
+			StringBuilder sb = new StringBuilder (s.Length);
+			while (idx >= 0 && idx < startIndex + numCharacters)
+			{
+				if (idx - startIndex > 0)
+					sb.Append (s.Substring (startIndex, idx - startIndex));
+				if (idx + 1 < s.Length)
+					sb.Append (s[idx + 1]);
+				numCharacters -= (idx - startIndex + 2);
+				startIndex = idx + 2;
+				idx = s.IndexOf (escape.Value, startIndex, numCharacters);
+			}
+
+			if (numCharacters > 0)
+				sb.Append (s.Substring (startIndex, numCharacters));
+
+			return sb.ToString ();
+		}
+
+		int IndexOfAnyEscaped (char[] ch, string value, char? escape, int startIdx)
+		{
+			if (escape == null)
+				return value.IndexOfAny(ch, startIdx);
+
+			int idx = 0, nextStart = startIdx;
+
+			do
+			{
+				idx = ch.Length == 1 ? value.IndexOf (ch[0], nextStart) : value.IndexOfAny (ch, nextStart);
+				nextStart = idx + 1;
+
+				// If no good match, return; otherwise, check for escape characters
+				if (idx < 0 || idx >= value.Length)
+					break;
+				else
+				{
+					// We need to handle repetitions. If there are an odd number of escape characters behind us, we
+					// are escaped; if an even number, we aren't escaped.
+					int numEscapes = 0;
+					for (int i = idx - 1; i >=0 && value [i] == escape.Value; i--)
+					{
+						++numEscapes;
+					}
+
+					if (numEscapes % 2 == 0)
+						break;
+				}
+			}
+			while (true);
+
+			return idx;
 		}
 
 		void ReadWhitespace ()
@@ -164,7 +237,7 @@ namespace Portable.Xaml
 				var markup = ReadMarkup();
 				if (markup != null)
 				{
-					ReadUntil(',', true);
+					ReadUntil(',', true, escape: '\\');
 					return markup;
 				}
 				break;
@@ -173,10 +246,10 @@ namespace Portable.Xaml
 				var idx = index;
 				var endch = Current;
 				index++;
-				var val = ReadUntil(endch);
+				var val = ReadUntil(endch, escape: '\\');
 				if (val != null)
 				{
-					ReadUntil (',', true);
+					ReadUntil(',', true, escape: '\\');
 					return val;
 				}
 				index = idx;
@@ -189,22 +262,23 @@ namespace Portable.Xaml
 		{
 			ReadWhitespace();
 			var escapedValue = ParseEscapedValue ();
-			if (escapedValue != null) {
+			if (escapedValue != null)
+			{
 				AddPositionalParameter(escapedValue);
 				ParseArgument();
 				return true;
 			}
 
-			var name = ReadUntil(new [] { '=', ' ', ',' }, readToEnd: true, skip: false);
+			var name = ReadUntil(new [] { '=', ' ', ',' }, readToEnd: true, skip: false, escape: '\\');
 			if (string.IsNullOrEmpty(name))
 				return false;
 			if (!ReadWhitespaceUntil('='))
 			{
-				AddPositionalParameter(name + ReadUntil(',', true).TrimEnd());
+				AddPositionalParameter(name + ReadUntil(',', true, escape: '\\').TrimEnd());
 				ParseArgument();
 				return true;
 			}
-			member = Type.GetMember (name) ?? new XamlMember (name, Type, false);
+			member = Type.GetMember (name) ?? new XamlMember(name, Type, false);
 			ReadWhitespace ();
 			ParseValue ();
 			return true;
@@ -235,7 +309,7 @@ namespace Portable.Xaml
 				return;
 			}
 
-			var val = ReadUntil (',', true);
+			var val = ReadUntil(',', true, escape: '\\');
 			val = val.Trim ();
 			Arguments.Add (member, val);
 			if (!ParseArgument()) {

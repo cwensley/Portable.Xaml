@@ -55,10 +55,9 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(ArgumentNullException))]
 		public void ConstructorNullSchemaContext ()
 		{
-			new XamlObjectReader ("foo", (XamlSchemaContext)null);
+			Assert.Throws<ArgumentNullException> (() => new XamlObjectReader ("foo", (XamlSchemaContext)null));
 		}
 
 		[Test]
@@ -68,10 +67,9 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(ArgumentNullException))]
 		public void ConstructorNullSchemaContext2 ()
 		{
-			new XamlObjectReader ("foo", null, new XamlObjectReaderSettings ());
+			Assert.Throws<ArgumentNullException> (() => new XamlObjectReader ("foo", null, new XamlObjectReaderSettings ()));
 		}
 
 		[Test]
@@ -81,25 +79,22 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlObjectReaderException))]
 		public void ReadNonConstructible ()
 		{
 			// XamlType has no default constructor.
-			new XamlObjectReader (XamlLanguage.String);
+			Assert.Throws<XamlObjectReaderException> (() => new XamlObjectReader (XamlLanguage.String));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlObjectReaderException))]
 		public void NonPublicType ()
 		{
-			new XamlObjectReader (new TestClass1 ());
+			Assert.Throws<XamlObjectReaderException> (() => new XamlObjectReader (new TestClass1 ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlObjectReaderException))]
 		public void NestedType ()
 		{
-			new XamlObjectReader (new TestClass2 ());
+			Assert.Throws<XamlObjectReaderException> (() => new XamlObjectReader (new TestClass2 ()));
 		}
 
 		public class TestClass2
@@ -378,24 +373,24 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlObjectReaderException))]
-		[Category (Categories.NotWorking)]
-		public void Read_XData ()
+		public void Read_XData()
 		{
-			var r = new XamlObjectReader (new XData () { Text = "xdata text" }); // XmlReader implementation is not visible.
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore(".NET does not support this");
+			var r = new XamlObjectReader(new XData() { Text = "xdata text" });
 			while (!r.IsEof)
-				r.Read ();
+				r.Read();
 		}
 
 		[Test]
-		[ExpectedException (typeof(XamlObjectReaderException))]
-		[Category (Categories.NotWorking)]
-		public void Read_XDataWrapper ()
+		public void Read_XDataWrapper()
 		{
-			var obj = new XDataWrapper () { Markup = new XData () { Text = "<my_xdata/>" } };
-			var r = new XamlObjectReader (obj);
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore(".NET does not support this");
+			var obj = new XDataWrapper() { Markup = new XData() { Text = "<my_xdata/>" } };
+			var r = new XamlObjectReader(obj);
 			while (!r.IsEof)
-				r.Read ();
+				r.Read();
 		}
 
 		[Test]
@@ -838,26 +833,18 @@ namespace MonoTests.Portable.Xaml
 
 
 		[Test]
-		[ExpectedException(typeof(XamlObjectReaderException))]
 		public void Read_InternalType()
 		{
 			var obj = new TestClassInternal();
-			var xr = new XamlObjectReader(obj);
-			while (xr.Read())
-			{
-			}
+			Assert.Throws<XamlObjectReaderException> (() => { var xr = new XamlObjectReader (obj); });
 		}
 
 		[Test]
-		[ExpectedException(typeof(XamlObjectReaderException))]
 		public void Read_InternalPropertyType()
 		{
 			var obj = new TestClassPropertyInternal();
 			obj.Bar = new TestClassInternal();
-			var xr = new XamlObjectReader(obj);
-			while (xr.Read())
-			{
-			}
+			Assert.Throws<XamlObjectReaderException> (() => { var xr = new XamlObjectReader (obj); });
 		}
 	}
 }

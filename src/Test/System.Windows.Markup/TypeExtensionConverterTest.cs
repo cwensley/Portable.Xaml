@@ -120,27 +120,24 @@ namespace MonoTests.Portable.Xaml.Markup
 		}
 		
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertToFail ()
 		{
 			var tc = XamlLanguage.Type.TypeConverter.ConverterInstance;
-			tc.ConvertTo (null, null, typeof (int), typeof (Type));
+			Assert.Throws<NotSupportedException> (() => tc.ConvertTo (null, null, typeof (int), typeof (Type)));
 		}
 		
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertToFail2 ()
 		{
 			var tc = XamlLanguage.Type.TypeConverter.ConverterInstance;
-			tc.ConvertTo (new DummyValueSerializerContext (), null, "x:Int32", typeof (TypeExtension));
+			Assert.Throws<NotSupportedException> (() => tc.ConvertTo (new DummyValueSerializerContext (), null, "x:Int32", typeof (TypeExtension)));
 		}
 		
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void ConvertToFail3 ()
 		{
 			var tc = XamlLanguage.Type.TypeConverter.ConverterInstance;
-			tc.ConvertTo (new DummyValueSerializerContext (), null, "x:Int32", typeof (TypeExtension));
+			Assert.Throws<NotSupportedException> (() => tc.ConvertTo (new DummyValueSerializerContext (), null, "x:Int32", typeof (TypeExtension)));
 		}
 	}
 }

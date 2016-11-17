@@ -87,6 +87,12 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	{
 		public override string Foo { get; set; }
 	}
+
+	[ContentProperty ("Contents")]
+	public class CustomGenericType<T>
+	{
+		public List<T> Contents { get; } = new List<T> ();
+	}
 }
 
 namespace MonoTests.Portable.Xaml
@@ -107,6 +113,13 @@ namespace MonoTests.Portable.Xaml
 		public string Arg2 { get; private set; }
 	}
 
+	[ContentProperty("Contents")]
+	public class CustomGenericType<T>
+		where T: struct
+	{
+		public List<T> Contents { get; } = new List<T> ();
+	}
+
 	public class ArgumentNonAttributed
 	{
 		public ArgumentNonAttributed(string s1, string s2)
@@ -118,6 +131,34 @@ namespace MonoTests.Portable.Xaml
 		public string Arg1 { get; private set; }
 
 		public string Arg2 { get; private set; }
+	}
+
+	public class ArgumentMultipleTypes
+	{
+		public int IntArg { get; private set; }
+
+		public string StringArg { get; private set; }
+
+		public ArgumentMultipleTypes (int arg1)
+		{
+			IntArg = arg1;
+		}
+
+		public ArgumentMultipleTypes (string arg1)
+		{
+			StringArg = arg1;
+		}
+
+	}
+
+	public class ArgumentWithIntConstructor
+	{
+		public int IntArg { get; private set; }
+
+		public ArgumentWithIntConstructor (int arg1)
+		{
+			IntArg = arg1;
+		}
 	}
 
 	public class ComplexPositionalParameterWrapper

@@ -51,10 +51,9 @@ namespace MonoTests.Portable.Xaml.Schema
 		EventInfo ass_load = typeof (AppDomain).GetEvent ("AssemblyLoad");
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void ConstructorNull ()
 		{
-			new XamlMemberInvoker (null);
+			Assert.Throws<ArgumentNullException> (() => new XamlMemberInvoker (null));
 		}
 
 		// Property
@@ -70,39 +69,35 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void GetValueNullObject ()
 		{
 			var pi = str_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.GetValue (null);
+			Assert.Throws<ArgumentNullException> (() => i.GetValue (null));
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentNullException))]
 		public void SetValueNullObject ()
 		{
 			var pi = sb_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.SetValue (null, 5);
+			Assert.Throws<ArgumentNullException> (() => i.SetValue (null, 5));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void GetValueOnWriteOnlyProperty ()
 		{
 			var pi = xr_resolver;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.GetValue (new XmlUrlResolver ());
+			Assert.Throws<NotSupportedException> (() => i.GetValue (new XmlUrlResolver ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void SetValueOnReadOnlyProperty ()
 		{
 			var pi = str_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.SetValue ("hello", 5);
+			Assert.Throws<NotSupportedException> (() => i.SetValue ("hello", 5));
 		}
 
 		[Test]
@@ -116,12 +111,11 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (TargetException))]
 		public void GetValueOnIrrelevantObject ()
 		{
 			var pi = str_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.GetValue (new StringBuilder ());
+			Assert.Throws<TargetException> (() => i.GetValue (new StringBuilder ()));
 		}
 
 		[Test]
@@ -145,30 +139,27 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void GetValueInitialization ()
 		{
 			var xm = XamlLanguage.Initialization;
 			var i = xm.Invoker;
-			i.GetValue ("foo");
+			Assert.Throws<NotSupportedException> (() => i.GetValue ("foo"));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void GetValuePositionalParameter ()
 		{
 			var xm = XamlLanguage.PositionalParameters;
 			var i = xm.Invoker;
-			i.GetValue (new TypeExtension (typeof (int)));
+			Assert.Throws<NotSupportedException> (() => i.GetValue (new TypeExtension (typeof (int))));
 		}
 
 		[Test]
-		[ExpectedException (typeof (TargetException))]
 		public void SetValueOnIrrelevantObject ()
 		{
 			var pi = sb_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			i.SetValue ("hello", 5);
+			Assert.Throws<TargetException> (() => i.SetValue ("hello", 5));
 		}
 
 		// Event
@@ -183,12 +174,11 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void GetValueOnEvent ()
 		{
 			var ei = ass_load;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			i.GetValue (AppDomain.CurrentDomain);
+			Assert.Throws<NotSupportedException> (() => i.GetValue (AppDomain.CurrentDomain));
 		}
 
 		[Test]
@@ -200,12 +190,11 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (ArgumentException))]
 		public void SetValueOnEventValueMismatch ()
 		{
 			var ei = ass_load;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			i.SetValue (AppDomain.CurrentDomain, 5);
+			Assert.Throws<ArgumentException> (() => i.SetValue (AppDomain.CurrentDomain, 5));
 		}
 
 		void DummyAssemblyLoad (object o, AssemblyLoadEventArgs e)
@@ -229,21 +218,19 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (MyException))]
 		public void UnderlyingGetter ()
 		{
 			var i = new XamlMemberInvoker (new MyXamlMember (str_len, sctx));
 			// call XamlMember's UnderlyingGetter.
-			Assert.IsNotNull (i.UnderlyingGetter, "#1");
+			Assert.Throws<MyException> (() => { var t = i.UnderlyingGetter; }, "#1");
 		}
 
 		[Test]
-		[ExpectedException (typeof (MyException))]
 		public void UnderlyingSetter ()
 		{
 			var i = new XamlMemberInvoker (new MyXamlMember (str_len, sctx));
 			// call XamlMember's UnderlyingSetter.
-			Assert.IsNull (i.UnderlyingSetter, "#1");
+			Assert.Throws<MyException> (() => { var t = i.UnderlyingSetter; }, "#1");
 		}
 
 		class MyXamlMember : XamlMember
@@ -286,17 +273,15 @@ namespace MonoTests.Portable.Xaml.Schema
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void UnknownInvokerGetValue ()
 		{
-			XamlMemberInvoker.UnknownInvoker.GetValue (new object ());
+			Assert.Throws<NotSupportedException> (() => XamlMemberInvoker.UnknownInvoker.GetValue (new object ()));
 		}
 
 		[Test]
-		[ExpectedException (typeof (NotSupportedException))]
 		public void UnknownInvokerSetValue ()
 		{
-			XamlMemberInvoker.UnknownInvoker.SetValue (new object (), new object ());
+			Assert.Throws<NotSupportedException> (() => XamlMemberInvoker.UnknownInvoker.SetValue (new object (), new object ()));
 		}
 
 		[Test]
