@@ -125,14 +125,22 @@ namespace Portable.Xaml
 			if (name != null)
 				return name;
 
-			var un = unnamed.FirstOrDefault (r => ReferenceEquals (r.Value, value));
+			if (unnamed.Count == 0)
+				return null;
+
+#if PCL136
+			var un = unnamed.FirstOrDefault(r => ReferenceEquals(r.Value, value));
+#else
+			// faster than FirstOrDefault
+			var un = unnamed.Find(r => ReferenceEquals (r.Value, value));
+#endif
 			if (un == null)
 				return null;
 			
 			// generate a name for it, only when needed.
 			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
 			if (xm != null)
-				name = (string) xm.Invoker.GetValue (xobj.GetRawValue ());
+				name = (string) xm.Invoker.GetValue (xobj.RawValue);
 			else
 				name = "__ReferenceID" + used_reference_ids++;
 			un.Name = name;

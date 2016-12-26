@@ -48,7 +48,11 @@ namespace Portable.Xaml
 
 		public string LookupPrefix (string ns)
 		{
+#if PCL136
 			var nd = Namespaces.FirstOrDefault (n => n.Namespace == ns);
+#else
+			var nd = Namespaces.Find (n => n.Namespace == ns);
+#endif
 			if (nd == null && IsCollectingNamespaces)
 				return AddNamespace (ns);
 			else

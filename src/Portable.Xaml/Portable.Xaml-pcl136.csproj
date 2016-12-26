@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\artifacts\pcl136\Debug</OutputPath>
-    <DefineConstants>DEBUG;PCL;PCL136</DefineConstants>
+    <DefineConstants>DEBUG;PCL;PCL136;USE_EXPRESSIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -30,7 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>PCL;PCL136</DefineConstants>
+    <DefineConstants>PCL;PCL136;USE_EXPRESSIONS</DefineConstants>
   </PropertyGroup>
   <Import Project="..\Shared\Common.props" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
@@ -39,6 +39,7 @@
     <Compile Include="Helpers\Compat259.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\FlagValue.cs" />
+    <Compile Include="Helpers\MemberExpressionExtensions.cs" />
     <Compile Include="Helpers\ReferenceValue.cs" />
     <Compile Include="Portable.Xaml\AmbientPropertyValue.cs" />
     <Compile Include="Portable.Xaml\AttachableMemberIdentifier.cs" />

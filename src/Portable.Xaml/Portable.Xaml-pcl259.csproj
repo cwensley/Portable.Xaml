@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\artifacts\pcl259\Debug</OutputPath>
-    <DefineConstants>DEBUG;PCL;MONO;PCL259</DefineConstants>
+    <DefineConstants>DEBUG;PCL;MONO;PCL259;USE_EXPRESSIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -30,13 +30,17 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>PCL;MONO;PCL259</DefineConstants>
+    <DefineConstants>PCL;MONO;PCL259;USE_EXPRESSIONS</DefineConstants>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <Import Project="..\Shared\Common.props" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Helpers\MemberExpressionExtensions.cs" />
     <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Assembly\AssemblyInfo.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\NullableConverter.cs" />

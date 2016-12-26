@@ -30,6 +30,7 @@ using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
@@ -76,6 +77,7 @@ namespace Portable.Xaml
 		IList<XamlMember> allMembers;
 		IList<string> xamlNamespaces;
 		IList<XamlMember> constructorArguments;
+		Dictionary<string, XamlMember> memberLookup;
 
 		public XamlType (Type underlyingType, XamlSchemaContext schemaContext)
 			: this (underlyingType, schemaContext, null)
@@ -277,35 +279,29 @@ namespace Portable.Xaml
 		}
 
 		public Type UnderlyingType {
-			get { return LookupUnderlyingType (); }
+			get { return underlying_type ?? (underlying_type = LookupUnderlyingType()); }
 		}
 
 		public XamlValueConverter<ValueSerializer> ValueSerializer {
 			get { return valueSerializer.Get(LookupValueSerializer); }
 		}
 
-		internal string GetInternalXmlName ()
+		internal string InternalXmlName => internalXmlName ?? (internalXmlName = LookupInternalXmlName());
+
+		string LookupInternalXmlName()
 		{
-			if (internalXmlName != null)
-				return internalXmlName;
 			if (IsMarkupExtension && Name.EndsWith("Extension", StringComparison.Ordinal))
-				internalXmlName = Name.Substring(0, Name.Length - 9);
+				return Name.Substring(0, Name.Length - 9);
 			else
 			{
 				var stn = XamlLanguage.SpecialNames.FirstOrDefault(s => s.Type == this);
-				internalXmlName = stn != null ? stn.Name : Name;
+				return stn?.Name ?? Name;
 			}
-			return internalXmlName;
 		}
 
 		public static bool operator == (XamlType left, XamlType right)
 		{
-			return IsNull (left) ? IsNull (right) : left.Equals (right);
-		}
-
-		static bool IsNull (XamlType a)
-		{
-			return Object.ReferenceEquals (a, null);
+			return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals (right);
 		}
 
 		public static bool operator != (XamlType left, XamlType right)
@@ -316,7 +312,7 @@ namespace Portable.Xaml
 		public bool Equals (XamlType other)
 		{
 			// It does not compare XamlSchemaContext.
-			return !IsNull (other) &&
+			return !ReferenceEquals(other, null) &&
 				UnderlyingType == other.UnderlyingType &&
 				Name == other.Name &&
 				PreferredXamlNamespace == other.PreferredXamlNamespace && TypeArguments.ListEquals (other.TypeArguments);
@@ -441,7 +437,14 @@ namespace Portable.Xaml
 
 		public ICollection<XamlMember> GetAllMembers ()
 		{
-			return allMembers ?? (allMembers = LookupAllMembers ().ToReadOnly());
+			if (allMembers != null)
+				return allMembers;
+			var list = LookupAllMembers().ToList();
+			// set allMembers before sorting as it will attempt to lookup a member which causes a stack overflow
+			allMembers = list;
+			list.Sort(TypeExtensionMethods.MemberComparer);
+			allMembers = new ReadOnlyCollection<XamlMember>(list);
+			return allMembers;
 		}
 
 		public XamlMember GetAttachableMember (string name)
@@ -451,7 +454,12 @@ namespace Portable.Xaml
 
 		public XamlMember GetMember (string name)
 		{
-			return LookupMember (name, true);
+			XamlMember member;
+			if (memberLookup == null)
+				memberLookup = new Dictionary<string, XamlMember>();
+			else if (memberLookup.TryGetValue(name, out member))
+				return member;
+			return memberLookup[name] = LookupMember (name, true);
 		}
 
 		public IList<XamlType> GetPositionalParameters (int parameterCount)
@@ -590,7 +598,7 @@ namespace Portable.Xaml
 		{
 			if (UnderlyingType == null)
 				return BaseType?.GetAllMembers() ?? Enumerable.Empty<XamlMember>();
-			return DoLookupAllMembers().OrderBy(r => r, TypeExtensionMethods.MemberComparer);
+			return DoLookupAllMembers();
 		}
 
 		IEnumerable<XamlMember> DoLookupAllMembers ()
@@ -859,8 +867,7 @@ namespace Portable.Xaml
 		protected virtual XamlMember LookupMember (string name, bool skipReadOnlyCheck)
 		{
 			// FIXME: verify if this does not filter out events.
-			var members = allMembers ?? (UnderlyingType != null ? DoLookupAllMembers() : BaseType?.GetAllMembers() ?? Enumerable.Empty<XamlMember>());
-			return members.FirstOrDefault (m => m.Name == name && (skipReadOnlyCheck || !m.IsReadOnly || m.Type.IsCollection || m.Type.IsDictionary || m.Type.IsArray));
+			return GetAllMembers().FirstOrDefault (m => m.Name == name && (skipReadOnlyCheck || !m.IsReadOnly || m.Type.IsCollection || m.Type.IsDictionary || m.Type.IsArray));
 		}
 
 		protected virtual IList<XamlType> LookupPositionalParameters (int parameterCount)

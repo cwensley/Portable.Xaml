@@ -39,33 +39,21 @@ namespace Portable.Xaml
 			node = default (XamlNodeLineInfo);
 		}
 
-		public override bool IsEof {
-			get { return node.Node.NodeType == XamlNodeType.None; }
-		}
-		
-		public override XamlMember Member {
-			get { return NodeType != XamlNodeType.StartMember ? null : node.Node.Member.Member; }
-		}
+		public override bool IsEof => (node.Node?.NodeType ?? XamlNodeType.None) == XamlNodeType.None;
+		//public override bool IsEof => node.Node.NodeType == XamlNodeType.None;
 
-		public override NamespaceDeclaration Namespace {
-			get { return NodeType != XamlNodeType.NamespaceDeclaration ? null : (NamespaceDeclaration) node.Node.Value; }
-		}
+		public override XamlMember Member => NodeType != XamlNodeType.StartMember ? null : node.Node.Member.Member;
 
-		public override XamlNodeType NodeType {
-			get { return node.Node.NodeType; }
-		}
+		public override NamespaceDeclaration Namespace => NodeType != XamlNodeType.NamespaceDeclaration ? null : (NamespaceDeclaration) node.Node.Value;
 
-		public override XamlSchemaContext SchemaContext {
-			get { return source.SchemaContext; }
-		}
+		public override XamlNodeType NodeType => node.Node?.NodeType ?? XamlNodeType.None;
+		//public override XamlNodeType NodeType => node.Node.NodeType;
 
-		public override XamlType Type {
-			get { return NodeType != XamlNodeType.StartObject ? null : node.Node.Object.Type; }
-		}
+		public override XamlSchemaContext SchemaContext => source.SchemaContext;
 
-		public override object Value {
-			get { return NodeType != XamlNodeType.Value ? null : node.Node.Value; }
-		}
+		public override XamlType Type => NodeType != XamlNodeType.StartObject ? null : node.Node.Object.Type;
+
+		public override object Value => NodeType != XamlNodeType.Value ? null : node.Node.Value;
 
 		public override bool Read ()
 		{
@@ -77,16 +65,10 @@ namespace Portable.Xaml
 			return true;
 		}
 
-		public bool HasLineInfo {
-			get { return node.LineNumber > 0; }
-		}
+		public bool HasLineInfo => node.LineNumber > 0;
 		
-		public int LineNumber {
-			get { return node.LineNumber; }
-		}
+		public int LineNumber => node.LineNumber;
 
-		public int LinePosition {
-			get { return node.LinePosition; }
-		}
+		public int LinePosition => node.LinePosition;
 	}
 }

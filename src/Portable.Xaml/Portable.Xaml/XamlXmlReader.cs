@@ -580,7 +580,7 @@ namespace Portable.Xaml
 				name = name.Substring (idx + 1);
 				// check if it is an attachable member first, either of this type or another type
 				// Should this also check the namespace to find the correct type?
-				if (typeName == xt.GetInternalXmlName())
+				if (typeName == xt.InternalXmlName)
 					xm = xt.GetMember (name);
 				else
 					xm = FindAttachableMember (r.Prefix, typeName, name);
@@ -600,7 +600,7 @@ namespace Portable.Xaml
 				// Current element could be for another member in the parent type (if exists)
 				if (parentType != null 
 					&& typeName != null
-					&& typeName == parentType.GetInternalXmlName ()
+					&& typeName == parentType.InternalXmlName
 					&& parentType.GetMember (name) != null) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
 					yield return Node (XamlNodeType.None, null);

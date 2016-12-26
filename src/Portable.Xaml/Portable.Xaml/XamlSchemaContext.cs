@@ -91,9 +91,10 @@ namespace Portable.Xaml
 			get { return reference_assemblies; }
 		}
 
-		struct AssemblyInfo
+		class AssemblyInfo
 		{
-			public AssemblyName Name;
+			AssemblyName _name;
+			public AssemblyName Name => _name ?? (_name = Assembly.GetName());
 			public Assembly Assembly;
 		}
 
@@ -105,35 +106,35 @@ namespace Portable.Xaml
 			{
 				if (assembliesInScope != null)
 					return assembliesInScope;
-				var assemblies = reference_assemblies ?? GetAppDomainAssemblies();
-				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Name = r.GetName(), Assembly = r }).ToList();
+				var assemblies = reference_assemblies ?? GetAppDomainAssemblies() ?? Enumerable.Empty<Assembly>();
+				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Assembly = r }).ToList();
 				return assembliesInScope;
 			}
 		}
 
-		IEnumerable<Assembly> GetAppDomainAssemblies()
+		Assembly[] GetAppDomainAssemblies()
 		{
 			try
 			{
 				var appDomainType = Type.GetType("System.AppDomain", false);
 				if (appDomainType == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				var getCurrentDomain = appDomainType.GetRuntimeProperty("CurrentDomain");
 				if (getCurrentDomain == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				var domain = getCurrentDomain.GetValue(null, null);
 
 				var getAssemblies = domain.GetType().GetRuntimeMethod("GetAssemblies", new Type[] { });
 				if (getAssemblies == null)
-					return Enumerable.Empty<Assembly>();
-				var assemblies = getAssemblies.Invoke(domain, null) as IEnumerable<Assembly>;
+					return null;
+				var assemblies = getAssemblies.Invoke(domain, null) as Assembly[];
 				if (assemblies == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				return assemblies;
 			}
 			catch
 			{
-				return Enumerable.Empty<Assembly>();
+				return null;
 			}
 		}
 
@@ -271,7 +272,7 @@ namespace Portable.Xaml
 			if (t.PreferredXamlNamespace == ns && t.Name == name && t.TypeArguments.ListEquals(typeArgs))
 				return true;
 			if (t.IsMarkupExtension)
-				return t.PreferredXamlNamespace == ns && t.GetInternalXmlName() == name && t.TypeArguments.ListEquals(typeArgs);
+				return t.PreferredXamlNamespace == ns && t.InternalXmlName == name && t.TypeArguments.ListEquals(typeArgs);
 			else
 				return false;
 		}
@@ -280,7 +281,7 @@ namespace Portable.Xaml
 		{
 			var aname = new AssemblyName(assemblyName);
 			var ainfo = AssembliesInScope.FirstOrDefault(r => r.Name.Matches(aname));
-			if (ainfo.Assembly != null)
+			if (ainfo?.Assembly != null)
 				return ainfo.Assembly;
 
 			// fallback if not found
@@ -301,9 +302,8 @@ namespace Portable.Xaml
 				foreach (var ass in AssembliesInScope)
 					FillCompatibilities(ass.Assembly);
 			}
-			if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace)
-			    && GetAllXamlNamespaces().Contains(compatibleNamespace))
-				return true;
+			if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace))
+				return GetAllXamlNamespaces().Contains(compatibleNamespace);
 			if (GetAllXamlNamespaces().Contains(xamlNamespace))
 			{
 				compatibleNamespace = xamlNamespace;

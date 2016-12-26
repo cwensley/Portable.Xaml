@@ -30,6 +30,7 @@ using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
@@ -40,6 +41,10 @@ namespace Portable.Xaml
 	{
 		int hasValue;
 		int values;
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 		public bool Get(int flag, Func<bool> getFlag)
 		{
 			if ((hasValue & flag) != 0)
@@ -50,6 +55,28 @@ namespace Portable.Xaml
 			if (value)
 				values |= flag;
 			return value;
+		}
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		public bool Get(int flag)
+		{
+			if ((hasValue & flag) != 0)
+				return (values & flag) != 0;
+			return false;
+		}
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		public void Set(int flag, bool value)
+		{
+			hasValue |= flag;
+			if (value)
+				values |= flag;
+			else
+				values &= ~flag;
 		}
 	}
 }

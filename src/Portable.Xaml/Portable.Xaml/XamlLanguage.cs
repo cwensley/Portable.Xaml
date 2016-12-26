@@ -78,7 +78,6 @@ namespace Portable.Xaml
 			return sctx.GetXamlType (typeof (T));
 		}
 
-		internal static readonly bool InitializingDirectives;
 		internal static readonly bool InitializingTypes;
 
 		static XamlLanguage ()
@@ -115,10 +114,6 @@ namespace Portable.Xaml
 
 			// directives
 
-			// Looks like predefined XamlDirectives have no ValueSerializer. 
-			// To handle this situation, differentiate them from non-primitive XamlMembers.
-			InitializingDirectives = true;
-
 			var nss = new string [] {XamlLanguage.Xaml2006Namespace};
 			var nssXml = new string [] {XamlLanguage.Xml1998Namespace};
 
@@ -148,8 +143,6 @@ namespace Portable.Xaml
 			UnknownContent = new XamlDirective (nss, "_UnknownContent", XT<object> (), null, AllowedMemberLocations.MemberElement) { InternalIsUnknown = true };
 
 			AllDirectives = new ReadOnlyCollection<XamlDirective> (new XamlDirective [] {Arguments, AsyncRecords, Base, Class, ClassAttributes, ClassModifier, Code, ConnectionId, FactoryMethod, FieldModifier, Initialization, Items, Key, Lang, Members, Name, PositionalParameters, Space, Subclass, SynchronousMode, Shared, TypeArguments, Uid, UnknownContent});
-
-			InitializingDirectives = false;
 
 			SpecialNames = new SpecialTypeNameList ();
 		}

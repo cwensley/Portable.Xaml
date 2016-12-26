@@ -63,7 +63,8 @@ namespace Portable.Xaml
 
 		public override XamlNodeType NodeType
 		{
-			get { return node.NodeType; }
+			get { return node?.NodeType ?? XamlNodeType.None; }
+			//get { return node.NodeType; }
 		}
 
 		public override XamlSchemaContext SchemaContext

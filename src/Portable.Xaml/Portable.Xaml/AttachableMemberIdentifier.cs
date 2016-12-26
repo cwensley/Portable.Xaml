@@ -38,22 +38,17 @@ namespace Portable.Xaml
 		
 		public static bool operator == (AttachableMemberIdentifier left, AttachableMemberIdentifier right)
 		{
-			return IsNull (left) ? IsNull (right) : left.Equals (right);
-		}
-
-		static bool IsNull (AttachableMemberIdentifier a)
-		{
-			return Object.ReferenceEquals (a, null);
+			return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals (right);
 		}
 
 		public static bool operator != (AttachableMemberIdentifier left, AttachableMemberIdentifier right)
 		{
-			return IsNull (left) ? !IsNull (right) : IsNull (right) || left.DeclaringType != right.DeclaringType || left.MemberName != right.MemberName;
+			return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : ReferenceEquals(right, null) || left.DeclaringType != right.DeclaringType || left.MemberName != right.MemberName;
 		}
 		
 		public bool Equals (AttachableMemberIdentifier other)
 		{
-			return !IsNull (other) && DeclaringType == other.DeclaringType && MemberName == other.MemberName;
+			return !ReferenceEquals(other, null) && DeclaringType == other.DeclaringType && MemberName == other.MemberName;
 		}
 
 		public override bool Equals (object obj)
