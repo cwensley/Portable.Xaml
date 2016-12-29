@@ -26,6 +26,7 @@ using Portable.Xaml.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Schema;
+using Portable.Xaml.Markup;
 
 namespace Portable.Xaml
 {
@@ -59,14 +60,11 @@ namespace Portable.Xaml
 			xaml_namespaces = new List<string> (xamlNamespaces);
 			AllowedLocation = allowedLocation;
 			type_converter = typeConverter;
-			
-			invoker = new DirectiveMemberInvoker (this);
 		}
 
 		public AllowedMemberLocations AllowedLocation { get; private set; }
 		XamlValueConverter<TypeConverter> type_converter;
 		XamlType type;
-		XamlMemberInvoker invoker;
 		bool is_unknown;
 		IList<string> xaml_namespaces;
 
@@ -103,7 +101,7 @@ namespace Portable.Xaml
 
 		protected override sealed XamlMemberInvoker LookupInvoker ()
 		{
-			return invoker;
+			return new DirectiveMemberInvoker(this);
 		}
 
 		protected override sealed bool LookupIsAmbient ()
@@ -169,6 +167,11 @@ namespace Portable.Xaml
 		}
 
 		protected override sealed MethodInfo LookupUnderlyingSetter ()
+		{
+			return null;
+		}
+
+		protected override XamlValueConverter<ValueSerializer> LookupValueSerializer()
 		{
 			return null;
 		}

@@ -91,7 +91,7 @@ namespace Portable.Xaml
 
 			// check type validity. Note that some checks also needs done at Read() phase. (it is likely FIXME:)
 			if (instance != null) {
-				var type = new InstanceContext (instance).GetRawValue ().GetType ();
+				var type = instance.GetType ();
 				if (!type.GetTypeInfo().IsPublic)
 					throw new XamlObjectReaderException (String.Format ("instance type '{0}' must be public and non-nested.", type));
 				var xt = SchemaContext.GetXamlType (type);
@@ -123,7 +123,7 @@ namespace Portable.Xaml
 		// - For IXmlSerializable, it does not either return the raw IXmlSerializable or interpreted XData (it just returns null).
 		public virtual object Instance {
 			get {
-				var cur = NodeType == XamlNodeType.StartObject ? nodes.Current.Object.GetRawValue () : null;
+				var cur = NodeType == XamlNodeType.StartObject ? nodes.Current.Object.RawValue : null;
 				return cur == root ? root_raw : cur is XData ? null : cur;
 			}
 		}

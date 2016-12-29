@@ -21,15 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Portable.Xaml.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using Portable.Xaml.Markup;
-using Portable.Xaml.Schema;
-using System.Xml.Serialization;
-using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
@@ -60,6 +52,9 @@ namespace Portable.Xaml
 			this.value = value ?? NullValue;
 		}
 
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 		public T Get(Func<T> getValue)
 		{
 			if (ReferenceEquals(value, NullValue))
@@ -80,6 +75,26 @@ namespace Portable.Xaml
 		{
 			return new ReferenceValue<T>(value);
 		}
+
+		public static bool operator ==(ReferenceValue<T> left, ReferenceValue<T> right)
+		{
+			return Equals(left.value, right.value);
+		}
+
+		public static bool operator !=(ReferenceValue<T> left, ReferenceValue<T> right)
+		{
+			return !Equals(left.value, right.value);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is ReferenceValue<T> && this == (ReferenceValue<T>)obj;
+		}
+
+		public override int GetHashCode()
+		{
+			return value?.GetHashCode() ?? base.GetHashCode();
+		}
 	}
-	
+
 }

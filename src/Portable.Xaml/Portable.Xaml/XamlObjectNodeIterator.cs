@@ -102,7 +102,7 @@ namespace Portable.Xaml
 				{
 					foreach (var argm in xobj.Type.GetSortedConstructorArguments())
 					{
-						var argv = argm.Invoker.GetValue(xobj.GetRawValue());
+						var argv = argm.Invoker.GetValue(xobj.RawValue);
 						var xarg = new XamlObject(argm.Type, argv);
 						foreach (var cn in GetNodes(null, xarg))
 							yield return cn;
@@ -123,11 +123,11 @@ namespace Portable.Xaml
 
 				if (xm == XamlLanguage.Initialization)
 				{
-					yield return new XamlNodeInfo(TypeExtensionMethods.GetStringValue(xobj.Type, xm, xobj.GetRawValue(), value_serializer_ctx));
+					yield return new XamlNodeInfo(TypeExtensionMethods.GetStringValue(xobj.Type, xm, xobj.RawValue, value_serializer_ctx));
 					yield break;
 				}
 
-				val = xobj.GetRawValue();
+				val = xobj.RawValue;
 				if (xm.DeferringLoader != null)
 				{
 					foreach (var xn in GetDeferredNodes(xm, val))
@@ -193,7 +193,7 @@ namespace Portable.Xaml
 				}
 			}
 			else
-				val = xobj.GetRawValue();
+				val = xobj.RawValue;
 			// Object - could become Reference
 			if (val != null && xobj.Type != XamlLanguage.Reference) {
 
@@ -319,10 +319,10 @@ namespace Portable.Xaml
 			}
 
 			// FIXME: find out why root Reference has PositionalParameters.
-			if (xobj.GetRawValue () != root && xobj.Type == XamlLanguage.Reference)
+			if (xobj.RawValue != root && xobj.Type == XamlLanguage.Reference)
 				yield return new XamlNodeMember (xobj, XamlLanguage.PositionalParameters);
 			else {
-				var inst = xobj.GetRawValue ();
+				var inst = xobj.RawValue;
 				var atts = new KeyValuePair<AttachableMemberIdentifier,object> [AttachablePropertyServices.GetAttachedPropertyCount (inst)];
 				AttachablePropertyServices.CopyPropertiesTo (inst, atts, 0);
 				foreach (var p in atts) {
@@ -370,7 +370,7 @@ namespace Portable.Xaml
 
 		IEnumerable<XamlNodeInfo> GetItemsNodes (XamlMember xm, XamlObject xobj)
 		{
-			var obj = xobj.GetRawValue ();
+			var obj = xobj.RawValue;
 			if (obj == null)
 				yield break;
 			var ie = xobj.Type.Invoker.GetItems (obj);

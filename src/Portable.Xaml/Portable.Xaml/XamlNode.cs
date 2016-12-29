@@ -32,55 +32,42 @@ using System.Xml;
 
 namespace Portable.Xaml
 {
-	internal struct XamlNodeInfo
+	class XamlNodeInfo
 	{
-		public XamlNodeInfo (XamlNodeType nodeType, XamlObject value)
+		public XamlNodeInfo(XamlNodeType nodeType, XamlObject value)
 		{
-			node_type = nodeType;
-			this.value = value;
-			member = default (XamlNodeMember);
-		}
-		
-		public XamlNodeInfo (XamlNodeType nodeType, XamlNodeMember member)
-		{
-			node_type = nodeType;
-			this.value = default (XamlObject);
-			this.member = member;
-		}
-		
-		public XamlNodeInfo (object value)
-		{
-			node_type = XamlNodeType.Value;
-			this.value = value;
-			member = default (XamlNodeMember);
-		}
-		
-		public XamlNodeInfo (NamespaceDeclaration ns)
-		{
-			node_type = XamlNodeType.NamespaceDeclaration;
-			this.value = ns;
-			member = default (XamlNodeMember);
+			NodeType = nodeType;
+			Value = value;
 		}
 
-		XamlNodeType node_type;
-		object value;
-		XamlNodeMember member;
-		
-		public XamlNodeType NodeType {
-			get { return node_type; }
+		public XamlNodeInfo(XamlNodeType nodeType, XamlNodeMember member)
+		{
+			NodeType = nodeType;
+			Value = member;
 		}
-		public XamlObject Object {
-			get { return (XamlObject) value; }
+
+		public XamlNodeInfo(object value)
+		{
+			NodeType = XamlNodeType.Value;
+			Value = value;
 		}
-		public XamlNodeMember Member {
-			get { return member; }
+
+		public XamlNodeInfo(NamespaceDeclaration ns)
+		{
+			NodeType = XamlNodeType.NamespaceDeclaration;
+			Value = ns;
 		}
-		public object Value {
-			get { return value; }
-		}
+
+		public XamlNodeType NodeType { get; }
+
+		public XamlObject Object => (XamlObject)Value;
+
+		public XamlNodeMember Member => (XamlNodeMember)Value;
+
+		public object Value { get; }
 	}
 
-	internal struct XamlNodeLineInfo
+	struct XamlNodeLineInfo
 	{
 		public readonly XamlNodeInfo Node;
 		public readonly int LineNumber, LinePosition;
@@ -92,87 +79,69 @@ namespace Portable.Xaml
 		}
 	}
 	
-	internal struct XamlObject
+	class XamlObject
 	{
 		public XamlObject (XamlType type, object instance)
-			: this (type, new InstanceContext (instance))
 		{
+			Type = type;
+			Value = instance;
+		}
+		
+		public object Value { get; }
+		
+		public XamlType Type { get; }
+
+		public object RawValue => Value;
+
+		public object GetMemberValue(XamlMember xm)
+		{
+			if (xm.IsUnknown)
+				return null;
+
+			var obj = RawValue;
+			// FIXME: this looks like an ugly hack. Is this really true? What if there's MarkupExtension that uses another MarkupExtension type as a member type.
+			if (xm.IsAttachable 
+				|| xm.IsDirective // is this correct?
+				/*
+				|| ReferenceEquals(xm, XamlLanguage.Initialization)
+				|| ReferenceEquals(xm, XamlLanguage.Items) // collection itself
+				|| ReferenceEquals(xm, XamlLanguage.Arguments) // object itself
+				|| ReferenceEquals(xm, XamlLanguage.PositionalParameters) // dummy value
+				*/
+				)
+				return obj;
+			return xm.Invoker.GetValue(obj);
 		}
 
-		public XamlObject (XamlType type, InstanceContext context)
-		{
-			this.type = type;
-			this.context = context;
-		}
-		
-		readonly XamlType type;
-		readonly InstanceContext context;
-		
-		public XamlType Type {
-			get { return type; }
-		}
-		
-		public InstanceContext Context {
-			get { return context; }
-		}
-		
-		XamlType GetType (object obj)
-		{
-			return type.SchemaContext.GetXamlType (obj.GetType ());
-		}
-		
-		public object GetRawValue ()
-		{
-			return context.GetRawValue ();
-		}
 	}
-	
-	internal struct XamlNodeMember
+
+	class XamlNodeMember
 	{
 		public XamlNodeMember (XamlObject owner, XamlMember member)
 		{
-			this.owner = owner;
-			this.member = member;
+			Owner = owner;
+			Member = member;
 		}
 		
-		readonly XamlObject owner;
-		readonly XamlMember member;
-		
-		public XamlObject Owner {
-			get { return owner; }
-		}
-		public XamlMember Member {
-			get { return member; }
-		}
-		public XamlObject Value {
-			get {
-				var mv = Owner.GetMemberValue (Member);
-				return new XamlObject (GetType (mv), mv);
+		public XamlObject Owner { get; }
+
+		public XamlMember Member { get; }
+
+		public XamlObject Value
+		{
+			get
+			{
+				var mv = Owner.GetMemberValue(Member);
+				return new XamlObject(GetType(mv), mv);
 			}
 		}
 
 		XamlType GetType (object obj)
 		{
-			return obj == null ? XamlLanguage.Null : owner.Type.SchemaContext.GetXamlType (new InstanceContext (obj).GetRawValue ().GetType ());
+			return obj == null ? XamlLanguage.Null : Owner.Type.SchemaContext.GetXamlType(obj.GetType());
 		}
 	}
 	
-	// Its original purpose was to enable delayed reflection, but it's not supported yet.
-	internal struct InstanceContext
-	{
-		public InstanceContext (object value)
-		{
-			this.value = value;
-		}
-		
-		object value;
-		
-		public object GetRawValue ()
-		{
-			return value; // so far.
-		}
-	}
-
 	internal static class TypeExtensionMethods2
 	{
 		// Note that this returns XamlMember which might not actually appear in XamlObjectReader. For example, XamlLanguage.Items won't be returned when there is no item in the collection.
@@ -220,27 +189,4 @@ namespace Portable.Xaml
 		}
 	}
 	
-	internal static class XamlNodeExtensions
-	{
-		internal static object GetMemberValue (this XamlObject xobj, XamlMember xm)
-		{
-			if (xm.IsUnknown)
-				return null;
-
-			if (xm.IsAttachable)
-				return xobj.GetRawValue (); // attachable property value
-
-			// FIXME: this looks like an ugly hack. Is this really true? What if there's MarkupExtension that uses another MarkupExtension type as a member type.
-			var obj = xobj.Context.GetRawValue ();
-			if (xm == XamlLanguage.Initialization)
-				return obj;
-			if (xm == XamlLanguage.Items) // collection itself.
-				return obj;
-			if (xm == XamlLanguage.Arguments) // object itself
-				return obj;
-			if (xm == XamlLanguage.PositionalParameters)
-				return xobj.GetRawValue (); // dummy value
-			return xm.Invoker.GetValue (xobj.GetRawValue ());
-		}
-	}
 }

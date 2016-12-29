@@ -103,16 +103,16 @@ namespace Portable.Xaml
 			if (obj == null)
 				return String.Empty;
 			if (obj is Type)
-				return new XamlTypeName (xt.SchemaContext.GetXamlType ((Type)obj)).ToString (vsctx != null ? vsctx.GetService (typeof(INamespacePrefixLookup)) as INamespacePrefixLookup : null);
+				return new XamlTypeName (xt.SchemaContext.GetXamlType ((Type)obj)).ToString (vsctx?.GetService (typeof(INamespacePrefixLookup)) as INamespacePrefixLookup);
 
-			var vs = (xm != null ? xm.ValueSerializer : null) ?? xt.ValueSerializer;
+			var vs = xm?.ValueSerializer ?? xt.ValueSerializer;
 			if (vs != null)
 				return vs.ConverterInstance.ConvertToString (obj, vsctx);
 
 			// FIXME: does this make sense?
-			var vc = (xm != null ? xm.TypeConverter : null) ?? xt.TypeConverter;
-			var tc = vc != null ? vc.ConverterInstance : null;
-			if (tc != null && typeof(string) != null && tc.CanConvertTo (vsctx, typeof(string)))
+			var vc = xm?.TypeConverter ?? xt.TypeConverter;
+			var tc = vc?.ConverterInstance;
+			if (tc != null && tc.CanConvertTo (vsctx, typeof(string)))
 				return (string)tc.ConvertTo (vsctx, CultureInfo.InvariantCulture, obj, typeof(string));
 			if (obj is string || obj == null)
 				return (string)obj;
@@ -434,7 +434,7 @@ namespace Portable.Xaml
 
 		internal static string GetInternalXmlName (this XamlMember xm)
 		{
-			return xm.IsAttachable ? String.Concat (xm.DeclaringType.GetInternalXmlName (), ".", xm.Name) : xm.Name;
+			return xm.IsAttachable ? String.Concat (xm.DeclaringType.InternalXmlName, ".", xm.Name) : xm.Name;
 		}
 
 		#if DOTNET

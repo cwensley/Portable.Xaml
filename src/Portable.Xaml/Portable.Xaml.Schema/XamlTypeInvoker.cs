@@ -33,9 +33,7 @@ namespace Portable.Xaml.Schema
 	public class XamlTypeInvoker
 	{
 		static readonly XamlTypeInvoker unknown = new XamlTypeInvoker ();
-		public static XamlTypeInvoker UnknownInvoker {
-			get { return unknown; }
-		}
+		public static XamlTypeInvoker UnknownInvoker => unknown;
 
 		protected XamlTypeInvoker ()
 		{
@@ -51,25 +49,21 @@ namespace Portable.Xaml.Schema
 		XamlType type;
 		Type mutableType;
 		MethodInfo createImmutableFromMutable;
+		Dictionary<Tuple<Type, Type, Type>, MethodInfo> add_method_cache = new Dictionary<Tuple<Type, Type, Type>, MethodInfo>();
 
 		[EnhancedXaml]
-		protected XamlType Type { get { return type; } }
+		protected XamlType Type => type;
 
 		void ThrowIfUnknown ()
 		{
 			if (type == null || type.UnderlyingType == null)
-				throw new NotSupportedException (String.Format ("Current operation is valid only when the underlying type on a XamlType is known, but it is unknown for '{0}'", type));
+				throw new NotSupportedException (string.Format ("Current operation is valid only when the underlying type on a XamlType is known, but it is unknown for '{0}'", type));
 		}
 
-		public EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler {
-			get { return type == null ? null : type.SetMarkupExtensionHandler; }
-		}
+		public EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler => type?.SetMarkupExtensionHandler;
 
-		public EventHandler<XamlSetTypeConverterEventArgs> SetTypeConverterHandler {
-			get { return type == null ? null : type.SetTypeConverterHandler; }
-		}
+		public EventHandler<XamlSetTypeConverterEventArgs> SetTypeConverterHandler => type?.SetTypeConverterHandler;
 
-		Dictionary<Tuple<Type, Type, Type>, MethodInfo> add_method_cache = new Dictionary<Tuple<Type, Type, Type>, MethodInfo>();
 
 		public virtual void AddToCollection (object instance, object item)
 		{
@@ -205,20 +199,24 @@ namespace Portable.Xaml.Schema
 			return createImmutableFromMutable.Invoke(null, new[] { instance });
 		}
 
-		public virtual MethodInfo GetAddMethod (XamlType contentType)
+		public virtual MethodInfo GetAddMethod(XamlType contentType)
 		{
-			return type == null || type.UnderlyingType == null || type.ItemType == null || type.CollectionKind == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod ("Add", new Type [] {contentType.UnderlyingType});
+			return type == null || type.UnderlyingType == null || type.ItemType == null || type.CollectionKind == XamlCollectionKind.None 
+				? null 
+				: type.UnderlyingType.GetRuntimeMethod("Add", new Type[] { contentType.UnderlyingType });
 		}
 
-		public virtual MethodInfo GetEnumeratorMethod ()
+		public virtual MethodInfo GetEnumeratorMethod()
 		{
-			return type.UnderlyingType == null || type.CollectionKind == XamlCollectionKind.None ? null : type.UnderlyingType.GetRuntimeMethod("GetEnumerator", new Type[0]);
+			return type == null || type.UnderlyingType == null || type.CollectionKind == XamlCollectionKind.None 
+				? null 
+				: type.UnderlyingType.GetRuntimeMethod("GetEnumerator", new Type[0]);
 		}
-		
+
 		public virtual IEnumerator GetItems (object instance)
 		{
 			if (instance == null)
-				throw new ArgumentNullException ("instance");
+				throw new ArgumentNullException (nameof(instance));
 			return ((IEnumerable) instance).GetEnumerator ();
 		}
 	}

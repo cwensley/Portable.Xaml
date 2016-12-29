@@ -60,22 +60,17 @@ namespace Portable.Xaml.Schema
 		
 		public static bool operator == (XamlValueConverter<TConverterBase> left, XamlValueConverter<TConverterBase> right)
 		{
-			return IsNull (left) ? IsNull (right) : left.Equals (right);
-		}
-
-		static bool IsNull (XamlValueConverter<TConverterBase> a)
-		{
-			return Object.ReferenceEquals (a, null);
+			return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals (right);
 		}
 
 		public static bool operator != (XamlValueConverter<TConverterBase> left, XamlValueConverter<TConverterBase> right)
 		{
-			return IsNull (left) ? !IsNull (right) : IsNull (right) || left.ConverterType != right.ConverterType || left.TargetType != right.TargetType || left.Name != right.Name;
+			return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : ReferenceEquals(right, null) || left.ConverterType != right.ConverterType || left.TargetType != right.TargetType || left.Name != right.Name;
 		}
 		
 		public bool Equals (XamlValueConverter<TConverterBase> other)
 		{
-			return !IsNull (other) && ConverterType == other.ConverterType && TargetType == other.TargetType && Name == other.Name;
+			return !ReferenceEquals(other, null) && ConverterType == other.ConverterType && TargetType == other.TargetType && Name == other.Name;
 		}
 
 		public override bool Equals (object obj)

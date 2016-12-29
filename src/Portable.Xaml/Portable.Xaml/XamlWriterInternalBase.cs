@@ -58,22 +58,13 @@ namespace Portable.Xaml
 
 		internal ObjectState root_state;
 		internal Stack<ObjectState> object_states = new Stack<ObjectState> ();
-		internal PrefixLookup prefix_lookup {
-			get { return (PrefixLookup) service_provider.GetService (typeof (INamespacePrefixLookup)); }
-		}
+		internal PrefixLookup prefix_lookup => (PrefixLookup) service_provider.GetService (typeof (INamespacePrefixLookup));
 
-		public Type GetDestinationType ()
-		{
-			return CurrentMember?.Type.UnderlyingType;
-		}
+		public Type GetDestinationType () => CurrentMember?.Type.UnderlyingType;
 
-		List<NamespaceDeclaration> namespaces {
-			get { return prefix_lookup.Namespaces; }
-		}
+		List<NamespaceDeclaration> Namespaces => prefix_lookup.Namespaces;
 
-		internal virtual IAmbientProvider AmbientProvider {
-			get { return null; }
-		}
+		internal virtual IAmbientProvider AmbientProvider => null;
 
 		internal class ObjectState
 		{
@@ -89,20 +80,11 @@ namespace Portable.Xaml
 			public bool IsXamlWriterCreated; // affects AfterProperties() calls.
 		}
 
-		object IProvideValueTarget.TargetObject
-		{
-			get { return object_states.Peek().Value; }
-		}
+		object IProvideValueTarget.TargetObject => object_states.Peek().Value;
 
-		object IProvideValueTarget.TargetProperty
-		{
-			get { return CurrentMember?.UnderlyingMember; }
-		}
+		object IProvideValueTarget.TargetProperty => CurrentMember?.UnderlyingMember;
 
-		object IRootObjectProvider.RootObject
-		{
-			get { return root_state.Value; }
-		}
+		object IRootObjectProvider.RootObject => root_state.Value;
 
 		internal class MemberAndValue
 		{
@@ -138,14 +120,23 @@ namespace Portable.Xaml
 
 		internal string GetPrefix (string ns)
 		{
-			foreach (var nd in namespaces)
+			foreach (var nd in Namespaces)
 				if (nd.Namespace == ns)
 					return nd.Prefix;
 			return null;
 		}
 
 		protected MemberAndValue CurrentMemberState {
-			get { return object_states.Count > 0 ? object_states.Peek ().WrittenProperties.LastOrDefault () : null; }
+			get
+			{
+				if (object_states.Count > 0)
+				{
+					var properties = object_states.Peek().WrittenProperties;
+					if (properties.Count > 0)
+						return properties[properties.Count - 1];
+				}
+				return null;
+			}
 		}
 
 		protected XamlMember CurrentMember {
@@ -175,7 +166,7 @@ namespace Portable.Xaml
 
 			manager.Namespace ();
 
-			namespaces.Add (namespaceDeclaration);
+			Namespaces.Add (namespaceDeclaration);
 			OnWriteNamespace (namespaceDeclaration);
 		}
 
@@ -210,7 +201,11 @@ namespace Portable.Xaml
 
 			var state = object_states.Peek ();
 			var wpl = state.WrittenProperties;
+#if PCL136
 			if (wpl.Any (wp => wp.Member == property))
+#else
+			if (wpl.Find (wp => wp.Member == property) != null)
+#endif
 				throw new XamlDuplicateMemberException (String.Format ("Property '{0}' is already set to this '{1}' object", property, object_states.Peek ().Type));
 			wpl.Add (new MemberAndValue (property));
 			if (property == XamlLanguage.PositionalParameters)
@@ -273,7 +268,7 @@ namespace Portable.Xaml
 				throw new XamlXmlWriterException (String.Format ("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType () : null));
 		}
 
-		#region IAmbientProvider
+#region IAmbientProvider
 
 		public IEnumerable<object> GetAllAmbientValues(params XamlType[] types)
 		{
@@ -317,9 +312,7 @@ namespace Portable.Xaml
 					{
 						if (!prop.DeclaringType.CanAssignFrom(state.Type))
 							continue;
-						if (prop.UnderlyingGetter == null)
-							continue;
-						var value = prop.UnderlyingGetter.Invoke(state.Value, null);
+						var value = prop.Invoker.GetValue(state.Value);
 						yield return new AmbientPropertyValue(prop, value);
 					}
 				}
@@ -335,6 +328,6 @@ namespace Portable.Xaml
 		{
 			return GetAllAmbientValues(ceilingTypes, properties).FirstOrDefault();
 		}
-		#endregion
+#endregion
 	}
 }

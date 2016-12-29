@@ -262,14 +262,14 @@ namespace Portable.Xaml
 					w.WriteString (prefix);
 					w.WriteString (":");
 				}
-				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.GetInternalXmlName () : xamlType.Name;
+				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.InternalXmlName : xamlType.Name;
 				w.WriteString (name);
 				// space between type and first member (if any).
 				if (xamlType.IsMarkupExtension && xamlType.GetSortedConstructorArguments ().GetEnumerator ().MoveNext ())
 					w.WriteString (" ");
 			} else {
 				WritePendingNamespaces ();
-				w.WriteStartElement (prefix, xamlType.GetInternalXmlName (), xamlType.PreferredXamlNamespace);
+				w.WriteStartElement (prefix, xamlType.InternalXmlName, xamlType.PreferredXamlNamespace);
 				var l = xamlType.TypeArguments;
 				if (l != null) {
 					w.WriteStartAttribute ("x", "TypeArguments", XamlLanguage.Xaml2006Namespace);
@@ -421,7 +421,7 @@ namespace Portable.Xaml
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.MemberElement;
 			string prefix = GetPrefix (xm.PreferredXamlNamespace);
-			string name = xm.IsDirective ? xm.Name : String.Concat (xt.GetInternalXmlName (), ".", xm.Name);
+			string name = xm.IsDirective ? xm.Name : String.Concat (xt.InternalXmlName, ".", xm.Name);
 			WritePendingNamespaces ();
 			w.WriteStartElement (prefix, name, xm.PreferredXamlNamespace);
 		}
