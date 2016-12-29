@@ -48,7 +48,7 @@ namespace Portable.Xaml
 			if (type.UnderlyingType == null)
 				return null;
 
-			T ret = type.GetCustomAttributeProvider ().GetCustomAttribute<T> (true);
+			T ret = type.CustomAttributeProvider.GetCustomAttribute<T> (true);
 			if (ret != null)
 				return ret;
 			if (type.BaseType != null)
@@ -360,7 +360,7 @@ namespace Portable.Xaml
 
 		public static string ConstructorArgumentName (this XamlMember xm)
 		{
-			var caa = xm.GetCustomAttributeProvider ().GetCustomAttribute<ConstructorArgumentAttribute> (false);
+			var caa = xm.CustomAttributeProvider.GetCustomAttribute<ConstructorArgumentAttribute> (false);
 			return caa.ArgumentName;
 		}
 

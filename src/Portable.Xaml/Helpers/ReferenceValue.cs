@@ -25,50 +25,39 @@ using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
+	class ReferenceValueInternal
+	{
+		// static in a generic creates multiple copies
+		public static readonly object NullValue = new object();
+	}
+
 	/// <summary>
 	/// Struct to store a reference type and cache its value (even if null).
 	/// </summary>
 	struct ReferenceValue<T>
 		where T: class
 	{
-		object value;
+		object _value;
 
-		static readonly object NullValue = new object();
+		// automatically translates NullValue into null without an extra test
+		public T Value => _value as T;
 
-		public T Value
-		{
-			get
-			{ 
-				if (ReferenceEquals(value, NullValue))
-					return default(T);
-				return (T)value;
-			} 
-		}
-
-		public bool HasValue { get { return value != null; } }
+		public bool HasValue => !ReferenceEquals(_value, null);
 
 		public ReferenceValue(T value)
 		{
-			this.value = value ?? NullValue;
+			_value = value ?? ReferenceValueInternal.NullValue;
 		}
 
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		public T Get(Func<T> getValue)
+		public T Set(T value)
 		{
-			if (ReferenceEquals(value, NullValue))
-				return default(T);
-			if (value != null)
-				return (T)value;
-			
-			value = getValue();
-			if (value == null)
+			_value = value;
+			if (ReferenceEquals(_value, null))
 			{
-				value = NullValue;
+				_value = ReferenceValueInternal.NullValue;
 				return default(T);
 			}
-			return (T)value;
+			return (T)_value;
 		}
 
 		public static implicit operator ReferenceValue<T>(T value)
@@ -78,12 +67,12 @@ namespace Portable.Xaml
 
 		public static bool operator ==(ReferenceValue<T> left, ReferenceValue<T> right)
 		{
-			return Equals(left.value, right.value);
+			return Equals(left._value, right._value);
 		}
 
 		public static bool operator !=(ReferenceValue<T> left, ReferenceValue<T> right)
 		{
-			return !Equals(left.value, right.value);
+			return !Equals(left._value, right._value);
 		}
 
 		public override bool Equals(object obj)
@@ -93,7 +82,7 @@ namespace Portable.Xaml
 
 		public override int GetHashCode()
 		{
-			return value?.GetHashCode() ?? base.GetHashCode();
+			return _value?.GetHashCode() ?? base.GetHashCode();
 		}
 	}
 
