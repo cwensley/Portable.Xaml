@@ -37,46 +37,29 @@ namespace Portable.Xaml
 	/// <summary>
 	/// Struct to store flags and cache their value
 	/// </summary>
+	/// <remarks>
+	/// Usage (for best performance):  flags.Get(MyFlag) ?? flags.Set(MyFlag, SomeValueToBeCached());
+	/// </remarks>
 	struct FlagValue
 	{
-		int hasValue;
-		int values;
+		int _set;
+		int _value;
 
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		public bool Get(int flag, Func<bool> getFlag)
+		public bool? Get(int flag)
 		{
-			if ((hasValue & flag) != 0)
-				return (values & flag) != 0;
-
-			var value = getFlag();
-			hasValue |= flag;
-			if (value)
-				values |= flag;
-			return value;
+			if ((_set & flag) != 0)
+				return (_value & flag) != 0;
+			return null;
 		}
 
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		public bool Get(int flag)
+		public bool Set(int flag, bool value)
 		{
-			if ((hasValue & flag) != 0)
-				return (values & flag) != 0;
-			return false;
-		}
-
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		public void Set(int flag, bool value)
-		{
-			hasValue |= flag;
+			_set |= flag;
 			if (value)
-				values |= flag;
+				_value |= flag;
 			else
-				values &= ~flag;
+				_value &= ~flag;
+			return value;
 		}
 	}
 }

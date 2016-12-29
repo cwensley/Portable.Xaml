@@ -11,7 +11,7 @@ The main difference between this and System.Xaml is that it comes with its own (
 
 Portable.Xaml currently supports the following profiles:
 
-- Profile 259 - For .NET 4.5, CoreCLR, WinRT, Xamarin, etc.
+- Profile 259 - For .NET 4.5, .NET Core, WinRT, Xamarin, etc.
 - Profile 136 - For .NET 4.0 support
 
 Other profiles can be contributed if desired, but these should support the widest range of platforms.
@@ -34,21 +34,17 @@ Contributors are more than welcome! Ideally this library can become well support
 
 ## Performance
 
-What about performance you ask? Portable.Xaml can actually be much faster than .NET's System.Xaml in some cases, especially when loading xaml.
+What about performance you ask? Portable.Xaml can actually be faster than .NET's System.Xaml in most cases, especially when loading xaml.
 
 Portable.Xaml's performance has also been drastically improved over mono's initial implementation, which used to be many times slower than .NET.
 
-### Load
-Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
-------------- |-------------- |----------- |------- |-------------- |-------- |---------- |
- PortableXaml |   897.6095 us | 24.2359 us |   1.00 |          0.00 | 19.7368 | 200.19 kB |
-   SystemXaml | 1,427.0262 us | 52.7652 us |   1.59 |          0.07 |  3.0382 | 155.19 kB |
+Here's some results using [BenchmarkDotNet](http://benchmarkdotnet.org):
 
+### Load
+Method |          Mean |     StdDev | Scaled | Scaled-StdDev | Allocated |------------- |-------------- |----------- |------- |-------------- |---------- | PortableXaml |   782.1410 us |  7.4904 us |   1.00 |          0.00 |  76.77 kB |   SystemXaml | 1,376.8630 us | 11.5132 us |   1.76 |          0.02 | 155.19 kB |
+   
 ### Save
-Method |        Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
-------------- |------------ |----------- |------- |-------------- |-------- |---------- |
- PortableXaml | 990.8799 us | 18.2260 us |   1.00 |          0.00 | 25.0000 |    408 kB |
-   SystemXaml | 923.7489 us | 21.5989 us |   0.93 |          0.03 |       - | 120.03 kB |
+Method |        Mean |     StdDev | Scaled | Scaled-StdDev |  Gen 0 | Allocated |------------- |------------ |----------- |------- |-------------- |------- |---------- | PortableXaml | 859.9563 us | 10.3759 us |   1.00 |          0.00 | 5.7292 | 180.25 kB |   SystemXaml | 914.7401 us | 14.3295 us |   1.06 |          0.02 |      - | 120.03 kB |
 
 ## License
 

@@ -73,10 +73,7 @@ namespace Portable.Xaml
 
 		static readonly XamlSchemaContext sctx = new XamlSchemaContext (new Assembly [] {typeof (XamlType).GetTypeInfo().Assembly});
 
-		static XamlType XT<T> ()
-		{
-			return sctx.GetXamlType (typeof (T));
-		}
+		static XamlType XT<T> () => sctx.GetXamlType (typeof (T));
 
 		internal static readonly bool InitializingTypes;
 
@@ -149,19 +146,15 @@ namespace Portable.Xaml
 
 		static readonly string [] xaml_nss = new string [] {Xaml2006Namespace};
 
-		public static IList<string> XamlNamespaces {
-			get { return xaml_nss; }
-		}
+		public static IList<string> XamlNamespaces => xaml_nss;
 
 		static readonly string [] xml_nss = new string [] {Xml1998Namespace};
 
-		public static IList<string> XmlNamespaces {
-			get { return xml_nss; }
-		}
+		public static IList<string> XmlNamespaces => xml_nss;
 
 		public static ReadOnlyCollection<XamlDirective> AllDirectives { get; private set; }
 
-		public static XamlDirective Arguments { get; private set; }
+		public static XamlDirective Arguments { get; private set; } 
 		public static XamlDirective AsyncRecords { get; private set; }
 		public static XamlDirective Base { get; private set; }
 		public static XamlDirective Class { get; private set; }
