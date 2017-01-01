@@ -107,8 +107,10 @@ namespace Portable.Xaml
 		public string GetName (object value)
 		{
 			foreach (var no in objects)
-				if (ReferenceEquals (no.Value.Value, value))
+			{
+				if (ReferenceEquals(no.Value.Value, value))
 					return no.Value.Name;
+			}
 			return null;
 		}
 
@@ -128,12 +130,16 @@ namespace Portable.Xaml
 			if (unnamed.Count == 0)
 				return null;
 
-#if PCL136
-			var un = unnamed.FirstOrDefault(r => ReferenceEquals(r.Value, value));
-#else
-			// faster than FirstOrDefault
-			var un = unnamed.Find(r => ReferenceEquals (r.Value, value));
-#endif
+			NamedObject un = null;
+			for (int i = 0; i < unnamed.Count; i++)
+			{
+				var r = unnamed[i];
+				if (ReferenceEquals(r.Value, value))
+				{
+					un = r;
+					break;
+				}
+			}
 			if (un == null)
 				return null;
 			

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,14 +13,52 @@ namespace Portable.Xaml
 	{
 		static ParameterExpression s_InstanceExpression = Expression.Parameter(typeof(object), "instance");
 		static ParameterExpression s_ValueExpression = Expression.Parameter(typeof(object), "value");
-		static ParameterExpression[] s_ParameterExpressions = { s_InstanceExpression, s_ValueExpression };
+		static ParameterExpression s_KeyExpression = Expression.Parameter(typeof(object), "key");
+		static ParameterExpression[] s_ParameterExpressions1 = { s_InstanceExpression, s_ValueExpression };
+		static ParameterExpression[] s_ParameterExpressions2 = { s_InstanceExpression, s_KeyExpression, s_ValueExpression };
 		static Type s_TargetExceptionType = typeof(Assembly).GetTypeInfo().Assembly.GetType("System.Reflection.TargetException");
 
-		public static Exception TargetException(Type targetType, Type instanceType)
+		static Exception TargetException(Type targetType, Type instanceType)
 		{
 			return s_TargetExceptionType != null
 				? (Exception)Activator.CreateInstance(s_TargetExceptionType)
 				: new InvalidOperationException($"Instance of type {instanceType} is not assignable to target type {targetType}");
+		}
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		static void CheckParameters(Type declaringType, object instance)
+		{
+			var instanceType = instance.GetType();
+			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
+				throw TargetException(declaringType, instanceType);
+		}
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		static void CheckParameters(Type declaringType, Type propertyType, object instance, object value)
+		{
+			var instanceType = instance.GetType();
+			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
+				throw TargetException(declaringType, instanceType);
+			if (value != null && !propertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
+				throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
+		}
+
+#if PCL259
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		static void CheckParameters(Type declaringType, Type keyType, Type propertyType, object instance, object key, object value)
+		{
+			var instanceType = instance.GetType();
+			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
+				throw TargetException(declaringType, instanceType);
+			if (value != null && !propertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
+				throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
+			if (key != null && !keyType.GetTypeInfo().IsAssignableFrom(key.GetType().GetTypeInfo()))
+				throw new ArgumentException($"Key of type {key.GetType()} cannot be assigned to member with type {keyType}", nameof(key));
 		}
 
 		public static Func<object, object> BuildGetExpression(this MethodInfo getter)
@@ -30,86 +69,110 @@ namespace Portable.Xaml
 				? Expression.TypeAs(s_InstanceExpression, declaringType)
 				: Expression.Convert(s_InstanceExpression, declaringType);
 
+			Expression block = Expression.TypeAs(Expression.Call(instanceCast, getter), typeof(object));
 
-			var typeAs = Expression.TypeAs(Expression.Call(instanceCast, getter), typeof(object));
+			var exp = Expression.Lambda<Func<object, object>>(block, s_InstanceExpression).Compile();
 
-			// check the type of instance and throw TargetException if it isn't compatible
-			var checkCall = Expression.Call(s_checkInstanceMethod, Expression.Constant(declaringType), s_InstanceExpression);
-			//var block = Expression.TryCatch(typeAs, Expression.Catch(typeof(Exception), Expression.Block(checkCall, Expression.Rethrow())));
-			var block = Expression.Block(typeof(object), checkCall, typeAs);
-
-			return Expression.Lambda<Func<object, object>>(block, s_InstanceExpression).Compile();
+			return (instance) =>
+			{
+				CheckParameters(declaringType, instance);
+				return exp(instance);
+			};
 		}
 
-		static MethodInfo s_checkInstanceMethod = GetMethodInfo(() => CheckInstance(null, null));
-		static MethodInfo s_checkInstanceAndValueMethod = GetMethodInfo(() => CheckInstanceAndValue(null, null, null, null));
-
-		static MethodInfo GetMethodInfo(Expression<Action> expression)
+		public static Action<object, object> BuildCallExpression(this MethodInfo method)
 		{
-			var member = expression.Body as MethodCallExpression;
-
-			if (member != null)
-				return member.Method;
-
-			throw new ArgumentException("Expression is not a method", "expression");
-		}
-
-		static void CheckInstance(Type declaringType, object instance)
-		{
-			if (!declaringType.GetTypeInfo().IsAssignableFrom(instance.GetType().GetTypeInfo()))
-				throw TargetException(declaringType, instance.GetType());
-		}
-
-		static void CheckInstanceAndValue(Type declaringType, Type propertyType, object instance, object value)
-		{
-			if (!declaringType.GetTypeInfo().IsAssignableFrom(instance.GetType().GetTypeInfo()))
-				throw TargetException(declaringType, instance.GetType());
-			if (value != null && !propertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
-				throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
-		}
-
-		public static Action<object, object> BuildSetExpression(this MethodInfo setter)
-		{
-			var parameters = setter.GetParameters();
-			bool isAttachable = parameters.Length > 1;
-			if (parameters.Length == 0 || parameters.Length > 2)
-				throw new ArgumentOutOfRangeException(nameof(setter), "Method must only have exactly one or two parameters");
-			if (isAttachable && !setter.IsStatic)
-				throw new ArgumentOutOfRangeException(nameof(setter), "Method must be static if it has two parameters, the first being the instance and second being the value");
-			var declaringType = isAttachable ? parameters[0].ParameterType : setter.DeclaringType;
+			var parameters = method.GetParameters();
+			Type declaringType;
+			Type propertyType;
+			if (method.IsStatic)
+			{
+				if (parameters.Length != 2)
+					throw new ArgumentOutOfRangeException(nameof(method), "Static method must have two parameters");
+				declaringType = parameters[0].ParameterType;
+				propertyType = parameters[1].ParameterType;
+			}
+			else
+			{
+				if (parameters.Length != 1)
+					throw new ArgumentOutOfRangeException(nameof(method), "Instance method must have one parameter");
+				declaringType = method.DeclaringType;
+				propertyType = parameters[0].ParameterType;
+			}
 
 			// value as T is slightly faster than (T)value, so if it's not a value type, use that
 			var instanceCast = !declaringType.GetTypeInfo().IsValueType
 				? Expression.TypeAs(s_InstanceExpression, declaringType)
 				: Expression.Convert(s_InstanceExpression, declaringType);
 
-			var propertyType = parameters[isAttachable ? 1 : 0].ParameterType;
 			var valueCast = !propertyType.GetTypeInfo().IsValueType
 				? Expression.TypeAs(s_ValueExpression, propertyType)
 				: Expression.Convert(s_ValueExpression, propertyType);
 
-			Expression call;
-			if (isAttachable)
-				call = Expression.Call(setter, instanceCast, valueCast);
+			Expression block;
+			if (method.IsStatic)
+				block = Expression.Call(method, instanceCast, valueCast);
 			else
-				call = Expression.Call(instanceCast, setter, valueCast);
+				block = Expression.Call(instanceCast, method, valueCast);
 
-			// check the type of instance and value and throw TargetException if it isn't compatible
-			var checkCall = Expression.Call(s_checkInstanceAndValueMethod, Expression.Constant(declaringType), Expression.Constant(propertyType), s_InstanceExpression, s_ValueExpression);
-			var returnTarget = Expression.Label();
-			/**
-			var block = Expression.Block(
-				Expression.TryCatch(
-					Expression.Return(returnTarget, call),
-					Expression.Catch(typeof(Exception), Expression.Block(checkCall, Expression.Rethrow()))
-				),
-				Expression.Label(returnTarget));
-			//block = Expression.Block(checkCall, block);
-			/**/
-			var block = Expression.Block(checkCall, call);
-			/**/
 
-			return Expression.Lambda<Action<object, object>>(block, s_ParameterExpressions).Compile();
+			var exp = Expression.Lambda<Action<object, object>>(block, s_ParameterExpressions1).Compile();
+			return (instance, value) =>
+			{
+				CheckParameters(declaringType, propertyType, instance, value);
+				exp(instance, value);
+			};
+		}
+
+		public static Action<object, object, object> BuildCall2Expression(this MethodInfo method)
+		{
+			var parameters = method.GetParameters();
+			Type declaringType;
+			Type propertyType;
+			Type keyType;
+			if (method.IsStatic)
+			{
+				if (parameters.Length != 3)
+					throw new ArgumentOutOfRangeException(nameof(method), "Static method must have three parameters");
+				declaringType = parameters[0].ParameterType;
+				keyType = parameters[1].ParameterType;
+				propertyType = parameters[2].ParameterType;
+			}
+			else
+			{
+				if (parameters.Length != 2)
+					throw new ArgumentOutOfRangeException(nameof(method), "Instance method must have two parameters");
+				declaringType = method.DeclaringType;
+				keyType = parameters[0].ParameterType;
+				propertyType = parameters[1].ParameterType;
+			}
+
+			// value as T is slightly faster than (T)value, so if it's not a value type, use that
+			var instanceCast = !declaringType.GetTypeInfo().IsValueType
+				? Expression.TypeAs(s_InstanceExpression, declaringType)
+				: Expression.Convert(s_InstanceExpression, declaringType);
+
+			var keyCast = !keyType.GetTypeInfo().IsValueType
+				? Expression.TypeAs(s_KeyExpression, keyType)
+				: Expression.Convert(s_KeyExpression, keyType);
+
+			var valueCast = !propertyType.GetTypeInfo().IsValueType
+				? Expression.TypeAs(s_ValueExpression, propertyType)
+				: Expression.Convert(s_ValueExpression, propertyType);
+
+			Expression block;
+			if (method.IsStatic)
+				block = Expression.Call(method, instanceCast, keyCast, valueCast);
+			else
+				block = Expression.Call(instanceCast, method, keyCast, valueCast);
+
+			var exp = Expression.Lambda<Action<object, object, object>>(block, s_ParameterExpressions2).Compile();
+
+			return (instance, key, value) =>
+			{
+				CheckParameters(declaringType, keyType, propertyType, instance, key, value);
+				exp(instance, key, value);
+			};
 		}
 	}
 }

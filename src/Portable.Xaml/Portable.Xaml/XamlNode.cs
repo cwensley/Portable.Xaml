@@ -34,6 +34,30 @@ namespace Portable.Xaml
 {
 	class XamlNodeInfo
 	{
+		public XamlNodeInfo()
+		{
+		}
+
+		public XamlNodeInfo Set(XamlNodeType nodeType, object value)
+		{
+			NodeType = nodeType;
+			Value = value;
+			return this;
+		}
+		public XamlNodeInfo Set(object value)
+		{
+			NodeType = XamlNodeType.Value;
+			Value = value;
+			return this;
+		}
+
+		public XamlNodeInfo Set(XamlNodeInfo node)
+		{
+			NodeType = node.NodeType;
+			Value = node.Value;
+			return this;
+		}
+
 		public XamlNodeInfo(XamlNodeType nodeType, XamlObject value)
 		{
 			NodeType = nodeType;
@@ -58,13 +82,15 @@ namespace Portable.Xaml
 			Value = ns;
 		}
 
-		public XamlNodeType NodeType { get; }
+		public XamlNodeType NodeType { get; private set; }
 
 		public XamlObject Object => (XamlObject)Value;
 
 		public XamlNodeMember Member => (XamlNodeMember)Value;
 
-		public object Value { get; }
+		public object Value { get; private set; }
+
+		public XamlNodeInfo Copy() => new XamlNodeInfo().Set(this);
 	}
 
 	struct XamlNodeLineInfo
@@ -81,15 +107,26 @@ namespace Portable.Xaml
 	
 	class XamlObject
 	{
+		public XamlObject()
+		{
+		}
+
+		public XamlObject Set(XamlType type, object instance)
+		{
+			Type = type;
+			Value = instance;
+			return this;
+		}
+
 		public XamlObject (XamlType type, object instance)
 		{
 			Type = type;
 			Value = instance;
 		}
 		
-		public object Value { get; }
+		public object Value { get; private set; }
 		
-		public XamlType Type { get; }
+		public XamlType Type { get; private set; }
 
 		public object RawValue => Value;
 
@@ -117,15 +154,32 @@ namespace Portable.Xaml
 
 	class XamlNodeMember
 	{
+		public XamlNodeMember()
+		{
+		}
+
+		public XamlNodeMember Set(XamlObject owner, XamlMember member)
+		{
+			Owner = owner;
+			Member = member;
+			return this;
+		}
+
 		public XamlNodeMember (XamlObject owner, XamlMember member)
 		{
 			Owner = owner;
 			Member = member;
 		}
-		
-		public XamlObject Owner { get; }
 
-		public XamlMember Member { get; }
+		public XamlObject Owner;
+
+		public XamlMember Member;
+
+		public XamlObject GetValue(XamlObject xobj)
+		{
+			var mv = Owner.GetMemberValue(Member);
+			return xobj.Set(GetType(mv), mv);
+		}
 
 		public XamlObject Value
 		{

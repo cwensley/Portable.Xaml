@@ -7,7 +7,7 @@ using BenchmarkDotNet.Attributes.Columns;
 
 namespace Portable.Xaml.Benchmark
 {
-	public abstract class SaveBenchmark : XamlBenchmark
+	public abstract class SaveBenchmark : IXamlBenchmark
 	{
 		public abstract object Instance { get; }
 
@@ -27,6 +27,20 @@ namespace Portable.Xaml.Benchmark
 			sxc = sxc ?? (sxc = new System.Xaml.XamlSchemaContext());
 			using (var stream = new MemoryStream())
 				System.Xaml.XamlServices.Save(new System.Xaml.XamlXmlWriter(stream, sxc), Instance);
+		}
+
+		[Benchmark]
+		public void PortableXamlNoCache()
+		{
+			using (var stream = new MemoryStream())
+				Portable.Xaml.XamlServices.Save(stream, Instance);
+		}
+
+		[Benchmark]
+		public void SystemXamlNoCache()
+		{
+			using (var stream = new MemoryStream())
+				System.Xaml.XamlServices.Save(stream, Instance);
 		}
 	}
 }

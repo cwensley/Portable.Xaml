@@ -4,14 +4,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BenchmarkDotNet.Attributes.Columns;
+using System.Diagnostics;
 
 namespace Portable.Xaml.Benchmark
 {
-	public abstract class LoadBenchmark : XamlBenchmark
+	[Config(typeof(Config))]
+	public abstract class LoadBenchmark : IXamlBenchmark
 	{
 		public abstract string TestName { get; }
 
-		protected Stream GetStream() => typeof(XamlBenchmark).Assembly.GetManifestResourceStream("Portable.Xaml.Benchmark." + TestName);
+		protected Stream GetStream() => typeof(IXamlBenchmark).Assembly.GetManifestResourceStream("Portable.Xaml.Benchmark." + TestName);
 
 		Portable.Xaml.XamlSchemaContext pxc;
 		[Benchmark(Baseline = true)]
@@ -29,6 +31,20 @@ namespace Portable.Xaml.Benchmark
 			sxc = sxc ?? (sxc = new System.Xaml.XamlSchemaContext());
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(new System.Xaml.XamlXmlReader(stream, sxc));
+		}
+
+		[Benchmark]
+		public void PortableXamlNoCache()
+		{
+			using (var stream = GetStream())
+				Portable.Xaml.XamlServices.Load(stream);
+		}
+
+		[Benchmark]
+		public void SystemXamlNoCache()
+		{
+			using (var stream = GetStream())
+				System.Xaml.XamlServices.Load(stream);
 		}
 	}
 }

@@ -201,12 +201,12 @@ namespace Portable.Xaml
 
 			var state = object_states.Peek ();
 			var wpl = state.WrittenProperties;
-#if PCL136
-			if (wpl.Any (wp => wp.Member == property))
-#else
-			if (wpl.Find (wp => wp.Member == property) != null)
-#endif
-				throw new XamlDuplicateMemberException (String.Format ("Property '{0}' is already set to this '{1}' object", property, object_states.Peek ().Type));
+			foreach (var wp in wpl)
+			{
+				if (wp.Member == property)
+					throw new XamlDuplicateMemberException(String.Format("Property '{0}' is already set to this '{1}' object", property, object_states.Peek().Type));
+			}
+
 			wpl.Add (new MemberAndValue (property));
 			if (property == XamlLanguage.PositionalParameters)
 				state.PositionalParameterIndex = 0;

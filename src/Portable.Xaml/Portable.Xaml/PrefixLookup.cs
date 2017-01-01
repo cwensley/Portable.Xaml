@@ -48,11 +48,16 @@ namespace Portable.Xaml
 
 		public string LookupPrefix (string ns)
 		{
-#if PCL136
-			var nd = Namespaces.FirstOrDefault (n => n.Namespace == ns);
-#else
-			var nd = Namespaces.Find (n => n.Namespace == ns);
-#endif
+			NamespaceDeclaration nd = null;
+			foreach (var nsd in Namespaces)
+			{
+				if (nsd.Namespace == ns)
+				{
+					nd = nsd;
+					break;
+				}
+			}
+
 			if (nd == null && IsCollectingNamespaces)
 				return AddNamespace (ns);
 			else
@@ -74,13 +79,14 @@ namespace Portable.Xaml
 			l.Add (new NamespaceDeclaration (ns, prefix));
 			return prefix;
 		}
-		
+
+		const string pre = "clr-namespace:";
+
 		string GetAcronym (string ns)
 		{
 			int idx = ns.IndexOf (';');
 			if (idx < 0)
 				return null;
-			string pre = "clr-namespace:";
 			if (!ns.StartsWith (pre, StringComparison.Ordinal))
 				return null;
 			ns = ns.Substring (pre.Length, idx - pre.Length);

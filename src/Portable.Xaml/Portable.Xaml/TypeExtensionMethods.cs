@@ -302,8 +302,7 @@ namespace Portable.Xaml
 					continue;
 				bool mismatch = false;
 				foreach (var pi in pis)
-					for (int i = 0; i < args.Count; i++)
-						mismatch |= args.All(a => a.ConstructorArgumentName() != pi.Name);
+					mismatch |= args.All(a => a.ConstructorArgumentName() != pi.Name);
 				if (mismatch)
 					continue;
 				return args.OrderBy(c => pis.FindParameterWithName(c.ConstructorArgumentName()).Position);
@@ -314,7 +313,12 @@ namespace Portable.Xaml
 
 		static ParameterInfo FindParameterWithName (this IEnumerable<ParameterInfo> pis, string name)
 		{
-			return pis.FirstOrDefault (pi => pi.Name == name);
+			foreach (var pi in pis)
+			{
+				if (pi.Name == name)
+					return pi;
+			}
+			return null;
 		}
 
 		static IEnumerable<XamlMember> FindConstructorArguments(XamlSchemaContext context, IEnumerable<ConstructorInfo> constructors, IList<object> contents, Func<XamlType, XamlType, bool> compare)

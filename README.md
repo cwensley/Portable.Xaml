@@ -36,15 +36,15 @@ Contributors are more than welcome! Ideally this library can become well support
 
 What about performance you ask? Portable.Xaml can actually be faster than .NET's System.Xaml in most cases, especially when loading xaml.
 
-Portable.Xaml's performance has also been drastically improved over mono's initial implementation, which used to be many times slower than .NET.
+Portable.Xaml's performance has also been drastically improved over mono's initial implementation by 11x loading, and 28x saving.
 
 Here's some results using [BenchmarkDotNet](http://benchmarkdotnet.org):
 
 ### Load
-Method |          Mean |     StdDev | Scaled | Scaled-StdDev | Allocated |------------- |-------------- |----------- |------- |-------------- |---------- | PortableXaml |   782.1410 us |  7.4904 us |   1.00 |          0.00 |  76.77 kB |   SystemXaml | 1,376.8630 us | 11.5132 us |   1.76 |          0.02 | 155.19 kB |
-   
+Method |          Mean |     StdDev | Scaled | Scaled-StdDev | Allocated |-------------------- |-------------- |----------- |------- |-------------- |---------- |        PortableXaml |   726.6193 us | 28.2493 us |   1.00 |          0.00 |  72.23 kB |          SystemXaml | 1,330.3755 us | 31.5314 us |   1.83 |          0.08 | 155.19 kB | PortableXamlNoCache | 1,598.9083 us | 22.4152 us |   2.20 |          0.09 | 129.89 kB |   SystemXamlNoCache | 1,899.0161 us | 90.5633 us |   2.62 |          0.16 | 187.14 kB |
+
 ### Save
-Method |        Mean |     StdDev | Scaled | Scaled-StdDev |  Gen 0 | Allocated |------------- |------------ |----------- |------- |-------------- |------- |---------- | PortableXaml | 859.9563 us | 10.3759 us |   1.00 |          0.00 | 5.7292 | 180.25 kB |   SystemXaml | 914.7401 us | 14.3295 us |   1.06 |          0.02 |      - | 120.03 kB |
+Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |-------------------- |-------------- |----------- |------- |-------------- |-------- |---------- |        PortableXaml |   813.9052 us | 11.2787 us |   1.00 |          0.00 |       - | 146.18 kB |          SystemXaml |   874.2129 us | 15.8162 us |   1.07 |          0.02 |       - | 120.03 kB | PortableXamlNoCache | 1,588.3347 us |  9.7873 us |   1.95 |          0.03 | 15.6250 | 197.46 kB |   SystemXamlNoCache | 1,187.0039 us | 13.3269 us |   1.46 |          0.03 |       - | 142.01 kB |
 
 ## License
 
