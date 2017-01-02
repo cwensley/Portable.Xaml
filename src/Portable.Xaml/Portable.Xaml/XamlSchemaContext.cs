@@ -66,30 +66,35 @@ namespace Portable.Xaml
 
 			FullyQualifyAssemblyNamesInClrNamespaces = settings.FullyQualifyAssemblyNamesInClrNamespaces;
 			SupportMarkupExtensionsWithDuplicateArity = settings.SupportMarkupExtensionsWithDuplicateArity;
+			InvokerOptions = settings.InvokerOptions;
 		}
 
-		~XamlSchemaContext ()
+		~XamlSchemaContext()
 		{
 			/*if (reference_assemblies == null)
 				AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoaded;*/
 		}
 
 		IList<Assembly> reference_assemblies;
-
-		// assembly attribute caches
-		Dictionary<string,List<string>> xaml_nss;
-		Dictionary<string,string> prefixes;
-		Dictionary<string,string> compat_nss;
-		Dictionary<string,List<XamlType>> all_xaml_types;
-		XamlType[] empty_xaml_types = new XamlType [0];
+		Dictionary<string, List<string>> xaml_nss;
+		Dictionary<string, string> prefixes;
+		Dictionary<string, string> compat_nss;
+		Dictionary<string, List<XamlType>> all_xaml_types;
+		XamlType[] empty_xaml_types = new XamlType[0];
 		Dictionary<Type, XamlType> run_time_types = new Dictionary<Type, XamlType>();
+		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
+		Dictionary<Pair, XamlDirective> xaml_directives = new Dictionary<Pair, XamlDirective>();
+		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
+		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
+
+		[EnhancedXaml]
+		public XamlInvokerOptions InvokerOptions { get; private set; } = XamlInvokerOptions.DeferCompile;
+
+		public bool SupportMarkupExtensionsWithDuplicateArity { get; private set; }
 
 		public bool FullyQualifyAssemblyNamesInClrNamespaces { get; private set; }
 
-		public IList<Assembly> ReferenceAssemblies
-		{
-			get { return reference_assemblies; }
-		}
+		public IList<Assembly> ReferenceAssemblies => reference_assemblies;
 
 		class AssemblyInfo
 		{
@@ -137,8 +142,6 @@ namespace Portable.Xaml
 				return null;
 			}
 		}
-
-		public bool SupportMarkupExtensionsWithDuplicateArity { get; private set; }
 
 		internal string GetXamlNamespace(string clrNamespace)
 		{
@@ -202,8 +205,6 @@ namespace Portable.Xaml
 			return new XamlValueConverter<TConverterBase>(converterType, targetType);
 		}
 
-		Dictionary<Pair,XamlDirective> xaml_directives = new Dictionary<Pair,XamlDirective>();
-
 		public virtual XamlDirective GetXamlDirective(string xamlNamespace, string name)
 		{
 			XamlDirective t;
@@ -243,8 +244,6 @@ namespace Portable.Xaml
 				typeArgs[i] = GetXamlType(n.TypeArguments[i]);
 			return GetXamlType(n.Namespace, n.Name, typeArgs);
 		}
-
-		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
 
 		protected internal virtual XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
 		{
@@ -496,9 +495,6 @@ namespace Portable.Xaml
 				tfn += "`" + genArgs.Length;
 			return tfn;
 		}
-
-		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
-		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
 
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo)

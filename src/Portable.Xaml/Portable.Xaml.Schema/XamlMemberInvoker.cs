@@ -22,16 +22,31 @@
 //
 using System;
 using System.Reflection;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Portable.Xaml.Schema
 {
 	public class XamlMemberInvoker
 	{
 		static readonly XamlMemberInvoker unknown = new XamlMemberInvoker();
+		Type _targetType;
+		Type _propertyType;
+		Func<object, object> getDelegate;
+		Action<object, object> setDelegate;
 
 		public static XamlMemberInvoker UnknownInvoker => unknown;
+
+		[EnhancedXaml]
+		protected XamlMember Member { get; }
+
+		public MethodInfo UnderlyingGetter => Member?.UnderlyingGetter;
+
+		public MethodInfo UnderlyingSetter => Member?.UnderlyingSetter;
+
+		Type TargetType => _targetType ?? (_targetType = Member.TargetType.UnderlyingType);
+
+		Type PropertyType => _propertyType ?? (_propertyType = Member.Type.UnderlyingType);
 
 		protected XamlMemberInvoker()
 		{
@@ -44,49 +59,44 @@ namespace Portable.Xaml.Schema
 			Member = member;
 		}
 
-		[EnhancedXaml]
-		protected XamlMember Member { get; }
-
-		public MethodInfo UnderlyingGetter => Member?.UnderlyingGetter;
-
-		public MethodInfo UnderlyingSetter => Member?.UnderlyingSetter;
-
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		void ThrowIfUnknownOrDirective()
-		{
-			if (Member == null)
-				throw new NotSupportedException("Current operation is invalid for unknown member.");
-			if (Member.IsDirective)
-				throw new NotSupportedException($"not supported operation on directive member {Member}");
-		}
-
 		public virtual object GetValue(object instance)
 		{
 			if (instance == null)
 				throw new ArgumentNullException(nameof(instance));
 
-#if USE_EXPRESSIONS
 			if (getDelegate != null)
+			{
+				// all checks already done
 				return getDelegate(instance);
+			}
 
-			ThrowIfUnknownOrDirective();
+			if (Member == null)
+				throw new NotSupportedException("Current operation is invalid for unknown member.");
+
+			if (Member.IsDirective)
+				throw new NotSupportedException($"not supported operation on directive member {Member}");
+
 			var getter = UnderlyingGetter;
 			if (getter == null)
 				throw new NotSupportedException($"Attempt to get value from write-only property or event {Member}");
 
-			getDelegate = getter.BuildGetExpression();
+			var mode = Member.SchemaContext.InvokerOptions;
+			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
+			{
+				getDelegate = i => getter.Invoke(i, null);
+				Task.Factory.StartNew(() => getDelegate = getter.BuildGetExpression());
+			}
+			else if (mode.HasFlag(XamlInvokerOptions.Compile))
+			{
+				getDelegate = getter.BuildGetExpression();
+			}
+			else
+			{
+				getDelegate = i => getter.Invoke(i, null);
+			}
+
 
 			return getDelegate(instance);
-#else
-			ThrowIfUnknownOrDirective();
-			var getter = UnderlyingGetter;
-			if (getter == null)
-				throw new NotSupportedException($"Attempt to get value from write-only property or event {Member}");
-
-			return getter.Invoke(instance, null);
-#endif
 		}
 
 		public virtual void SetValue(object instance, object value)
@@ -94,36 +104,48 @@ namespace Portable.Xaml.Schema
 			if (instance == null)
 				throw new ArgumentNullException(nameof(instance));
 
-#if USE_EXPRESSIONS
 			if (setDelegate != null)
 			{
+				// all checks already done
 				setDelegate(instance, value);
 				return;
 			}
 
-			ThrowIfUnknownOrDirective();
-			var setter = UnderlyingSetter;
-			if (setter == null)
-				throw new NotSupportedException($"Attempt to set value from read-only property {Member}");
-			setDelegate = setter.BuildSetExpression();
-				setDelegate(instance, value);
-#else
-			ThrowIfUnknownOrDirective();
+			if (Member == null)
+				throw new NotSupportedException("Current operation is invalid for unknown member.");
+
+			if (Member.IsDirective)
+				throw new NotSupportedException($"not supported operation on directive member {Member}");
+
 			var setter = UnderlyingSetter;
 			if (setter == null)
 				throw new NotSupportedException($"Attempt to set value from read-only property {Member}");
 
-			if (Member.IsAttachable)
-				setter.Invoke(null, new object [] { instance, value });
+			var mode = Member.SchemaContext.InvokerOptions;
+			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
+			{
+				CreateSetDelegate(setter);
+				Task.Factory.StartNew(() => setDelegate = setter.BuildCallExpression());
+			}
+			else if (mode.HasFlag(XamlInvokerOptions.Compile))
+			{
+				setDelegate = setter.BuildCallExpression();
+			}
 			else
-				setter.Invoke(instance, new object[] { value });
-#endif
+			{
+				CreateSetDelegate(setter);
+			}
+
+			setDelegate(instance, value);
 		}
 
-#if USE_EXPRESSIONS
-		Func<object, object> getDelegate;
-		Action<object, object> setDelegate;
-#endif
+		void CreateSetDelegate(MethodInfo setter)
+		{
+			if (Member.IsAttachable)
+				setDelegate = (i, v) => setter.Invoke(null, new object[] { i, v });
+			else
+				setDelegate = (i, v) => setter.Invoke(i, new object[] { v });
+		}
 
 		public virtual ShouldSerializeResult ShouldSerializeValue(object instance)
 		{

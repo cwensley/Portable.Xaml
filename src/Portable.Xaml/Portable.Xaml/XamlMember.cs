@@ -64,6 +64,8 @@ namespace Portable.Xaml
 		ReferenceValue<ICustomAttributeProvider> customAttributeProvider;
 		ReferenceValue<XamlValueConverter<XamlDeferringLoader>> deferringLoader;
 
+		internal XamlSchemaContext SchemaContext => context; // should we expose this as public?
+
 		public XamlMember(EventInfo eventInfo, XamlSchemaContext schemaContext)
 			: this(eventInfo, schemaContext, null)
 		{

@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\artifacts\pcl259\Debug</OutputPath>
-    <DefineConstants>DEBUG;PCL;MONO;PCL259;USE_EXPRESSIONS</DefineConstants>
+    <DefineConstants>DEBUG;PCL;MONO;PCL259</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -30,7 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>PCL;MONO;PCL259;USE_EXPRESSIONS</DefineConstants>
+    <DefineConstants>PCL;MONO;PCL259</DefineConstants>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
