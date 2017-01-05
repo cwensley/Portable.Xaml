@@ -49,12 +49,13 @@ Portable.Xaml's performance has also been drastically improved over mono's initi
 Here's some results using [BenchmarkDotNet](http://benchmarkdotnet.org):
 
 ### Load
-Method |          Mean |     StdDev | Scaled | Scaled-StdDev | Allocated |
--------------------- |-------------- |----------- |------- |-------------- |---------- |
-        PortableXaml |   726.6193 us | 28.2493 us |   1.00 |          0.00 |  72.23 kB |
-          SystemXaml | 1,330.3755 us | 31.5314 us |   1.83 |          0.08 | 155.19 kB |
- PortableXamlNoCache | 1,598.9083 us | 22.4152 us |   2.20 |          0.09 | 129.89 kB |
-   SystemXamlNoCache | 1,899.0161 us | 90.5633 us |   2.62 |          0.16 | 187.14 kB |
+Method |          Mean |      StdDev | Scaled | Scaled-StdDev |    Gen 0 | Allocated |
+-------------------- |-------------- |------------ |------- |-------------- |--------- |---------- |
+        PortableXaml |   691.6986 us |   9.8060 us |   1.00 |          0.00 |        - |  72.21 kB |
+          SystemXaml | 1,289.9520 us |   5.8708 us |   1.87 |          0.03 |        - | 155.19 kB |
+ PortableXamlNoCache | 1,603.6102 us |  10.8539 us |   2.32 |          0.03 |        - | 130.45 kB |
+   SystemXamlNoCache | 1,859.4895 us |  34.3770 us |   2.69 |          0.06 |        - | 188.29 kB |
+            OmniXaml | 8,505.1863 us | 158.3414 us |  12.30 |          0.28 | 164.5833 |   1.73 MB |
 
 ### Save
 Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |

@@ -19,7 +19,7 @@ namespace Portable.Xaml.Benchmark
 		[Benchmark(Baseline = true)]
 		public void PortableXaml()
 		{
-			pxc = pxc ?? (pxc = new XamlSchemaContext());
+			pxc = pxc ?? new XamlSchemaContext();
 			using (var stream = GetStream())
 				Portable.Xaml.XamlServices.Load(new Portable.Xaml.XamlXmlReader(stream, pxc));
 		}
@@ -28,7 +28,7 @@ namespace Portable.Xaml.Benchmark
 		[Benchmark]
 		public void SystemXaml()
 		{
-			sxc = sxc ?? (sxc = new System.Xaml.XamlSchemaContext());
+			sxc = sxc ?? new System.Xaml.XamlSchemaContext();
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(new System.Xaml.XamlXmlReader(stream, sxc));
 		}
@@ -45,6 +45,16 @@ namespace Portable.Xaml.Benchmark
 		{
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(stream);
+		}
+
+		OmniXaml.Services.XamlLoader loader;
+		[Benchmark]
+		public void OmniXamlBenchmark()
+		{
+			loader = loader ?? new OmniXaml.Services.XamlLoader(AppDomain.CurrentDomain.GetAssemblies());
+
+			using (var stream = new StreamReader(GetStream()))
+				loader.Load(stream.ReadToEnd());
 		}
 	}
 }
