@@ -738,17 +738,17 @@ namespace MonoTests.Portable.Xaml
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			//Console.Error.WriteLine ("### {0}:{1}", sourceType, context);
-			ValueSerializerContextTest.Context = (IValueSerializerContext)context;
+			ValueSerializerContextTest.RunCanConvertFromTest(context, sourceType);
 			return true;
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object source)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			//Console.Error.WriteLine ("##### {0}:{1}", source, context);
-			ValueSerializerContextTest.Provider = (IServiceProvider)context;
+			ValueSerializerContextTest.RunConvertFromTest(context, culture, value);
 			//var sp = context as IServiceProvider;
 			// ValueSerializerContextTest.Context = (IValueSerializerContext) context; -> causes InvalidCastException
-			if ((source as string) == "v")
+			if ((value as string) == "v")
 				return new TestValueSerialized();
 			throw new Exception("huh");
 		}
@@ -756,8 +756,19 @@ namespace MonoTests.Portable.Xaml
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
 			//Console.Error.WriteLine ("$$$ {0}:{1}", destinationType, context);
-			ValueSerializerContextTest.Context = (IValueSerializerContext)context;
-			return destinationType != typeof(MarkupExtension);
+			if (destinationType != typeof(MarkupExtension))
+			{
+				ValueSerializerContextTest.RunCanConvertToTest(context, destinationType);
+				return true;
+			}
+			return false;
+		}
+
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			ValueSerializerContextTest.RunConvertToTest(context, culture, value, destinationType);
+
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 	}
 
@@ -1486,7 +1497,22 @@ namespace MonoTests.Portable.Xaml
 		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
 	}
 
-	#endif
+#endif
+
+	public class NumericValues
+	{
+		public double DoubleValue { get; set; }
+
+		public decimal DecimalValue { get; set; }
+
+		public float FloatValue { get; set; }
+
+		public byte ByteValue { get; set; }
+
+		public int IntValue { get; set; }
+
+		public long LongValue { get; set; }
+	}
 }
 
 namespace XamlTest
@@ -1565,6 +1591,16 @@ namespace SecondTest
 
 	public class CustomTypeConverterBase : TypeConverter
 	{
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			return base.ConvertTo(context, culture, value, destinationType);
+		}
+
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			return base.ConvertFrom(context, culture, value);
+		}
+
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			if (sourceType == typeof(string))

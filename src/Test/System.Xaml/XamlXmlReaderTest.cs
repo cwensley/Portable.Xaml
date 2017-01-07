@@ -900,5 +900,70 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsInstanceOf<TestClass1> (obj, "#2");
 			});
 		}
+
+		[Test]
+		public void Read_NumericValues()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(123.456, obj.DoubleValue, "#2");
+			Assert.AreEqual(234.567M, obj.DecimalValue, "#3");
+			Assert.AreEqual(345.678f, obj.FloatValue, "#4");
+			Assert.AreEqual(123, obj.ByteValue, "#5");
+			Assert.AreEqual(123456, obj.IntValue, "#6");
+			Assert.AreEqual(234567, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_Max()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_Max.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.MaxValue, obj.DoubleValue, "#2");
+			Assert.AreEqual(decimal.MaxValue, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.MaxValue, obj.FloatValue, "#4");
+			Assert.AreEqual(byte.MaxValue, obj.ByteValue, "#5");
+			Assert.AreEqual(int.MaxValue, obj.IntValue, "#6");
+			Assert.AreEqual(long.MaxValue, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_PositiveInfinity()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_PositiveInfinity.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.PositiveInfinity, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.PositiveInfinity, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_NegativeInfinity()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_NegativeInfinity.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.NegativeInfinity, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.NegativeInfinity, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_NaN()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_NaN.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.NaN, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.NaN, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
 	}
 }

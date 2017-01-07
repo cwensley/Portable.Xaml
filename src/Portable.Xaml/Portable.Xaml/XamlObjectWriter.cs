@@ -277,7 +277,7 @@ namespace Portable.Xaml
 	}
 
 	// specific implementation
-	class XamlObjectWriterInternal : XamlWriterInternalBase
+	class XamlObjectWriterInternal : XamlWriterInternalBase, IXamlObjectWriterFactory
 	{
 		const string Xmlns2000Namespace = "http://www.w3.org/2000/xmlns/";
 
@@ -600,8 +600,8 @@ namespace Portable.Xaml
 			var xtc = xm?.TypeConverter ?? xt.TypeConverter;
 			if (xtc != null && value != null) {
 				var tc = xtc.ConverterInstance;
-				if (tc != null && tc.CanConvertFrom (value.GetType ()))
-					value = tc.ConvertFrom (service_provider, null, value);
+				if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
+					value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
 				return value;
 			}
 
@@ -614,7 +614,7 @@ namespace Portable.Xaml
 			return sctx.GetXamlType (XamlTypeName.Parse (name, nsr));
 		}
 
-		bool IsAllowedType (XamlType xt, object value)
+		static bool IsAllowedType (XamlType xt, object value)
 		{
 			return  xt == null ||
 				xt.UnderlyingType == null ||
@@ -740,6 +740,16 @@ namespace Portable.Xaml
 			}
 			if (setValue)
 				manager.Value();
+		}
+
+		public XamlObjectWriterSettings GetParentSettings()
+		{
+			return source.Settings;
+		}
+
+		public XamlObjectWriter GetXamlObjectWriter(XamlObjectWriterSettings settings)
+		{
+			return new XamlObjectWriter(sctx, settings);
 		}
 	}
 }
