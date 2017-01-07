@@ -46,8 +46,9 @@ namespace Portable.Xaml
 		IProvideValueTarget provideValue;
 		IRootObjectProvider rootProvider;
 		IDestinationTypeProvider destinationProvider;
+		IXamlObjectWriterFactory objectWriterFactory;
 
-		public ValueSerializerContext (PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider)
+		public ValueSerializerContext (PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
 		{
 			if (prefixLookup == null)
 				throw new ArgumentNullException ("prefixLookup");
@@ -61,6 +62,7 @@ namespace Portable.Xaml
 			this.provideValue = provideValue;
 			this.rootProvider = rootProvider;
 			this.destinationProvider = destinationProvider;
+			this.objectWriterFactory = objectWriterFactory;
 		}
 
 		public object GetService (Type serviceType)
@@ -85,6 +87,8 @@ namespace Portable.Xaml
 				return rootProvider;
 			if (serviceType == typeof(IDestinationTypeProvider))
 				return destinationProvider;
+			if (serviceType == typeof(IXamlObjectWriterFactory))
+				return objectWriterFactory;
 			return null;
 		}
 		

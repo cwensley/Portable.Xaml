@@ -1084,6 +1084,70 @@ namespace MonoTests.Portable.Xaml
 			var obj = new NullableContainer () { TestProp = 5 };
 			Assert.AreEqual (ReadXml ("NullableContainer.xml").Trim (), XamlServices.Save (obj), "#1");
 		}
+
+		[Test]
+		public void Write_NumericValues()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = 123.456,
+				DecimalValue = 234.567M,
+				FloatValue = 345.678f,
+				ByteValue = 123,
+				IntValue = 123456,
+				LongValue = 234567
+			};
+			Assert.AreEqual(ReadXml("NumericValues.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_Max()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.MaxValue,
+				DecimalValue = decimal.MaxValue,
+				FloatValue = float.MaxValue,
+				ByteValue = byte.MaxValue,
+				IntValue = int.MaxValue,
+				LongValue = long.MaxValue
+			};
+			Assert.AreEqual(ReadXml("NumericValues_Max.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_PositiveInfinity()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.PositiveInfinity,
+				FloatValue = float.PositiveInfinity
+			};
+			Assert.AreEqual(ReadXml("NumericValues_PositiveInfinity.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_NegativeInfinity()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.NegativeInfinity,
+				FloatValue = float.NegativeInfinity
+			};
+			Assert.AreEqual(ReadXml("NumericValues_NegativeInfinity.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_NaN()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.NaN,
+				FloatValue = float.NaN
+			};
+			Assert.AreEqual(ReadXml("NumericValues_NaN.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
 	}
 
 	public class TestXmlWriterClass1

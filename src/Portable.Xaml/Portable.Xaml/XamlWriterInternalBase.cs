@@ -48,7 +48,7 @@ namespace Portable.Xaml
 			this.sctx = schemaContext;
 			this.manager = manager;
 			var p = new PrefixLookup (sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
-			service_provider = new ValueSerializerContext (p, schemaContext, this, this, this, this);
+			service_provider = new ValueSerializerContext (p, schemaContext, this, this, this, this, this as IXamlObjectWriterFactory);
 		}
 
 		internal XamlSchemaContext sctx;
