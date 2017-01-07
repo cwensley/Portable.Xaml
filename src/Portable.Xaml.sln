@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-net_4_5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml.Benchmark", "Portable.Xaml.Benchmark\Portable.Xaml.Benchmark.csproj", "{AC406459-D324-4ADF-853D-A58B63396591}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml.Roslyn", "Portable.Xaml.Roslyn\Portable.Xaml.Roslyn.csproj", "{65569529-AECB-4163-A0A9-290A93AD25F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRoslyn", "TestRoslyn\TestRoslyn.csproj", "{0F971C04-6D97-43B4-9559-9C0494894754}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{AC406459-D324-4ADF-853D-A58B63396591}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC406459-D324-4ADF-853D-A58B63396591}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC406459-D324-4ADF-853D-A58B63396591}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65569529-AECB-4163-A0A9-290A93AD25F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65569529-AECB-4163-A0A9-290A93AD25F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65569529-AECB-4163-A0A9-290A93AD25F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65569529-AECB-4163-A0A9-290A93AD25F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F971C04-6D97-43B4-9559-9C0494894754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F971C04-6D97-43B4-9559-9C0494894754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F971C04-6D97-43B4-9559-9C0494894754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F971C04-6D97-43B4-9559-9C0494894754}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
