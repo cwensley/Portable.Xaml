@@ -95,35 +95,84 @@ namespace Portable.Xaml
 		{
 		}
 
-		public XamlXmlReader (Stream stream, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (stream), schemaContext, settings)
+		public XamlXmlReader(Stream stream, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
+			Initialize(CreateReader(stream, settings), schemaContext, settings);
 		}
 
-		#if PCL136
-		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+#if PCL136
+		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
-			throw new NotSupportedException ("Cannot load directly from a file with this profile");
+			throw new NotSupportedException("Cannot load directly from a file with this profile");
 		}
-		#else
-		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings () { CloseInput =true };
+#else
+		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings { CloseInput = true };
 
-		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (fileName, file_reader_settings), schemaContext, settings)
+		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
-		}
-		#endif
-
-		public XamlXmlReader (TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (textReader), schemaContext, settings)
-		{
+			Initialize(CreateReader(fileName, settings), schemaContext, settings);
 		}
 
-		public XamlXmlReader (XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		static XmlReader CreateReader(string fileName, XamlXmlReaderSettings settings)
 		{
-			parser = new XamlXmlParser (xmlReader, schemaContext, settings);
+			return CreateReader(XmlReader.Create(fileName, CreateReaderSettings(settings, closeInput: true)), settings);
 		}
-		
+#endif
+
+		public XamlXmlReader(TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			Initialize(CreateReader(textReader, settings), schemaContext, settings);
+		}
+
+		public XamlXmlReader(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			Initialize(CreateReader(xmlReader, settings), schemaContext, settings);
+		}
+
+		void Initialize(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			parser = new XamlXmlParser(xmlReader, schemaContext, settings);
+		}
+
+		static XmlReader CreateReader(Stream stream, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(stream, CreateReaderSettings(settings));
+			
+			return XmlReader.Create(stream, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReader CreateReader(TextReader reader, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(reader, CreateReaderSettings(settings));
+			
+			return XmlReader.Create(reader, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReader CreateReader(XmlReader xmlReader, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(xmlReader, CreateReaderSettings(settings));
+
+			// need to read from a TextReader to load a fragment, so we copy the xml of the current reader
+			xmlReader.Read();
+			var reader = new StringReader(xmlReader.ReadOuterXml());
+			return XmlReader.Create(reader, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReaderSettings CreateReaderSettings(XamlXmlReaderSettings settings, ConformanceLevel conformance = ConformanceLevel.Document, bool? closeInput = null)
+		{
+			return new XmlReaderSettings
+			{
+				CloseInput = closeInput ?? settings?.CloseInput ?? false,
+				IgnoreComments = true,
+				IgnoreProcessingInstructions = true,
+				IgnoreWhitespace = true,
+				ConformanceLevel = conformance
+			};
+		}
+
 		#endregion
 
 		XamlXmlParser parser;
@@ -206,28 +255,22 @@ namespace Portable.Xaml
 	
 	class XamlXmlParser
 	{
-		public XamlXmlParser (XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		static XamlXmlReaderSettings default_settings = new XamlXmlReaderSettings();
+		public XamlXmlParser(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
 			if (xmlReader == null)
-				throw new ArgumentNullException ("xmlReader");
+				throw new ArgumentNullException(nameof(xmlReader));
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
+				throw new ArgumentNullException(nameof(schemaContext));
 
 			sctx = schemaContext;
-			this.settings = settings ?? new XamlXmlReaderSettings ();
+			this.settings = settings ?? default_settings;
 
-			// filter out some nodes.
-			var xrs = new XmlReaderSettings () {
-				CloseInput = this.settings.CloseInput,
-				IgnoreComments = true,
-				IgnoreProcessingInstructions = true,
-				IgnoreWhitespace = true };
-
-			r = XmlReader.Create (xmlReader, xrs);
+			r = xmlReader;
 			line_info = r as IXmlLineInfo;
-			xaml_namespace_resolver = new NamespaceResolver (r as IXmlNamespaceResolver);
+			xaml_namespace_resolver = new NamespaceResolver(r as IXmlNamespaceResolver);
 		}
-		
+
 		XmlReader r;
 		IXmlLineInfo line_info;
 		XamlSchemaContext sctx;

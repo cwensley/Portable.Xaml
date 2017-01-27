@@ -76,6 +76,8 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	public class NamespaceTestClass
 	{
 		public string Foo { get; set; }
+
+		public string Bar { get; set; }
 	}
 
 	public abstract class AbstractObject

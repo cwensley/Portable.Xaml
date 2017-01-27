@@ -50,17 +50,17 @@ namespace MonoTests.Portable.Xaml
 	{
 		// read test
 
-		XamlReader GetReader(string filename)
+		XamlReader GetReader(string filename, XamlXmlReaderSettings settings = null)
 		{
-			string xml = File.ReadAllText(Compat.GetTestFile (filename)).UpdateXml();
-			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)));
+			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
+			return new XamlXmlReader(new StringReader(xml), new XamlSchemaContext(), settings);
 		}
-		
-		void ReadTest (string filename)
+
+		void ReadTest(string filename)
 		{
-			var r = GetReader (filename);
+			var r = GetReader(filename);
 			while (!r.IsEof)
-				r.Read ();
+				r.Read();
 		}
 
 		[Test]
@@ -964,6 +964,38 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(0, obj.ByteValue, "#5");
 			Assert.AreEqual(0, obj.IntValue, "#6");
 			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_DefaultNamespaces_ClrNamespace()
+		{
+#if PCL
+			var settings = new XamlXmlReaderSettings();
+			settings.AddNamespace(null, Compat.TestAssemblyNamespace);
+			settings.AddNamespace("x", XamlLanguage.Xaml2006Namespace);
+			var obj = (TestClass5)XamlServices.Load(GetReader("DefaultNamespaces.xml", settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(obj.Bar, "Hello");
+			Assert.AreEqual(obj.Baz, null);
+#else
+			Assert.Ignore("Not supported in System.Xaml");
+#endif
+		}
+
+		[Test]
+		public void Read_DefaultNamespaces_WithDefinedNamespace()
+		{
+#if PCL
+			var settings = new XamlXmlReaderSettings();
+			settings.AddNamespace(null, "urn:mono-test");
+			settings.AddNamespace("x", "urn:mono-test2");
+			var obj = (NamespaceTest.NamespaceTestClass)XamlServices.Load(GetReader("DefaultNamespaces_WithDefinedNamespace.xml", settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(obj.Foo, "Hello");
+			Assert.AreEqual(obj.Bar, null);
+#else
+			Assert.Ignore("Not supported in System.Xaml");
+#endif
 		}
 	}
 }
