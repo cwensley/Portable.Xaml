@@ -43,37 +43,53 @@ namespace MonoTests.Portable.Xaml
 	public class XamlXmlReaderSettingsTest
 	{
 		[Test]
-		public void DefaultValues ()
+		public void DefaultValues()
 		{
-			var s = new XamlXmlReaderSettings ();
-			Assert.IsFalse (s.CloseInput, "#1");
-			Assert.IsFalse (s.SkipXmlCompatibilityProcessing, "#2");
-			Assert.IsNull (s.XmlLang, "#3");
-			Assert.IsFalse (s.XmlSpacePreserve, "#4");
+			var s = new XamlXmlReaderSettings();
+			Assert.IsFalse(s.CloseInput, "#1");
+			Assert.IsFalse(s.SkipXmlCompatibilityProcessing, "#2");
+			Assert.IsNull(s.XmlLang, "#3");
+			Assert.IsFalse(s.XmlSpacePreserve, "#4");
 		}
 
 		[Test]
-		public void CopyConstructorNull ()
+		public void CopyConstructorNull()
 		{
-			new XamlXmlReaderSettings (null);
+			new XamlXmlReaderSettings(null);
 		}
 
 		[Test]
-		public void CopyConstructor ()
+		public void CopyConstructor()
 		{
-			var s = new XamlXmlReaderSettings ();
+			var s = new XamlXmlReaderSettings();
 			s.CloseInput = true;
 			s.SkipXmlCompatibilityProcessing = true;
 			s.XmlLang = "ja-JP";
 			s.XmlSpacePreserve = true;
 
-			s = new XamlXmlReaderSettings (s);
+			s = new XamlXmlReaderSettings(s);
 
 			// .NET fails to copy this value.
 			//Assert.IsTrue (s.CloseInput, "#1");
-			Assert.IsTrue (s.SkipXmlCompatibilityProcessing, "#2");
-			Assert.AreEqual ("ja-JP", s.XmlLang, "#3");
-			Assert.IsTrue (s.XmlSpacePreserve, "#4");
+			Assert.IsTrue(s.SkipXmlCompatibilityProcessing, "#2");
+			Assert.AreEqual("ja-JP", s.XmlLang, "#3");
+			Assert.IsTrue(s.XmlSpacePreserve, "#4");
+		}
+
+		[Test]
+		public void DefaultNamespaceFromAttributes()
+		{
+#if PCL
+			var s = new XamlXmlReaderSettings();
+			s.AddNamespaces(GetType());
+			var testNamespaces = new Dictionary<string, string>
+			{
+				{ "test", "http://schemas.example.com/test" }
+			};
+			CollectionAssert.AreEquivalent(s.DefaultNamespaces, testNamespaces);
+#else
+			Assert.Ignore("Not supported in System.Xaml");
+#endif
 		}
 	}
 }
