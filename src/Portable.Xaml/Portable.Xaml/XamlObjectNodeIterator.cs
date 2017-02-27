@@ -132,7 +132,7 @@ namespace Portable.Xaml
 				}
 
 				// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
-				if (!partOfPositionalParameters && xm.DefaultValue != null && Equals(xm.DefaultValue.Value, val))
+				if (!partOfPositionalParameters && xm.Invoker.IsDefaultValue(val))
 					yield break;
 
 				// overrideMemberType is (so far) used for XamlLanguage.Key.

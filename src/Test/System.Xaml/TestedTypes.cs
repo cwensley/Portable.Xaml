@@ -53,22 +53,22 @@ using System.Xaml.Schema;
 #endif
 
 [assembly: XmlnsDefinition("http://www.domain.com/path", "XamlTest")]
- // bug #680385
+// bug #680385
 [assembly: XmlnsDefinition("http://www.domain.com/path", "SecondTest")]
- // bug #681045, same xmlns key for different clrns.
+// bug #681045, same xmlns key for different clrns.
 
 [assembly: XmlnsDefinition("http://schemas.example.com/test", "XamarinBug3003")]
- // bug #3003
+// bug #3003
 [assembly: XmlnsPrefix("http://schemas.example.com/test", "test")]
- // bug #3003
+// bug #3003
 
-[assembly:XmlnsDefinition("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
-[assembly:XmlnsDefinition("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
+[assembly: XmlnsDefinition("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
+[assembly: XmlnsDefinition("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
 
 // comment out the following to get mono's System.Xaml to go further in the tests
 [assembly: XmlnsDefinition("urn:bar", "MonoTests.Portable.Xaml.NamespaceTest")]
 
-[assembly:XmlnsCompatibleWith("urn:foo", "urn:bar")]
+[assembly: XmlnsCompatibleWith("urn:foo", "urn:bar")]
 [assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
 namespace MonoTests.Portable.Xaml.NamespaceTest
@@ -90,10 +90,10 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 		public override string Foo { get; set; }
 	}
 
-	[ContentProperty ("Contents")]
+	[ContentProperty("Contents")]
 	public class CustomGenericType<T>
 	{
-		public List<T> Contents { get; } = new List<T> ();
+		public List<T> Contents { get; } = new List<T>();
 	}
 }
 
@@ -117,9 +117,9 @@ namespace MonoTests.Portable.Xaml
 
 	[ContentProperty("Contents")]
 	public class CustomGenericType<T>
-		where T: struct
+		where T : struct
 	{
-		public List<T> Contents { get; } = new List<T> ();
+		public List<T> Contents { get; } = new List<T>();
 	}
 
 	public class ArgumentNonAttributed
@@ -141,12 +141,12 @@ namespace MonoTests.Portable.Xaml
 
 		public string StringArg { get; private set; }
 
-		public ArgumentMultipleTypes (int arg1)
+		public ArgumentMultipleTypes(int arg1)
 		{
 			IntArg = arg1;
 		}
 
-		public ArgumentMultipleTypes (string arg1)
+		public ArgumentMultipleTypes(string arg1)
 		{
 			StringArg = arg1;
 		}
@@ -157,7 +157,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		public int IntArg { get; private set; }
 
-		public ArgumentWithIntConstructor (int arg1)
+		public ArgumentWithIntConstructor(int arg1)
 		{
 			IntArg = arg1;
 		}
@@ -213,7 +213,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		public string Foo { get; set; }
 	}
-	
+
 	//[MarkupExtensionReturnType (typeof (Array))]
 	//[ContentProperty ("Items")]  ... so, these attributes do not affect XamlObjectReader.
 	public class MyArrayExtension : MarkupExtension
@@ -679,13 +679,13 @@ namespace MonoTests.Portable.Xaml
 	{
 		public XData Markup { get; set; }
 	}
-	
+
 	// FIXME: test it with XamlXmlReader (needs to create xml first)
 	public class EventContainer
 	{
-		#pragma warning disable 67
+#pragma warning disable 67
 		public event Action Run;
-		#pragma warning restore 67
+#pragma warning restore 67
 	}
 
 	public class NamedItem
@@ -723,6 +723,15 @@ namespace MonoTests.Portable.Xaml
 		public string ItemName { get; set; }
 
 		public IList<NamedItem2> References { get; private set; }
+	}
+
+	public class NamedItem3 : NamedItem2
+	{
+		public NamedItem2 Other { get; set; }
+
+#if !PCL136
+		public ImmutableArray<NamedItem3> ImmutableReferences { get; set; }
+#endif
 	}
 
 	[TypeConverter(typeof(TestValueConverter))]

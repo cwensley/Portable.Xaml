@@ -364,16 +364,34 @@ namespace Portable.Xaml
 				source.OnAfterProperties (obj);
 			
 			var nfr = obj as NameFixupRequired;
-			if (nfr != null && object_states.Count > 0) { // IF the root object to be written is x:Reference, then the Result property will become the NameFixupRequired. That's what .NET also does.
+			if (nfr != null && object_states.Count > 0)
+			{
+				// IF the root object to be written is x:Reference, then the Result property will become the NameFixupRequired. That's what .NET also does.
 				// actually .NET seems to seek "parent" object in its own IXamlNameResolver implementation.
-				var pstate = object_states.Peek ();
-				nfr.ParentType = pstate.Type;
-				nfr.ParentMember = CurrentMember; // Note that it is a member of the pstate.
-				nfr.ParentValue = pstate.Value;
-				pending_name_references.Add ((NameFixupRequired) obj);
+				nfr.State = object_states.Peek();
+				nfr.MemberState = nfr.State.CurrentMemberState;
+
+				if (nfr.Type.IsCollection && !nfr.Type.IsDictionary && nfr.Value is IList)
+				{
+					// ensure the collection is in the same order as in xaml, so add a null in place
+					// and we will replace it later
+					var list = (IList)nfr.Value;
+					nfr.ListIndex = list.Count;
+					list.Add(null);
+				}
+
+				if (nfr.Type.IsImmutable && object_states.Count > 0)
+				{
+					// if it's immutable, we need to set the parent member after getting the real value
+					object_states.Pop();
+					nfr.ParentState = object_states.Peek();
+					nfr.ParentMemberState = nfr.ParentState.CurrentMemberState;
+					object_states.Push(nfr.State);
+				}
+				pending_name_references.Add((NameFixupRequired)obj);
 			}
 			else
-				StoreAppropriatelyTypedValue (obj, state.KeyValue);
+				StoreAppropriatelyTypedValue(obj, state.KeyValue);
 			
 			HandleEndInit (obj);
 			
@@ -501,35 +519,38 @@ namespace Portable.Xaml
 		{
 			// nothing to do here.
 		}
-		
-		void StoreAppropriatelyTypedValue (object obj, object keyObj)
+
+		void StoreAppropriatelyTypedValue(object obj, object keyObj)
 		{
-			var ms = CurrentMemberState; // note that this retrieves parent's current property for EndObject.
-			if (ms != null) {
-				var state = object_states.Peek ();
-				var parent = state.Value;
-				var xt = state.Type;
-				var xm = ms.Member;
-				if (xm == XamlLanguage.Initialization) {
-					state.Value = GetCorrectlyTypedValue (null, xt, obj);
-					state.IsInstantiated = true;
-				} else if (xm.Type.IsXData) {
-					var xdata = (XData) obj;
-					var ixser = xm.Invoker.GetValue (state.Value) as IXmlSerializable;
-					if (ixser != null)
-						ixser.ReadXml ((XmlReader) xdata.XmlReader);
-				}
-				else if (xm == XamlLanguage.Base)
-					ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
-				else if (xm == XamlLanguage.Name || xm == xt.GetAliasedProperty (XamlLanguage.Name))
-					ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
-				else if (xm == XamlLanguage.Key)
-					state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
-				else {
-					if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
-						if (!xm.IsReadOnly || xm.IsConstructorArgument)
-							ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
-					}
+			var ms = CurrentMemberState;
+			if (ms != null)
+				StoreAppropriatelyTypedValue(object_states.Peek(), ms, obj, keyObj);
+		}
+
+		void StoreAppropriatelyTypedValue (ObjectState state, MemberAndValue ms, object obj, object keyObj)
+		{
+			var parent = state.Value;
+			var xt = state.Type;
+			var xm = ms.Member;
+			if (xm == XamlLanguage.Initialization) {
+				state.Value = GetCorrectlyTypedValue (null, xt, obj);
+				state.IsInstantiated = true;
+			} else if (xm.Type.IsXData) {
+				var xdata = (XData) obj;
+				var ixser = xm.Invoker.GetValue (state.Value) as IXmlSerializable;
+				if (ixser != null)
+					ixser.ReadXml ((XmlReader) xdata.XmlReader);
+			}
+			else if (xm == XamlLanguage.Base)
+				ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
+			else if (xm == XamlLanguage.Name || xm == xt.GetAliasedProperty (XamlLanguage.Name))
+				ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
+			else if (xm == XamlLanguage.Key)
+				state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
+			else {
+				if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
+					if (!xm.IsReadOnly || xm.IsConstructorArgument)
+						ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
 				}
 			}
 		}
@@ -542,9 +563,9 @@ namespace Portable.Xaml
 			    xm == XamlLanguage.Arguments) {
 
 				if (xt.IsDictionary)
-					mt.Invoker.AddToDictionary (parent, GetCorrectlyTypedValue (null, xt.KeyType, keyObj), GetCorrectlyTypedValue (null, xt.ItemType, obj));
+					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
 				else // collection. Note that state.Type isn't usable for PositionalParameters to identify collection kind.
-					mt.Invoker.AddToCollection (parent, GetCorrectlyTypedValue (null, xt.ItemType, obj));
+					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj));
 				return true;
 			}
 			else
@@ -701,12 +722,27 @@ namespace Portable.Xaml
 					var obj = name_scope.FindName (name) ?? name_resolver.Resolve (name, out isFullyInitialized);
 					if (obj == null)
 						throw new XamlObjectWriterException (String.Format ("Unresolved object reference '{0}' was found", name));
-					if (!AddToCollectionIfAppropriate (fixup.ParentType, fixup.ParentMember, fixup.ParentValue, obj, null)) // FIXME: is keyObj always null?
-						SetValue (fixup.ParentMember, fixup.ParentValue, obj);
+
+					if (fixup.ListIndex != null)
+						((IList)fixup.Value)[fixup.ListIndex.Value] = obj;
+					else if (!AddToCollectionIfAppropriate(fixup.Type, fixup.Member, fixup.Value, obj, fixup.KeyValue))
+						SetValue(fixup.Member, fixup.Value, obj);
+				}
+			}
+
+			var handled_values = new HashSet<object>();
+			foreach (var fixup in pending_name_references)
+			{
+				if (fixup.Type.IsImmutable && !handled_values.Contains(fixup.Value))
+				{
+					var value = fixup.Type.Invoker.ToImmutable(fixup.Value);
+					SetValue(fixup.ParentMemberState.Member, fixup.ParentState.Value, value);
+
+					handled_values.Add(fixup.Value);
 				}
 			}
 		}
-		
+
 		void HandleBeginInit (object value)
 		{
 			var si = value as ISupportInitialize;

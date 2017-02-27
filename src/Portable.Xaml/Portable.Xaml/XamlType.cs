@@ -948,5 +948,20 @@ namespace Portable.Xaml
 				.ToList ();
 			return constructorArguments;
 		}
+
+		internal bool IsMutableDefault(object instance)
+		{
+			if (!IsImmutableCollection)
+				return false;
+			var isDefaultProperty = UnderlyingType?.GetRuntimeProperty("IsDefault");
+			if (isDefaultProperty != null)
+			{
+				var isDefault = isDefaultProperty.GetValue(instance, null) as bool?;
+				if (isDefault == true)
+					return true;
+			}
+			return false;
+		}
+
 	}
 }

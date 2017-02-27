@@ -374,7 +374,7 @@ namespace Portable.Xaml
 			if (object_states.Count == 1)
 				return true;
 			var tmp = object_states.Pop ();
-			var parentMember = object_states.Peek ().WrittenProperties.LastOrDefault ().Member;
+			var parentMember = object_states.Peek().CurrentMemberState?.Member;
 			object_states.Push (tmp);
 
 			return parentMember == XamlLanguage.Items;
