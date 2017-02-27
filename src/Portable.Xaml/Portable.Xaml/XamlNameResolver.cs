@@ -209,10 +209,17 @@ namespace Portable.Xaml
 			CanAssignDirectly = canAssignDirectly;
 			Names = names.ToArray ();
 		}
-		
-		public XamlType ParentType { get; set; }
-		public XamlMember ParentMember { get; set; }
-		public object ParentValue { get; set; }
+
+		public XamlWriterInternalBase.ObjectState ParentState { get; set; }
+		public XamlWriterInternalBase.MemberAndValue ParentMemberState { get; set; }
+		public XamlWriterInternalBase.ObjectState State { get; set; }
+		public XamlWriterInternalBase.MemberAndValue MemberState { get; set; }
+		public XamlType Type => State.Type;
+		public XamlMember Member => MemberState.Member;
+		public object Value => State.Value;
+		public object KeyValue => State.KeyValue;
+
+		public int? ListIndex { get; set; }
 
 		public bool CanAssignDirectly { get; set; }
 		public IList<string> Names { get; set; }

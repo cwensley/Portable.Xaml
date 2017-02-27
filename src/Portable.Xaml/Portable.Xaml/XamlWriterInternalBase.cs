@@ -78,6 +78,11 @@ namespace Portable.Xaml
 			public List<MemberAndValue> WrittenProperties = new List<MemberAndValue> ();
 			public bool IsInstantiated;
 			public bool IsXamlWriterCreated; // affects AfterProperties() calls.
+
+			public MemberAndValue CurrentMemberState
+			{
+				get { return WrittenProperties.Count > 0 ? WrittenProperties[WrittenProperties.Count - 1] : null; }
+			}
 		}
 
 		object IProvideValueTarget.TargetObject => object_states.Peek().Value;
@@ -131,20 +136,13 @@ namespace Portable.Xaml
 			{
 				if (object_states.Count > 0)
 				{
-					var properties = object_states.Peek().WrittenProperties;
-					if (properties.Count > 0)
-						return properties[properties.Count - 1];
+					return object_states.Peek().CurrentMemberState;
 				}
 				return null;
 			}
 		}
 
-		protected XamlMember CurrentMember {
-			get {
-				var mv = CurrentMemberState;
-				return mv != null ? mv.Member : null;
-			}
-		}
+		protected XamlMember CurrentMember => CurrentMemberState?.Member;
 
 		public void WriteGetObject ()
 		{

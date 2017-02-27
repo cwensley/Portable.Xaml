@@ -317,6 +317,11 @@ namespace Portable.Xaml.Schema
 		{
 			if (instance == null)
 				throw new ArgumentNullException (nameof(instance));
+
+			// cannot get enumerator of immutable collections
+			if (Type?.IsMutableDefault(instance) == true)
+				return Enumerable.Empty<object>().GetEnumerator();
+
 			return ((IEnumerable) instance).GetEnumerator ();
 		}
 	}

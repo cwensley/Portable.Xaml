@@ -151,5 +151,28 @@ namespace Portable.Xaml.Schema
 		{
 			throw new NotImplementedException();
 		}
+
+		/// <summary>
+		/// Gets a value indicating that the instance is considered the default value of the member.
+		/// </summary>
+		/// <remarks>
+		/// This uses the DefaultValueAttribute normally, but for immutable structs this is also useful to  define that 
+		/// the value is default.
+		/// 
+		/// E.g. for immutable collections, this uses the IsDefault property to determine if it should be written to xaml.
+		/// </remarks>
+		/// <returns><c>true</c>, if the instance is the default value, <c>false</c> otherwise.</returns>
+		/// <param name="instance">instance of the object to test if it is default.</param>
+		[EnhancedXaml]
+		public virtual bool IsDefaultValue(object instance)
+		{
+			if (Member == null)
+				return false;
+			if (Member.DefaultValue != null)
+				return Equals(Member.DefaultValue.Value, instance);
+			if (Member.Type?.IsMutableDefault(instance) == true)
+				return true;
+			return false;
+		}
 	}
 }
