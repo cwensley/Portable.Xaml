@@ -266,11 +266,22 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (typeof (TypeExtension), xt.UnderlyingType, "#2-2");
 		}
 
-		[Test]
-		public void GetTypeFromXamlTypeNameWithClrName ()
+		[TestCase(typeof(bool))]
+		[TestCase(typeof(byte))]
+		[TestCase(typeof(char))]
+		[TestCase(typeof(DateTime))]
+		[TestCase(typeof(decimal))]
+		[TestCase(typeof(double))]
+		[TestCase(typeof(Int16))]
+		[TestCase(typeof(Int32))]
+		[TestCase(typeof(Int64))]
+		[TestCase(typeof(float))]
+		[TestCase(typeof(string))]
+		[TestCase(typeof(TimeSpan))]
+		public void GetTypeFromXamlTypeNameWithClrName (Type type)
 		{
 			// ensure that this does *not* resolve clr type name.
-			var xn = new XamlTypeName ("clr-namespace:System;assembly=mscorlib", "DateTime");
+			var xn = new XamlTypeName ("clr-namespace:System;assembly=mscorlib", type.Name);
 			var ctx = NewStandardContext ();
 			var xt = ctx.GetXamlType (xn);
 			Assert.IsNull (xt, "#1");

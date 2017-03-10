@@ -469,8 +469,9 @@ namespace MonoTests.Portable.Xaml
 			var obj = new Dictionary<string,object> ();
 			obj ["Foo"] = 5.0;
 			obj ["Bar"] = -6.5;
+			obj ["Woo"] = 123.45d;
 			var r = new XamlObjectReader (obj);
-			Read_Dictionary (r);
+			Read_Dictionary (r, false);
 		}
 
 		[Test]

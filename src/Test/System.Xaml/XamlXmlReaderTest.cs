@@ -562,8 +562,9 @@ namespace MonoTests.Portable.Xaml
 			var obj = new Dictionary<string,object> ();
 			obj ["Foo"] = 5.0;
 			obj ["Bar"] = -6.5;
+			obj ["Woo"] = 123.45d;
 			var r = GetReader ("Dictionary_String_Double.xml");
-			Read_Dictionary (r);
+			Read_Dictionary (r, true);
 		}
 		
 		[Test]
@@ -997,5 +998,19 @@ namespace MonoTests.Portable.Xaml
 			Assert.Ignore("Not supported in System.Xaml");
 #endif
 		}
+
+		[Test]
+		public void Read_NumericValues_StandardTypes()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_StandardTypes.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(123.456, obj.DoubleValue, "#2");
+			Assert.AreEqual(234.567M, obj.DecimalValue, "#3");
+			Assert.AreEqual(345.678f, obj.FloatValue, "#4");
+			Assert.AreEqual(123, obj.ByteValue, "#5");
+			Assert.AreEqual(123456, obj.IntValue, "#6");
+			Assert.AreEqual(234567, obj.LongValue, "#7");
+		}
+
 	}
 }
