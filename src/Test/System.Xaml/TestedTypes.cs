@@ -1332,11 +1332,14 @@ namespace MonoTests.Portable.Xaml
 		public DeferredLoadingChild Child { get; set; }
 	}
 
+	[ContentProperty("Item")]
 	[XamlDeferLoad(typeof(TestDeferredLoader2), typeof(DeferredLoadingChild2))]
 	public class DeferredLoadingChild2
 	{
 		public XamlNodeList List { get; set; }
 		public string Foo { get; set; }
+
+		public CollectionParentGenericList Item { get; set; }
 
 		public DeferredLoadingChild2()
 		{

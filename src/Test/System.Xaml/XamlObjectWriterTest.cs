@@ -1815,6 +1815,24 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
+		[Test]
+		public void Write_DeferredLoadingCollectionContainer()
+		{
+			using (var xr = GetReader("DeferredLoadingCollectionContainer.xml"))
+			{
+				var res = (DeferredLoadingContainerType)XamlServices.Load(xr);
+				Assert.IsNotNull(res, "#1");
+				Assert.IsNotNull(res.Child, "#2");
+				Assert.IsNull(res.Child.Foo, "#3");
+				Assert.IsNotNull(res.Child.List, "#4");
+
+				var obj = XamlServices.Load(res.Child.List.GetReader()) as DeferredLoadingChild2;
+				Assert.IsNotNull(obj, "#6");
+				Assert.IsNotNull(obj.Item, "#6");
+				Assert.AreEqual(2, obj.Item.Items.Count, "#6");
+			}
+		}
+
 #if !PCL136
 		[Test]
 		public void Write_ImmutableTypeWithNames()

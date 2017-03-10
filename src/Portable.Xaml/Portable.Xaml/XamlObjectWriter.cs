@@ -185,6 +185,7 @@ namespace Portable.Xaml
 			if (deferredWriter != null)
 			{
 				deferredWriter.Writer.WriteGetObject();
+				deferredWriter.DeferCount++;
 				return;
 			}
 
