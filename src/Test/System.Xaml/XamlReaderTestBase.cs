@@ -1483,7 +1483,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual ("bar", args [1], "#2");
 		}
 
-		protected void Read_Dictionary (XamlReader r)
+		protected void Read_Dictionary (XamlReader r, bool includeSystemNamespace)
 		{
 			Assert.IsTrue (r.Read (), "ns#1-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
@@ -1496,6 +1496,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNotNull (r.Namespace, "ns#2-3");
 			Assert.AreEqual ("x", r.Namespace.Prefix, "ns#2-4");
 			Assert.AreEqual (XamlLanguage.Xaml2006Namespace, r.Namespace.Namespace, "ns#2-5");
+
+			if (includeSystemNamespace)
+				ReadNamespace(r, "sys", "clr-namespace:System;assembly=mscorlib", "#3");
 
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -1510,7 +1513,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (XamlNodeType.StartMember, r.NodeType, "smitems#2");
 			Assert.AreEqual (XamlLanguage.Items, r.Member, "smitems#3");
 
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 3; i++) {
 
 				// start of an item
 				Assert.IsTrue (r.Read (), "soi#1-1." + i);
@@ -1524,7 +1527,7 @@ namespace MonoTests.Portable.Xaml
 
 				Assert.IsTrue (r.Read (), "svi#1-1." + i);
 				Assert.AreEqual (XamlNodeType.Value, r.NodeType, "svi#1-2." + i);
-				Assert.AreEqual (i == 0 ? "Foo" : "Bar", r.Value, "svi#1-3." + i);
+				Assert.AreEqual (i == 0 ? "Foo" : i == 1 ? "Bar" : "Woo", r.Value, "svi#1-3." + i);
 
 				Assert.IsTrue (r.Read (), "emi#1-1." + i);
 				Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "emi#1-2." + i);
@@ -1535,7 +1538,7 @@ namespace MonoTests.Portable.Xaml
 
 				Assert.IsTrue (r.Read (), "svi#2-1." + i);
 				Assert.AreEqual (XamlNodeType.Value, r.NodeType, "svi#2-2." + i);
-				Assert.AreEqual (i == 0 ? "5" : "-6.5", r.Value, "svi#2-3." + i); // converted to string(!)
+				Assert.AreEqual (i == 0 ? "5" : i == 1 ? "-6.5" : "123.45", r.Value, "svi#2-3." + i); // converted to string(!)
 
 				Assert.IsTrue (r.Read (), "emi#2-1." + i);
 				Assert.AreEqual (XamlNodeType.EndMember, r.NodeType, "emi#2-2." + i);
