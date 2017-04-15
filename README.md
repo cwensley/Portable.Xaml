@@ -49,21 +49,21 @@ Portable.Xaml's performance has also been drastically improved over mono's initi
 Here's some results using [BenchmarkDotNet](http://benchmarkdotnet.org):
 
 ### Load
-Method |          Mean |      StdDev | Scaled | Scaled-StdDev |    Gen 0 | Allocated |
--------------------- |-------------- |------------ |------- |-------------- |--------- |---------- |
-        PortableXaml |   691.6986 us |   9.8060 us |   1.00 |          0.00 |        - |  72.21 kB |
-          SystemXaml | 1,289.9520 us |   5.8708 us |   1.87 |          0.03 |        - | 155.19 kB |
- PortableXamlNoCache | 1,603.6102 us |  10.8539 us |   2.32 |          0.03 |        - | 130.45 kB |
-   SystemXamlNoCache | 1,859.4895 us |  34.3770 us |   2.69 |          0.06 |        - | 188.29 kB |
-            OmniXaml | 8,505.1863 us | 158.3414 us |  12.30 |          0.28 | 164.5833 |   1.73 MB |
+| Method |          Mean |      StdDev | Scaled | Scaled-StdDev |    Gen 0 | Allocated |
+|-------------------- |-------------- |------------ |------- |-------------- |--------- |---------- |
+|        PortableXaml |   691.6986 us |   9.8060 us |   1.00 |          0.00 |        - |  72.21 kB |
+|          SystemXaml | 1,289.9520 us |   5.8708 us |   1.87 |          0.03 |        - | 155.19 kB |
+| PortableXamlNoCache | 1,603.6102 us |  10.8539 us |   2.32 |          0.03 |        - | 130.45 kB |
+|   SystemXamlNoCache | 1,859.4895 us |  34.3770 us |   2.69 |          0.06 |        - | 188.29 kB |
+|            OmniXaml | 8,505.1863 us | 158.3414 us |  12.30 |          0.28 | 164.5833 |   1.73 MB |
 
 ### Save
-Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
--------------------- |-------------- |----------- |------- |-------------- |-------- |---------- |
-        PortableXaml |   813.9052 us | 11.2787 us |   1.00 |          0.00 |       - | 146.18 kB |
-          SystemXaml |   874.2129 us | 15.8162 us |   1.07 |          0.02 |       - | 120.03 kB |
- PortableXamlNoCache | 1,588.3347 us |  9.7873 us |   1.95 |          0.03 | 15.6250 | 197.46 kB |
-   SystemXamlNoCache | 1,187.0039 us | 13.3269 us |   1.46 |          0.03 |       - | 142.01 kB |
+| Method |          Mean |     StdDev | Scaled | Scaled-StdDev |   Gen 0 | Allocated |
+|-------------------- |-------------- |----------- |------- |-------------- |-------- |---------- |
+|        PortableXaml |   813.9052 us | 11.2787 us |   1.00 |          0.00 |       - | 146.18 kB |
+|          SystemXaml |   874.2129 us | 15.8162 us |   1.07 |          0.02 |       - | 120.03 kB |
+| PortableXamlNoCache | 1,588.3347 us |  9.7873 us |   1.95 |          0.03 | 15.6250 | 197.46 kB |
+|   SystemXamlNoCache | 1,187.0039 us | 13.3269 us |   1.46 |          0.03 |       - | 142.01 kB |
 
 ## License
 
