@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
@@ -51,3 +52,4 @@ namespace Portable.Xaml.ComponentModel
 
 }
 
+#endif

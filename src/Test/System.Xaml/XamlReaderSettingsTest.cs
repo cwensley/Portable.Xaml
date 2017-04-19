@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -69,14 +69,14 @@ namespace MonoTests.Portable.Xaml
 			s.ProvideLineInfo = true;
 			s.ValuesMustBeString = true;
 			s.BaseUri = new Uri ("urn:foo");
-			s.LocalAssembly = typeof (object).Assembly;
+			s.LocalAssembly = typeof (object).GetTypeInfo().Assembly;
 
 			s = new XamlReaderSettings (s);
 
 			Assert.IsTrue (s.AllowProtectedMembersOnRoot, "#1");
 			Assert.IsTrue (s.BaseUri.Equals (new Uri ("urn:foo")), "#2");
 			Assert.IsTrue (s.IgnoreUidsOnPropertyElements, "#3");
-			Assert.AreEqual (typeof (int).Assembly, s.LocalAssembly, "#4");
+			Assert.AreEqual (typeof (int).GetTypeInfo().Assembly, s.LocalAssembly, "#4");
 			Assert.IsTrue (s.ProvideLineInfo, "#5");
 			Assert.IsTrue (s.ValuesMustBeString, "#6");
 		}

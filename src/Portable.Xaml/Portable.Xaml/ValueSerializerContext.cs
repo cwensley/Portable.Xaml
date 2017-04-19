@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -32,12 +32,13 @@ using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
 	internal class ValueSerializerContext : IValueSerializerContext, IXamlSchemaContextProvider, ITypeDescriptorContext
 	{
-		XamlNameResolver name_resolver = new XamlNameResolver ();
+		XamlNameResolver name_resolver = new XamlNameResolver();
 		XamlTypeResolver type_resolver;
 		NamespaceResolver namespace_resolver;
 		PrefixLookup prefix_lookup;
@@ -48,15 +49,15 @@ namespace Portable.Xaml
 		IDestinationTypeProvider destinationProvider;
 		IXamlObjectWriterFactory objectWriterFactory;
 
-		public ValueSerializerContext (PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		public ValueSerializerContext(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
 		{
 			if (prefixLookup == null)
-				throw new ArgumentNullException ("prefixLookup");
+				throw new ArgumentNullException("prefixLookup");
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
+				throw new ArgumentNullException("schemaContext");
 			prefix_lookup = prefixLookup;
-			namespace_resolver = new NamespaceResolver (prefix_lookup.Namespaces);
-			type_resolver = new XamlTypeResolver (namespace_resolver, schemaContext);
+			namespace_resolver = new NamespaceResolver(prefix_lookup.Namespaces);
+			type_resolver = new XamlTypeResolver(namespace_resolver, schemaContext);
 			sctx = schemaContext;
 			ambient_provider = ambientProvider;
 			this.provideValue = provideValue;
@@ -65,23 +66,23 @@ namespace Portable.Xaml
 			this.objectWriterFactory = objectWriterFactory;
 		}
 
-		public object GetService (Type serviceType)
+		public object GetService(Type serviceType)
 		{
-			if (serviceType == typeof (INamespacePrefixLookup))
+			if (serviceType == typeof(INamespacePrefixLookup))
 				return prefix_lookup;
-			if (serviceType == typeof (IXamlNamespaceResolver))
+			if (serviceType == typeof(IXamlNamespaceResolver))
 				return namespace_resolver;
-			if (serviceType == typeof (IXamlNameResolver))
+			if (serviceType == typeof(IXamlNameResolver))
 				return name_resolver;
-			if (serviceType == typeof (IXamlNameProvider))
+			if (serviceType == typeof(IXamlNameProvider))
 				return name_resolver;
-			if (serviceType == typeof (IXamlTypeResolver))
+			if (serviceType == typeof(IXamlTypeResolver))
 				return type_resolver;
-			if (serviceType == typeof (IAmbientProvider))
+			if (serviceType == typeof(IAmbientProvider))
 				return ambient_provider;
-			if (serviceType == typeof (IXamlSchemaContextProvider))
+			if (serviceType == typeof(IXamlSchemaContextProvider))
 				return this;
-			if (serviceType == typeof (IProvideValueTarget))
+			if (serviceType == typeof(IProvideValueTarget))
 				return provideValue;
 			if (serviceType == typeof(IRootObjectProvider))
 				return rootProvider;
@@ -91,24 +92,35 @@ namespace Portable.Xaml
 				return objectWriterFactory;
 			return null;
 		}
-		
-		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext {
+
+		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext
+		{
 			get { return sctx; }
 		}
 
+		public object Instance
+		{
+			get { throw new NotImplementedException(); }
+		}
+
+#if NETSTANDARD
+		public IContainer Container => throw new NotImplementedException();
+
+		public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
+#else
 		/*
 		public IContainer Container {
 			get { throw new NotImplementedException (); }
 		}*/
-		public object Instance {
-			get { throw new NotImplementedException (); }
-		}
-		public PropertyInfo PropertyDescriptor {
-			get { throw new NotImplementedException (); }
-		}
-		public void OnComponentChanged ()
+		public PropertyInfo PropertyDescriptor
 		{
-			throw new NotImplementedException ();
+			get { throw new NotImplementedException(); }
+		}
+#endif
+
+		public void OnComponentChanged()
+		{
+			throw new NotImplementedException();
 		}
 		public bool OnComponentChanging ()
 		{

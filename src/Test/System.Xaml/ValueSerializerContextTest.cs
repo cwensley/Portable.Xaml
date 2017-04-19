@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,6 +43,9 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 using System.Globalization;
+#if NETSTANDARD
+using System.ComponentModel;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {

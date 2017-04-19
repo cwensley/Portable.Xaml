@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,8 +28,10 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 
-using Pair = System.Collections.Generic.KeyValuePair<string,string>;
+using Pair = System.Collections.Generic.KeyValuePair<string, string>;
 using System.Diagnostics;
+using System.Collections;
+using System.IO;
 
 namespace Portable.Xaml
 {
@@ -84,7 +86,7 @@ namespace Portable.Xaml
 		Dictionary<Type, XamlType> run_time_types = new Dictionary<Type, XamlType>();
 		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
 		Dictionary<Pair, XamlDirective> xaml_directives = new Dictionary<Pair, XamlDirective>();
-		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
+		Dictionary<object, XamlMember> member_cache = new Dictionary<object, XamlMember>();
 		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
 
 		[EnhancedXaml]
@@ -111,13 +113,34 @@ namespace Portable.Xaml
 			{
 				if (assembliesInScope != null)
 					return assembliesInScope;
-				var assemblies = reference_assemblies ?? GetAppDomainAssemblies() ?? Enumerable.Empty<Assembly>();
+				var assemblies = reference_assemblies ?? LookupAssembliesInScope();
+
 				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Assembly = r }).ToList();
 				return assembliesInScope;
 			}
 		}
 
-		Assembly[] GetAppDomainAssemblies()
+		static List<Assembly> cachedAssembliesInScope;
+		static IEnumerable<Assembly> LookupAssembliesInScope()
+		{
+			if (cachedAssembliesInScope != null)
+				return cachedAssembliesInScope;
+
+			var assemblies =
+				GetAppDomainAssemblies()
+#if NETSTANDARD
+				?? GetBaseDirectoryAssemblies()
+#endif
+#if !PCL136
+				?? GetUwpAssemblies()
+#endif
+				?? Enumerable.Empty<Assembly>();
+
+			cachedAssembliesInScope = assemblies.ToList();
+			return cachedAssembliesInScope;
+		}
+
+		static IEnumerable<Assembly> GetAppDomainAssemblies()
 		{
 			try
 			{
@@ -142,6 +165,95 @@ namespace Portable.Xaml
 				return null;
 			}
 		}
+
+#if NETSTANDARD
+		static IEnumerable<Assembly> GetBaseDirectoryAssemblies()
+		{
+			try
+			{
+				// .NET Core, we get the assemblies in the base directory.
+				var assemblyType = typeof(Assembly);
+				if (assemblyType == null)
+					return null;
+				var getEntryAssembly = assemblyType.GetRuntimeMethod("GetEntryAssembly", new Type[0]);
+				if (getEntryAssembly == null)
+					return null;
+				var entryAssembly = getEntryAssembly.Invoke(null, null) as Assembly;
+				if (entryAssembly == null)
+					return null;
+
+				var assemblies = new List<Assembly>();
+				assemblies.Add(entryAssembly);
+				foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
+				{
+					try
+					{
+						var assembly = Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(file)));
+						if (assembly != entryAssembly)
+							assemblies.Add(assembly);
+					}
+					catch { }
+				}
+
+				return assemblies;
+			}
+			catch
+			{
+				return null;
+			}
+		}
+#endif
+
+#if !PCL136
+		static IEnumerable<Assembly> GetUwpAssemblies()
+		{
+			try
+			{
+				// if we're running in UWP, get all assemblies in installed locationF
+				// an ugly hack, but there's no other option until maybe netstandard 2.0.
+				var packageType = Type.GetType("Windows.ApplicationModel.Package,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				if (packageType == null)
+					return null;
+				var current = packageType.GetRuntimeProperty("Current")?.GetValue(null);
+				if (current == null)
+					return null;
+				var installedLocation = current.GetType().GetRuntimeProperty("InstalledLocation")?.GetValue(current);
+				if (installedLocation == null)
+					return null;
+				var getFilesAsync = installedLocation.GetType().GetRuntimeMethod("GetFilesAsync", new Type[0])?.Invoke(installedLocation, null);
+				if (getFilesAsync == null)
+					return null;
+
+				var awaiterExtensions = Type.GetType("System.WindowsRuntimeSystemExtensions,System.Runtime.WindowsRuntime");
+				var interfaceType = Type.GetType("Windows.Foundation.IAsyncOperation`1,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				var storageType = Type.GetType("Windows.Storage.StorageFile,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				var resultType = typeof(IReadOnlyList<>).MakeGenericType(storageType);
+				var interfaceResultType = interfaceType?.MakeGenericType(resultType);
+				var getAwaiterMethod = awaiterExtensions.GetRuntimeMethods().First(m => m.Name == "GetAwaiter" && m.IsGenericMethod && m.ReturnType.GetTypeInfo().IsGenericType);
+				var awaiter = getAwaiterMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { getFilesAsync });
+				var results = awaiter?.GetType().GetRuntimeMethod("GetResult", new Type[0])?.Invoke(awaiter, null);
+				var nameProperty = storageType.GetRuntimeProperty("Name");
+
+				var assemblies = new List<Assembly>();
+				foreach (var result in (results as IEnumerable))
+				{
+					var name = (string)nameProperty.GetValue(result);
+					if (string.Equals(Path.GetExtension(name), ".dll", StringComparison.OrdinalIgnoreCase)
+						|| string.Equals(Path.GetExtension(name), ".exe", StringComparison.OrdinalIgnoreCase))
+					{
+						try
+						{
+							assemblies.Add(Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(name))));
+						}
+						catch { }
+					}
+				}
+				return assemblies;
+			}
+			catch { }
+			return null;
+		}
+#endif
 
 		internal string GetXamlNamespace(string clrNamespace)
 		{
@@ -508,7 +620,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetProperty(PropertyInfo propertyInfo)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(propertyInfo, null);
+			var key = Tuple.Create(propertyInfo.DeclaringType, propertyInfo.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -518,7 +630,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetEvent(EventInfo eventInfo)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(eventInfo, null);
+			var key = Tuple.Create(eventInfo.DeclaringType, eventInfo.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -528,7 +640,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableProperty(string attachablePropertyName, MethodInfo getter, MethodInfo setter)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(getter, setter);
+			var key = Tuple.Create(getter?.DeclaringType ?? setter.DeclaringType, getter?.Name, setter?.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -538,7 +650,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableEvent(string attachablePropertyName, MethodInfo adder)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(adder, null);
+			var key = Tuple.Create(adder.DeclaringType, adder.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;

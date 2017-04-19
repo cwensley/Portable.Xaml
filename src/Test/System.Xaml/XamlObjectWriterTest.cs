@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -697,7 +697,7 @@ namespace MonoTests.Portable.Xaml
 			Attached2 result = null;
 
 			var rsettings = new XamlXmlReaderSettings();
-			using (var reader = new XamlXmlReader(new StringReader(String.Format(@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></Attached2>", typeof(AttachedWrapper3).Assembly.GetName().Name)), rsettings))
+			using (var reader = new XamlXmlReader(new StringReader(String.Format(@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></Attached2>", typeof(AttachedWrapper3).GetTypeInfo().Assembly.GetName().Name)), rsettings))
 			{
 				var wsettings = new XamlObjectWriterSettings();
 				using (var writer = new XamlObjectWriter(reader.SchemaContext, wsettings))
@@ -746,7 +746,7 @@ namespace MonoTests.Portable.Xaml
 		[Test] // bug #3003 repro
 		public void EventsAndProcessingOrder()
 		{
-			var asm = Assembly.GetExecutingAssembly();
+			var asm = GetType().GetTypeInfo().Assembly;
 			var context = new XamlSchemaContext(new Assembly[] { asm });
 			var output = XamarinBug3003.TestContext.Writer;
 			output.WriteLine();
@@ -1502,7 +1502,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_XmlSerializableWrapper()
 		{
-			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().Assembly.GetName().Name;
+			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
 			using (var xr = GetReader("XmlSerializableWrapper.xml"))
 			{
 				var des = (XmlSerializableWrapper)XamlServices.Load(xr);

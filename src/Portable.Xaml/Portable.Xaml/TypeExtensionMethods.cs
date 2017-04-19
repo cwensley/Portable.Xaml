@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -29,6 +29,7 @@ using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
@@ -378,23 +379,24 @@ namespace Portable.Xaml
 
     internal static IComparer<XamlMember> MemberComparer = new InternalMemberComparer();
 
-    internal static int CompareMembers (XamlMember m1, XamlMember m2)
+		internal static int CompareMembers(XamlMember m1, XamlMember m2)
 		{
-			if (m1 == null)
-				return m2 == null ? 0 : 1;
-			if (m2 == null)
+			if (ReferenceEquals(m1, null))
+				return ReferenceEquals(m2, null) ? 0 : 1;
+			if (ReferenceEquals(m2, null))
 				return 0;
 
 			// these come before non-content properties
 
 			// 1. PositionalParameters comes first
-			if (m1 == XamlLanguage.PositionalParameters)
-				return m2 == XamlLanguage.PositionalParameters ? 0 : -1;
-			else if (m2 == XamlLanguage.PositionalParameters)
+			if (ReferenceEquals(m1, XamlLanguage.PositionalParameters))
+				return ReferenceEquals(m2, XamlLanguage.PositionalParameters) ? 0 : -1;
+			if (ReferenceEquals(m2, XamlLanguage.PositionalParameters))
 				return 1;
 
 			// 2. constructor arguments
-			if (m1.IsConstructorArgument) {
+			if (m1.IsConstructorArgument)
+			{
 				if (!m2.IsConstructorArgument)
 					return -1;
 			}
@@ -406,34 +408,45 @@ namespace Portable.Xaml
 
 			// 1. initialization
 
-			if (m1 == XamlLanguage.Initialization)
-				return m2 == XamlLanguage.Initialization ? 0 : 1;
-			else if (m2 == XamlLanguage.Initialization)
+			if (ReferenceEquals(m1, XamlLanguage.Initialization))
+				return ReferenceEquals(m2, XamlLanguage.Initialization) ? 0 : 1;
+			if (ReferenceEquals(m2, XamlLanguage.Initialization))
 				return -1;
 
 			// 2. key
-			if (m1 == XamlLanguage.Key)
-				return m2 == XamlLanguage.Key ? 0 : 1;
-			else if (m2 == XamlLanguage.Key)
+			if (ReferenceEquals(m1, XamlLanguage.Key))
+				return ReferenceEquals(m2, XamlLanguage.Key) ? 0 : 1;
+			if (ReferenceEquals(m2, XamlLanguage.Key))
 				return -1;
 
 			// 3. Name
-			if (m1 == XamlLanguage.Name)
-				return m2 == XamlLanguage.Name ? 0 : 1;
-			else if (m2 == XamlLanguage.Name)
+			if (ReferenceEquals(m1, XamlLanguage.Name))
+				return ReferenceEquals(m2, XamlLanguage.Name) ? 0 : 1;
+			if (ReferenceEquals(m2, XamlLanguage.Name))
 				return -1;
 
 			// 4. ContentProperty is always returned last
-			if (m1.DeclaringType != null && m1.DeclaringType.ContentProperty == m1) {
-				if (!(m2.DeclaringType != null && m2.DeclaringType.ContentProperty == m2))
+			if (m1.DeclaringType?.ContentProperty == m1)
+			{
+				if (m2.DeclaringType?.ContentProperty != m2)
 					return 1;
 			}
-			else if (m2.DeclaringType != null && m2.DeclaringType.ContentProperty == m2)
+			else if (m2.DeclaringType?.ContentProperty == m2)
+				return -1;
+
+			// preoperties that (probably) require a child node should come last so we can
+			// put as many in the start tag as possible.
+			if (m1.RequiresChildNode)
+			{
+				if (!m2.RequiresChildNode)
+					return 1;
+			}
+			else if (m2.RequiresChildNode)
 				return -1;
 
 
 			// then, compare names.
-			return String.CompareOrdinal (m1.Name, m2.Name);
+			return String.CompareOrdinal(m1.Name, m2.Name);
 		}
 
 		internal static string GetInternalXmlName (this XamlMember xm)

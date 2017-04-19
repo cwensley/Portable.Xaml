@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -31,7 +31,6 @@ using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using UriTypeConverter = Portable.Xaml.ComponentModel.UriTypeConverter;
 #else
 using System.Windows.Markup;
 using System.ComponentModel;
@@ -40,6 +39,10 @@ using System.Xaml.Schema;
 #endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
+#if NETSTANDARD
+using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
+using System.ComponentModel;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {
@@ -484,7 +487,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (t.IsNameValid, "#2"); // see #4
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("XamlTypeTest+TestClass3", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (TestClass3), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -521,7 +524,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (t.IsNameValid, "#2");
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("ArgumentAttributed", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (ArgumentAttributed), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -559,8 +562,11 @@ namespace MonoTests.Portable.Xaml
 		public void TypeConverter ()
 		{
 			Assert.IsNull (new XamlType (typeof (List<object>), sctx).TypeConverter, "#1");
+			Assert.IsNull (new XamlType (typeof (Dictionary<object, object>), sctx).TypeConverter, "#1");
 			Assert.IsNotNull (new XamlType (typeof (object), sctx).TypeConverter, "#2");
-			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance is UriTypeConverter, "#3");
+#if !WINDOWS_UWP
+			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance.GetType().Name == "UriTypeConverter", "#3");
+#endif
 			Assert.IsTrue (new XamlType (typeof (TimeSpan), sctx).TypeConverter.ConverterInstance is TimeSpanConverter, "#4");
 			Assert.IsNull (new XamlType (typeof (XamlType), sctx).TypeConverter, "#5");
 			Assert.IsTrue (new XamlType (typeof (char), sctx).TypeConverter.ConverterInstance is CharConverter, "#6");

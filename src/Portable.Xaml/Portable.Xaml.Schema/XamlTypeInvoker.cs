@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -151,11 +151,14 @@ namespace Portable.Xaml.Schema
 
 			if (mi == null)
 			{
-				if (collectionType.GetTypeInfo().IsGenericType)
+				var baseCollection = collectionType.GetTypeInfo().GetInterfaces()
+				                                   .FirstOrDefault(r => r.GetTypeInfo().IsGenericType
+				                                                   && r.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>));
+				if (baseCollection != null)
 				{
-					mi = collectionType.GetRuntimeMethod("Add", collectionType.GetTypeInfo().GetGenericArguments());
+					mi = collectionType.GetRuntimeMethod("Add", baseCollection.GetTypeInfo().GetGenericArguments());
 					if (mi == null)
-						mi = LookupAddMethod(collectionType, typeof(ICollection<>).MakeGenericType(collectionType.GetTypeInfo().GetGenericArguments()));
+						mi = LookupAddMethod(collectionType, baseCollection);
 				}
 				else
 				{

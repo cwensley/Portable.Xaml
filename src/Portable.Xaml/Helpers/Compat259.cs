@@ -1,4 +1,4 @@
-﻿#if PCL259
+﻿#if PCL259 || NETSTANDARD
 using System;
 using System.Reflection;
 using System.Collections.Generic;

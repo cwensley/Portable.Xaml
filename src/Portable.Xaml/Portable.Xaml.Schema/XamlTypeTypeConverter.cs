@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -26,6 +26,7 @@ using Portable.Xaml.ComponentModel;
 using System.Globalization;
 using Portable.Xaml.Markup;
 using Portable.Xaml;
+using System.ComponentModel;
 
 namespace Portable.Xaml.Schema
 {

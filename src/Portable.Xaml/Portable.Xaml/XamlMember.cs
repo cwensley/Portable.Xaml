@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -50,6 +50,7 @@ namespace Portable.Xaml
 			public const int IsAttachable = 1 << 9;
 			public const int IsDefaultEvent = 1 << 10;
 			public const int IsDirective = 1 << 11;
+			public const int ShouldSerialize = 1 << 12;
 		}
 		XamlType target_type;
 		MemberInfo underlying_member;
@@ -202,14 +203,18 @@ namespace Portable.Xaml
 
 		public string PreferredXamlNamespace => ns.HasValue ? ns.Value : ns.Set(DeclaringType?.PreferredXamlNamespace);
 
-#if !PCL
+#if !PCL || NETSTANDARD
 		public DesignerSerializationVisibility SerializationVisibility {
 			get {
-				var c= GetCustomAttributeProvider ();
+				var c = this.CustomAttributeProvider;
 				var a = c == null ? null : c.GetCustomAttribute<DesignerSerializationVisibilityAttribute> (false);
 				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
 			}
 		}
+
+		internal bool ShouldSerialize => flags.Get(MemberFlags.ShouldSerialize) ?? flags.Set(MemberFlags.ShouldSerialize, SerializationVisibility != DesignerSerializationVisibility.Hidden);
+#else
+		internal bool ShouldSerialize => true;
 #endif
 
 		public bool IsAttachable => flags.Get(MemberFlags.IsAttachable) ?? false;
@@ -266,6 +271,16 @@ namespace Portable.Xaml
 			return Equals(x);
 		}
 
+		bool MemberEquals(MemberInfo member1, MemberInfo member2)
+		{
+			if (ReferenceEquals(member1, null))
+				return ReferenceEquals(member2, null);
+			return !ReferenceEquals(member2, null)
+				&& member1.DeclaringType == member2.DeclaringType
+				&& string.Equals(member1.Name, member2.Name, StringComparison.Ordinal);
+		}
+
+
 		public bool Equals(XamlMember other)
 		{
 			// this should be in general correct; XamlMembers are almost not comparable.
@@ -273,9 +288,9 @@ namespace Portable.Xaml
 				return true;
 			// It does not compare XamlSchemaContext.
 			return !ReferenceEquals(other, null) &&
-				underlying_member == other.underlying_member &&
-				underlying_getter == other.underlying_getter &&
-				underlying_setter == other.underlying_setter &&
+				MemberEquals(underlying_member, other.underlying_member) &&
+				MemberEquals(underlying_getter, other.underlying_getter) &&
+				MemberEquals(underlying_setter, other.underlying_setter) &&
 				Name == other.Name &&
 				PreferredXamlNamespace == other.PreferredXamlNamespace &&
 				ns == other.ns &&
@@ -429,10 +444,15 @@ namespace Portable.Xaml
 			if (t == typeof(object)) // it is different from XamlType.LookupTypeConverter().
 				return null;
 
+
 			var a = CustomAttributeProvider;
 			var ca = a != null ? a.GetCustomAttribute<TypeConverterAttribute>(false) : null;
 			if (ca != null)
 				return context.GetValueConverter<TypeConverter>(System.Type.GetType(ca.ConverterTypeName), Type);
+#if NETSTANDARD
+			if (IsEvent)
+				return context.GetValueConverter<TypeConverter>(typeof(EventConverter), Type);
+#endif
 
 			return Type.TypeConverter;
 		}
@@ -480,6 +500,8 @@ namespace Portable.Xaml
 		internal DefaultValueAttribute DefaultValue => defaultValue.HasValue ? defaultValue.Value : defaultValue.Set(CustomAttributeProvider?.GetCustomAttribute<DefaultValueAttribute>(true));
 
 		internal bool IsConstructorArgument => flags.Get(MemberFlags.IsConstructorArgument) ?? flags.Set(MemberFlags.IsConstructorArgument, LookupIsConstructorArgument());
+
+		internal virtual bool RequiresChildNode => Type.IsCollection || Type.IsDictionary || (IsWritePublic && !Type.CanConvertFrom(XamlLanguage.String));
 
 		bool LookupIsConstructorArgument()
 		{

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -877,7 +877,7 @@ namespace MonoTests.Portable.Xaml
 		public void LocalAssemblyShouldApplyToNamespace()
 		{
 			var settings = new XamlXmlReaderSettings();
-			settings.LocalAssembly = typeof(TestClass1).Assembly;
+			settings.LocalAssembly = typeof(TestClass1).GetTypeInfo().Assembly;
 			string xml = File.ReadAllText(Compat.GetTestFile ("LocalAssembly.xml")).UpdateXml();
 			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
 			Assert.IsNotNull(obj, "#1");

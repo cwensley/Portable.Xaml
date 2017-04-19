@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,12 +43,12 @@ namespace MonoTests.Portable.Xaml
 	{
 		XamlSchemaContext NewStandardContext ()
 		{
-			return new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly });
+			return new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).GetTypeInfo().Assembly });
 		}
 
 		XamlSchemaContext NewThisAssemblyContext ()
 		{
-			return new XamlSchemaContext (new Assembly [] {GetType ().Assembly });
+			return new XamlSchemaContext (new Assembly [] {GetType ().GetTypeInfo().Assembly });
 		}
 
 		[Test]
@@ -77,7 +77,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Constructor ()
 		{
-			var ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly });
+			var ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).GetTypeInfo().Assembly });
 			Assert.AreEqual (1, ctx.ReferenceAssemblies.Count, "#1");
 		}
 
@@ -165,7 +165,7 @@ namespace MonoTests.Portable.Xaml
         [Test]
 		public void GetXamlTypeAndAllXamlTypes ()
 		{
-			var ctx = new XamlSchemaContext (new Assembly [] {typeof (string).Assembly}); // build with corlib.
+			var ctx = new XamlSchemaContext (new Assembly [] {typeof (string).GetTypeInfo().Assembly }); // build with corlib.
 			Assert.AreEqual (0, ctx.GetAllXamlTypes (XamlLanguage.Xaml2006Namespace).Count (), "#0"); // premise
 
 			var xt = ctx.GetXamlType (typeof (string));

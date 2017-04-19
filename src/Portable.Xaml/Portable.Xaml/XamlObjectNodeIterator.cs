@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -132,8 +132,21 @@ namespace Portable.Xaml
 				}
 
 				// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
-				if (!partOfPositionalParameters && xm.Invoker.IsDefaultValue(val))
-					yield break;
+				if (!partOfPositionalParameters)
+				{
+					if (xm.Invoker.IsDefaultValue(val))
+						yield break;
+					if (settings.IgnoreDefaultValues && xm.DefaultValue == null)
+					{
+						if (xm.Type?.UnderlyingType?.GetTypeInfo().IsValueType == true)
+						{
+							if (Equals(val, Activator.CreateInstance(xm.Type.UnderlyingType)))
+								yield break;
+						}
+						else if (ReferenceEquals(val, null))
+							yield break;
+					}
+				}
 
 				// overrideMemberType is (so far) used for XamlLanguage.Key.
 				var xtt = overrideMemberType ?? xm.Type;
@@ -156,7 +169,7 @@ namespace Portable.Xaml
 				}
 
 				// collection items: return GetObject and Items.
-				if (xm.Type.IsCollection && !xm.IsWritePublic)
+				if ((xm.Type.IsCollection || xm.Type.IsDictionary) && !xm.IsWritePublic)
 				{
 					yield return node.Set(XamlNodeType.GetObject, xobj);
 					// Write Items member only when there are items (i.e. do not write it if it is empty).
@@ -352,19 +365,25 @@ namespace Portable.Xaml
 			var xobject = new XamlObject();
 			while (xce.MoveNext ()) {
 				// XamlLanguage.Items does not show up if the content is empty.
-				if (xce.Current.Member == XamlLanguage.Items) {
+				if (ReferenceEquals(xce.Current.Member, XamlLanguage.Items))
+				{
 					// FIXME: this is nasty, but this name resolution is the only side effect of this iteration model. Save-Restore procedure is required.
-					NameResolver.Save ();
-					try {
-						if (!GetNodes (xce.Current.Member, xce.Current.GetValue(xobject)).GetEnumerator ().MoveNext ())
+					NameResolver.Save();
+					try
+					{
+						if (!GetNodes(xce.Current.Member, xce.Current.GetValue(xobject)).GetEnumerator().MoveNext())
 							continue;
-					} finally {
-						NameResolver.Restore ();
+					}
+					finally
+					{
+						NameResolver.Restore();
 					}
 				}
 
+				var member = xce.Current.Member;
 				// Other collections as well, but needs different iteration (as nodes contain GetObject and EndObject).
-				if (!xce.Current.Member.IsWritePublic && xce.Current.Member.Type != null && xce.Current.Member.Type.IsCollection) {
+				if (!member.IsWritePublic && member.Type != null 
+				    && (member.Type.IsCollection || member.Type.IsDictionary)) {
 					var e = GetNodes (xce.Current.Member, xce.Current.GetValue(xobject)).GetEnumerator ();
 					// FIXME: this is nasty, but this name resolution is the only side effect of this iteration model. Save-Restore procedure is required.
 					NameResolver.Save ();
@@ -405,21 +424,28 @@ namespace Portable.Xaml
 				if (ikey != null) {
 
 					// TODO: do this without copying the XamlNodeInfo somehow?
-					var en = GetNodes (null, xiobj).Select(r => r.Copy()).ToList ();
-					yield return en [0]; // StartObject
+					var en = GetNodes(null, xiobj).Select(c => c.Copy()).GetEnumerator();
+					en.MoveNext();
+					yield return en.Current; // StartObject
 
 					var xknm = new XamlNodeMember (xobj, XamlLanguage.Key);
-					var nodes1 = en.Skip (1).Take (en.Count - 2);
+					//var nodes1 = en.Skip (1).Take (en.Count - 2);
+					var nodes1 = new List<XamlNodeInfo>();
+					while (en.MoveNext())
+					{
+						nodes1.Add(en.Current);
+					}
+
 					var nodes2 = GetKeyNodes (ikey, xobj.Type.KeyType, xknm);
 
 					// group the members then sort to put the key nodes in the correct order
-					var grouped = GroupMemberNodes (nodes1.Concat (nodes2)).OrderBy (r => r.Item1, TypeExtensionMethods.MemberComparer);
+					var grouped = GroupMemberNodes (nodes1.Take(nodes1.Count - 1).Concat (nodes2)).OrderBy (r => r.Item1, TypeExtensionMethods.MemberComparer);
 					foreach (var item in grouped) {
 						foreach (var node in item.Item2)
 							yield return node;
 					}
 
-					yield return en [en.Count - 1]; // EndObject
+					yield return nodes1[nodes1.Count - 1]; // EndObject
 				}
 				else
 					foreach (var xn in GetNodes (null, xiobj))
