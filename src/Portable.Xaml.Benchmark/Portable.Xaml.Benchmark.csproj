@@ -2,26 +2,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\artifacts\benchmark\$(Configuration)\</OutputPath>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Xml" />
+  <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="LoadSimpleBenchmark.xml" />
-    <EmbeddedResource Include="LoadComplexBenchmark.xml" />
+    <EmbeddedResource Include="Xml\*.xml" />
+    <EmbeddedResource Include="Json\*.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />

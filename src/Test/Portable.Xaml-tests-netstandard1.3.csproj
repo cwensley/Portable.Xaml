@@ -14,8 +14,6 @@
 		<DefineConstants>TRACE;DEBUG;PCL259;PCL;NETSTANDARD;NETSTANDARD1_3;HAS_TYPE_CONVERTER</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>
-		</DebugType>
 		<OutputPath>..\..\artifacts\test\Release\netstandard1.3</OutputPath>
 		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;NETSTANDARD1_3;HAS_TYPE_CONVERTER</DefineConstants>
 	</PropertyGroup>

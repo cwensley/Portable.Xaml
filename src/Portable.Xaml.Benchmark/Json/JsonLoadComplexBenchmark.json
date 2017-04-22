@@ -1,0 +1,306 @@
+﻿{
+	"$type": "Portable.Xaml.Benchmark.TestObject, Portable.Xaml.Benchmark",
+	"StringProperty": "Hello!",
+	"Children": [
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		},
+		{
+			"StringProperty": "Hello",
+			"IntProperty": 2,
+			"DoubleProperty": 123.456,
+			"BoolProperty": true
+		}
+	]
+}

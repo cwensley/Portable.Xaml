@@ -1,0 +1,4 @@
+﻿{
+	"$type": "Portable.Xaml.Benchmark.TestObject, Portable.Xaml.Benchmark",
+	"StringProperty": "Hello!"
+}
