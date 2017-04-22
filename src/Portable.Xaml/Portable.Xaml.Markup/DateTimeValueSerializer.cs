@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -52,19 +52,14 @@ namespace Portable.Xaml.Markup
 			return DateTime.Parse (value, CultureInfo.InvariantCulture, styles);
 		}
 
-		public override string ConvertToString (object value,     IValueSerializerContext context)
+		public override string ConvertToString (object value, IValueSerializerContext context)
 		{
 			if (!(value is DateTime))
 				throw new NotSupportedException ();
-			DateTime dt = (DateTime) value;
-			if (dt.Millisecond != 0)
-				return dt.ToString ("yyyy-MM-dd'T'HH:mm:ss.F");
-			if (dt.Second != 0)
-				return dt.ToString ("yyyy-MM-dd'T'HH:mm:ss");
-			if (dt.Minute != 0)
-				return dt.ToString ("yyyy-MM-dd'T'HH:mm");
-			else
-				return dt.ToString ("yyyy-MM-dd");
+			DateTime date = (DateTime) value;
+			if (date.TimeOfDay.TotalSeconds > 0)
+				return date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'FFFFFFFK", CultureInfo.InvariantCulture);
+			return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 		}
 	}
 }

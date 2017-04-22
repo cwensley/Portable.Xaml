@@ -1,4 +1,4 @@
-﻿//
+﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -85,6 +85,23 @@ namespace Portable.Xaml
 		{
 		}
 
+
+		static readonly Type[] mscorlib_types = { 
+			Type.GetType("System.Collections.IList`1, System.Colletions.Generic", false), 
+			typeof(bool), 
+			Type.GetType("System.Collections.ArrayList, System.Colletions.NonGeneric", false) 
+		};
+
+		static readonly string[] mscorlib_assemblies = new string[] {
+			"System.Collections.Generic",
+			"System.Private.CoreLib",
+			"System.Collections.NonGeneric"
+		};
+
+			/*mscorlib_types.Where(r => r != null)
+		                                                               .Select(r => r.GetTypeInfo().Assembly)
+		                                                               .Distinct()
+		                                                               .ToArray();*/
 		//		static readonly Type [] predefined_types = {
 		//				typeof (XData), typeof (Uri), typeof (TimeSpan), typeof (PropertyDefinition), typeof (MemberDefinition), typeof (Reference)
 		//			};
@@ -118,11 +135,9 @@ namespace Portable.Xaml
 			{
 				Name = GetXamlName(type);
 				var assembly = type.GetTypeInfo().Assembly;
-				string assemblyName;
-				if (assembly == typeof(bool).GetTypeInfo().Assembly)
-					assemblyName = "mscorlib"; // .net Core 
-				else
-					assemblyName = assembly.GetName().Name;
+				string assemblyName = assembly.GetName().Name;
+				if (mscorlib_assemblies.Contains(assemblyName))
+					assemblyName = "mscorlib";
 				PreferredXamlNamespace = schemaContext.GetXamlNamespace(type.Namespace) ?? String.Format("clr-namespace:{0};assembly={1}", type.Namespace, assemblyName);
 			}
 			if (type.GetTypeInfo().IsGenericType)
@@ -333,7 +348,7 @@ namespace Portable.Xaml
 				return false;
 
 			var ti = UnderlyingType.GetTypeInfo();
-			if (!ti.IsGenericType || !ti.Assembly.FullName.StartsWith("System.Collections.Immutable,"))
+			if (!ti.IsGenericType || !ti.Assembly.FullName.StartsWith("System.Collections.Immutable,", StringComparison.Ordinal))
 				return false;
 
 			var typeDef = ti.GetGenericTypeDefinition();
@@ -897,6 +912,8 @@ namespace Portable.Xaml
 			if (t == typeof(Type))
 				t = typeof(TypeExtension);
 
+			t = Nullable.GetUnderlyingType(t) ?? t;
+
 			var a = CustomAttributeProvider;
 			var ca = a?.GetCustomAttribute<TypeConverterAttribute>(false);
 			if (ca != null)
@@ -905,21 +922,30 @@ namespace Portable.Xaml
 			if (t == typeof(object)) // This is a special case. ConverterType is null.
 				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
 
-			if ((Nullable.GetUnderlyingType(t) ?? t) == typeof(DateTime))
+			if (t == typeof(DateTime))
 				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.DateTimeConverter), this);
 
+			if (t == typeof(Uri))
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
+
 			// It's still not decent to check CollectionConverter.
-			var tct = t.GetTypeConverter()?.GetType();
-			if (tct != null && tct != typeof(TypeConverter)
+			var tc = t.GetTypeConverter();
+			var tct = tc?.GetType();
+
+			if (tct != null
+				&& tct != typeof(TypeConverter)
 #if NETSTANDARD
-				&& tct != typeof(CollectionConverter) //*PCL && tct != typeof (ReferenceConverter))
+				&& tct != typeof(CollectionConverter)
+#else
+				&& tct.FullName != "System.ComponentModel.CollectionConverter"
 #endif
+				&& tct.FullName != "System.ComponentModel.ReferenceConverter"
 			)
 			{
-				return SchemaContext.GetValueConverter<TypeConverter>(tct, this);
+				var vc = SchemaContext.GetValueConverter<TypeConverter>(tct, this);
+				vc.InitialConverterInstance = tc;
+				return vc;
 			}
-			if (type == typeof(Uri))
-				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
 
 			return null;
 		}
@@ -934,8 +960,6 @@ namespace Portable.Xaml
 			var a = this.GetCustomAttribute<UsableDuringInitializationAttribute> ();
 			return a != null && a.Usable;
 		}
-
-		static XamlValueConverter<ValueSerializer> string_value_serializer;
 
 		protected virtual XamlValueConverter<ValueSerializer> LookupValueSerializer ()
 		{
@@ -957,11 +981,11 @@ namespace Portable.Xaml
 					return ret;
 			}
 
-			if (targetType.UnderlyingType == typeof (string)) {
-				if (string_value_serializer == null)
-					string_value_serializer = new XamlValueConverter<ValueSerializer> (typeof (StringValueSerializer), targetType);
-				return string_value_serializer;
-			}
+			if (targetType.UnderlyingType == typeof(string))
+				return new XamlValueConverter<ValueSerializer>(typeof(StringValueSerializer), targetType);
+
+			if (targetType.UnderlyingType == typeof(DateTime))
+				return new XamlValueConverter<ValueSerializer>(typeof(DateTimeValueSerializer), targetType);
 
 			return null;
 		}

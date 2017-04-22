@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{e9dccdcc-03a8-4bd1-888d-cee86468a15a}</ProjectGuid>
+    <ProjectGuid>{E9DCCDCC-03A8-4BD1-888D-CEE86468A15A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoWarn>1699</NoWarn>
     <NoStdLib>True</NoStdLib>
@@ -24,7 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoStdLib>false</NoStdLib>
-    <OutputPath>..\..\artifacts\netstandard1.3\Debug</OutputPath>
+    <OutputPath>..\..\artifacts\Debug\netstandard1.3\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -32,7 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoStdLib>false</NoStdLib>
-    <OutputPath>..\..\artifacts\netstandard1.3\Release</OutputPath>
+    <OutputPath>..\..\artifacts\Release\netstandard1.3\</OutputPath>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>

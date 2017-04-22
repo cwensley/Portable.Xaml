@@ -902,6 +902,20 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (xt.IsDictionary, "#3");
 			Assert.IsFalse (xt.IsCollection, "#4");
 		}
+
+		[Test]
+		public void NullableTypeShouldUseProperValueSerializer()
+		{
+			var val = DateTime.Today;
+			var xt = sctx.GetXamlType(typeof(DateTime?));
+			Assert.IsTrue(xt.IsNullable, "#1");
+			Assert.AreEqual(xt.BaseType, sctx.GetXamlType(typeof(ValueType)), "#2");
+			Assert.IsNull(xt.ValueSerializer, "#3");
+			Assert.IsNotInstanceOf<System.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
+#if PCL
+			Assert.IsInstanceOf<global::Portable.Xaml.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
+#endif
+		}
 	}
 
 	class MyXamlType : XamlType

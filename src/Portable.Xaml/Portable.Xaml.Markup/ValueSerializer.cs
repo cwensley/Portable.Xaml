@@ -1,4 +1,4 @@
-﻿//
+﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -79,17 +79,20 @@ namespace Portable.Xaml.Markup
 			type = Nullable.GetUnderlyingType(type) ?? type;
 
 			// DateTime is documented as special.
-			if (type == typeof(DateTime))
+			if (type == typeof(DateTime) || type == typeof(DateTime?))
 				return new DateTimeValueSerializer();
+			
 			// String too.
 			if (type == typeof(string))
 				return new StringValueSerializer();
 
+			// Undocumented, but System.Type seems also special. While other MarkupExtension returned types are not handled specially, this method returns a valid instance for System.Type. Note that it doesn't for TypeExtension.
+			if (type == typeof(Type))
+				// Since System.Type does not have a valid TypeConverter, I use TypeExtensionConverter (may sound funny considering the above notes!) for this serializer.
+				return new TypeValueSerializer();
+
 #if NETSTANDARD
-			if (type == typeof(Array) )
-			    //|| type == typeof(MemberDefinition) 
-			    //|| type == typeof(PropertyDefinition)
-			    //|| type == typeof(XData))
+			if (type == typeof(Array))
 				return null;
 #endif
 
@@ -100,11 +103,6 @@ namespace Portable.Xaml.Markup
 				if (tc != null && tc.GetType() != typeof(TypeConverter))
 					return new TypeConverterValueSerializer(tc);
 			}
-
-			// Undocumented, but System.Type seems also special. While other MarkupExtension returned types are not handled specially, this method returns a valid instance for System.Type. Note that it doesn't for TypeExtension.
-			if (type == typeof (Type))
-				// Since System.Type does not have a valid TypeConverter, I use TypeExtensionConverter (may sound funny considering the above notes!) for this serializer.
-				return new TypeValueSerializer ();
 
 			// Undocumented, but several primitive types get a valid serializer while it does not have TypeConverter.
 			// There is still exceptional type! TimeSpan. Why aren't they documented?

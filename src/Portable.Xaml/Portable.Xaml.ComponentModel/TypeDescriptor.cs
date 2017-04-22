@@ -53,8 +53,8 @@ namespace Portable.Xaml.ComponentModel
 			{
 				if (!converters.TryGetValue(type, out converterType))
 				{
-					if (type.GetTypeInfo().IsGenericType && type.GetTypeInfo().GetGenericTypeDefinition() == typeof(Nullable<>))
-						return new NullableConverter(type);
+					/*if (type.GetTypeInfo().IsGenericType && type.GetTypeInfo().GetGenericTypeDefinition() == typeof(Nullable<>))
+						return new NullableConverter(type);*/
 					if (type.GetTypeInfo().IsEnum)
 						return new EnumConverter(type);
 					if (typeof(Delegate).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))

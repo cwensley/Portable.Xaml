@@ -3763,6 +3763,18 @@ if (i == 0) {
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "ct#6");
 		}
 
+		static readonly Type[] mscorlib_types = { typeof(IList<>), typeof(bool) };
+
+		static readonly Assembly[] mscorlib_assemblies = mscorlib_types.Select(r => r.GetTypeInfo().Assembly).Distinct().ToArray();
+
+		static string GetFixedAssemblyName(Type type)
+		{
+			if (mscorlib_assemblies.Contains(type.GetTypeInfo().Assembly))
+				return "mscorlib";
+			return type.GetTypeInfo().Assembly.GetName().Name;
+		}
+
+
 		// from initial to StartObject
 		protected void Read_CommonClrType (XamlReader r, object obj, params KeyValuePair<string,string> [] additionalNamespaces)
 		{
@@ -3770,7 +3782,7 @@ if (i == 0) {
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ct#2");
 			Assert.IsNotNull (r.Namespace, "ct#3");
 			Assert.AreEqual (String.Empty, r.Namespace.Prefix, "ct#3-2");
-			Assert.AreEqual ("clr-namespace:" + obj.GetType ().Namespace + ";assembly=" + obj.GetType ().GetTypeInfo().Assembly.GetName ().Name, r.Namespace.Namespace, "ct#3-3");
+			Assert.AreEqual ("clr-namespace:" + obj.GetType ().Namespace + ";assembly=" + GetFixedAssemblyName(obj.GetType ()), r.Namespace.Namespace, "ct#3-3");
 
 			foreach (var kvp in additionalNamespaces) {
 				Assert.IsTrue (r.Read (), "ct#4." + kvp.Key);
