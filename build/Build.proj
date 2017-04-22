@@ -17,6 +17,8 @@
 	<Target Name="Build">
 
     	<Exec Command="$(Runtime) $(Nuget) restore $(SourceDir)\Portable.Xaml.sln"/>
+    	<Exec Command="dotnet restore $(SourceDir)\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj"/>
+    	<Exec Command="dotnet restore $(SourceDir)\Test\Portable.Xaml-tests-core.csproj"/>
     	<MSBuild Projects="$(SourceDir)\Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
 
 	</Target>
