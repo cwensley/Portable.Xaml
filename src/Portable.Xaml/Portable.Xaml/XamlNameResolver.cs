@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -146,7 +146,7 @@ namespace Portable.Xaml
 			// generate a name for it, only when needed.
 			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
 			if (xm != null)
-				name = (string) xm.Invoker.GetValue (xobj.RawValue);
+				name = (string) xm.Invoker.GetValue (xobj.Value);
 			else
 				name = "__ReferenceID" + used_reference_ids++;
 			un.Name = name;

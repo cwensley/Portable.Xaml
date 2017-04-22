@@ -87,12 +87,8 @@ namespace Portable.Xaml
 		
 		public XamlXmlWriter (XmlWriter xmlWriter, XamlSchemaContext schemaContext, XamlXmlWriterSettings settings)
 		{
-			if (xmlWriter == null)
-				throw new ArgumentNullException ("xmlWriter");
-			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
-			this.w = xmlWriter;
-			this.sctx = schemaContext;
+			this.w = xmlWriter ?? throw new ArgumentNullException(nameof(xmlWriter));
+			this.sctx = schemaContext ?? throw new ArgumentNullException(nameof(schemaContext));
 			this.settings = settings ?? new XamlXmlWriterSettings ();
 			var manager = new XamlWriterStateManager<XamlXmlWriterException, InvalidOperationException> (true);
 			intl = new XamlXmlWriterInternal (xmlWriter, sctx, manager);

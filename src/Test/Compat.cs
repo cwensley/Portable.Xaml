@@ -51,6 +51,14 @@ namespace MonoTests.Portable.Xaml
 		public static Type GetTypeInfo(this Type type) => type;
 #endif
 
+#if PCL136
+		public static Assembly GetAssembly(this Type type) => type.Assembly;
+		public static bool GetIsGenericType(this Type type) => type.IsGenericType;
+#else
+		public static Assembly GetAssembly(this Type type) => type.GetTypeInfo().Assembly;
+		public static bool GetIsGenericType(this Type type) => type.GetTypeInfo().IsGenericType;
+#endif
+
 		public static string UpdateXml(this string str)
 		{
 			return str.Replace("net_4_0", Compat.Version)
@@ -62,7 +70,18 @@ namespace MonoTests.Portable.Xaml
 				.Replace("\n", Environment.NewLine);
 		}
 
-        public static bool IsMono
+		public static string UpdateJson(this string str)
+		{
+			return str.Replace("net_4_0", Compat.Version)
+				.Replace("net_4_5", Compat.Version)
+				.Replace("clr-namespace:Portable.Xaml;assembly=Portable.Xaml", $"clr-namespace:{Compat.Namespace};assembly={Compat.Namespace}")
+				.Replace($" px:", $" {Compat.Prefix}:")
+				.Replace($"$ns:px", $"$ns:{Compat.Prefix}")
+				.Replace("\r", "")
+				.Replace("\n", Environment.NewLine);
+		}
+
+		public static bool IsMono
         {
             get { return Type.GetType("Mono.Runtime", false) != null; }
         }
@@ -71,7 +90,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			return Path.Combine (
 #if !WINDOWS_UWP
-				Path.GetDirectoryName (typeof(Compat).GetTypeInfo().Assembly.Location),
+				Path.GetDirectoryName (typeof(Compat).GetAssembly().Location),
 #endif
 				"XmlFiles",
 				fileName);

@@ -42,7 +42,7 @@ namespace Portable.Xaml.Schema
 		
 		public XamlTypeInvoker (XamlType type)
 		{
-			if (type == null)
+			if (ReferenceEquals(type, null))
 				throw new ArgumentNullException ("type");
 			Type = type;
 		}
@@ -72,7 +72,7 @@ namespace Portable.Xaml.Schema
 
 		void ThrowIfUnknown ()
 		{
-			if (Type == null || Type.UnderlyingType == null)
+			if (ReferenceEquals(Type, null) || Type.UnderlyingType == null)
 				throw new NotSupportedException (string.Format ("Current operation is valid only when the underlying type on a XamlType is known, but it is unknown for '{0}'", Type));
 		}
 
@@ -102,20 +102,7 @@ namespace Portable.Xaml.Schema
 					return;
 				}
 
-				MethodInfo mi = LookupAddCollectionMethod(Type, collectionType, itemType);
-				if (mi == null)
-					throw new InvalidOperationException($"The collection type '{collectionType}' does not have 'Add' method");
-
-				if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
-				{
-					addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
-					Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCallExpression());
-				}
-				else
-				{
-					addDelegate = mi.BuildCallExpression();
-				}
-				cache[key] = addDelegate;
+				addDelegate = CreateAddDelegate(instance, item, collectionType, itemType, key, mode);
 				addDelegate(instance, item);
 			}
 			else
@@ -134,6 +121,27 @@ namespace Portable.Xaml.Schema
 				cache[key] = mi;
 				mi.Invoke(instance, new object[] { item });
 			}
+		}
+
+		Action<object, object> CreateAddDelegate(object instance, object item, Type collectionType, Type itemType, Tuple<Type, Type> key, XamlInvokerOptions mode)
+		{
+			// this is separate as the anonymous types are instantiated at the beginning of the method
+			Action<object, object> addDelegate;
+			MethodInfo mi = LookupAddCollectionMethod(Type, collectionType, itemType);
+			if (mi == null)
+				throw new InvalidOperationException($"The collection type '{collectionType}' does not have 'Add' method");
+
+			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
+			{
+				addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
+				Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCallExpression());
+			}
+			else
+			{
+				addDelegate = mi.BuildCallExpression();
+			}
+			cache[key] = addDelegate;
+			return addDelegate;
 		}
 
 		MethodInfo LookupAddCollectionMethod(XamlType type, Type collectionType, Type itemType)

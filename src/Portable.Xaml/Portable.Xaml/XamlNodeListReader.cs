@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -53,7 +53,7 @@ namespace Portable.Xaml
 
 		public override XamlMember Member
 		{
-			get { return NodeType == XamlNodeType.StartMember ? node.Member.Member : null; }
+			get { return NodeType == XamlNodeType.StartMember ? node.Member : null; }
 		}
 
 		public override NamespaceDeclaration Namespace

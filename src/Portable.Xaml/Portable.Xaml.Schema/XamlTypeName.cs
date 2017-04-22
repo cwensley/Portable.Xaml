@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -198,9 +198,10 @@ namespace Portable.Xaml.Schema
 			Namespace = xamlType.PreferredXamlNamespace;
 			Name = xamlType.Name;
 			if (xamlType.TypeArguments != null && xamlType.TypeArguments.Count > 0) {
-				var l = new List<XamlTypeName> ();
-				l.AddRange (from x in xamlType.TypeArguments select new XamlTypeName (x));
-				TypeArguments = l;
+				TypeArguments = xamlType
+					.TypeArguments
+					.Select(x => new XamlTypeName (x))
+					.ToList();
 			}
 		}
 		
@@ -232,7 +233,7 @@ namespace Portable.Xaml.Schema
 			return ToString (null);
 		}
 
-		public string ToString (INamespacePrefixLookup prefixLookup)
+		public string ToString(INamespacePrefixLookup prefixLookup)
 		{
 			if (Namespace == null)
 				throw new InvalidOperationException ("Namespace must be set before calling ToString method.");

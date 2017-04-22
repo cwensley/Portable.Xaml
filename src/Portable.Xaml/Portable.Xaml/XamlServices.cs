@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -94,9 +94,10 @@ namespace Portable.Xaml
 				Save (xw, instance);
 		}
 
+		static XamlSchemaContextSettings s_settings = new XamlSchemaContextSettings { InvokerOptions = XamlInvokerOptions.None };
 		public static void Save (XmlWriter xmlWriter, object instance)
 		{
-			Save (new XamlXmlWriter (xmlWriter, new XamlSchemaContext ()), instance);
+			Save (new XamlXmlWriter (xmlWriter, new XamlSchemaContext(s_settings)), instance);
 		}
 
 		public static void Save (XamlWriter xamlWriter, object instance)

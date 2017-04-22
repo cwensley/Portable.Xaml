@@ -162,9 +162,9 @@ namespace Portable.Xaml
 
 		public static bool IsContentValue (this XamlMember member, IValueSerializerContext vsctx)
 		{
-			if (member == XamlLanguage.Initialization)
+			if (ReferenceEquals(member, XamlLanguage.Initialization))
 				return true;
-			if (member == XamlLanguage.PositionalParameters || member == XamlLanguage.Arguments)
+			if (ReferenceEquals(member, XamlLanguage.PositionalParameters) || ReferenceEquals(member, XamlLanguage.Arguments))
 				return false; // it's up to the argument (no need to check them though, as IList<object> is not of value)
 			var typeConverter = member.TypeConverter;
 			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof(string)))
@@ -199,7 +199,7 @@ namespace Portable.Xaml
 			// FIXME: find out why only TypeExtension and StaticExtension yield this directive. Seealso XamlObjectReaderTest.Read_CustomMarkupExtension*()
 			return  type == XamlLanguage.Type ||
 			type == XamlLanguage.Static ||
-			(type.ConstructionRequiresArguments && ExaminePositionalParametersApplicable (type, vsctx));
+				(type.ConstructionRequiresArguments && ExaminePositionalParametersApplicable (type, vsctx));
 		}
 
 		static bool ExaminePositionalParametersApplicable (this XamlType type, IValueSerializerContext vsctx)
@@ -382,9 +382,9 @@ namespace Portable.Xaml
 		internal static int CompareMembers(XamlMember m1, XamlMember m2)
 		{
 			if (ReferenceEquals(m1, null))
-				return ReferenceEquals(m2, null) ? 0 : 1;
+				return ReferenceEquals(m2, null) ? 0 : -1;
 			if (ReferenceEquals(m2, null))
-				return 0;
+				return 1;
 
 			// these come before non-content properties
 
@@ -407,7 +407,6 @@ namespace Portable.Xaml
 			// these come AFTER non-content properties
 
 			// 1. initialization
-
 			if (ReferenceEquals(m1, XamlLanguage.Initialization))
 				return ReferenceEquals(m2, XamlLanguage.Initialization) ? 0 : 1;
 			if (ReferenceEquals(m2, XamlLanguage.Initialization))
@@ -425,16 +424,8 @@ namespace Portable.Xaml
 			if (ReferenceEquals(m2, XamlLanguage.Name))
 				return -1;
 
-			// 4. ContentProperty is always returned last
-			if (m1.DeclaringType?.ContentProperty == m1)
-			{
-				if (m2.DeclaringType?.ContentProperty != m2)
-					return 1;
-			}
-			else if (m2.DeclaringType?.ContentProperty == m2)
-				return -1;
 
-			// preoperties that (probably) require a child node should come last so we can
+			// 4. Properties that (probably) require a child node should come last so we can
 			// put as many in the start tag as possible.
 			if (m1.RequiresChildNode)
 			{
@@ -443,7 +434,6 @@ namespace Portable.Xaml
 			}
 			else if (m2.RequiresChildNode)
 				return -1;
-
 
 			// then, compare names.
 			return String.CompareOrdinal(m1.Name, m2.Name);

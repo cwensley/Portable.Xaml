@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using BenchmarkDotNet.Attributes;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,6 @@ using System.Diagnostics;
 
 namespace Portable.Xaml.Benchmark
 {
-	[Config(typeof(Config))]
 	public abstract class LoadBenchmark : IXamlBenchmark
 	{
 		public abstract string TestName { get; }

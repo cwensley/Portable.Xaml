@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -407,8 +407,8 @@ namespace Portable.Xaml
 
 		protected override void OnWriteStartMember (XamlMember property)
 		{
-			if (property == XamlLanguage.PositionalParameters ||
-			    property == XamlLanguage.Arguments)
+			if (ReferenceEquals(property, XamlLanguage.PositionalParameters) ||
+			    ReferenceEquals(property, XamlLanguage.Arguments))
 			{
 				var state = object_states.Peek();
 				escaped_objects.Push(state.Value);
@@ -418,7 +418,7 @@ namespace Portable.Xaml
 			// FIXME: this condition needs to be examined. What is known to be prevented are: PositionalParameters, Initialization and Base (the last one sort of indicates there's a lot more).
 			else
 			{
-				if (!property.IsDirective || property == XamlLanguage.Name) // x:Name requires an object instance
+				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
 					InitializeObjectIfRequired(false);
 			}
 		}
@@ -430,29 +430,37 @@ namespace Portable.Xaml
 			var xm = CurrentMember;
 			var state = object_states.Peek ();
 
-			if (xm == XamlLanguage.PositionalParameters) {
+			if (ReferenceEquals(xm, XamlLanguage.PositionalParameters)) {
 				var l = (List<object>) state.Value;
 				state.Value = escaped_objects.Pop ();
 				state.IsInstantiated = true;
 				PopulateObject (true, l);
 				return;
-			} else if (xm == XamlLanguage.Arguments) {
+			} else if (ReferenceEquals(xm, XamlLanguage.Arguments)) {
 				if (state.FactoryMethod != null) {
 					var contents = (List<object>) state.Value;
-					var mi = state.Type.UnderlyingType.GetRuntimeMethods().FirstOrDefault(r => r.Name == state.FactoryMethod && r.IsStatic && r.GetParameters().Length == contents.Count);
-					if (mi == null)
+					bool found = false;
+					foreach (var mi in state.Type.UnderlyingType.GetRuntimeMethods())
+					{
+						if (mi.Name == state.FactoryMethod && mi.IsStatic && mi.GetParameters().Length == contents.Count)
+						{
+							state.Value = mi.Invoke(null, contents.ToArray());
+							found = true;
+							break;
+						}
+					}
+					if (!found)
 						throw new XamlObjectWriterException (String.Format ("Specified static factory method '{0}' for type '{1}' was not found", state.FactoryMethod, state.Type));
-					state.Value = mi.Invoke (null, contents.ToArray ());
 				}
 				else
 					PopulateObject (true, (List<object>) state.Value);
 				state.IsInstantiated = true;
 				escaped_objects.Pop ();
-			} else if (xm == XamlLanguage.Initialization) {
+			} else if (ReferenceEquals(xm, XamlLanguage.Initialization)) {
 				// ... and no need to do anything. The object value to pop *is* the return value.
 			} else {
 				XamlMember aliasedName = state.Type.GetAliasedProperty (XamlLanguage.Name);
-				if (xm == XamlLanguage.Name || xm == aliasedName) {
+				if (ReferenceEquals(xm, XamlLanguage.Name) || xm == aliasedName) {
 					string name = (string) CurrentMemberState.Value;
 					name_scope.RegisterName (name, state.Value);
 
@@ -467,7 +475,7 @@ namespace Portable.Xaml
 
 		void SetValue (XamlMember member, object value)
 		{
-			if (member == XamlLanguage.FactoryMethod)
+			if (ReferenceEquals(member, XamlLanguage.FactoryMethod))
 				object_states.Peek().FactoryMethod = (string)value;
 			else if (member.IsDirective)
 				return;
@@ -533,7 +541,7 @@ namespace Portable.Xaml
 			var parent = state.Value;
 			var xt = state.Type;
 			var xm = ms.Member;
-			if (xm == XamlLanguage.Initialization) {
+			if (ReferenceEquals(xm, XamlLanguage.Initialization)) {
 				state.Value = GetCorrectlyTypedValue (null, xt, obj);
 				state.IsInstantiated = true;
 			} else if (xm.Type.IsXData) {
@@ -542,11 +550,11 @@ namespace Portable.Xaml
 				if (ixser != null)
 					ixser.ReadXml ((XmlReader) xdata.XmlReader);
 			}
-			else if (xm == XamlLanguage.Base)
+			else if (ReferenceEquals(xm, XamlLanguage.Base))
 				ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
-			else if (xm == XamlLanguage.Name || xm == xt.GetAliasedProperty (XamlLanguage.Name))
+			else if (ReferenceEquals(xm, XamlLanguage.Name) || xm == xt.GetAliasedProperty (XamlLanguage.Name))
 				ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
-			else if (xm == XamlLanguage.Key)
+			else if (ReferenceEquals(xm, XamlLanguage.Key))
 				state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
 			else {
 				if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
@@ -559,9 +567,9 @@ namespace Portable.Xaml
 		bool AddToCollectionIfAppropriate (XamlType xt, XamlMember xm, object parent, object obj, object keyObj)
 		{
 			var mt = xm.Type;
-			if (xm == XamlLanguage.Items ||
-			    xm == XamlLanguage.PositionalParameters ||
-			    xm == XamlLanguage.Arguments) {
+			if (ReferenceEquals(xm, XamlLanguage.Items) ||
+				ReferenceEquals(xm, XamlLanguage.PositionalParameters) ||
+				ReferenceEquals(xm, XamlLanguage.Arguments)) {
 
 				if (xt.IsDictionary)
 					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
@@ -573,58 +581,57 @@ namespace Portable.Xaml
 				return false;
 		}
 
-		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value)
-		{
-			try {
-				return DoGetCorrectlyTypedValue (xm, xt, value);
-			} catch (XamlObjectWriterException) {
-				throw;
-			} catch (Exception ex) {
-				// For + ex.Message, the runtime should print InnerException message like .NET does.
-				throw new XamlObjectWriterException (String.Format ("Could not convert object \'{0}' (of type {1}) to {2}: ", value, value != null ? (object) value.GetType () : "(null)", xt)  + ex.Message, ex);
-			}
-		}
 
 		// It expects that it is not invoked when there is no value to 
 		// assign.
 		// When it is passed null, then it returns a default instance.
 		// For example, passing null as Int32 results in 0.
 		// But do not immediately try to instantiate with the type, since the type might be abstract.
-		object DoGetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value)
+		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value)
 		{
-			if (value == null) {
-				if (xt.IsContentValue (service_provider)) // it is for collection/dictionary key and item
-					return null;
-				else
-					return xt.IsNullable ? null : xt.Invoker.CreateInstance (new object [0]);
+			try
+			{
+				if (value == null)
+				{
+					if (xt.IsContentValue(service_provider)) // it is for collection/dictionary key and item
+						return null;
+					else
+						return xt.IsNullable ? null : xt.Invoker.CreateInstance(new object[0]);
+				}
+				if (ReferenceEquals(xt, null))
+					return value;
+
+				// Not sure if this is really required though...
+				var vt = sctx.GetXamlType(value.GetType());
+				if (vt.CanAssignTo(xt))
+					return value;
+
+				// FIXME: this could be generalized by some means, but I cannot find any.
+				if (xt.UnderlyingType == typeof(XamlType) && value is string)
+					value = ResolveTypeFromName((string)value);
+
+				// FIXME: this could be generalized by some means, but I cannot find any.
+				if (xt.UnderlyingType == typeof(Type))
+					value = new TypeExtension((string)value).ProvideValue(service_provider);
+				if (ReferenceEquals(xt, XamlLanguage.Type) && value is string)
+					value = new TypeExtension((string)value);
+
+				if (IsAllowedType(xt, value))
+					return value;
+
+				var xtc = xm?.TypeConverter ?? xt.TypeConverter;
+				if (xtc != null && value != null)
+				{
+					var tc = xtc.ConverterInstance;
+					if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
+						value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
+					return value;
+				}
 			}
-			if (xt == null)
-				return value;
-
-			// Not sure if this is really required though...
-			var vt = sctx.GetXamlType (value.GetType ());
-			if (vt.CanAssignTo (xt))
-				return value;
-
-			// FIXME: this could be generalized by some means, but I cannot find any.
-			if (xt.UnderlyingType == typeof (XamlType) && value is string)
-				value = ResolveTypeFromName ((string) value);
-
-			// FIXME: this could be generalized by some means, but I cannot find any.
-			if (xt.UnderlyingType == typeof (Type))
-				value = new TypeExtension ((string) value).ProvideValue (service_provider);
-			if (xt == XamlLanguage.Type && value is string)
-				value = new TypeExtension ((string) value);
-			
-			if (IsAllowedType (xt, value))
-				return value;
-
-			var xtc = xm?.TypeConverter ?? xt.TypeConverter;
-			if (xtc != null && value != null) {
-				var tc = xtc.ConverterInstance;
-				if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
-					value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
-				return value;
+			catch (Exception ex)
+			{
+				// For + ex.Message, the runtime should print InnerException message like .NET does.
+				throw new XamlObjectWriterException(String.Format("Could not convert object \'{0}' (of type {1}) to {2}: ", value, value != null ? (object)value.GetType() : "(null)", xt) + ex.Message, ex);
 			}
 
 			throw new XamlObjectWriterException (String.Format ("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object) value.GetType () : "(null)", xt, xm));
@@ -638,10 +645,10 @@ namespace Portable.Xaml
 
 		static bool IsAllowedType (XamlType xt, object value)
 		{
-			return  xt == null ||
+			return ReferenceEquals(xt, null) ||
 				xt.UnderlyingType == null ||
 				xt.UnderlyingType.GetTypeInfo().IsAssignableFrom (value.GetType().GetTypeInfo()) ||
-				value == null && xt == XamlLanguage.Null ||
+				value == null && ReferenceEquals(xt, XamlLanguage.Null) ||
 				xt.IsMarkupExtension && IsAllowedType (xt.MarkupExtensionReturnType, value);
 		}
 		

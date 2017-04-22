@@ -88,6 +88,7 @@ namespace Portable.Xaml
 		Dictionary<Pair, XamlDirective> xaml_directives = new Dictionary<Pair, XamlDirective>();
 		Dictionary<object, XamlMember> member_cache = new Dictionary<object, XamlMember>();
 		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
+		Dictionary<string, AssemblyInfo> assembly_cache = new Dictionary<string, AssemblyInfo>();
 
 		[EnhancedXaml]
 		public XamlInvokerOptions InvokerOptions { get; private set; } = XamlInvokerOptions.DeferCompile;
@@ -329,6 +330,33 @@ namespace Portable.Xaml
 			return t;
 		}
 
+		Dictionary<string, XamlType> typename_lookup = new Dictionary<string, XamlType>();
+
+		internal XamlType GetXamlType(string fullTypeName)
+		{
+			if (typename_lookup.TryGetValue(fullTypeName, out XamlType xamlType))
+				return xamlType;
+			var idx = fullTypeName.IndexOf(',');
+			if (idx == -1)
+				return null;
+			var name = fullTypeName.Substring(0, idx).Trim();
+			var assemblyName = fullTypeName.Substring(idx + 1).Trim();
+			var assembly = OnAssemblyResolve(assemblyName);
+			if (assembly == null)
+				return null;
+
+			var type = assembly.GetType(name);
+			if (type == null)
+				return null;
+			xamlType = GetXamlType(type);
+			if (ReferenceEquals(xamlType, null) || xamlType.IsUnknown)
+				return null;
+
+			if (!ReferenceEquals(xamlType, null))
+				typename_lookup[fullTypeName] = xamlType;
+			return xamlType;
+		}
+
 		public virtual XamlType GetXamlType(Type type)
 		{
 			XamlType xt;
@@ -390,17 +418,27 @@ namespace Portable.Xaml
 
 		protected internal virtual Assembly OnAssemblyResolve(string assemblyName)
 		{
+			if (assembly_cache.TryGetValue(assemblyName, out AssemblyInfo info))
+				return info.Assembly;
+
 			var aname = new AssemblyName(assemblyName);
-			var ainfo = AssembliesInScope.FirstOrDefault(r => r.Name.Matches(aname));
-			if (ainfo?.Assembly != null)
-				return ainfo.Assembly;
+			foreach (var ainfo in AssembliesInScope)
+			{
+				if (ainfo.Name.Matches(aname))
+				{
+					assembly_cache[assemblyName] = ainfo;
+					return ainfo.Assembly;
+				}
+			}
 
 			// fallback if not found
 #if PCL136
-			return Assembly.Load(assemblyName);
+			var assembly = Assembly.Load(assemblyName);
 #else
-			return Assembly.Load(aname);
+			var assembly = Assembly.Load(aname);
 #endif
+			assembly_cache[assemblyName] = new AssemblyInfo { Assembly = assembly };
+			return assembly;
 		}
 
 		public virtual bool TryGetCompatibleXamlNamespace(string xamlNamespace, out string compatibleNamespace)
@@ -551,9 +589,9 @@ namespace Portable.Xaml
 			if (xmlNamespace == XamlLanguage.Xaml2006Namespace)
 			{
 				var xt = XamlLanguage.SpecialNames.Find(xmlLocalName, xmlNamespace);
-				if (xt == null)
+				if (ReferenceEquals(xt, null))
 					xt = XamlLanguage.AllTypes.FirstOrDefault(t => TypeMatches(t, xmlNamespace, xmlLocalName, typeArguments));
-				if (xt != null)
+				if (!ReferenceEquals(xt, null))
 					return xt;
 			}
 

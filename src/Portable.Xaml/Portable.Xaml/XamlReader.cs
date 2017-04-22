@@ -22,6 +22,7 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Portable.Xaml
 {
@@ -59,13 +60,43 @@ namespace Portable.Xaml
 			return new XamlSubtreeReader(this);
 		}
 
-#if NETSTANDARD
-		/* For debugging */
-		public void Dump()
+#if DEBUG
+		/* For debugging purposes */
+		[EnhancedXaml]
+		public void Dump(Action<string> write)
 		{
+			var sb = new StringBuilder();
 			while (Read())
 			{
-				Console.WriteLine($"{NodeType}: Type: {Type}, Member: {Member}, Value: {Value}");
+				sb.Clear();
+				sb.Append(NodeType);
+				sb.Append(": ");
+				if (Type != null)
+				{
+					sb.Append(" Type:");
+					sb.Append(Type);
+				}
+				if (Member != null)
+				{
+					sb.Append(" Member:");
+					sb.Append(Member);
+				}
+				if (Namespace != null)
+				{
+					sb.Append(" Namespace:");
+					if (Namespace.Prefix != null)
+					{
+						sb.Append(Namespace.Prefix);
+						sb.Append(":");
+					}
+					sb.Append(Namespace.Namespace);
+				}
+				if (!ReferenceEquals(Value, null))
+				{
+					sb.Append(" Value:");
+					sb.Append(Value);
+				}
+				write(sb.ToString());
 			}
 		}
 #endif

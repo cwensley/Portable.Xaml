@@ -25,42 +25,6 @@ namespace Portable.Xaml
 				: new InvalidOperationException($"Instance of type {instanceType} is not assignable to target type {targetType}");
 		}
 
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		static void CheckParameters(Type declaringType, object instance)
-		{
-			var instanceType = instance.GetType();
-			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
-				throw TargetException(declaringType, instanceType);
-		}
-
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		static void CheckParameters(Type declaringType, Type propertyType, object instance, object value)
-		{
-			var instanceType = instance.GetType();
-			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
-				throw TargetException(declaringType, instanceType);
-			if (value != null && !propertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
-				throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
-		}
-
-#if PCL259
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-		static void CheckParameters(Type declaringType, Type keyType, Type propertyType, object instance, object key, object value)
-		{
-			var instanceType = instance.GetType();
-			if (!declaringType.GetTypeInfo().IsAssignableFrom(instanceType.GetTypeInfo()))
-				throw TargetException(declaringType, instanceType);
-			if (value != null && !propertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo()))
-				throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
-			if (key != null && !keyType.GetTypeInfo().IsAssignableFrom(key.GetType().GetTypeInfo()))
-				throw new ArgumentException($"Key of type {key.GetType()} cannot be assigned to member with type {keyType}", nameof(key));
-		}
-
 		public static Func<object, object> BuildGetExpression(this MethodInfo getter)
 		{
 			var declaringType = getter.DeclaringType;
@@ -73,10 +37,13 @@ namespace Portable.Xaml
 
 			var exp = Expression.Lambda<Func<object, object>>(block, s_InstanceExpression).Compile();
 
+			var declaringTypeInfo = declaringType.GetTypeInfo();
 			return (instance) =>
 			{
-				CheckParameters(declaringType, instance);
-				return exp(instance);
+				var instanceType = instance.GetType();
+				if (declaringTypeInfo.IsAssignableFrom(instanceType.GetTypeInfo()))
+					return exp(instance);
+				throw TargetException(declaringType, instanceType);
 			};
 		}
 
@@ -116,10 +83,16 @@ namespace Portable.Xaml
 				block = Expression.Call(instanceCast, method, valueCast);
 
 
+			var declaringTypeInfo = declaringType.GetTypeInfo();
+			var propertyTypeInfo = propertyType.GetTypeInfo();
 			var exp = Expression.Lambda<Action<object, object>>(block, s_ParameterExpressions1).Compile();
 			return (instance, value) =>
 			{
-				CheckParameters(declaringType, propertyType, instance, value);
+				var instanceType = instance.GetType();
+				if (!declaringTypeInfo.IsAssignableFrom(instanceType.GetTypeInfo()))
+					throw TargetException(declaringType, instanceType);
+				if (value != null && !propertyTypeInfo.IsAssignableFrom(value.GetType().GetTypeInfo()))
+					throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
 				exp(instance, value);
 			};
 		}
@@ -168,9 +141,18 @@ namespace Portable.Xaml
 
 			var exp = Expression.Lambda<Action<object, object, object>>(block, s_ParameterExpressions2).Compile();
 
+			var declaringTypeInfo = declaringType.GetTypeInfo();
+			var propertyTypeInfo = propertyType.GetTypeInfo();
+			var keyTypeInfo = keyType.GetTypeInfo();
 			return (instance, key, value) =>
 			{
-				CheckParameters(declaringType, keyType, propertyType, instance, key, value);
+				var instanceType = instance.GetType();
+				if (!declaringTypeInfo.IsAssignableFrom(instanceType.GetTypeInfo()))
+					throw TargetException(declaringType, instanceType);
+				if (value != null && !propertyTypeInfo.IsAssignableFrom(value.GetType().GetTypeInfo()))
+					throw new ArgumentException($"Value of type {value.GetType()} cannot be assigned to member with type {propertyType}", nameof(value));
+				if (key != null && !keyTypeInfo.IsAssignableFrom(key.GetType().GetTypeInfo()))
+					throw new ArgumentException($"Key of type {key.GetType()} cannot be assigned to member with type {keyType}", nameof(key));
 				exp(instance, key, value);
 			};
 		}

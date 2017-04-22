@@ -51,6 +51,7 @@ namespace Portable.Xaml
 			public const int IsDefaultEvent = 1 << 10;
 			public const int IsDirective = 1 << 11;
 			public const int ShouldSerialize = 1 << 12;
+			public const int RequiresChildNode = 1 << 13;
 		}
 		XamlType target_type;
 		MemberInfo underlying_member;
@@ -501,12 +502,25 @@ namespace Portable.Xaml
 
 		internal bool IsConstructorArgument => flags.Get(MemberFlags.IsConstructorArgument) ?? flags.Set(MemberFlags.IsConstructorArgument, LookupIsConstructorArgument());
 
-		internal virtual bool RequiresChildNode => Type.IsCollection || Type.IsDictionary || (IsWritePublic && !Type.CanConvertFrom(XamlLanguage.String));
-
 		bool LookupIsConstructorArgument()
 		{
 			var ap = CustomAttributeProvider;
 			return ap != null && ap.GetCustomAttributes(typeof(ConstructorArgumentAttribute), false).Length > 0;
+		}
+
+		internal virtual bool RequiresChildNode => flags.Get(MemberFlags.RequiresChildNode) ?? flags.Set(MemberFlags.RequiresChildNode, LookupRequiresChildNode());
+
+		bool LookupRequiresChildNode()
+		{
+			// if we can convert to & from string, we can write it as an attribute
+			if (DeclaringType?.ContentProperty == this)
+				return true;
+			var canConvert = Type.CanConvertFrom(XamlLanguage.String) && Type.CanConvertTo(XamlLanguage.String);
+			if (IsWritePublic && canConvert)
+				return false;
+			return Type.IsCollection
+				|| Type.IsDictionary 
+				|| (IsWritePublic && !canConvert);
 		}
 	}
 }
