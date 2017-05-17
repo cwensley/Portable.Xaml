@@ -1,3 +1,3 @@
 #!/bin/bash
 
-xbuild /t:Package Build.proj
+msbuild /t:Package Build.proj

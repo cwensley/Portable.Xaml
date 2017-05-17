@@ -17,10 +17,23 @@ This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
 		</description>
 		<copyright>(c) Various Mono authors</copyright>
 		<tags>cross platform xaml</tags>
+		<dependencies>
+            <group targetFramework=".NETFramework4.5" />
+            <group targetFramework=".NETPortable4.5-Profile259" />
+            <group targetFramework=".NETPortable4.0-Profile136" />
+            <group targetFramework=".NETStandard1.3">
+                <dependency id="Microsoft.CSharp" version="4.3.0" />
+                <dependency id="NETStandard.Library" version="1.6.1" />
+                <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
+                <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" />
+                <dependency id="System.Xml.XmlDocument" version="4.3.0" />
+            </group>
+        </dependencies>
 	</metadata>
 	<files>
-		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib\portable-net40+sl50+win+wp80+MonoAndroid10+xamarinios10+MonoTouch10" />
-		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10" />
+		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib\net45" />
+		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib\portable-net40+sl5+win8+wpa81+wp8" />
+		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib\portable-net45+win8+wpa81+wp8" />
 		<file src="../../artifacts/$configuration$/netstandard1.3/Portable.Xaml.dll" target="lib\netstandard1.3" />
 		<file src="../../LICENSE.txt" target="LICENSE.txt" />
 	</files>
