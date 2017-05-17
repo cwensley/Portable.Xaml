@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -334,7 +334,7 @@ namespace MonoTests.Portable.Xaml
 			{
 				//Assert.IsNull (d.TypeConverter, "#12")
 			}
-			else if (type.IsGenericType || name == "_Initialization" || name == "_UnknownContent")
+			else if (type.GetTypeInfo().IsGenericType || name == "_Initialization" || name == "_UnknownContent")
 				Assert.IsNull (d.TypeConverter, "#12");
 			else
 				Assert.IsNotNull (d.TypeConverter, "#12");

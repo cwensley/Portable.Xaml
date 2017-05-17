@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Portable.Xaml.ComponentModel
 {

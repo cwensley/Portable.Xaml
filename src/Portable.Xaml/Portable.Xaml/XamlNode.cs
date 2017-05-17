@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -51,13 +51,6 @@ namespace Portable.Xaml
 			return this;
 		}
 
-		public XamlNodeInfo Set(XamlNodeInfo node)
-		{
-			NodeType = node.NodeType;
-			Value = node.Value;
-			return this;
-		}
-
 		public XamlNodeInfo(XamlNodeType nodeType, XamlObject value)
 		{
 			NodeType = nodeType;
@@ -90,7 +83,24 @@ namespace Portable.Xaml
 
 		public object Value { get; private set; }
 
-		public XamlNodeInfo Copy() => new XamlNodeInfo().Set(this);
+		public XamlNodeInfo Copy()
+		{
+			var node = new XamlNodeInfo();
+			node.NodeType = NodeType;
+			node.Value = Value;
+			var nm = node.Value as XamlNodeMember;
+			if (nm != null)
+				node.Value = new XamlNodeMember(nm.Owner, nm.Member);
+			var obj = node.Value as XamlObject;
+			if (obj != null)
+				node.Value = new XamlObject(obj.Type, obj.Value);
+			return node;
+		}
+
+		public override string ToString()
+		{
+			return $"[XamlNodeInfo: NodeType={NodeType}, Value={Value}]";
+		}
 	}
 
 	struct XamlNodeLineInfo
@@ -221,22 +231,25 @@ namespace Portable.Xaml
 				yield break;
 			}
 
-			foreach (var m in type.GetAllMembers ()) {
-				// do not read constructor arguments twice (they are written inside Arguments).
-				if (args != null && args.Contains (m))
-					continue;
-				// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
-				if (!m.IsReadPublic)
-					continue;
-				if (!m.IsWritePublic &&
-				    !m.Type.IsXData &&
-				    !m.Type.IsArray &&
-				    !m.Type.IsCollection &&
-				    !m.Type.IsDictionary)
-					continue;
+			foreach (var m in type.GetAllMembers())
+				{
+					// do not read constructor arguments twice (they are written inside Arguments).
+					if (args != null && args.Contains(m))
+						continue;
+					// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
+					if (!m.IsReadPublic
+				        || !m.ShouldSerialize)
+						continue;
+					
+					if (!m.IsWritePublic &&
+						!m.Type.IsXData &&
+						!m.Type.IsArray &&
+						!m.Type.IsCollection &&
+						!m.Type.IsDictionary)
+						continue;
 
-				yield return m;
-			}
+					yield return m;
+				}
 			
 			if (type.IsCollection)
 				yield return XamlLanguage.Items;

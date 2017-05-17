@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -218,7 +218,9 @@ namespace MonoTests.Portable.Xaml.Schema
 				i.AddToCollection (new ArrayExtension (), 5);
 				Assert.Fail ("not supported operation.");
 			} catch (NotSupportedException) {
+#if !WINDOWS_UWP
 			} catch (TargetException) {
+#endif
 				// .NET throws this, but the difference should not really matter.
 			}
 		}

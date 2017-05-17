@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -71,7 +71,7 @@ namespace MonoTests.Portable.Xaml
 			
 			var rsettings = new XamlXmlReaderSettings ();
 			
-			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().Assembly.GetName ().Name);
+			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
 			using (var reader = new XamlXmlReader (new StringReader (xml), rsettings)) {
 				var wsettings = new XamlObjectWriterSettings ();
 				wsettings.RootObjectInstance = obj;

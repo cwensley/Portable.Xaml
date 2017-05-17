@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using Portable.Xaml.ComponentModel;
 using System.Reflection;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Portable.Xaml.Schema
 {
@@ -45,11 +46,14 @@ namespace Portable.Xaml.Schema
 			Name = name;
 		}
 
+		internal TConverterBase InitialConverterInstance { get; set; }
 		TConverterBase converter_instance;
-		public TConverterBase ConverterInstance {
-			get {
+		public TConverterBase ConverterInstance
+		{
+			get
+			{
 				if (converter_instance == null)
-					converter_instance = CreateInstance ();
+					converter_instance = CreateInstance();
 				return converter_instance;
 			}
 		}
@@ -81,25 +85,20 @@ namespace Portable.Xaml.Schema
 
 		protected virtual TConverterBase CreateInstance ()
 		{
+			if (InitialConverterInstance != null)
+				return InitialConverterInstance;
 			if (ConverterType == null)
 				return null;
 
 			if (!typeof (TConverterBase).GetTypeInfo().IsAssignableFrom (ConverterType.GetTypeInfo()))
 				throw new XamlSchemaException (String.Format ("ConverterType '{0}' is not derived from '{1}' type", ConverterType, typeof (TConverterBase)));
 
-			if (TargetType != null && TargetType.UnderlyingType != null) {
-				// special case: Enum
-				if (TargetType.UnderlyingType.GetTypeInfo().IsEnum)
-					return (TConverterBase) (object) new EnumConverter (TargetType.UnderlyingType);
-				// special case: Nullable<T>
-				if (TargetType.IsNullable && TargetType.UnderlyingType.GetTypeInfo().IsValueType)
-					return (TConverterBase) (object) new NullableConverter (TargetType.UnderlyingType);
-			}
+			if (ConverterType.GetTypeInfo().GetConstructors().Any(r => r.GetParameters().Length == 0))
+				return (TConverterBase) Activator.CreateInstance (ConverterType);
 
-			if (ConverterType.GetTypeInfo().GetConstructors().All(r => r.GetParameters().Length > 0))
-				return null;
-
-			return (TConverterBase) Activator.CreateInstance (ConverterType);
+			if (ConverterType.GetTypeInfo().GetConstructors().Any(r => r.GetParameters().Length == 1 && r.GetParameters()[0].ParameterType == typeof(Type)))
+				return (TConverterBase)Activator.CreateInstance(ConverterType, TargetType.UnderlyingType);
+			return null;
 		}
 
 		public override int GetHashCode ()

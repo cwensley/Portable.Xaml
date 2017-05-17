@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -38,6 +38,13 @@ using sc = System.ComponentModel;
 using System.Collections.Immutable;
 #endif
 
+#if NETSTANDARD
+using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
+using System.ComponentModel;
+using DateTimeConverter = System.ComponentModel.DateTimeConverter;
+#elif PCL
+using DateTimeConverter = Portable.Xaml.ComponentModel.DateTimeConverter;
+#endif
 
 #if PCL
 using Portable.Xaml.Markup;
@@ -322,6 +329,11 @@ namespace MonoTests.Portable.Xaml
 		public string Bar { get; set; }
 
 		public string Baz { internal get; set; }
+
+		public string WriteOnly
+		{
+			set { Baz = value; }
+		}
 
 		public string ReadOnly
 		{
@@ -890,7 +902,7 @@ namespace MonoTests.Portable.Xaml
 			AttachablePropertyServices.SetProperty(target, ProtectedIdentifier, value);
 		}
 
-		static Dictionary<object,List<EventHandler>> handlers = new Dictionary<object,List<EventHandler>>();
+		static Dictionary<object, List<EventHandler>> handlers = new Dictionary<object, List<EventHandler>>();
 
 		public static void AddXHandler(object target, EventHandler handler)
 		{
@@ -915,7 +927,7 @@ namespace MonoTests.Portable.Xaml
 		{
 		}
 
-		Dictionary<AttachableMemberIdentifier,object> props = new Dictionary<AttachableMemberIdentifier,object>();
+		Dictionary<AttachableMemberIdentifier, object> props = new Dictionary<AttachableMemberIdentifier, object>();
 
 		public int PropertyCount
 		{
@@ -1000,12 +1012,18 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class CustomEventArgs : EventArgs
+	{
+	}
+
 	public class EventStore
 	{
 		public bool Method1Invoked;
 
 		public event EventHandler<EventArgs> Event1;
 		public event Func<object> Event2;
+
+		public event EventHandler<CustomEventArgs> Event3;
 
 		public object Examine()
 		{
@@ -1043,7 +1061,7 @@ namespace MonoTests.Portable.Xaml
 		public object Examine()
 		{
 			if (Event1 != null)
-				Event1(this, default (TEventArgs));
+				Event1(this, default(TEventArgs));
 			if (Event2 != null)
 				return Event2();
 			else
@@ -1194,11 +1212,11 @@ namespace MonoTests.Portable.Xaml
 
 	public class DirectDictionaryContainer // for such xml that directly contains items in <*.Items> element.
 	{
-		public IDictionary<EnumValueType,int> Items { get; set; }
+		public IDictionary<EnumValueType, int> Items { get; set; }
 
 		public DirectDictionaryContainer()
 		{
-			this.Items = new Dictionary<EnumValueType,int>();
+			this.Items = new Dictionary<EnumValueType, int>();
 		}
 	}
 
@@ -1497,7 +1515,7 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
-	#if !PCL136
+#if !PCL136
 
 	public class ImmutableCollectionContainer
 	{

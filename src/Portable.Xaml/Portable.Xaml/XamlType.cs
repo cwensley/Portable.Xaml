@@ -1,4 +1,4 @@
-//
+﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -31,6 +31,7 @@ using Portable.Xaml.Schema;
 using System.Xml.Serialization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
@@ -79,83 +80,112 @@ namespace Portable.Xaml
 		IList<XamlMember> constructorArguments;
 		Dictionary<string, XamlMember> memberLookup;
 
-		public XamlType (Type underlyingType, XamlSchemaContext schemaContext)
-			: this (underlyingType, schemaContext, null)
+		public XamlType(Type underlyingType, XamlSchemaContext schemaContext)
+			: this(underlyingType, schemaContext, null)
 		{
 		}
 
-//		static readonly Type [] predefined_types = {
-//				typeof (XData), typeof (Uri), typeof (TimeSpan), typeof (PropertyDefinition), typeof (MemberDefinition), typeof (Reference)
-//			};
 
-		public XamlType (Type underlyingType, XamlSchemaContext schemaContext, XamlTypeInvoker invoker)
-			: this (schemaContext, invoker)
+		static readonly Type[] mscorlib_types = { 
+			Type.GetType("System.Collections.IList`1, System.Colletions.Generic", false), 
+			typeof(bool), 
+			Type.GetType("System.Collections.ArrayList, System.Colletions.NonGeneric", false) 
+		};
+
+		static readonly string[] mscorlib_assemblies = new string[] {
+			"System.Collections.Generic",
+			"System.Private.CoreLib",
+			"System.Collections.NonGeneric"
+		};
+
+			/*mscorlib_types.Where(r => r != null)
+		                                                               .Select(r => r.GetTypeInfo().Assembly)
+		                                                               .Distinct()
+		                                                               .ToArray();*/
+		//		static readonly Type [] predefined_types = {
+		//				typeof (XData), typeof (Uri), typeof (TimeSpan), typeof (PropertyDefinition), typeof (MemberDefinition), typeof (Reference)
+		//			};
+
+		public XamlType(Type underlyingType, XamlSchemaContext schemaContext, XamlTypeInvoker invoker)
+			: this(schemaContext, invoker)
 		{
 			if (underlyingType == null)
-				throw new ArgumentNullException ("underlyingType");
+				throw new ArgumentNullException("underlyingType");
 			type = underlyingType;
 			underlying_type = type;
 
 			XamlType xt;
-			if (XamlLanguage.InitializingTypes) {
+			if (XamlLanguage.InitializingTypes)
+			{
 				// These are special. Only XamlLanguage members are with shorthand name.
-				if (type == typeof (PropertyDefinition))
+				if (type == typeof(PropertyDefinition))
 					Name = "Property";
-				else if (type == typeof (MemberDefinition))
+				else if (type == typeof(MemberDefinition))
 					Name = "Member";
 				else
-					Name = GetXamlName (type);
+					Name = GetXamlName(type);
 				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
-			} else if ((xt = XamlLanguage.AllTypes.FirstOrDefault (t => t.UnderlyingType == type)) != null) {
+			}
+			else if ((xt = XamlLanguage.AllTypes.FirstOrDefault(t => t.UnderlyingType == type)) != null)
+			{
 				Name = xt.Name;
 				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
-			} else {
-				Name = GetXamlName (type);
-				PreferredXamlNamespace = schemaContext.GetXamlNamespace (type.Namespace) ?? String.Format ("clr-namespace:{0};assembly={1}", type.Namespace, type.GetTypeInfo().Assembly.GetName ().Name);
 			}
-			if (type.GetTypeInfo().IsGenericType) {
+			else
+			{
+				Name = GetXamlName(type);
+				var assembly = type.GetTypeInfo().Assembly;
+				string assemblyName = assembly.GetName().Name;
+				if (mscorlib_assemblies.Contains(assemblyName))
+					assemblyName = "mscorlib";
+				PreferredXamlNamespace = schemaContext.GetXamlNamespace(type.Namespace) ?? String.Format("clr-namespace:{0};assembly={1}", type.Namespace, assemblyName);
+			}
+			if (type.GetTypeInfo().IsGenericType)
+			{
 				TypeArguments = type.GetTypeInfo().GetGenericArguments().Select(r => schemaContext.GetXamlType(r)).ToReadOnly();
 			}
 		}
 
-		public XamlType (string unknownTypeNamespace, string unknownTypeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext)
-			: this (schemaContext, null)
+		public XamlType(string unknownTypeNamespace, string unknownTypeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext)
+			: this(schemaContext, null)
 		{
 			if (unknownTypeNamespace == null)
-				throw new ArgumentNullException ("unknownTypeNamespace");
+				throw new ArgumentNullException("unknownTypeNamespace");
 			if (unknownTypeName == null)
-				throw new ArgumentNullException ("unknownTypeName");
+				throw new ArgumentNullException("unknownTypeName");
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
+				throw new ArgumentNullException("schemaContext");
 
-			type = typeof (object);
+			type = typeof(object);
 			Name = unknownTypeName;
 			PreferredXamlNamespace = unknownTypeNamespace;
 			TypeArguments = typeArguments == null || typeArguments.Count == 0 ? null : typeArguments.ToReadOnly();
 			explicit_ns = unknownTypeNamespace;
 		}
 
-		protected XamlType (string typeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext)
-			: this (String.Empty, typeName, typeArguments, schemaContext)
+		protected XamlType(string typeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext)
+			: this(String.Empty, typeName, typeArguments, schemaContext)
 		{
 		}
 
-		XamlType (XamlSchemaContext schemaContext, XamlTypeInvoker invoker)
+		XamlType(XamlSchemaContext schemaContext, XamlTypeInvoker invoker)
 		{
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
+				throw new ArgumentNullException("schemaContext");
 			SchemaContext = schemaContext;
 			this.invoker = invoker;
 		}
 
 		// populated properties
 
-		internal EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler {
-			get { return LookupSetMarkupExtensionHandler (); }
+		internal EventHandler<XamlSetMarkupExtensionEventArgs> SetMarkupExtensionHandler
+		{
+			get { return LookupSetMarkupExtensionHandler(); }
 		}
 
-		internal EventHandler<XamlSetTypeConverterEventArgs> SetTypeConverterHandler {
-			get { return LookupSetTypeConverterHandler (); }
+		internal EventHandler<XamlSetTypeConverterEventArgs> SetTypeConverterHandler
+		{
+			get { return LookupSetTypeConverterHandler(); }
 		}
 
 		public IList<XamlType> AllowedContentTypes => allowedContentTypes.HasValue ? allowedContentTypes.Value : allowedContentTypes.Set(LookupAllowedContentTypes());
@@ -172,7 +202,7 @@ namespace Portable.Xaml
 
 		public XamlTypeInvoker Invoker => invoker ?? (invoker = LookupInvoker());
 
-		internal XamlCollectionKind CollectionKind => collectionKind ?? (collectionKind = LookupCollectionKind()).Value; 
+		internal XamlCollectionKind CollectionKind => collectionKind ?? (collectionKind = LookupCollectionKind()).Value;
 
 		public bool IsAmbient => flags.Get(TypeFlags.IsAmbient) ?? flags.Set(TypeFlags.IsAmbient, LookupIsAmbient());
 
@@ -191,7 +221,7 @@ namespace Portable.Xaml
 
 		public bool IsNameScope => flags.Get(TypeFlags.IsNameScope) ?? flags.Set(TypeFlags.IsNameScope, LookupIsNameScope());
 
-		public bool IsNameValid => flags.Get(TypeFlags.IsNameValid) ?? flags.Set(TypeFlags.IsNameValid, XamlLanguage.IsValidXamlName (Name));
+		public bool IsNameValid => flags.Get(TypeFlags.IsNameValid) ?? flags.Set(TypeFlags.IsNameValid, XamlLanguage.IsValidXamlName(Name));
 
 		public bool IsNullable => flags.Get(TypeFlags.IsNullable) ?? flags.Set(TypeFlags.IsNullable, LookupIsNullable());
 
@@ -240,64 +270,65 @@ namespace Portable.Xaml
 			}
 		}
 
-		public static bool operator == (XamlType left, XamlType right)
+		public static bool operator ==(XamlType left, XamlType right)
 		{
-			return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals (right);
+			return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals(right);
 		}
 
-		public static bool operator != (XamlType left, XamlType right)
+		public static bool operator !=(XamlType left, XamlType right)
 		{
 			return !(left == right);
 		}
-		
-		public bool Equals (XamlType other)
+
+		public bool Equals(XamlType other)
 		{
 			// It does not compare XamlSchemaContext.
 			return !ReferenceEquals(other, null) &&
 				UnderlyingType == other.UnderlyingType &&
 				Name == other.Name &&
-				PreferredXamlNamespace == other.PreferredXamlNamespace && TypeArguments.ListEquals (other.TypeArguments);
+				PreferredXamlNamespace == other.PreferredXamlNamespace && TypeArguments.ListEquals(other.TypeArguments);
 		}
 
-		public override bool Equals (object obj)
+		public override bool Equals(object obj)
 		{
 			var a = obj as XamlType;
-			return Equals (a);
+			return Equals(a);
 		}
-		
-		public override int GetHashCode ()
+
+		public override int GetHashCode()
 		{
 			if (UnderlyingType != null)
-				return UnderlyingType.GetHashCode ();
-			int x = Name.GetHashCode () << 7 + PreferredXamlNamespace.GetHashCode ();
+				return UnderlyingType.GetHashCode();
+			int x = Name.GetHashCode() << 7 + PreferredXamlNamespace.GetHashCode();
 			if (TypeArguments != null)
 				foreach (var t in TypeArguments)
-					x = t.GetHashCode () + x << 5;
+					x = t.GetHashCode() + x << 5;
 			return x;
 		}
 
-		public override string ToString ()
+		public override string ToString()
 		{
-			return new XamlTypeName (this).ToString ();
+			return new XamlTypeName(this).ToString();
 			//return String.IsNullOrEmpty (PreferredXamlNamespace) ? Name : String.Concat ("{", PreferredXamlNamespace, "}", Name);
 		}
 
-		internal bool CanConvertFrom (XamlType inputType)
+		internal bool CanConvertFrom(XamlType inputType)
 		{
-			if (CanAssignFrom (inputType))
+			if (CanAssignFrom(inputType))
 				return true;
 
 			var tc = TypeConverter;
-			if (tc != null) {
-				return tc.ConverterInstance.CanConvertFrom (inputType?.UnderlyingType ?? typeof(object));
+			if (tc != null)
+			{
+				return tc.ConverterInstance.CanConvertFrom(inputType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
 		}
 
-		internal bool CanAssignFrom (XamlType inputType)
+		internal bool CanAssignFrom(XamlType inputType)
 		{
-			return inputType.CanAssignTo (this);
+			return inputType.CanAssignTo(this);
 		}
 
 		[EnhancedXaml]
@@ -317,7 +348,7 @@ namespace Portable.Xaml
 				return false;
 
 			var ti = UnderlyingType.GetTypeInfo();
-			if (!ti.IsGenericType || !ti.Assembly.FullName.StartsWith("System.Collections.Immutable,"))
+			if (!ti.IsGenericType || !ti.Assembly.FullName.StartsWith("System.Collections.Immutable,", StringComparison.Ordinal))
 				return false;
 
 			var typeDef = ti.GetGenericTypeDefinition();
@@ -328,7 +359,7 @@ namespace Portable.Xaml
 			return name.EndsWith("`1", StringComparison.Ordinal) || name.EndsWith("`2", StringComparison.Ordinal);
 		}
 
-		public virtual bool CanAssignTo (XamlType xamlType)
+		public virtual bool CanAssignTo(XamlType xamlType)
 		{
 			if (xamlType == null)
 				return false;
@@ -337,26 +368,26 @@ namespace Portable.Xaml
 
 			if (UnderlyingType == null)
 				return xamlType == XamlLanguage.Object;
-			var ut = (xamlType.UnderlyingType ?? typeof (object)).GetTypeInfo();
+			var ut = (xamlType.UnderlyingType ?? typeof(object)).GetTypeInfo();
 
 			// if we are assigning to a nullable type, we allow null
-			if (ut.IsValueType 
+			if (ut.IsValueType
 				&& ut.IsGenericType
-				&& ut.GetGenericTypeDefinition () == typeof(Nullable<>)
+				&& ut.GetGenericTypeDefinition() == typeof(Nullable<>)
 				&& this == XamlLanguage.Null)
 				return true;
 
 			if (xamlType.IsImmutableCollection && (IsCollection || IsDictionary))
 				return true;
 
-			return ut.IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			return ut.IsAssignableFrom(UnderlyingType.GetTypeInfo());
 		}
 
-		public XamlMember GetAliasedProperty (XamlDirective directive)
+		public XamlMember GetAliasedProperty(XamlDirective directive)
 		{
 			XamlMember member;
 			if (aliased_property_cache == null)
-				aliased_property_cache = new Dictionary<XamlDirective, XamlMember> ();
+				aliased_property_cache = new Dictionary<XamlDirective, XamlMember>();
 			else if (aliased_property_cache.TryGetValue(directive, out member))
 				return member;
 			member = LookupAliasedProperty(directive);
@@ -364,12 +395,12 @@ namespace Portable.Xaml
 			return member;
 		}
 
-		public ICollection<XamlMember> GetAllAttachableMembers ()
+		public ICollection<XamlMember> GetAllAttachableMembers()
 		{
 			return attachableMembers ?? (attachableMembers = LookupAllAttachableMembers().ToReadOnly());
 		}
 
-		public ICollection<XamlMember> GetAllMembers ()
+		public ICollection<XamlMember> GetAllMembers()
 		{
 			if (allMembers != null)
 				return allMembers;
@@ -381,27 +412,27 @@ namespace Portable.Xaml
 			return allMembers;
 		}
 
-		public XamlMember GetAttachableMember (string name)
+		public XamlMember GetAttachableMember(string name)
 		{
-			return LookupAttachableMember (name);
+			return LookupAttachableMember(name);
 		}
 
-		public XamlMember GetMember (string name)
+		public XamlMember GetMember(string name)
 		{
 			XamlMember member;
 			if (memberLookup == null)
 				memberLookup = new Dictionary<string, XamlMember>();
 			else if (memberLookup.TryGetValue(name, out member))
 				return member;
-			return memberLookup[name] = LookupMember (name, true);
+			return memberLookup[name] = LookupMember(name, true);
 		}
 
-		public IList<XamlType> GetPositionalParameters (int parameterCount)
+		public IList<XamlType> GetPositionalParameters(int parameterCount)
 		{
-			return LookupPositionalParameters (parameterCount);
+			return LookupPositionalParameters(parameterCount);
 		}
 
-		public virtual IList<string> GetXamlNamespaces ()
+		public virtual IList<string> GetXamlNamespaces()
 		{
 			if (xamlNamespaces != null)
 				return xamlNamespaces;
@@ -439,92 +470,104 @@ namespace Portable.Xaml
 
 		// lookups
 
-		protected virtual XamlMember LookupAliasedProperty (XamlDirective directive)
+		protected virtual XamlMember LookupAliasedProperty(XamlDirective directive)
 		{
 			XamlMember member = null;
 
-			if (directive == XamlLanguage.Key) {
-				var a = this.GetCustomAttribute<DictionaryKeyPropertyAttribute> ();
-				member = a != null ? GetMember (a.Name) : null;
+			if (directive == XamlLanguage.Key)
+			{
+				var a = this.GetCustomAttribute<DictionaryKeyPropertyAttribute>();
+				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Name) {
-				var a = this.GetCustomAttribute<RuntimeNamePropertyAttribute> ();
-				member = a != null ? GetMember (a.Name) : null;
+			else if (directive == XamlLanguage.Name)
+			{
+				var a = this.GetCustomAttribute<RuntimeNamePropertyAttribute>();
+				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Uid) {
-				var a = this.GetCustomAttribute<UidPropertyAttribute> ();
-				member = a != null ? GetMember (a.Name) : null;
+			else if (directive == XamlLanguage.Uid)
+			{
+				var a = this.GetCustomAttribute<UidPropertyAttribute>();
+				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Lang) {
-				var a = this.GetCustomAttribute<XmlLangPropertyAttribute> ();
-				member = a != null ? GetMember (a.Name) : null;
+			else if (directive == XamlLanguage.Lang)
+			{
+				var a = this.GetCustomAttribute<XmlLangPropertyAttribute>();
+				member = a != null ? GetMember(a.Name) : null;
 			}
 			return member;
 		}
 
-		protected virtual IEnumerable<XamlMember> LookupAllAttachableMembers ()
+		protected virtual IEnumerable<XamlMember> LookupAllAttachableMembers()
 		{
 			if (UnderlyingType == null)
 				return BaseType != null ? BaseType.GetAllAttachableMembers() : Enumerable.Empty<XamlMember>();
 			return DoLookupAllAttachableMembers().OrderBy(r => r, TypeExtensionMethods.MemberComparer);
 		}
 
-		IEnumerable<XamlMember> DoLookupAllAttachableMembers ()
+		IEnumerable<XamlMember> DoLookupAllAttachableMembers()
 		{
 			// based on http://msdn.microsoft.com/en-us/library/ff184560.aspx
 
-			var gl = new Dictionary<string,MethodInfo> ();
-			var sl = new Dictionary<string,MethodInfo> ();
-			var al = new Dictionary<string,MethodInfo> ();
+			var gl = new Dictionary<string, MethodInfo>();
+			var sl = new Dictionary<string, MethodInfo>();
+			var al = new Dictionary<string, MethodInfo>();
 			//var rl = new Dictionary<string,MethodInfo> ();
-			var nl = new List<string> ();
-			foreach (var mi in UnderlyingType.GetRuntimeMethods()) {
+			var nl = new List<string>();
+			foreach (var mi in UnderlyingType.GetRuntimeMethods())
+			{
 				if (!mi.IsStatic)
 					continue;
 				string name = null;
-				if (mi.Name.StartsWith ("Get", StringComparison.Ordinal)) {
-					if (mi.ReturnType == typeof (void))
+				if (mi.Name.StartsWith("Get", StringComparison.Ordinal))
+				{
+					if (mi.ReturnType == typeof(void))
 						continue;
-					var args = mi.GetParameters ();
+					var args = mi.GetParameters();
 					if (args.Length != 1)
 						continue;
-					name = mi.Name.Substring (3);
-					gl.Add (name, mi);
-				} else if (mi.Name.StartsWith ("Set", StringComparison.Ordinal)) {
+					name = mi.Name.Substring(3);
+					gl.Add(name, mi);
+				}
+				else if (mi.Name.StartsWith("Set", StringComparison.Ordinal))
+				{
 					// looks like the return type is *ignored*
 					//if (mi.ReturnType != typeof (void))
 					//	continue;
-					var args = mi.GetParameters ();
+					var args = mi.GetParameters();
 					if (args.Length != 2)
 						continue;
-					name = mi.Name.Substring (3);
-					sl.Add (name, mi);
-				} else if (mi.Name.EndsWith ("Handler", StringComparison.Ordinal)) {
-					var args = mi.GetParameters ();
+					name = mi.Name.Substring(3);
+					sl.Add(name, mi);
+				}
+				else if (mi.Name.EndsWith("Handler", StringComparison.Ordinal))
+				{
+					var args = mi.GetParameters();
 					if (args.Length != 2)
 						continue;
-					if (mi.Name.StartsWith ("Add", StringComparison.Ordinal)) {
-						name = mi.Name.Substring (3, mi.Name.Length - 3 - 7);
-						al.Add (name, mi);
+					if (mi.Name.StartsWith("Add", StringComparison.Ordinal))
+					{
+						name = mi.Name.Substring(3, mi.Name.Length - 3 - 7);
+						al.Add(name, mi);
 					}/* else if (mi.Name.StartsWith ("Remove", StringComparison.Ordinal)) {
 						name = mi.Name.Substring (6, mi.Name.Length - 6 - 7);
 						rl.Add (name, mi);
 					}*/
 				}
-				if (name != null && !nl.Contains (name))
-					nl.Add (name);
+				if (name != null && !nl.Contains(name))
+					nl.Add(name);
 			}
 
-			foreach (var name in nl) {
+			foreach (var name in nl)
+			{
 				MethodInfo m;
-				var g = gl.TryGetValue (name, out m) ? m : null;
-				var s = sl.TryGetValue (name, out m) ? m : null;
+				var g = gl.TryGetValue(name, out m) ? m : null;
+				var s = sl.TryGetValue(name, out m) ? m : null;
 				if (g != null || s != null)
-					yield return SchemaContext.GetAttachableProperty (name, g, s);
-				var a = al.TryGetValue (name, out m) ? m : null;
+					yield return SchemaContext.GetAttachableProperty(name, g, s);
+				var a = al.TryGetValue(name, out m) ? m : null;
 				//var r = rl.TryGetValue (name, out m) ? m : null;
 				if (a != null)
-					yield return SchemaContext.GetAttachableEvent (name, a);
+					yield return SchemaContext.GetAttachableEvent(name, a);
 			}
 		}
 
@@ -535,47 +578,48 @@ namespace Portable.Xaml
 			return DoLookupAllMembers();
 		}
 
-		IEnumerable<XamlMember> DoLookupAllMembers ()
+		IEnumerable<XamlMember> DoLookupAllMembers()
 		{
 			// This is a hack that is likely required due to internal implementation difference in System.Uri. Our Uri has two readonly collection properties
-			if (this == XamlLanguage.Uri)
+			if (ReferenceEquals(this, XamlLanguage.Uri))
 				yield break;
 
 			//var bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-			foreach (var pi in UnderlyingType.GetRuntimeProperties()) {
+			foreach (var pi in UnderlyingType.GetRuntimeProperties())
+			{
 				if (pi.GetPrivateGetMethod()?.IsStatic ?? pi.GetPrivateSetMethod()?.IsStatic ?? false)
 					continue;
-				if (pi.Name.Contains (".")) // exclude explicit interface implementations.
+				if (pi.Name.Contains(".")) // exclude explicit interface implementations.
 					continue;
-				if (pi.CanRead && 
+				if (/*pi.CanRead &&*/
 					(
-						pi.CanWrite 
-						|| IsCollectionType (pi.PropertyType)
-						|| typeof (IXmlSerializable).GetTypeInfo().IsAssignableFrom (pi.PropertyType.GetTypeInfo())
+						pi.CanWrite
+						|| IsCollectionType(pi.PropertyType)
+						|| typeof(IXmlSerializable).GetTypeInfo().IsAssignableFrom(pi.PropertyType.GetTypeInfo())
 						|| pi.GetCustomAttribute<ConstructorArgumentAttribute>() != null
-					) 
-					&& pi.GetIndexParameters ().Length == 0)
-					yield return SchemaContext.GetProperty (pi);
+					)
+					&& pi.GetIndexParameters().Length == 0)
+					yield return SchemaContext.GetProperty(pi);
 			}
 			foreach (var ei in UnderlyingType.GetRuntimeEvents())
-				yield return SchemaContext.GetEvent (ei);
+				yield return SchemaContext.GetEvent(ei);
 		}
-		
-		static bool IsPublicAccessor (MethodInfo mi)
+
+		static bool IsPublicAccessor(MethodInfo mi)
 		{
 			return mi != null && mi.IsPublic;
 		}
 
-		bool IsCollectionType (Type type)
+		bool IsCollectionType(Type type)
 		{
 			if (type == null)
 				return false;
-			var xt = SchemaContext.GetXamlType (type);
+			var xt = SchemaContext.GetXamlType(type);
 			return xt.CollectionKind != XamlCollectionKind.None;
 		}
 
-		protected virtual IList<XamlType> LookupAllowedContentTypes ()
+		protected virtual IList<XamlType> LookupAllowedContentTypes()
 		{
 			// the actual implementation is very different from what is documented :(
 			return null;
@@ -592,31 +636,31 @@ namespace Portable.Xaml
 			*/
 		}
 
-		protected virtual XamlMember LookupAttachableMember (string name)
+		protected virtual XamlMember LookupAttachableMember(string name)
 		{
-			return GetAllAttachableMembers().FirstOrDefault (m => m.Name == name);
+			return GetAllAttachableMembers().FirstOrDefault(m => m.Name == name);
 		}
 
-		protected virtual XamlType LookupBaseType ()
+		protected virtual XamlType LookupBaseType()
 		{
 			if (UnderlyingType == null)
-				return SchemaContext.GetXamlType (typeof (object));
+				return SchemaContext.GetXamlType(typeof(object));
 			else
-				return type.GetTypeInfo().BaseType == null || type.GetTypeInfo().BaseType == typeof (object) ? null : SchemaContext.GetXamlType (type.GetTypeInfo().BaseType);
+				return type.GetTypeInfo().BaseType == null || type.GetTypeInfo().BaseType == typeof(object) ? null : SchemaContext.GetXamlType(type.GetTypeInfo().BaseType);
 		}
 
 		// This implementation is not verified. (No place to use.)
-		protected virtual XamlCollectionKind LookupCollectionKind ()
+		protected virtual XamlCollectionKind LookupCollectionKind()
 		{
 			if (UnderlyingType == null)
 				return BaseType != null ? BaseType.CollectionKind : XamlCollectionKind.None;
 			else if (type.IsArray)
 				return XamlCollectionKind.Array;
 
-			else if (type.ImplementsAnyInterfacesOf (typeof (IDictionary), typeof (IDictionary<,>)))
+			else if (type.ImplementsAnyInterfacesOf(typeof(IDictionary), typeof(IDictionary<,>)))
 				return XamlCollectionKind.Dictionary;
 
-			else if (type.ImplementsAnyInterfacesOf (typeof (IList), typeof (ICollection<>)))
+			else if (type.ImplementsAnyInterfacesOf(typeof(IList), typeof(ICollection<>)))
 				return XamlCollectionKind.Collection;
 			else if (IsImmutableCollection && type.ImplementsAnyInterfacesOf(typeof(IEnumerable))) // stack/queue
 				return XamlCollectionKind.Collection;
@@ -624,12 +668,12 @@ namespace Portable.Xaml
 				return XamlCollectionKind.None;
 		}
 
-		protected virtual bool LookupConstructionRequiresArguments ()
+		protected virtual bool LookupConstructionRequiresArguments()
 		{
 			if (UnderlyingType == null)
 				return false;
 
-			var typeInfo = UnderlyingType.GetTypeInfo ();
+			var typeInfo = UnderlyingType.GetTypeInfo();
 
 			if (typeInfo.IsValueType)
 				return false;
@@ -648,34 +692,34 @@ namespace Portable.Xaml
 			return typeInfo.GetConstructors().Where(r => r.IsPublic).All(r => r.GetParameters().Length > 0);
 		}
 
-		protected virtual XamlMember LookupContentProperty ()
+		protected virtual XamlMember LookupContentProperty()
 		{
-			var a = this.GetCustomAttribute<ContentPropertyAttribute> ();
-			return a != null && a.Name != null ? GetMember (a.Name) : null;
+			var a = this.GetCustomAttribute<ContentPropertyAttribute>();
+			return a != null && a.Name != null ? GetMember(a.Name) : null;
 		}
 
-		protected virtual IList<XamlType> LookupContentWrappers ()
+		protected virtual IList<XamlType> LookupContentWrappers()
 		{
 			if (CustomAttributeProvider == null)
 				return null;
 
-			var arr = CustomAttributeProvider.GetCustomAttributes (typeof (ContentWrapperAttribute), false);
+			var arr = CustomAttributeProvider.GetCustomAttributes(typeof(ContentWrapperAttribute), false);
 			if (arr == null || arr.Length == 0)
 				return null;
-			var l = new XamlType [arr.Length];
-			for (int i = 0; i < l.Length; i++) 
-				l [i] = SchemaContext.GetXamlType (((ContentWrapperAttribute) arr [i]).ContentWrapper);
+			var l = new XamlType[arr.Length];
+			for (int i = 0; i < l.Length; i++)
+				l[i] = SchemaContext.GetXamlType(((ContentWrapperAttribute)arr[i]).ContentWrapper);
 			return l;
 		}
 
 		internal ICustomAttributeProvider CustomAttributeProvider => attributeProvider.HasValue ? attributeProvider.Value : attributeProvider.Set(LookupCustomAttributeProvider());
 
-		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider ()
+		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider()
 		{
 			return UnderlyingType != null ? SchemaContext.GetCustomAttributeProvider(UnderlyingType) : null;
 		}
-		
-		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader ()
+
+		protected virtual XamlValueConverter<XamlDeferringLoader> LookupDeferringLoader()
 		{
 			if (UnderlyingType == null)
 				return null;
@@ -689,12 +733,12 @@ namespace Portable.Xaml
 			return new XamlValueConverter<XamlDeferringLoader>(loaderType, null); // Why is the targetType null in System.Xaml?
 		}
 
-		protected virtual XamlTypeInvoker LookupInvoker ()
+		protected virtual XamlTypeInvoker LookupInvoker()
 		{
-			return new XamlTypeInvoker (this);
+			return new XamlTypeInvoker(this);
 		}
 
-		protected virtual bool LookupIsAmbient ()
+		protected virtual bool LookupIsAmbient()
 		{
 			return this.GetCustomAttribute<AmbientAttribute>() != null;
 		}
@@ -702,7 +746,7 @@ namespace Portable.Xaml
 		// It is documented as if it were to reflect spec. section 5.2,
 		// but the actual behavior shows it is *totally* wrong.
 		// Here I have implemented this based on the nunit test results. sigh.
-		protected virtual bool LookupIsConstructible ()
+		protected virtual bool LookupIsConstructible()
 		{
 			if (UnderlyingType == null)
 				return true;
@@ -715,50 +759,51 @@ namespace Portable.Xaml
 			return true;
 		}
 
-		protected virtual bool LookupIsMarkupExtension ()
+		protected virtual bool LookupIsMarkupExtension()
 		{
-			return UnderlyingType != null && typeof (MarkupExtension).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			return UnderlyingType != null && typeof(MarkupExtension).GetTypeInfo().IsAssignableFrom(UnderlyingType.GetTypeInfo());
 		}
 
-		protected virtual bool LookupIsNameScope ()
+		protected virtual bool LookupIsNameScope()
 		{
-			return UnderlyingType != null && typeof (INameScope).GetTypeInfo().IsAssignableFrom (UnderlyingType.GetTypeInfo());
+			return UnderlyingType != null && typeof(INameScope).GetTypeInfo().IsAssignableFrom(UnderlyingType.GetTypeInfo());
 		}
 
-		protected virtual bool LookupIsNullable ()
+		protected virtual bool LookupIsNullable()
 		{
-			return !type.GetTypeInfo().IsValueType || type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition () == typeof (Nullable<>);
+			return !type.GetTypeInfo().IsValueType || type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
-		protected virtual bool LookupIsPublic ()
+		protected virtual bool LookupIsPublic()
 		{
 			return underlying_type == null || underlying_type.GetTypeInfo().IsPublic || underlying_type.GetTypeInfo().IsNestedPublic;
 		}
 
-		protected virtual bool LookupIsUnknown ()
+		protected virtual bool LookupIsUnknown()
 		{
 			return UnderlyingType == null;
 		}
 
-		protected virtual bool LookupIsWhitespaceSignificantCollection ()
+		protected virtual bool LookupIsWhitespaceSignificantCollection()
 		{
 			// probably for unknown types, it should preserve whitespaces.
-			return IsUnknown || this.GetCustomAttribute<WhitespaceSignificantCollectionAttribute> () != null;
+			return IsUnknown || this.GetCustomAttribute<WhitespaceSignificantCollectionAttribute>() != null;
 		}
 
-		protected virtual bool LookupIsXData ()
+		protected virtual bool LookupIsXData()
 		{
-			return CanAssignTo (SchemaContext.GetXamlType (typeof (IXmlSerializable)));
+			return CanAssignTo(SchemaContext.GetXamlType(typeof(IXmlSerializable)));
 		}
 
-		protected virtual XamlType LookupItemType ()
+		protected virtual XamlType LookupItemType()
 		{
 			XamlType itemType;
 
 			var kind = CollectionKind;
 			if (kind == XamlCollectionKind.Array)
 				itemType = SchemaContext.GetXamlType(type.GetElementType());
-			else if (kind == XamlCollectionKind.Dictionary) {
+			else if (kind == XamlCollectionKind.Dictionary)
+			{
 				if (!IsGeneric)
 					itemType = SchemaContext.GetXamlType(typeof(object));
 				else
@@ -766,95 +811,97 @@ namespace Portable.Xaml
 			}
 			else if (kind != XamlCollectionKind.Collection)
 				return null;
-            else if (!IsGeneric)
-            {
-                // support custom collections that inherit ICollection<T>
-                var collectionType = type.GetTypeInfo().GetInterfaces().FirstOrDefault(r => r.GetTypeInfo().IsGenericType && r.GetGenericTypeDefinition() == typeof(ICollection<>));
-                if (collectionType != null)
+			else if (!IsGeneric)
+			{
+				// support custom collections that inherit ICollection<T>
+				var collectionType = type.GetTypeInfo().GetInterfaces().FirstOrDefault(r => r.GetTypeInfo().IsGenericType && r.GetGenericTypeDefinition() == typeof(ICollection<>));
+				if (collectionType != null)
 					itemType = SchemaContext.GetXamlType(collectionType.GetTypeInfo().GetGenericArguments()[0]);
 				else
 					itemType = SchemaContext.GetXamlType(typeof(object));
-            }
+			}
 			else
 				itemType = SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[0]);
 			return itemType;
 		}
 
-		protected virtual XamlType LookupKeyType ()
+		protected virtual XamlType LookupKeyType()
 		{
 			if (!IsDictionary)
 				return null;
 			if (!IsGeneric)
-				return SchemaContext.GetXamlType(typeof (object));
-			return SchemaContext.GetXamlType (type.GetTypeInfo().GetGenericArguments() [0]);
+				return SchemaContext.GetXamlType(typeof(object));
+			return SchemaContext.GetXamlType(type.GetTypeInfo().GetGenericArguments()[0]);
 		}
 
-		protected virtual XamlType LookupMarkupExtensionReturnType ()
+		protected virtual XamlType LookupMarkupExtensionReturnType()
 		{
-			var a = this.GetCustomAttribute<MarkupExtensionReturnTypeAttribute> ();
-			return a != null ? SchemaContext.GetXamlType (a.ReturnType) : null;
+			var a = this.GetCustomAttribute<MarkupExtensionReturnTypeAttribute>();
+			return a != null ? SchemaContext.GetXamlType(a.ReturnType) : null;
 		}
 
-		protected virtual XamlMember LookupMember (string name, bool skipReadOnlyCheck)
+		protected virtual XamlMember LookupMember(string name, bool skipReadOnlyCheck)
 		{
 			// FIXME: verify if this does not filter out events.
-			return GetAllMembers().FirstOrDefault (m => m.Name == name && (skipReadOnlyCheck || !m.IsReadOnly || m.Type.IsCollection || m.Type.IsDictionary || m.Type.IsArray));
+			return GetAllMembers().FirstOrDefault(m => m.Name == name && (skipReadOnlyCheck || !m.IsReadOnly || m.Type.IsCollection || m.Type.IsDictionary || m.Type.IsArray));
 		}
 
-		protected virtual IList<XamlType> LookupPositionalParameters (int parameterCount)
+		protected virtual IList<XamlType> LookupPositionalParameters(int parameterCount)
 		{
 			if (UnderlyingType == null/* || !IsMarkupExtension*/) // see nunit tests...
 				return null;
 
 			// check if there is applicable ConstructorArgumentAttribute.
 			// If there is, then return its type.
-			if (parameterCount == 1) {
-				foreach (var xm in GetAllMembers()) {
-					var ca = xm.CustomAttributeProvider.GetCustomAttribute<ConstructorArgumentAttribute> (false);
+			if (parameterCount == 1)
+			{
+				foreach (var xm in GetAllMembers())
+				{
+					var ca = xm.CustomAttributeProvider.GetCustomAttribute<ConstructorArgumentAttribute>(false);
 					if (ca != null)
-						return new XamlType [] {xm.Type};
+						return new XamlType[] { xm.Type };
 				}
 			}
 
-			var methods = (from m in UnderlyingType.GetTypeInfo().GetConstructors() where m.GetParameters ().Length == parameterCount select m).ToList();
+			var methods = (from m in UnderlyingType.GetTypeInfo().GetConstructors() where m.GetParameters().Length == parameterCount select m).ToList();
 			if (methods.Count == 1)
-				return (from p in methods [0].GetParameters () select SchemaContext.GetXamlType (p.ParameterType)).ToList();
+				return (from p in methods[0].GetParameters() select SchemaContext.GetXamlType(p.ParameterType)).ToList();
 
 			if (SchemaContext.SupportMarkupExtensionsWithDuplicateArity)
-				throw new NotSupportedException ("The default LookupPositionalParameters implementation does not allow duplicate arity of markup extensions");
+				throw new NotSupportedException("The default LookupPositionalParameters implementation does not allow duplicate arity of markup extensions");
 			return null;
 		}
 
 		//static readonly BindingFlags flags_get_static = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
 
-		protected virtual EventHandler<XamlSetMarkupExtensionEventArgs> LookupSetMarkupExtensionHandler ()
+		protected virtual EventHandler<XamlSetMarkupExtensionEventArgs> LookupSetMarkupExtensionHandler()
 		{
-			var a = this.GetCustomAttribute<XamlSetMarkupExtensionAttribute> ();
+			var a = this.GetCustomAttribute<XamlSetMarkupExtensionAttribute>();
 			if (a == null)
 				return null;
 			var mi = type.GetRuntimeMethods().FirstOrDefault(r => r.Name == a.XamlSetMarkupExtensionHandler && r.IsStatic);
 			if (mi == null)
-				throw new ArgumentException ("Binding to XamlSetMarkupExtensionHandler failed");
-			return (EventHandler<XamlSetMarkupExtensionEventArgs>) mi.CreateDelegate(typeof (EventHandler<XamlSetMarkupExtensionEventArgs>));
+				throw new ArgumentException("Binding to XamlSetMarkupExtensionHandler failed");
+			return (EventHandler<XamlSetMarkupExtensionEventArgs>)mi.CreateDelegate(typeof(EventHandler<XamlSetMarkupExtensionEventArgs>));
 		}
 
-		protected virtual EventHandler<XamlSetTypeConverterEventArgs> LookupSetTypeConverterHandler ()
+		protected virtual EventHandler<XamlSetTypeConverterEventArgs> LookupSetTypeConverterHandler()
 		{
-			var a = this.GetCustomAttribute<XamlSetTypeConverterAttribute> ();
+			var a = this.GetCustomAttribute<XamlSetTypeConverterAttribute>();
 			if (a == null)
 				return null;
 			var mi = type.GetRuntimeMethods().FirstOrDefault(r => r.Name == a.XamlSetTypeConverterHandler && r.IsStatic);
 			if (mi == null)
-				throw new ArgumentException ("Binding to XamlSetTypeConverterHandler failed");
-			return (EventHandler<XamlSetTypeConverterEventArgs>) mi.CreateDelegate (typeof (EventHandler<XamlSetTypeConverterEventArgs>));
+				throw new ArgumentException("Binding to XamlSetTypeConverterHandler failed");
+			return (EventHandler<XamlSetTypeConverterEventArgs>)mi.CreateDelegate(typeof(EventHandler<XamlSetTypeConverterEventArgs>));
 		}
 
-		protected virtual bool LookupTrimSurroundingWhitespace ()
+		protected virtual bool LookupTrimSurroundingWhitespace()
 		{
-			return this.GetCustomAttribute<TrimSurroundingWhitespaceAttribute> () != null;
+			return this.GetCustomAttribute<TrimSurroundingWhitespaceAttribute>() != null;
 		}
 
-		protected virtual XamlValueConverter<TypeConverter> LookupTypeConverter ()
+		protected virtual XamlValueConverter<TypeConverter> LookupTypeConverter()
 		{
 			var t = UnderlyingType;
 			if (t == null)
@@ -862,21 +909,44 @@ namespace Portable.Xaml
 
 			// equivalent to TypeExtension.
 			// FIXME: not sure if it should be specially handled here.
-			if (t == typeof (Type))
-				t = typeof (TypeExtension);
+			if (t == typeof(Type))
+				t = typeof(TypeExtension);
+
+			t = Nullable.GetUnderlyingType(t) ?? t;
 
 			var a = CustomAttributeProvider;
 			var ca = a?.GetCustomAttribute<TypeConverterAttribute>(false);
 			if (ca != null)
-				return SchemaContext.GetValueConverter<TypeConverter> (Type.GetType (ca.ConverterTypeName), this);
+				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(ca.ConverterTypeName), this);
 
-			if (t == typeof (object)) // This is a special case. ConverterType is null.
-				return  SchemaContext.GetValueConverter<TypeConverter> (null, this);
+			if (t == typeof(object)) // This is a special case. ConverterType is null.
+				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
+
+			if (t == typeof(DateTime))
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.DateTimeConverter), this);
+
+			if (t == typeof(Uri))
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
 
 			// It's still not decent to check CollectionConverter.
-			var tct = t.GetTypeConverter ()?.GetType ();
-			if (tct != null && tct != typeof (TypeConverter)) //*PCL && tct != typeof (CollectionConverter)) //*PCL && tct != typeof (ReferenceConverter))
-				return SchemaContext.GetValueConverter<TypeConverter> (tct, this);
+			var tc = t.GetTypeConverter();
+			var tct = tc?.GetType();
+
+			if (tct != null
+				&& tct != typeof(TypeConverter)
+#if NETSTANDARD
+				&& tct != typeof(CollectionConverter)
+#else
+				&& tct.FullName != "System.ComponentModel.CollectionConverter"
+#endif
+				&& tct.FullName != "System.ComponentModel.ReferenceConverter"
+			)
+			{
+				var vc = SchemaContext.GetValueConverter<TypeConverter>(tct, this);
+				vc.InitialConverterInstance = tc;
+				return vc;
+			}
+
 			return null;
 		}
 
@@ -890,8 +960,6 @@ namespace Portable.Xaml
 			var a = this.GetCustomAttribute<UsableDuringInitializationAttribute> ();
 			return a != null && a.Usable;
 		}
-
-		static XamlValueConverter<ValueSerializer> string_value_serializer;
 
 		protected virtual XamlValueConverter<ValueSerializer> LookupValueSerializer ()
 		{
@@ -913,11 +981,11 @@ namespace Portable.Xaml
 					return ret;
 			}
 
-			if (targetType.UnderlyingType == typeof (string)) {
-				if (string_value_serializer == null)
-					string_value_serializer = new XamlValueConverter<ValueSerializer> (typeof (StringValueSerializer), targetType);
-				return string_value_serializer;
-			}
+			if (targetType.UnderlyingType == typeof(string))
+				return new XamlValueConverter<ValueSerializer>(typeof(StringValueSerializer), targetType);
+
+			if (targetType.UnderlyingType == typeof(DateTime))
+				return new XamlValueConverter<ValueSerializer>(typeof(DateTimeValueSerializer), targetType);
 
 			return null;
 		}

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2011 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -347,31 +347,29 @@ namespace Portable.Xaml
 				// creates name-only XamlType. Also, it does not seem that it does not store this XamlType to XamlSchemaContext (Try GetXamlType(xtn) after reading such xaml node, it will return null).
 				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments == null ? null : sti.TypeName.TypeArguments.Select<XamlTypeName,XamlType> (xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
-			
-			bool isGetObject = false;
-			if (currentMember != null && !xt.CanAssignTo (currentMember.Type)) {
-				if (currentMember.DeclaringType != null && currentMember.DeclaringType.ContentProperty == currentMember)
-					isGetObject = true;
 
-				// It could still be GetObject if current_member
-				// is not a directive and current type is not
-				// a markup extension.
-				// (I'm not very sure about the condition;
-				// it could be more complex.)
-				// seealso: bug #682131
-				else if (!(currentMember is XamlDirective) &&
-				    !xt.IsMarkupExtension)
-					isGetObject = true;
-			}
-
-			if (isGetObject) {
-				yield return Node (XamlNodeType.GetObject, currentMember.Type);
-				foreach (var ni in ReadMembers (parentType, currentMember.Type))
+			// It could still be GetObject if current_member
+			// is not a directive and current type is not
+			// a markup extension.
+			// (I'm not very sure about the condition;
+			// it could be more complex.)
+			// seealso: bug #682131
+			if (currentMember != null
+				&& !xt.CanAssignTo(currentMember.Type)
+				&& xt != XamlLanguage.Reference
+			    && (
+				    currentMember.DeclaringType?.ContentProperty == currentMember
+				    || (!currentMember.IsDirective && !xt.IsMarkupExtension)
+				   )
+			   )
+			{
+				yield return Node(XamlNodeType.GetObject, currentMember.Type);
+				foreach (var ni in ReadMembers(parentType, currentMember.Type))
 					yield return ni;
-				yield return Node (XamlNodeType.EndObject, currentMember.Type);
+				yield return Node(XamlNodeType.EndObject, currentMember.Type);
 				yield break;
 			}
-			// else
+
 
 			yield return Node (XamlNodeType.StartObject, xt);
 

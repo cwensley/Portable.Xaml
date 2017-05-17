@@ -1,3 +1,4 @@
+﻿#if !NETSTANDARD
 using System;
 using System.Collections;
 using System.Globalization;
@@ -62,3 +63,4 @@ namespace Portable.Xaml.ComponentModel
 		}
 	}
 }
+#endif

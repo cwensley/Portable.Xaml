@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -36,59 +36,74 @@ namespace Portable.Xaml
 		public abstract XamlSchemaContext SchemaContext { get; }
 		public abstract XamlType Type { get; }
 		public abstract object Value { get; }
-		
-		public void Close ()
+
+		public void Close()
 		{
-			Dispose (true);
+			Dispose(true);
 		}
-		
-		protected virtual void Dispose (bool disposing)
+
+		protected virtual void Dispose(bool disposing)
 		{
 			IsDisposed = true;
 		}
-		
-		void IDisposable.Dispose ()
+
+		void IDisposable.Dispose()
 		{
-			Dispose (true);
+			Dispose(true);
 		}
-		
-		public abstract bool Read ();
-		
-		public virtual XamlReader ReadSubtree ()
+
+		public abstract bool Read();
+
+		public virtual XamlReader ReadSubtree()
 		{
-			return new XamlSubtreeReader (this);
+			return new XamlSubtreeReader(this);
 		}
-		
-		public virtual void Skip ()
+
+#if NETSTANDARD
+		/* For debugging */
+		public void Dump()
+		{
+			while (Read())
+			{
+				Console.WriteLine($"{NodeType}: Type: {Type}, Member: {Member}, Value: {Value}");
+			}
+		}
+#endif
+
+		public virtual void Skip()
 		{
 			int count = 0;
-			switch (NodeType) {
-			case XamlNodeType.StartMember:
-			case XamlNodeType.StartObject:
-			case XamlNodeType.GetObject:
-				count++;
-				while (Read ()) {
-					switch (NodeType) {
-					case XamlNodeType.StartMember:
-					case XamlNodeType.GetObject:
-					case XamlNodeType.StartObject:
-						count++;
-						continue;
-					case XamlNodeType.EndMember:
-					case XamlNodeType.EndObject:
-						count--;
-						if (count == 0) {
-							Read ();
-							return;
+			switch (NodeType)
+			{
+				case XamlNodeType.StartMember:
+				case XamlNodeType.StartObject:
+				case XamlNodeType.GetObject:
+					count++;
+					while (Read())
+					{
+						switch (NodeType)
+						{
+							case XamlNodeType.StartMember:
+							case XamlNodeType.GetObject:
+							case XamlNodeType.StartObject:
+								count++;
+								continue;
+							case XamlNodeType.EndMember:
+							case XamlNodeType.EndObject:
+								count--;
+								if (count == 0)
+								{
+									Read();
+									return;
+								}
+								continue;
 						}
-						continue;
 					}
-				}
-				return;
+					return;
 
-			default:
-				Read ();
-				return;
+				default:
+					Read();
+					return;
 			}
 		}
 	}

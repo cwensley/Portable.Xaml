@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -49,7 +49,7 @@ namespace MonoTests.Portable.Xaml
 	public class XamlMemberTest
 	{
 		XamlSchemaContext sctx = new XamlSchemaContext (new XamlSchemaContextSettings ());
-		EventInfo ass_load = typeof (AppDomain).GetEvent ("AssemblyLoad");
+		EventInfo eventStore_Event3 = typeof (EventStore).GetEvent ("Event3");
 		PropertyInfo str_len = typeof (string).GetProperty ("Length");
 		PropertyInfo sb_len = typeof (StringBuilder).GetProperty ("Length");
 		MethodInfo dummy_add = typeof (XamlMemberTest).GetMethod ("DummyAddMethod");
@@ -66,7 +66,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void ConstructorEventInfoNullSchemaContext ()
 		{
-			Assert.Throws<ArgumentNullException> (() => new XamlMember (ass_load, null));
+			Assert.Throws<ArgumentNullException> (() => new XamlMember (eventStore_Event3, null));
 		}
 
 		[Test]
@@ -146,7 +146,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			// It is not of expected kind of member here:
 			// "Attached property setter and attached event adder methods must have two parameters."
-			Assert.Throws<ArgumentException> (() => new XamlMember ("AssemblyLoad", ass_load.GetAddMethod (), sctx));
+			Assert.Throws<ArgumentException> (() => new XamlMember ("Event3", eventStore_Event3.GetAddMethod (), sctx));
 		}
 
 		[Test]
@@ -180,26 +180,26 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void EventInfoDefaultValues ()
 		{
-			var m = new XamlMember (typeof (AppDomain).GetEvent ("AssemblyLoad"), sctx);
+			var m = new XamlMember (typeof (EventStore).GetEvent ("Event3"), sctx);
 
 			Assert.IsNotNull (m.DeclaringType, "#2");
-			Assert.AreEqual (typeof (AppDomain), m.DeclaringType.UnderlyingType, "#2-2");
+			Assert.AreEqual (typeof (EventStore), m.DeclaringType.UnderlyingType, "#2-2");
 			Assert.IsNotNull (m.Invoker, "#3");
 			Assert.IsNull (m.Invoker.UnderlyingGetter, "#3-2");
-			Assert.AreEqual (ass_load.GetAddMethod (), m.Invoker.UnderlyingSetter, "#3-3");
+			Assert.AreEqual (eventStore_Event3.GetAddMethod (), m.Invoker.UnderlyingSetter, "#3-3");
 			Assert.IsFalse (m.IsUnknown, "#4");
 			Assert.IsFalse (m.IsReadPublic, "#5");
 			Assert.IsTrue (m.IsWritePublic, "#6");
-			Assert.AreEqual ("AssemblyLoad", m.Name, "#7");
+			Assert.AreEqual ("Event3", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			Assert.AreEqual ("clr-namespace:System;assembly=mscorlib", m.PreferredXamlNamespace, "#9");
-			Assert.AreEqual (new XamlType (typeof (AppDomain), sctx), m.TargetType, "#10");
+			Assert.AreEqual ($"clr-namespace:MonoTests.Portable.Xaml;assembly={Compat.TestAssemblyName}", m.PreferredXamlNamespace, "#9");
+			Assert.AreEqual (new XamlType (typeof (EventStore), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
-			Assert.AreEqual (typeof (AssemblyLoadEventHandler), m.Type.UnderlyingType, "#11-2");
-//			Assert.IsNotNull (m.TypeConverter, "#12"); // EventConverter
+			Assert.AreEqual (typeof (EventHandler<CustomEventArgs>), m.Type.UnderlyingType, "#11-2");
+			Assert.IsNotNull (m.TypeConverter, "#12"); // EventConverter
 			Assert.IsNull (m.ValueSerializer, "#13");
 			Assert.IsNull (m.DeferringLoader, "#14");
-			Assert.AreEqual (ass_load, m.UnderlyingMember, "#15");
+			Assert.AreEqual (eventStore_Event3, m.UnderlyingMember, "#15");
 			Assert.IsFalse (m.IsReadOnly, "#16");
 			Assert.IsTrue (m.IsWriteOnly, "#17");
 			Assert.IsFalse (m.IsAttachable, "#18");
@@ -243,7 +243,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (m.IsAmbient, "#22");
 		}
 
-		public void DummyAddMethod (object o, AssemblyLoadEventHandler h)
+		public void DummyAddMethod (object o, CustomEventArgs h)
 		{
 		}
 
@@ -283,12 +283,12 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyAddMethod", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
-			Assert.AreEqual (typeof (AssemblyLoadEventHandler), m.Type.UnderlyingType, "#11-2");
+			Assert.AreEqual (typeof (CustomEventArgs), m.Type.UnderlyingType, "#11-2");
 //			Assert.IsNotNull (m.TypeConverter, "#12");
 			Assert.IsNull (m.ValueSerializer, "#13");
 			Assert.IsNull (m.DeferringLoader, "#14");
@@ -318,7 +318,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyProp", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().Assembly.GetName ().Name;
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
@@ -374,7 +374,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void UnderlyingMember ()
 		{
-			Assert.IsTrue (new XamlMember (ass_load, sctx).UnderlyingMember is EventInfo, "#1");
+			Assert.IsTrue (new XamlMember (eventStore_Event3, sctx).UnderlyingMember is EventInfo, "#1");
 			Assert.IsTrue (new XamlMember (str_len, sctx).UnderlyingMember is PropertyInfo, "#2");
 			Assert.AreEqual (dummy_get, new XamlMember ("DummyProp", dummy_get, dummy_set, sctx).UnderlyingMember, "#3");
 			Assert.AreEqual (dummy_add, new XamlMember ("DummyAddMethod", dummy_add, sctx).UnderlyingMember, "#4");
