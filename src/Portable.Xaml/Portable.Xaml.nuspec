@@ -31,10 +31,10 @@ This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
         </dependencies>
 	</metadata>
 	<files>
-		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib\net45" />
-		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib\portable-net40+sl5+win8+wpa81+wp8" />
-		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib\portable-net45+win8+wpa81+wp8" />
-		<file src="../../artifacts/$configuration$/netstandard1.3/Portable.Xaml.dll" target="lib\netstandard1.3" />
+		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib/net45" />
+		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib/portable-net40+sl5+win8+wpa81+wp8" />
+		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib/portable-net45+win8+wpa81+wp8" />
+		<file src="../../artifacts/$configuration$/netstandard1.3/Portable.Xaml.dll" target="lib/netstandard1.3" />
 		<file src="../../LICENSE.txt" target="LICENSE.txt" />
 	</files>
 </package>
