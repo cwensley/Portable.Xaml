@@ -7,41 +7,31 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Columns;
 
 namespace Portable.Xaml.Benchmark
 {
-	class Config : ManualConfig
-	{
-		public Config()
-		{
-			/* doesn't work yet, still runs twice as of BenchmarkDotNet 0.10.1
-			Add(Job.Dry
-				.With(RunStrategy.ColdStart)
-				.WithLaunchCount(4)
-				.WithId("ColdStart")
-				);
-			*/
-			
-			Add(Job.Default);
-		}
-	}
-
 	class MainClass
 	{
 		public static void Main(string[] args)
 		{
-			/**  Uncomment to test using performance profiler *
-			
-			//var benchmark = new LoadSimpleBenchmark();
-			var benchmark = new LoadComplexBenchmark();
-			//var benchmark = new SaveSimpleBenchmark();
-			//var benchmark = new SaveComplexBenchmark();
-			for (int i = 0; i < 10000; i++)
+			/**  Uncomment to test using performance profiler */
+			if (args?.FirstOrDefault() == "profile")
 			{
-				benchmark.PortableXaml();
-				//b.SystemXaml();
+				//var benchmark = new LoadSimpleBenchmark();
+				var benchmark = new LoadComplexBenchmark();
+				//var benchmark = new SaveSimpleBenchmark();
+				//var benchmark = new SaveComplexBenchmark();
+				for (int i = 0; i < 1000; i++)
+				{
+					benchmark.PortableXaml();
+					//benchmark.PortableXamlNoCache();
+					//benchmark.SystemXaml();
+					//benchmark.SystemXamlNoCache();
+				}
+				return;
 			}
-			return;
 			/**/
 
 			// BenchmarkSwitcher doesn't automatically exclude abstract benchmark classes
@@ -50,8 +40,16 @@ namespace Portable.Xaml.Benchmark
 				.GetExportedTypes()
 				.Where(r => typeof(IXamlBenchmark).IsAssignableFrom(r) && !r.IsAbstract);
 
+
+			var config = ManualConfig
+				.Create(DefaultConfig.Instance)
+				.With(Job.Default)
+				.With(MemoryDiagnoser.Default)
+				.With(StatisticColumn.OperationsPerSecond)
+				.With(RankColumn.Arabic);
+
 			var switcher = new BenchmarkSwitcher(types.ToArray());
-			switcher.Run(args);
+			switcher.Run(args, config);
 		}
 	}
 }

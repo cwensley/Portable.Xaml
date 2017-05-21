@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -375,22 +375,24 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_XData()
 		{
-			if (!Compat.IsPortableXaml)
-				Assert.Ignore(".NET does not support this");
-			var r = new XamlObjectReader(new XData() { Text = "xdata text" });
-			while (!r.IsEof)
-				r.Read();
+			Assert.Throws<XamlObjectReaderException>(() =>
+			{
+				var r = new XamlObjectReader(new XData() { Text = "xdata text" });
+				while (!r.IsEof)
+					r.Read();
+			});
 		}
 
 		[Test]
 		public void Read_XDataWrapper()
 		{
-			if (!Compat.IsPortableXaml)
-				Assert.Ignore(".NET does not support this");
-			var obj = new XDataWrapper() { Markup = new XData() { Text = "<my_xdata/>" } };
-			var r = new XamlObjectReader(obj);
-			while (!r.IsEof)
-				r.Read();
+			Assert.Throws<XamlObjectReaderException>(() =>
+			{
+				var obj = new XDataWrapper() { Markup = new XData() { Text = "<my_xdata/>" } };
+				var r = new XamlObjectReader(obj);
+				while (!r.IsEof)
+					r.Read();
+			});
 		}
 
 		[Test]

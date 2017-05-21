@@ -35,6 +35,14 @@ using System.ComponentModel;
 
 namespace Portable.Xaml
 {
+	internal class ReferenceComparer : IEqualityComparer<object>
+	{
+		public static readonly ReferenceComparer Instance = new ReferenceComparer();
+		bool IEqualityComparer<object>.Equals(object x, object y) => ReferenceEquals(x, y);
+
+		public int GetHashCode(object obj) => obj.GetHashCode();
+	}
+
 	public class XamlType : IEquatable<XamlType>
 	{
 		FlagValue flags;
@@ -126,7 +134,7 @@ namespace Portable.Xaml
 					Name = GetXamlName(type);
 				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
 			}
-			else if ((xt = XamlLanguage.AllTypes.FirstOrDefault(t => t.UnderlyingType == type)) != null)
+			else if (!ReferenceEquals(xt = XamlLanguage.AllTypes.FirstOrDefault(t => t.UnderlyingType == type), null))
 			{
 				Name = xt.Name;
 				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
@@ -317,14 +325,29 @@ namespace Portable.Xaml
 			if (CanAssignFrom(inputType))
 				return true;
 
-			var tc = TypeConverter;
+			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return tc.ConverterInstance.CanConvertFrom(inputType?.UnderlyingType ?? typeof(object));
+				return tc.CanConvertFrom(inputType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
 		}
+
+		internal bool CanConvertTo(XamlType inputType)
+		{
+			if (CanAssignTo(inputType))
+				return true;
+
+			var tc = TypeConverter?.ConverterInstance;
+			if (tc != null)
+			{
+				return tc.CanConvertTo(inputType?.UnderlyingType ?? typeof(object));
+			}
+
+			return false;
+		}
+
 
 		internal bool CanAssignFrom(XamlType inputType)
 		{
@@ -361,20 +384,22 @@ namespace Portable.Xaml
 
 		public virtual bool CanAssignTo(XamlType xamlType)
 		{
-			if (xamlType == null)
+			if (ReferenceEquals(xamlType, null))
 				return false;
+
 			if (IsUnknown && xamlType.IsUnknown)
 				return Equals(xamlType);
 
 			if (UnderlyingType == null)
-				return xamlType == XamlLanguage.Object;
+				return ReferenceEquals(xamlType, XamlLanguage.Object);
 			var ut = (xamlType.UnderlyingType ?? typeof(object)).GetTypeInfo();
 
 			// if we are assigning to a nullable type, we allow null
-			if (ut.IsValueType
+			if (ReferenceEquals(this, XamlLanguage.Null)
+				&& ut.IsValueType
 				&& ut.IsGenericType
 				&& ut.GetGenericTypeDefinition() == typeof(Nullable<>)
-				&& this == XamlLanguage.Null)
+				)
 				return true;
 
 			if (xamlType.IsImmutableCollection && (IsCollection || IsDictionary))
@@ -387,7 +412,7 @@ namespace Portable.Xaml
 		{
 			XamlMember member;
 			if (aliased_property_cache == null)
-				aliased_property_cache = new Dictionary<XamlDirective, XamlMember>();
+				aliased_property_cache = new Dictionary<XamlDirective, XamlMember>(ReferenceComparer.Instance);
 			else if (aliased_property_cache.TryGetValue(directive, out member))
 				return member;
 			member = LookupAliasedProperty(directive);
@@ -399,6 +424,8 @@ namespace Portable.Xaml
 		{
 			return attachableMembers ?? (attachableMembers = LookupAllAttachableMembers().ToReadOnly());
 		}
+
+		internal IList<XamlMember> GetAllMembersAsList() => (IList<XamlMember>)GetAllMembers();
 
 		public ICollection<XamlMember> GetAllMembers()
 		{
@@ -474,22 +501,22 @@ namespace Portable.Xaml
 		{
 			XamlMember member = null;
 
-			if (directive == XamlLanguage.Key)
+			if (ReferenceEquals(directive, XamlLanguage.Key))
 			{
 				var a = this.GetCustomAttribute<DictionaryKeyPropertyAttribute>();
 				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Name)
+			else if (ReferenceEquals(directive, XamlLanguage.Name))
 			{
 				var a = this.GetCustomAttribute<RuntimeNamePropertyAttribute>();
 				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Uid)
+			else if (ReferenceEquals(directive, XamlLanguage.Uid))
 			{
 				var a = this.GetCustomAttribute<UidPropertyAttribute>();
 				member = a != null ? GetMember(a.Name) : null;
 			}
-			else if (directive == XamlLanguage.Lang)
+			else if (ReferenceEquals(directive, XamlLanguage.Lang))
 			{
 				var a = this.GetCustomAttribute<XmlLangPropertyAttribute>();
 				member = a != null ? GetMember(a.Name) : null;

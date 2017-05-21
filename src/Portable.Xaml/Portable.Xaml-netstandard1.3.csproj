@@ -12,9 +12,10 @@
     <DefineConstants>TRACE;DEBUG;NETSTANDARD1_3;PCL;NETSTANDARD</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType></DebugType>
+    <DebugType>pdbonly</DebugType>
     <OutputPath>..\..\artifacts\Release\</OutputPath>
     <DefineConstants>TRACE;RELEASE;NETSTANDARD1_3;PCL;NETSTANDARD</DefineConstants>
+    <DebugSymbols>True</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />

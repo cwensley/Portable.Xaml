@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2011 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -42,7 +42,7 @@ namespace Portable.Xaml
 		public override bool IsEof => (node.Node?.NodeType ?? XamlNodeType.None) == XamlNodeType.None;
 		//public override bool IsEof => node.Node.NodeType == XamlNodeType.None;
 
-		public override XamlMember Member => NodeType != XamlNodeType.StartMember ? null : node.Node.Member.Member;
+		public override XamlMember Member => NodeType != XamlNodeType.StartMember ? null : node.Node.Member;
 
 		public override NamespaceDeclaration Namespace => NodeType != XamlNodeType.NamespaceDeclaration ? null : (NamespaceDeclaration) node.Node.Value;
 

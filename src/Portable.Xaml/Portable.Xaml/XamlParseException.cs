@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -42,6 +42,11 @@ namespace Portable.Xaml
 
 		public XamlParseException (string message, Exception innerException)
 			: base (message, innerException)
+		{
+		}
+
+		internal XamlParseException(string message, Exception innerException, int lineNumber, int linePosition)
+			: base(message, innerException, lineNumber, linePosition)
 		{
 		}
 

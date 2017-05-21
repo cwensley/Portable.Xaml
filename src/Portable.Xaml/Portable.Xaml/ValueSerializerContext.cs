@@ -38,7 +38,7 @@ namespace Portable.Xaml
 {
 	internal class ValueSerializerContext : IValueSerializerContext, IXamlSchemaContextProvider, ITypeDescriptorContext
 	{
-		XamlNameResolver name_resolver = new XamlNameResolver();
+		XamlNameResolver name_resolver;
 		XamlTypeResolver type_resolver;
 		NamespaceResolver namespace_resolver;
 		PrefixLookup prefix_lookup;
@@ -56,8 +56,6 @@ namespace Portable.Xaml
 			if (schemaContext == null)
 				throw new ArgumentNullException("schemaContext");
 			prefix_lookup = prefixLookup;
-			namespace_resolver = new NamespaceResolver(prefix_lookup.Namespaces);
-			type_resolver = new XamlTypeResolver(namespace_resolver, schemaContext);
 			sctx = schemaContext;
 			ambient_provider = ambientProvider;
 			this.provideValue = provideValue;
@@ -66,18 +64,22 @@ namespace Portable.Xaml
 			this.objectWriterFactory = objectWriterFactory;
 		}
 
+		NamespaceResolver NamespaceResolver => namespace_resolver ?? (namespace_resolver = new NamespaceResolver(prefix_lookup.Namespaces));
+
+		XamlTypeResolver TypeResolver => type_resolver ?? (type_resolver = new XamlTypeResolver(NamespaceResolver, sctx));
+
+		XamlNameResolver NameResolver => name_resolver ?? (name_resolver = new XamlNameResolver());
+
 		public object GetService(Type serviceType)
 		{
 			if (serviceType == typeof(INamespacePrefixLookup))
 				return prefix_lookup;
 			if (serviceType == typeof(IXamlNamespaceResolver))
-				return namespace_resolver;
-			if (serviceType == typeof(IXamlNameResolver))
-				return name_resolver;
-			if (serviceType == typeof(IXamlNameProvider))
-				return name_resolver;
+				return NamespaceResolver;
+			if (serviceType == typeof(IXamlNameResolver) || serviceType == typeof(IXamlNameProvider))
+				return NameResolver;
 			if (serviceType == typeof(IXamlTypeResolver))
-				return type_resolver;
+				return TypeResolver;
 			if (serviceType == typeof(IAmbientProvider))
 				return ambient_provider;
 			if (serviceType == typeof(IXamlSchemaContextProvider))

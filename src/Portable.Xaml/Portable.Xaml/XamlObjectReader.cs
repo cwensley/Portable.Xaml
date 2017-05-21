@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -123,7 +123,7 @@ namespace Portable.Xaml
 		// - For IXmlSerializable, it does not either return the raw IXmlSerializable or interpreted XData (it just returns null).
 		public virtual object Instance {
 			get {
-				var cur = NodeType == XamlNodeType.StartObject ? nodes.Current.Object.RawValue : null;
+				var cur = NodeType == XamlNodeType.StartObject ? nodes.Current.Object.Value : null;
 				return cur == root ? root_raw : cur is XData ? null : cur;
 			}
 		}
@@ -133,7 +133,7 @@ namespace Portable.Xaml
 		}
 
 		public override XamlMember Member {
-			get { return NodeType == XamlNodeType.StartMember ? nodes.Current.Member.Member : null; }
+			get { return NodeType == XamlNodeType.StartMember ? nodes.Current.Member : null; }
 		}
 
 		public override NamespaceDeclaration Namespace {

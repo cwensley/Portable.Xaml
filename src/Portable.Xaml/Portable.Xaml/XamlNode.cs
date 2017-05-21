@@ -34,16 +34,29 @@ namespace Portable.Xaml
 {
 	class XamlNodeInfo
 	{
+		public static readonly XamlNodeInfo EndMember = new XamlNodeInfo(XamlNodeType.EndMember, (XamlMember)null);
+
+		public static readonly XamlNodeInfo EndObject = new XamlNodeInfo(XamlNodeType.EndObject, (XamlObject)null);
+
+		public static readonly XamlNodeInfo GetObject = new XamlNodeInfo(XamlNodeType.GetObject, (XamlObject)null);
+
 		public XamlNodeInfo()
 		{
 		}
 
-		public XamlNodeInfo Set(XamlNodeType nodeType, object value)
+		public XamlNodeInfo Set(XamlNodeType nodeType, XamlObject value)
 		{
 			NodeType = nodeType;
 			Value = value;
 			return this;
 		}
+		public XamlNodeInfo Set(XamlNodeType nodeType, XamlMember value)
+		{
+			NodeType = nodeType;
+			Value = value;
+			return this;
+		}
+
 		public XamlNodeInfo Set(object value)
 		{
 			NodeType = XamlNodeType.Value;
@@ -57,7 +70,7 @@ namespace Portable.Xaml
 			Value = value;
 		}
 
-		public XamlNodeInfo(XamlNodeType nodeType, XamlNodeMember member)
+		public XamlNodeInfo(XamlNodeType nodeType, XamlMember member)
 		{
 			NodeType = nodeType;
 			Value = member;
@@ -79,7 +92,7 @@ namespace Portable.Xaml
 
 		public XamlObject Object => (XamlObject)Value;
 
-		public XamlNodeMember Member => (XamlNodeMember)Value;
+		public XamlMember Member => (XamlMember)Value;
 
 		public object Value { get; private set; }
 
@@ -88,9 +101,6 @@ namespace Portable.Xaml
 			var node = new XamlNodeInfo();
 			node.NodeType = NodeType;
 			node.Value = Value;
-			var nm = node.Value as XamlNodeMember;
-			if (nm != null)
-				node.Value = new XamlNodeMember(nm.Owner, nm.Member);
 			var obj = node.Value as XamlObject;
 			if (obj != null)
 				node.Value = new XamlObject(obj.Type, obj.Value);
@@ -138,14 +148,12 @@ namespace Portable.Xaml
 		
 		public XamlType Type { get; private set; }
 
-		public object RawValue => Value;
-
 		public object GetMemberValue(XamlMember xm)
 		{
 			if (xm.IsUnknown)
 				return null;
 
-			var obj = RawValue;
+			var obj = Value;
 			// FIXME: this looks like an ugly hack. Is this really true? What if there's MarkupExtension that uses another MarkupExtension type as a member type.
 			if (xm.IsAttachable 
 				|| xm.IsDirective // is this correct?
@@ -160,6 +168,17 @@ namespace Portable.Xaml
 			return xm.Invoker.GetValue(obj);
 		}
 
+		public XamlObject GetMemberObjectValue(XamlMember xm)
+		{
+			var mv = GetMemberValue(xm);
+			return new XamlObject(GetType(mv), mv);
+		}
+
+
+		XamlType GetType(object obj)
+		{
+			return obj == null ? XamlLanguage.Null : Type.SchemaContext.GetXamlType(obj.GetType());
+		}
 	}
 
 	class XamlNodeMember
@@ -175,12 +194,6 @@ namespace Portable.Xaml
 			return this;
 		}
 
-		public XamlNodeMember (XamlObject owner, XamlMember member)
-		{
-			Owner = owner;
-			Member = member;
-		}
-
 		public XamlObject Owner;
 
 		public XamlMember Member;
@@ -191,69 +204,9 @@ namespace Portable.Xaml
 			return xobj.Set(GetType(mv), mv);
 		}
 
-		public XamlObject Value
-		{
-			get
-			{
-				var mv = Owner.GetMemberValue(Member);
-				return new XamlObject(GetType(mv), mv);
-			}
-		}
-
 		XamlType GetType (object obj)
 		{
 			return obj == null ? XamlLanguage.Null : Owner.Type.SchemaContext.GetXamlType(obj.GetType());
 		}
 	}
-	
-	internal static class TypeExtensionMethods2
-	{
-		// Note that this returns XamlMember which might not actually appear in XamlObjectReader. For example, XamlLanguage.Items won't be returned when there is no item in the collection.
-		public static IEnumerable<XamlMember> GetAllObjectReaderMembersByType (this XamlType type, IValueSerializerContext vsctx)
-		{
-			if (type.HasPositionalParameters (vsctx)) {
-				yield return XamlLanguage.PositionalParameters;
-				yield break;
-			}
-
-			// Note that if the XamlType has the default constructor, we don't need "Arguments".
-			IEnumerable<XamlMember> args = type.ConstructionRequiresArguments ? type.GetSortedConstructorArguments () : null;
-			if (args != null && args.Any ())
-				yield return XamlLanguage.Arguments;
-
-			if (type.IsContentValue (vsctx)) {
-				yield return XamlLanguage.Initialization;
-				yield break;
-			}
-
-			if (type.IsDictionary) {
-				yield return XamlLanguage.Items;
-				yield break;
-			}
-
-			foreach (var m in type.GetAllMembers())
-				{
-					// do not read constructor arguments twice (they are written inside Arguments).
-					if (args != null && args.Contains(m))
-						continue;
-					// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
-					if (!m.IsReadPublic
-				        || !m.ShouldSerialize)
-						continue;
-					
-					if (!m.IsWritePublic &&
-						!m.Type.IsXData &&
-						!m.Type.IsArray &&
-						!m.Type.IsCollection &&
-						!m.Type.IsDictionary)
-						continue;
-
-					yield return m;
-				}
-			
-			if (type.IsCollection)
-				yield return XamlLanguage.Items;
-		}
-	}
-	
 }

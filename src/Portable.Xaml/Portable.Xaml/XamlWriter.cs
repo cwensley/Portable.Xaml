@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -59,6 +59,9 @@ namespace Portable.Xaml
 				throw new ArgumentNullException ("reader");
 
 			switch (reader.NodeType) {
+			case XamlNodeType.Value:
+				WriteValue (reader.Value);
+				break;
 			case XamlNodeType.StartObject:
 				WriteStartObject (reader.Type);
 				break;
@@ -73,9 +76,6 @@ namespace Portable.Xaml
 				break;
 			case XamlNodeType.EndMember:
 				WriteEndMember ();
-				break;
-			case XamlNodeType.Value:
-				WriteValue (reader.Value);
 				break;
 			case XamlNodeType.NamespaceDeclaration:
 				WriteNamespace (reader.Namespace);

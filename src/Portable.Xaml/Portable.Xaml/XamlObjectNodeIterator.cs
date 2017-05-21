@@ -74,8 +74,24 @@ namespace Portable.Xaml
 		public IEnumerable<XamlNodeInfo> GetNodes ()
 		{
 			var xobj = new XamlObject (GetType (root), root);
-			foreach (var node in GetNodes (null, xobj))
-				yield return node;
+			return GetNodes(null, xobj);
+		}
+
+		INamespacePrefixLookup prefixLookup;
+		void LookupType(Type type)
+		{
+			var xamlType = SchemaContext.GetXamlType(type);
+			prefixLookup = prefixLookup ?? value_serializer_ctx?.GetService(typeof(INamespacePrefixLookup)) as INamespacePrefixLookup;
+			if (prefixLookup == null)
+				return;
+			prefixLookup.LookupPrefix(xamlType.PreferredXamlNamespace);
+			if (xamlType.TypeArguments != null)
+			{
+				for (int i = 0; i < xamlType.TypeArguments.Count; i++)
+				{
+					prefixLookup.LookupPrefix(xamlType.TypeArguments[i].PreferredXamlNamespace);
+				}
+			}
 		}
 		
 		IEnumerable<XamlNodeInfo> GetNodes (XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null)
@@ -85,7 +101,7 @@ namespace Portable.Xaml
 			if (xm != null)
 			{
 				// collection items: each item is exposed as a standalone object that has StartObject, EndObject and contents.
-				if (xm == XamlLanguage.Items)
+				if (ReferenceEquals(xm, XamlLanguage.Items))
 				{
 					foreach (var xn in GetItemsNodes(xm, xobj))
 						yield return xn;
@@ -93,12 +109,13 @@ namespace Portable.Xaml
 				}
 
 				// Arguments: each argument is written as a standalone object
-				if (xm == XamlLanguage.Arguments)
+				if (ReferenceEquals(xm, XamlLanguage.Arguments))
 				{
+					var xarg = new XamlObject();
 					foreach (var argm in xobj.Type.GetSortedConstructorArguments())
 					{
-						var argv = argm.Invoker.GetValue(xobj.RawValue);
-						var xarg = new XamlObject(argm.Type, argv);
+						var argv = argm.Invoker.GetValue(xobj.Value);
+						xarg.Set(argm.Type, argv);
 						foreach (var cn in GetNodes(null, xarg))
 							yield return cn;
 					}
@@ -106,24 +123,25 @@ namespace Portable.Xaml
 				}
 
 				// PositionalParameters: items are from constructor arguments, written as Value node sequentially. Note that not all of them are in simple string value. Also, null values are not written as NullExtension
-				if (xm == XamlLanguage.PositionalParameters)
+				if (ReferenceEquals(xm, XamlLanguage.PositionalParameters))
 				{
+					var xarg = new XamlObject();
 					foreach (var argm in xobj.Type.GetSortedConstructorArguments())
 					{
-						foreach (var cn in GetNodes(argm, new XamlObject(argm.Type, xobj.GetMemberValue(argm)), null, true))
+						foreach (var cn in GetNodes(argm, xarg.Set(argm.Type, xobj.GetMemberValue(argm)), null, true))
 							yield return cn;
 					}
 					yield break;
 				}
 				node = node ?? new XamlNodeInfo();
 
-				if (xm == XamlLanguage.Initialization)
+				if (ReferenceEquals(xm, XamlLanguage.Initialization))
 				{
-					yield return node.Set(TypeExtensionMethods.GetStringValue(xobj.Type, xm, xobj.RawValue, value_serializer_ctx));
+					yield return node.Set(TypeExtensionMethods.GetStringValue(xobj.Type, xm, xobj.Value, value_serializer_ctx));
 					yield break;
 				}
 
-				val = xobj.RawValue;
+				val = xobj.Value;
 				if (xm.DeferringLoader != null)
 				{
 					foreach (var xn in GetDeferredNodes(xm, val))
@@ -158,33 +176,36 @@ namespace Portable.Xaml
 					if (val == null)
 					{
 						if (!partOfPositionalParameters)
-							foreach (var xn in GetNodes(null, null_object))
+							foreach (var xn in GetNodes(null, null_object, node: node))
 								yield return xn;
 						else
 							yield return node.Set(String.Empty);
 					}
-					else
+					else if (!NameResolver.IsCollectingReferences) // for perf, getting string value can be expensive
 						yield return node.Set(TypeExtensionMethods.GetStringValue(xtt, xm, val, value_serializer_ctx));
+					else if (val is Type)
+						LookupType((Type)val);
+						//new XamlTypeName(xtt.SchemaContext.GetXamlType((Type)val)).ToString(value_serializer_ctx?.GetService(typeof(INamespacePrefixLookup)) as INamespacePrefixLookup);
 					yield break;
 				}
 
 				// collection items: return GetObject and Items.
 				if ((xm.Type.IsCollection || xm.Type.IsDictionary) && !xm.IsWritePublic)
 				{
-					yield return node.Set(XamlNodeType.GetObject, xobj);
+					yield return XamlNodeInfo.GetObject;
 					// Write Items member only when there are items (i.e. do not write it if it is empty).
-					var xnm = new XamlNodeMember(xobj, XamlLanguage.Items);
-					var en = GetNodes(XamlLanguage.Items, xnm.Value).GetEnumerator();
+					var itemsValue = xobj.GetMemberObjectValue(XamlLanguage.Items);
+					var en = GetItemsNodes(XamlLanguage.Items, itemsValue).GetEnumerator();
 					if (en.MoveNext())
 					{
-						yield return node.Set(XamlNodeType.StartMember, xnm);
+						yield return node.Set(XamlNodeType.StartMember, XamlLanguage.Items);
 						do
 						{
 							yield return en.Current;
 						} while (en.MoveNext());
-						yield return node.Set(XamlNodeType.EndMember, xnm);
+						yield return XamlNodeInfo.EndMember;
 					}
-					yield return node.Set(XamlNodeType.EndObject, xobj);
+					yield return XamlNodeInfo.EndObject;
 					yield break;
 				}
 				if (xm.Type.IsXData)
@@ -197,7 +218,7 @@ namespace Portable.Xaml
 					val3.WriteXml(xw);
 					xw.Dispose();
 					var obj = new XData { Text = sw.ToString() };
-					foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.XData, obj)))
+					foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.XData, obj), node: node))
 						yield return xn;
 					yield break;
 				}
@@ -205,12 +226,11 @@ namespace Portable.Xaml
 			else
 			{
 				node = node ?? new XamlNodeInfo();
-				val = xobj.RawValue;
+				val = xobj.Value;
 			}
 			// Object - could become Reference
-			if (val != null && xobj.Type != XamlLanguage.Reference)
+			if (val != null && !ReferenceEquals(xobj.Type, XamlLanguage.Reference))
 			{
-
 				if (xm != null && !xm.IsReadOnly && !IsPublicOrVisible(val.GetType()))
 					throw new XamlObjectReaderException($"Cannot read from internal type {xobj.Type}");
 
@@ -222,8 +242,13 @@ namespace Portable.Xaml
 						// The target object is already retrieved, so we don't return the same object again.
 						NameResolver.SaveAsReferenced(val); // Record it as named object.
 															// Then return Reference object instead.
-						foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.Reference, new Reference(refName)), node: node))
-							yield return xn;
+
+						var xref = new XamlObject(XamlLanguage.Reference, new Reference(refName));
+						yield return node.Set(XamlNodeType.StartObject, xref);
+						yield return node.Set(XamlNodeType.StartMember, XamlLanguage.PositionalParameters);
+						yield return node.Set(refName);
+						yield return XamlNodeInfo.EndMember;
+						yield return XamlNodeInfo.EndObject;
 						yield break;
 					}
 					else
@@ -241,9 +266,9 @@ namespace Portable.Xaml
 					string name = NameResolver.GetReferencedName(xobj, val);
 					if (name != null)
 					{
-						var sobj = new XamlObject(XamlLanguage.String, name);
-						foreach (var cn in GetMemberNodes(new XamlNodeMember(sobj, XamlLanguage.Name), new[] { new XamlNodeInfo(name) }, node))
-							yield return cn;
+						yield return node.Set(XamlNodeType.StartMember, XamlLanguage.Name);
+						yield return node.Set(name);
+						yield return XamlNodeInfo.EndMember;
 					}
 				}
 			}
@@ -252,10 +277,47 @@ namespace Portable.Xaml
 				yield return node.Set(XamlNodeType.StartObject, xobj);
 			}
 
-			foreach (var xn in GetObjectMemberNodes (xobj, node))
-				yield return xn;
+			// get all object member nodes
+			var xce = GetNodeMembers(xobj, value_serializer_ctx).GetEnumerator();
+			var xobject = new XamlObject();
+			var startNode = new XamlNodeInfo();
+			while (xce.MoveNext())
+			{
+				var xnm = xce.Current;
 
-			yield return node.Set(XamlNodeType.EndObject, xobj);
+				var en = GetNodes(xnm.Member, xnm.GetValue(xobject), node: node).GetEnumerator();
+				if (en.MoveNext())
+				{
+					if (!xnm.Member.IsWritePublic && xnm.Member.Type != null && (xnm.Member.Type.IsCollection || xnm.Member.Type.IsDictionary))
+					{
+						// if we are a collection or dictionary without a setter, check to see if its empty first
+						var node1 = en.Current.Copy(); // getObject
+						if (!en.MoveNext())
+							continue;
+						var node2 = en.Current.Copy(); // possibly endObject
+						if (!en.MoveNext()) // we have one more, so it's not empty!
+							continue;
+
+						// if we have three nodes, then it isn't empty
+
+						yield return startNode.Set(XamlNodeType.StartMember, xnm.Member);
+						yield return node1;
+						yield return node2;
+					}
+					else
+					{
+						yield return startNode.Set(XamlNodeType.StartMember, xnm.Member);
+					}
+
+					do
+					{
+						yield return en.Current;
+					} while (en.MoveNext());
+					yield return XamlNodeInfo.EndMember;
+				}
+			}
+
+			yield return XamlNodeInfo.EndObject;
 		}
 
 		bool IsPublicOrVisible(Type type)
@@ -283,7 +345,7 @@ namespace Portable.Xaml
 		{
 			var node = new XamlNodeInfo();
 			var reader = xm.DeferringLoader.ConverterInstance.Save(val, value_serializer_ctx);
-			Stack<XamlObject> objs = new Stack<XamlObject>();
+			var xobj = new XamlObject();
 			while (reader.Read())
 			{
 				var nodeType = reader.NodeType;
@@ -291,18 +353,17 @@ namespace Portable.Xaml
 				{
 					case XamlNodeType.StartObject:
 					case XamlNodeType.GetObject:
-						var obj = new XamlObject(reader.Type, reader.Value);
-						objs.Push(obj);
-						yield return node.Set(nodeType, obj);
+						xobj.Set(reader.Type, reader.Value);
+						yield return node.Set(nodeType, xobj);
 						break;
 					case XamlNodeType.EndObject:
-						yield return node.Set(nodeType, objs.Pop());
+						yield return XamlNodeInfo.EndObject;
 						break;
 					case XamlNodeType.StartMember:
-						yield return node.Set(nodeType, new XamlNodeMember(objs.Peek(), reader.Member));
+						yield return node.Set(nodeType, reader.Member);
 						break;
 					case XamlNodeType.EndMember:
-						yield return node.Set(nodeType, new XamlNodeMember(objs.Peek(), reader.Member));
+						yield return XamlNodeInfo.EndMember;
 						break;
 					case XamlNodeType.Value:
 						yield return node.Set(reader.Value);
@@ -316,96 +377,89 @@ namespace Portable.Xaml
 			}
 		}
 
-		IEnumerable<XamlNodeInfo> GetMemberNodes(XamlNodeMember member, IEnumerable<XamlNodeInfo> contents, XamlNodeInfo node)
-		{
-			node = node ?? new XamlNodeInfo();
-			bool hasData = false;
-			foreach (var cn in contents)
-			{
-				if (!hasData)
-				{
-					hasData = true;
-					yield return node.Set(XamlNodeType.StartMember, member);
-				}
-				yield return cn;
-			}
-			if (hasData)
-				yield return node.Set(XamlNodeType.EndMember, member);
-		}
-
 		IEnumerable<XamlNodeMember> GetNodeMembers (XamlObject xobj, IValueSerializerContext vsctx)
 		{
 			var member = new XamlNodeMember();
 			// XData.XmlReader is not returned.
-			if (xobj.Type == XamlLanguage.XData) {
+			if (ReferenceEquals(xobj.Type, XamlLanguage.XData)) {
 				yield return member.Set(xobj, XamlLanguage.XData.GetMember ("Text"));
 				yield break;
 			}
 
 			// FIXME: find out why root Reference has PositionalParameters.
-			if (xobj.RawValue != root && xobj.Type == XamlLanguage.Reference)
+			if (xobj.Value != root && ReferenceEquals(xobj.Type, XamlLanguage.Reference))
 				yield return member.Set(xobj, XamlLanguage.PositionalParameters);
 			else {
-				var inst = xobj.RawValue;
+				var inst = xobj.Value;
 				var atts = new KeyValuePair<AttachableMemberIdentifier,object> [AttachablePropertyServices.GetAttachedPropertyCount (inst)];
 				AttachablePropertyServices.CopyPropertiesTo (inst, atts, 0);
+				XamlObject cobj = null;
 				foreach (var p in atts) {
 					var axt = ctx.GetXamlType (p.Key.DeclaringType);
-					yield return member.Set(new XamlObject (axt, p.Value), axt.GetAttachableMember (p.Key.MemberName));
+					if (cobj == null)
+						cobj = new XamlObject();
+					yield return member.Set(cobj.Set(axt, p.Value), axt.GetAttachableMember (p.Key.MemberName));
 				}
-				foreach (var xm in xobj.Type.GetAllObjectReaderMembersByType (vsctx))
-					yield return member.Set(xobj, xm);
-			}
-		}
 
-		IEnumerable<XamlNodeInfo> GetObjectMemberNodes (XamlObject xobj, XamlNodeInfo node)
-		{
-			node = node ?? new XamlNodeInfo();
-			var xce = GetNodeMembers (xobj, value_serializer_ctx).GetEnumerator ();
-			var xobject = new XamlObject();
-			while (xce.MoveNext ()) {
-				// XamlLanguage.Items does not show up if the content is empty.
-				if (ReferenceEquals(xce.Current.Member, XamlLanguage.Items))
+				var type = xobj.Type;
+				if (type.HasPositionalParameters(vsctx))
 				{
-					// FIXME: this is nasty, but this name resolution is the only side effect of this iteration model. Save-Restore procedure is required.
-					NameResolver.Save();
-					try
-					{
-						if (!GetNodes(xce.Current.Member, xce.Current.GetValue(xobject)).GetEnumerator().MoveNext())
-							continue;
-					}
-					finally
-					{
-						NameResolver.Restore();
-					}
+					yield return member.Set(xobj, XamlLanguage.PositionalParameters);
+					yield break;
 				}
 
-				var member = xce.Current.Member;
-				// Other collections as well, but needs different iteration (as nodes contain GetObject and EndObject).
-				if (!member.IsWritePublic && member.Type != null 
-				    && (member.Type.IsCollection || member.Type.IsDictionary)) {
-					var e = GetNodes (xce.Current.Member, xce.Current.GetValue(xobject)).GetEnumerator ();
-					// FIXME: this is nasty, but this name resolution is the only side effect of this iteration model. Save-Restore procedure is required.
-					NameResolver.Save ();
-					try {
-						if (!(e.MoveNext () && e.MoveNext () && e.MoveNext ())) // GetObject, EndObject and more
-							continue;
-					} finally {
-						NameResolver.Restore ();
-					}
+				// Note that if the XamlType has the default constructor, we don't need "Arguments".
+				IEnumerable<XamlMember> args = type.ConstructionRequiresArguments ? type.GetSortedConstructorArguments() : null;
+				if (args != null && args.Any())
+					yield return member.Set(xobj, XamlLanguage.Arguments);
+
+				if (type.IsContentValue(vsctx))
+				{
+					yield return member.Set(xobj, XamlLanguage.Initialization);
+					yield break;
 				}
 
-				foreach (var cn in GetMemberNodes (xce.Current, GetNodes (xce.Current.Member, xce.Current.GetValue(xobject)), node))
-					yield return cn;
+				if (type.IsDictionary)
+				{
+					yield return member.Set(xobj, XamlLanguage.Items);
+					yield break;
+				}
+
+				var members = type.GetAllMembersAsList();
+				for (int i = 0; i < members.Count; i++)
+				{
+					var m = members[i];
+					// do not read constructor arguments twice (they are written inside Arguments).
+					if (args != null && args.Contains(m))
+						continue;
+					// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
+					if (!m.IsReadPublic
+						|| !m.ShouldSerialize)
+						continue;
+
+					if (!m.IsWritePublic &&
+						!m.Type.IsXData &&
+						!m.Type.IsArray &&
+						!m.Type.IsCollection &&
+						!m.Type.IsDictionary)
+						continue;
+
+					yield return member.Set(xobj, m);
+				}
+
+				if (type.IsCollection)
+					yield return member.Set(xobj, XamlLanguage.Items);
 			}
 		}
 
 		IEnumerable<XamlNodeInfo> GetItemsNodes (XamlMember xm, XamlObject xobj)
 		{
-			var obj = xobj.RawValue;
+			var obj = xobj.Value;
 			if (obj == null)
 				yield break;
 			var ie = xobj.Type.Invoker.GetItems (obj);
+			var node = new XamlNodeInfo();
+			var xiobj = new XamlObject();
 			while (ie.MoveNext ()) {
 				var iobj = ie.Current;
 				// If it is dictionary, then retrieve the key, and rewrite the item as the Value part.
@@ -420,7 +474,7 @@ namespace Portable.Xaml
 				}
 
 				var wobj = TypeExtensionMethods.GetExtensionWrapped (iobj);
-				var xiobj = new XamlObject (GetType (wobj), wobj);
+				xiobj.Set(GetType (wobj), wobj);
 				if (ikey != null) {
 
 					// TODO: do this without copying the XamlNodeInfo somehow?
@@ -428,7 +482,6 @@ namespace Portable.Xaml
 					en.MoveNext();
 					yield return en.Current; // StartObject
 
-					var xknm = new XamlNodeMember (xobj, XamlLanguage.Key);
 					//var nodes1 = en.Skip (1).Take (en.Count - 2);
 					var nodes1 = new List<XamlNodeInfo>();
 					while (en.MoveNext())
@@ -436,19 +489,19 @@ namespace Portable.Xaml
 						nodes1.Add(en.Current);
 					}
 
-					var nodes2 = GetKeyNodes (ikey, xobj.Type.KeyType, xknm);
+					var nodes2 = GetKeyNodes (ikey, xobj.Type.KeyType);
 
 					// group the members then sort to put the key nodes in the correct order
 					var grouped = GroupMemberNodes (nodes1.Take(nodes1.Count - 1).Concat (nodes2)).OrderBy (r => r.Item1, TypeExtensionMethods.MemberComparer);
 					foreach (var item in grouped) {
-						foreach (var node in item.Item2)
-							yield return node;
+						foreach (var n in item.Item2)
+							yield return n;
 					}
 
 					yield return nodes1[nodes1.Count - 1]; // EndObject
 				}
 				else
-					foreach (var xn in GetNodes (null, xiobj))
+					foreach (var xn in GetNodes (null, xiobj, node: node))
 						yield return xn;
 			}
 		}
@@ -481,18 +534,29 @@ namespace Portable.Xaml
 				{
 					// split into chunks by member
 					// TODO: Omit copying the nodes somehow?
+					var member = e1.Current.Member;
 					var memberNodes = (IEnumerable<XamlNodeInfo>)GetMemberNodes(e1).Select(r => r.Copy()).ToList();
-					yield return Tuple.Create(e1.Current.Member.Member, memberNodes);
+					yield return Tuple.Create(member, memberNodes);
 				}
 				else
 					throw new InvalidOperationException("Unexpected node");
 			}
 		}
 		
-		IEnumerable<XamlNodeInfo> GetKeyNodes (object ikey, XamlType keyType, XamlNodeMember xknm)
+		IEnumerable<XamlNodeInfo> GetKeyNodes (object ikey, XamlType keyType)
 		{
-			foreach (var xn in GetMemberNodes (xknm, GetNodes (XamlLanguage.Key, new XamlObject (GetType (ikey), ikey), keyType, false), null))
-				yield return xn;
+			var node = new XamlNodeInfo();
+			var en = GetNodes(XamlLanguage.Key, new XamlObject(GetType(ikey), ikey), keyType, false, node: node).GetEnumerator();
+			if (en.MoveNext())
+			{
+				yield return new XamlNodeInfo(XamlNodeType.StartMember, XamlLanguage.Key);
+				do
+				{
+					yield return en.Current;
+				} while (en.MoveNext());
+
+				yield return XamlNodeInfo.EndMember;
+			}
 		}
 
 		// Namespace and Reference retrieval.
@@ -506,18 +570,20 @@ namespace Portable.Xaml
 				if (xn.NodeType == XamlNodeType.GetObject)
 					continue; // it is out of consideration here.
 				if (xn.NodeType == XamlNodeType.StartObject) {
-					foreach (var ns in NamespacesInType (xn.Object.Type))
-						PrefixLookup.LookupPrefix (ns);
+					LookupNamespacesInType(xn.Object.Type);
 				} else if (xn.NodeType == XamlNodeType.StartMember) {
-					var xm = xn.Member.Member;
+					var xm = xn.Member;
 					// This filtering is done as a black list so far. There does not seem to be any usable property on XamlDirective.
-					if (xm == XamlLanguage.Items || xm == XamlLanguage.PositionalParameters || xm == XamlLanguage.Initialization)
+					if (ReferenceEquals(xm, XamlLanguage.Items) 
+						|| ReferenceEquals(xm, XamlLanguage.PositionalParameters)
+						|| ReferenceEquals(xm, XamlLanguage.Initialization))
 						continue;
-					PrefixLookup.LookupPrefix (xn.Member.Member.PreferredXamlNamespace);
+					PrefixLookup.LookupPrefix (xn.Member.PreferredXamlNamespace);
 				} else {
 					if (xn.NodeType == XamlNodeType.Value && xn.Value is Type)
 						// this tries to lookup existing prefix, and if there isn't any, then adds a new declaration.
-						TypeExtensionMethods.GetStringValue (XamlLanguage.Type, xn.Member.Member, xn.Value, value_serializer_ctx);
+						LookupType((Type)xn.Value);
+						//TypeExtensionMethods.GetStringValue (XamlLanguage.Type, xn.Member, xn.Value, value_serializer_ctx);
 					continue;
 				}
 			}
@@ -527,15 +593,14 @@ namespace Portable.Xaml
 			NameResolver.NameScopeInitializationCompleted (this);
 		}
 		
-		IEnumerable<string> NamespacesInType (XamlType xt)
+		void LookupNamespacesInType (XamlType xt)
 		{
-			yield return xt.PreferredXamlNamespace;
+			PrefixLookup.LookupPrefix(xt.PreferredXamlNamespace);
 			if (xt.TypeArguments != null) {
 				// It is for x:TypeArguments
-				yield return XamlLanguage.Xaml2006Namespace;
+				PrefixLookup.LookupPrefix(XamlLanguage.Xaml2006Namespace);
 				foreach (var targ in xt.TypeArguments)
-					foreach (var ns in NamespacesInType (targ))
-						yield return ns;
+					LookupNamespacesInType(targ);
 			}
 		}
 	}

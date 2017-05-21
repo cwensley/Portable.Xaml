@@ -54,7 +54,7 @@ namespace Portable.Xaml
 		{
 			if (xamlNamespaces == null)
 				throw new ArgumentNullException ("xamlNamespaces");
-			if (xamlType == null)
+			if (ReferenceEquals(xamlType, null))
 				throw new ArgumentNullException ("xamlType");
 
 			type = xamlType;
@@ -76,8 +76,8 @@ namespace Portable.Xaml
 
 		public override int GetHashCode ()
 		{
-			var name = string.IsNullOrEmpty(PreferredXamlNamespace) ? Name : PreferredXamlNamespace;
-			return name.GetHashCode();
+			var pns = PreferredXamlNamespace ?? string.Empty;
+			return pns.GetHashCode() ^ Name.GetHashCode();
 		}
 
 		public override IList<string> GetXamlNamespaces ()
