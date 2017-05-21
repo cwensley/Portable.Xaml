@@ -36,15 +36,20 @@ public static class Extensions
 		return attributes.OfType<T>().SingleOrDefault();
 	}
 	
-	public static bool IsMono
+	public static bool IsUnix
 	{
-		get { return Type.GetType("Mono.Runtime", false) != null; }
+		get
+		{
+			return 
+				Environment.OSVersion.Platform == PlatformID.MacOSX
+				|| Environment.OSVersion.Platform == PlatformID.Unix; 
+		}
 	}
 	
 	public static string FixParameter(string value)
 	{
-		if (IsMono)
-			return value.Replace("//", "\\");
+		if (IsUnix)
+			return value.Replace("//", "%5C%5C");
 		return value;
 	}
 }]]></Text></Utilities>
@@ -248,9 +253,11 @@ public class FileExtract : Task
 	{
 		try
 		{
-			var regex = new Regex(Extensions.FixParameter(Pattern), RegexOptions.None);
-
 			var fileName = File.ItemSpec;
+			var pattern = Extensions.FixParameter(Pattern);
+			Log.LogMessage("Extracting '{0}' from {1}", pattern, fileName);
+			var regex = new Regex(pattern, RegexOptions.None);
+
 
 			var text = System.IO.File.ReadAllText(fileName);
 

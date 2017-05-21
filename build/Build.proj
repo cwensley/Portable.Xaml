@@ -68,8 +68,8 @@
 		<Message Text="New Informational Version: $(AssemblyInformationalVersion)" />
 		
 		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
-            Pattern='AssemblyVersion(\\s*)[(]&quot;.*&quot;[)]'
-            Replacement='AssemblyVersion$1(&quot;$(AssemblyVersion)&quot;)' />
+            Pattern='AssemblyVersion(\\s*)[(]"."[)]'
+            Replacement='AssemblyVersion$1("$(AssemblyVersion)")' />
 
 		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
             Pattern='AssemblyInformationalVersion(\\s*)[(]&quot;.*&quot;[)]'
