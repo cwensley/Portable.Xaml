@@ -57,7 +57,12 @@ namespace Portable.Xaml
 
 		public static IEnumerable<Attribute> GetCustomAttributes(this Assembly assembly, Type attributeType)
 		{
-			return assembly.GetCustomAttributes (attributeType, true).OfType<Attribute>();
+			return assembly.GetCustomAttributes (attributeType, false).OfType<Attribute>();
+		}
+
+		public static IEnumerable<Attribute> GetCustomAttributes(this Assembly assembly)
+		{
+			return assembly.GetCustomAttributes(false).OfType<Attribute>();
 		}
 
 		public static System.Reflection.AssemblyName GetName(this Assembly assembly)
@@ -119,6 +124,16 @@ namespace Portable.Xaml
 		{
 			var val = parameterInfo.DefaultValue;
 			return val == null || val.GetType().FullName != "System.DBNull";
+		}
+
+		public static MethodInfo GetRuntimeBaseDefinition(this MethodInfo method)
+		{
+			return method.GetBaseDefinition();
+		}
+
+		public static MethodInfo GetMethodInfo(this Delegate del)
+		{
+			return del.Method;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -107,8 +107,10 @@ namespace Portable.Xaml
 		public string GetName (object value)
 		{
 			foreach (var no in objects)
-				if (ReferenceEquals (no.Value.Value, value))
+			{
+				if (ReferenceEquals(no.Value.Value, value))
 					return no.Value.Name;
+			}
 			return null;
 		}
 
@@ -125,14 +127,26 @@ namespace Portable.Xaml
 			if (name != null)
 				return name;
 
-			var un = unnamed.FirstOrDefault (r => ReferenceEquals (r.Value, value));
+			if (unnamed.Count == 0)
+				return null;
+
+			NamedObject un = null;
+			for (int i = 0; i < unnamed.Count; i++)
+			{
+				var r = unnamed[i];
+				if (ReferenceEquals(r.Value, value))
+				{
+					un = r;
+					break;
+				}
+			}
 			if (un == null)
 				return null;
 			
 			// generate a name for it, only when needed.
 			var xm = xobj.Type.GetAliasedProperty (XamlLanguage.Name);
 			if (xm != null)
-				name = (string) xm.Invoker.GetValue (xobj.GetRawValue ());
+				name = (string) xm.Invoker.GetValue (xobj.Value);
 			else
 				name = "__ReferenceID" + used_reference_ids++;
 			un.Name = name;
@@ -195,10 +209,17 @@ namespace Portable.Xaml
 			CanAssignDirectly = canAssignDirectly;
 			Names = names.ToArray ();
 		}
-		
-		public XamlType ParentType { get; set; }
-		public XamlMember ParentMember { get; set; }
-		public object ParentValue { get; set; }
+
+		public XamlWriterInternalBase.ObjectState ParentState { get; set; }
+		public XamlWriterInternalBase.MemberAndValue ParentMemberState { get; set; }
+		public XamlWriterInternalBase.ObjectState State { get; set; }
+		public XamlWriterInternalBase.MemberAndValue MemberState { get; set; }
+		public XamlType Type => State.Type;
+		public XamlMember Member => MemberState.Member;
+		public object Value => State.Value;
+		public object KeyValue => State.KeyValue;
+
+		public int? ListIndex { get; set; }
 
 		public bool CanAssignDirectly { get; set; }
 		public IList<string> Names { get; set; }

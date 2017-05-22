@@ -30,51 +30,35 @@ namespace Portable.Xaml
 {
 	public class XamlNodeQueue
 	{
-		Queue<XamlNodeLineInfo> queue = new Queue<XamlNodeLineInfo> ();
-		XamlSchemaContext ctx;
-		XamlReader reader;
-		XamlWriter writer;
+		Queue<XamlNodeLineInfo> queue = new Queue<XamlNodeLineInfo>();
 
-		public XamlNodeQueue (XamlSchemaContext schemaContext)
+		public XamlNodeQueue(XamlSchemaContext schemaContext)
 		{
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
-			this.ctx = schemaContext;
-			reader = new XamlNodeQueueReader (this);
-			writer = new XamlNodeQueueWriter (this);
+				throw new ArgumentNullException(nameof(schemaContext));
+			SchemaContext = schemaContext;
+			Reader = new XamlNodeQueueReader(this);
+			Writer = new XamlNodeQueueWriter(this);
 		}
-		
+
 		internal IXamlLineInfo LineInfoProvider { get; set; }
 
-		internal XamlSchemaContext SchemaContext {
-			get { return ctx; }
-		}
+		internal XamlSchemaContext SchemaContext { get; }
 
-		public int Count {
-			get { return queue.Count; }
-		}
+		public int Count => queue.Count;
 
-		public bool IsEmpty {
-			get { return queue.Count == 0; }
-		}
+		public bool IsEmpty => queue.Count == 0;
 
-		public XamlReader Reader {
-			get { return reader; }
-		}
+		public XamlReader Reader { get; }
 
-		public XamlWriter Writer {
-			get { return writer; }
-		}
+		public XamlWriter Writer { get; }
 
-		internal XamlNodeLineInfo Dequeue ()
+		internal XamlNodeLineInfo Dequeue() => queue.Dequeue();
+
+		internal void Enqueue(XamlNodeInfo info)
 		{
-			return queue.Dequeue ();
-		}
-
-		internal void Enqueue (XamlNodeInfo info)
-		{
-			var nli = (LineInfoProvider != null && LineInfoProvider.HasLineInfo) ? new XamlNodeLineInfo (info, LineInfoProvider.LineNumber, LineInfoProvider.LinePosition) : new XamlNodeLineInfo (info, 0, 0);
-			queue.Enqueue (nli);
+			var nli = (LineInfoProvider != null && LineInfoProvider.HasLineInfo) ? new XamlNodeLineInfo(info, LineInfoProvider.LineNumber, LineInfoProvider.LinePosition) : new XamlNodeLineInfo(info, 0, 0);
+			queue.Enqueue(nli);
 		}
 	}
 }

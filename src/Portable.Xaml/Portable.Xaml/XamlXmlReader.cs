@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2011 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,6 +28,7 @@ using System.Xml;
 using Portable.Xaml.Schema;
 
 using Pair = System.Collections.Generic.KeyValuePair<Portable.Xaml.XamlMember,string>;
+using StringPair = System.Collections.Generic.KeyValuePair<string, string>;
 
 namespace Portable.Xaml
 {
@@ -95,35 +96,84 @@ namespace Portable.Xaml
 		{
 		}
 
-		public XamlXmlReader (Stream stream, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (stream), schemaContext, settings)
+		public XamlXmlReader(Stream stream, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
+			Initialize(CreateReader(stream, settings), schemaContext, settings);
 		}
 
-		#if PCL136
-		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+#if PCL136
+		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
-			throw new NotSupportedException ("Cannot load directly from a file with this profile");
+			throw new NotSupportedException("Cannot load directly from a file with this profile");
 		}
-		#else
-		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings () { CloseInput =true };
+#else
+		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings { CloseInput = true };
 
-		public XamlXmlReader (string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (fileName, file_reader_settings), schemaContext, settings)
+		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
-		}
-		#endif
-
-		public XamlXmlReader (TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-			: this (XmlReader.Create (textReader), schemaContext, settings)
-		{
+			Initialize(CreateReader(fileName, settings), schemaContext, settings);
 		}
 
-		public XamlXmlReader (XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		static XmlReader CreateReader(string fileName, XamlXmlReaderSettings settings)
 		{
-			parser = new XamlXmlParser (xmlReader, schemaContext, settings);
+			return CreateReader(XmlReader.Create(fileName, CreateReaderSettings(settings, closeInput: true)), settings);
 		}
-		
+#endif
+
+		public XamlXmlReader(TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			Initialize(CreateReader(textReader, settings), schemaContext, settings);
+		}
+
+		public XamlXmlReader(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			Initialize(CreateReader(xmlReader, settings), schemaContext, settings);
+		}
+
+		void Initialize(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		{
+			parser = new XamlXmlParser(xmlReader, schemaContext, settings);
+		}
+
+		static XmlReader CreateReader(Stream stream, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(stream, CreateReaderSettings(settings));
+			
+			return XmlReader.Create(stream, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReader CreateReader(TextReader reader, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(reader, CreateReaderSettings(settings));
+			
+			return XmlReader.Create(reader, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReader CreateReader(XmlReader xmlReader, XamlXmlReaderSettings settings)
+		{
+			if (settings?.RequiresXmlContext != true)
+				return XmlReader.Create(xmlReader, CreateReaderSettings(settings));
+
+			// need to read from a TextReader to load a fragment, so we copy the xml of the current reader
+			xmlReader.Read();
+			var reader = new StringReader(xmlReader.ReadOuterXml());
+			return XmlReader.Create(reader, CreateReaderSettings(settings, ConformanceLevel.Fragment), settings.CreateXmlContext());
+		}
+
+		static XmlReaderSettings CreateReaderSettings(XamlXmlReaderSettings settings, ConformanceLevel conformance = ConformanceLevel.Document, bool? closeInput = null)
+		{
+			return new XmlReaderSettings
+			{
+				CloseInput = closeInput ?? settings?.CloseInput ?? false,
+				IgnoreComments = true,
+				IgnoreProcessingInstructions = true,
+				IgnoreWhitespace = true,
+				ConformanceLevel = conformance
+			};
+		}
+
 		#endregion
 
 		XamlXmlParser parser;
@@ -206,28 +256,22 @@ namespace Portable.Xaml
 	
 	class XamlXmlParser
 	{
-		public XamlXmlParser (XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
+		static XamlXmlReaderSettings default_settings = new XamlXmlReaderSettings();
+		public XamlXmlParser(XmlReader xmlReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
 			if (xmlReader == null)
-				throw new ArgumentNullException ("xmlReader");
+				throw new ArgumentNullException(nameof(xmlReader));
 			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
+				throw new ArgumentNullException(nameof(schemaContext));
 
 			sctx = schemaContext;
-			this.settings = settings ?? new XamlXmlReaderSettings ();
+			this.settings = settings ?? default_settings;
 
-			// filter out some nodes.
-			var xrs = new XmlReaderSettings () {
-				CloseInput = this.settings.CloseInput,
-				IgnoreComments = true,
-				IgnoreProcessingInstructions = true,
-				IgnoreWhitespace = true };
-
-			r = XmlReader.Create (xmlReader, xrs);
+			r = xmlReader;
 			line_info = r as IXmlLineInfo;
-			xaml_namespace_resolver = new NamespaceResolver (r as IXmlNamespaceResolver);
+			xaml_namespace_resolver = new NamespaceResolver(r as IXmlNamespaceResolver);
 		}
-		
+
 		XmlReader r;
 		IXmlLineInfo line_info;
 		XamlSchemaContext sctx;
@@ -293,7 +337,7 @@ namespace Portable.Xaml
 			var sti = GetStartTagInfo ();
 
 			var xt = sctx.GetXamlType (sti.TypeName);
-			if (xt == null) {
+			if (ReferenceEquals(xt, null)) {
 				// Current element could be for another member in the parent type (if exists)
 				if (parentType != null && (r.LocalName.IndexOf ('.') > 0 || parentType.GetMember (r.LocalName) != null)) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
@@ -304,53 +348,54 @@ namespace Portable.Xaml
 				// creates name-only XamlType. Also, it does not seem that it does not store this XamlType to XamlSchemaContext (Try GetXamlType(xtn) after reading such xaml node, it will return null).
 				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments == null ? null : sti.TypeName.TypeArguments.Select<XamlTypeName,XamlType> (xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
-			
-			bool isGetObject = false;
-			if (currentMember != null && !xt.CanAssignTo (currentMember.Type)) {
-				if (currentMember.DeclaringType != null && currentMember.DeclaringType.ContentProperty == currentMember)
-					isGetObject = true;
 
-				// It could still be GetObject if current_member
-				// is not a directive and current type is not
-				// a markup extension.
-				// (I'm not very sure about the condition;
-				// it could be more complex.)
-				// seealso: bug #682131
-				else if (!(currentMember is XamlDirective) &&
-				    !xt.IsMarkupExtension)
-					isGetObject = true;
-			}
-
-			if (isGetObject) {
-				yield return Node (XamlNodeType.GetObject, currentMember.Type);
-				foreach (var ni in ReadMembers (parentType, currentMember.Type))
+			// It could still be GetObject if current_member
+			// is not a directive and current type is not
+			// a markup extension.
+			// (I'm not very sure about the condition;
+			// it could be more complex.)
+			// seealso: bug #682131
+			if (!ReferenceEquals(currentMember, null)
+				&& !xt.CanAssignTo(currentMember.Type)
+				&& !ReferenceEquals(xt, XamlLanguage.Reference)
+			    && (
+				    currentMember.DeclaringType?.ContentProperty == currentMember
+				    || (!currentMember.IsDirective && !xt.IsMarkupExtension)
+				   )
+			   )
+			{
+				yield return Node(XamlNodeType.GetObject, currentMember.Type);
+				foreach (var ni in ReadMembers(parentType, currentMember.Type))
 					yield return ni;
-				yield return Node (XamlNodeType.EndObject, currentMember.Type);
+				yield return Node(XamlNodeType.EndObject, currentMember.Type);
 				yield break;
 			}
-			// else
+
 
 			yield return Node (XamlNodeType.StartObject, xt);
 
 			// process attribute members (including MarkupExtensions)
 			ProcessAttributesToMember (sti, xt);
 
-			foreach (var pair in sti.Members) {
-				yield return Node (XamlNodeType.StartMember, pair.Key);
+			for (int i = 0; i < sti.Members.Count; i++)
+			{
+				var pair = sti.Members[i];
+				yield return Node(XamlNodeType.StartMember, pair.Key);
 
 				// Try markup extension
 				// FIXME: is this rule correct?
 				var v = pair.Value;
-				if (!String.IsNullOrEmpty (v) && v [0] == '{') {
+				if (!String.IsNullOrEmpty(v) && v[0] == '{')
+				{
 					var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
-					pai.Parse ();
+					pai.Parse();
 					foreach (var node in ReadMarkup(pai))
 						yield return node;
 				}
 				else
-					yield return Node (XamlNodeType.Value, pair.Value);
+					yield return Node(XamlNodeType.Value, pair.Value);
 
-				yield return Node (XamlNodeType.EndMember, pair.Key);
+				yield return Node(XamlNodeType.EndMember, pair.Key);
 			}
 
 			// process content members
@@ -424,80 +469,79 @@ namespace Portable.Xaml
 		{
 			string name = r.LocalName;
 			string ns = ResolveLocalNamespace(r.NamespaceURI);
-			string typeArgNames = null;
+			string typeArgNames;
 
 			var members = new List<Pair> ();
-			var atts = ProcessAttributes (r, members);
-
-			// check TypeArguments to resolve Type, and remove them from the list. They don't appear as a node.
-			var l = new List<Pair> ();
-			foreach (var p in members) {
-				if (p.Key == XamlLanguage.TypeArguments) {
-					typeArgNames = p.Value;
-					l.Add (p);
-					break;
-				}
-			}
-			foreach (var p in l)
-				members.Remove (p);
+			var atts = ProcessAttributes (r, members, out typeArgNames);
 
 			IList<XamlTypeName> typeArgs = typeArgNames == null ? null : XamlTypeName.ParseList (typeArgNames, xaml_namespace_resolver);
 			var xtn = new XamlTypeName (ns, name, typeArgs);
-			return new StartTagInfo () { Name = name, Namespace = ns, TypeName = xtn, Members = members, Attributes = atts};
+			return new StartTagInfo { Name = name, Namespace = ns, TypeName = xtn, Members = members, Attributes = atts};
 		}
 
 		bool xmlbase_done;
 
 		// returns remaining attributes to be processed
-		Dictionary<string,string> ProcessAttributes (XmlReader r, List<Pair> members)
+		List<StringPair> ProcessAttributes(XmlReader r, List<Pair> members, out string typeArgNames)
 		{
-			var l = members;
-
 			// base (top element)
-			if (!xmlbase_done) {
+			if (!xmlbase_done)
+			{
 				xmlbase_done = true;
-				string xmlbase = r.GetAttribute ("base", XamlLanguage.Xml1998Namespace) ?? r.BaseURI;
+				string xmlbase = r.GetAttribute("base", XamlLanguage.Xml1998Namespace) ?? r.BaseURI;
 				if (xmlbase != null)
-					l.Add (new Pair (XamlLanguage.Base, xmlbase));
+					members.Add(new Pair(XamlLanguage.Base, xmlbase));
 			}
+			typeArgNames = null;
+			var atts = new List<StringPair>();
 
-			var atts = new Dictionary<string,string> ();
-
-			if (r.MoveToFirstAttribute ()) {
-				do {
-					switch (r.NamespaceURI) {
-					case XamlLanguage.Xml1998Namespace:
-						switch (r.LocalName) {
-						case "base":
-							continue; // already processed.
-						case "lang":
-							l.Add (new Pair (XamlLanguage.Lang, r.Value));
+			if (r.MoveToFirstAttribute())
+			{
+				do
+				{
+					switch (r.NamespaceURI)
+					{
+						case XamlLanguage.Xml1998Namespace:
+							switch (r.LocalName)
+							{
+								case "base":
+									continue; // already processed.
+								case "lang":
+									members.Add(new Pair(XamlLanguage.Lang, r.Value));
+									continue;
+								case "space":
+									members.Add(new Pair(XamlLanguage.Space, r.Value));
+									continue;
+							}
+							break;
+						case XamlLanguage.Xmlns2000Namespace:
 							continue;
-						case "space":
-							l.Add (new Pair (XamlLanguage.Space, r.Value));
-							continue;
-						}
-						break;
-					case XamlLanguage.Xmlns2000Namespace:
-						continue;
-					case XamlLanguage.Xaml2006Namespace:
-						XamlDirective d = FindStandardDirective (r.LocalName, AllowedMemberLocations.Attribute);
-						if (d != null) {
-							l.Add (new Pair (d, r.Value));
-							continue;
-						}
-						throw new NotSupportedException (String.Format ("Attribute '{0}' is not supported", r.Name));
-					default:
-						if (r.NamespaceURI == String.Empty) {
-							atts.Add (r.Name, r.Value);
-							continue;
-						}
-						// Should we just ignore unknown attribute in XAML namespace or any other namespaces ?
-						// Probably yes for compatibility with future version.
-						break;
+						case XamlLanguage.Xaml2006Namespace:
+							XamlDirective d = FindStandardDirective(r.LocalName, AllowedMemberLocations.Attribute);
+							if (d != null)
+							{
+								// check TypeArguments to resolve Type, and remove them from the list. They don't appear as a node.
+								if (ReferenceEquals(d, XamlLanguage.TypeArguments))
+								{
+									typeArgNames = r.Value;
+									continue;
+								}
+								members.Add(new Pair(d, r.Value));
+								continue;
+							}
+							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
+						default:
+							if (string.IsNullOrEmpty(r.NamespaceURI))
+							{
+								atts.Add(new StringPair(r.Name, r.Value));
+								continue;
+							}
+							// Should we just ignore unknown attribute in XAML namespace or any other namespaces ?
+							// Probably yes for compatibility with future version.
+							break;
 					}
-				} while (r.MoveToNextAttribute ());
-				r.MoveToElement ();
+				} while (r.MoveToNextAttribute());
+				r.MoveToElement();
 			}
 			return atts;
 		}
@@ -522,19 +566,23 @@ namespace Portable.Xaml
 
 		void ProcessAttributesToMember (StartTagInfo sti, XamlType xt)
 		{
-			foreach (var p in sti.Attributes) {
-				int idx = p.Key.IndexOf (':');
-				string prefix = idx > 0 ? p.Key.Substring (0, idx) : String.Empty;
-				string name = idx > 0 ? p.Key.Substring (idx + 1) : p.Key;
+			sti.Members.Capacity = Math.Max(sti.Members.Capacity, sti.Members.Count + sti.Attributes.Count);
+			for (int i = 0; i < sti.Attributes.Count; i++)
+			{
+				var p = sti.Attributes[i];
+				int idx = p.Key.IndexOf(':');
+				string prefix = idx > 0 ? p.Key.Substring(0, idx) : String.Empty;
+				string name = idx > 0 ? p.Key.Substring(idx + 1) : p.Key;
 
-				var am = FindAttachableMember (prefix, name);
-				if (am != null) {
-					sti.Members.Add (new Pair (am, p.Value));
+				var am = FindAttachableMember(prefix, name);
+				if (am != null)
+				{
+					sti.Members.Add(new Pair(am, p.Value));
 					continue;
 				}
-				var xm = xt.GetMember (name);
+				var xm = xt.GetMember(name);
 				if (xm != null)
-					sti.Members.Add (new Pair (xm, p.Value));
+					sti.Members.Add(new Pair(xm, p.Value));
 				// ignore unknown attribute
 			}
 		}
@@ -580,7 +628,7 @@ namespace Portable.Xaml
 				name = name.Substring (idx + 1);
 				// check if it is an attachable member first, either of this type or another type
 				// Should this also check the namespace to find the correct type?
-				if (typeName == xt.GetInternalXmlName())
+				if (typeName == xt.InternalXmlName)
 					xm = xt.GetMember (name);
 				else
 					xm = FindAttachableMember (r.Prefix, typeName, name);
@@ -600,7 +648,7 @@ namespace Portable.Xaml
 				// Current element could be for another member in the parent type (if exists)
 				if (parentType != null 
 					&& typeName != null
-					&& typeName == parentType.GetInternalXmlName ()
+					&& typeName == parentType.InternalXmlName
 					&& parentType.GetMember (name) != null) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
 					yield return Node (XamlNodeType.None, null);
@@ -690,13 +738,13 @@ namespace Portable.Xaml
 			get { return line_info != null && line_info.HasLineInfo () ? line_info.LinePosition : 0; }
 		}
 
-		internal class StartTagInfo
+		internal struct StartTagInfo
 		{
 			public string Name;
 			public string Namespace;
 			public XamlTypeName TypeName;
 			public List<Pair> Members;
-			public Dictionary<string,string> Attributes;
+			public List<StringPair> Attributes;
 		}
 		
 		internal class NamespaceResolver : IXamlNamespaceResolver

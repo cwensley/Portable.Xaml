@@ -29,6 +29,33 @@ using Portable.Xaml.Schema;
 
 namespace Portable.Xaml
 {
+	/// <summary>
+	/// Options for member and type invokers.
+	/// </summary>
+	[EnhancedXaml, Flags]
+	public enum XamlInvokerOptions
+	{
+		/// <summary>
+		/// Use reflection, which is much slower than compiled code on each call.
+		/// </summary>
+		None = 0,
+
+		/// <summary>
+		/// Compile an expression tree to get/set/add values, which has higher startup cost but is an 
+		/// order of magnatude faster than reflection.
+		/// </summary>
+		Compile = 1,
+
+		/// <summary>
+		/// Use reflection while the expression tree is compiled in a background thread.
+		/// </summary>
+		/// <remarks>
+		/// This (might) be the best of both worlds, where it uses reflection initially, but will compile the expression tree
+		/// in a background thread and use it when it is ready.
+		/// </remarks>
+		DeferCompile = 3
+	}
+
 	public class XamlSchemaContextSettings
 	{
 		public XamlSchemaContextSettings ()
@@ -43,10 +70,15 @@ namespace Portable.Xaml
 				return;
 			FullyQualifyAssemblyNamesInClrNamespaces = s.FullyQualifyAssemblyNamesInClrNamespaces;
 			SupportMarkupExtensionsWithDuplicateArity = s.SupportMarkupExtensionsWithDuplicateArity;
+			InvokerOptions = s.InvokerOptions;
 		}
 
 		public bool FullyQualifyAssemblyNamesInClrNamespaces { get; set; }
+
 		public bool SupportMarkupExtensionsWithDuplicateArity { get; set; }
+
+		[EnhancedXaml]
+		public XamlInvokerOptions InvokerOptions { get; set; } = XamlInvokerOptions.DeferCompile;
 
 	}
 }

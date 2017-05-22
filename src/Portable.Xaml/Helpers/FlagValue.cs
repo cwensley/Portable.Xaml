@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,27 +28,36 @@ using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
-using System.Xml.Serialization;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml
 {
 	/// <summary>
 	/// Struct to store flags and cache their value
 	/// </summary>
+	/// <remarks>
+	/// Usage (for best performance):  flags.Get(MyFlag) ?? flags.Set(MyFlag, SomeValueToBeCached());
+	/// </remarks>
 	struct FlagValue
 	{
-		int hasValue;
-		int values;
-		public bool Get(int flag, Func<bool> getFlag)
-		{
-			if ((hasValue & flag) != 0)
-				return (values & flag) != 0;
+		int _set;
+		int _value;
 
-			var value = getFlag();
-			hasValue |= flag;
+		public bool? Get(int flag)
+		{
+			if ((_set & flag) != 0)
+				return (_value & flag) != 0;
+			return null;
+		}
+
+		public bool Set(int flag, bool value)
+		{
+			_set |= flag;
 			if (value)
-				values |= flag;
+				_value |= flag;
+			else
+				_value &= ~flag;
 			return value;
 		}
 	}

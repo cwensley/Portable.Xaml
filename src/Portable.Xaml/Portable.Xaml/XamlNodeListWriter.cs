@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,7 +43,7 @@ namespace Portable.Xaml
 
 		public override void WriteEndMember ()
 		{
-			source.Add (new XamlNodeInfo (XamlNodeType.EndMember, default (XamlNodeMember)));
+			source.Add (new XamlNodeInfo (XamlNodeType.EndMember, default (XamlMember)));
 		}
 
 		public override void WriteEndObject ()
@@ -63,7 +63,7 @@ namespace Portable.Xaml
 
 		public override void WriteStartMember (XamlMember xamlMember)
 		{
-			source.Add (new XamlNodeInfo (XamlNodeType.StartMember, new XamlNodeMember (default (XamlObject), xamlMember)));
+			source.Add (new XamlNodeInfo (XamlNodeType.StartMember, xamlMember));
 		}
 
 		public override void WriteStartObject (XamlType type)

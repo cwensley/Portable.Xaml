@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -43,12 +43,12 @@ namespace Portable.Xaml
 {
 	abstract class XamlWriterInternalBase : IProvideValueTarget, IRootObjectProvider, IDestinationTypeProvider, IAmbientProvider
 	{
-		protected XamlWriterInternalBase (XamlSchemaContext schemaContext, XamlWriterStateManager manager)
+		protected XamlWriterInternalBase(XamlSchemaContext schemaContext, XamlWriterStateManager manager)
 		{
 			this.sctx = schemaContext;
 			this.manager = manager;
-			var p = new PrefixLookup (sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
-			service_provider = new ValueSerializerContext (p, schemaContext, this, this, this, this);
+			var p = new PrefixLookup(sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
+			service_provider = new ValueSerializerContext(p, schemaContext, this, this, this, this, this as IXamlObjectWriterFactory);
 		}
 
 		internal XamlSchemaContext sctx;
@@ -57,56 +57,66 @@ namespace Portable.Xaml
 		internal ValueSerializerContext service_provider;
 
 		internal ObjectState root_state;
-		internal Stack<ObjectState> object_states = new Stack<ObjectState> ();
-		internal PrefixLookup prefix_lookup {
-			get { return (PrefixLookup) service_provider.GetService (typeof (INamespacePrefixLookup)); }
-		}
+		internal Stack<ObjectState> object_states = new Stack<ObjectState>();
+		internal PrefixLookup prefix_lookup => (PrefixLookup)service_provider.GetService(typeof(INamespacePrefixLookup));
 
-		public Type GetDestinationType ()
-		{
-			return CurrentMember?.Type.UnderlyingType;
-		}
+		public Type GetDestinationType() => CurrentMember?.Type.UnderlyingType;
 
-		List<NamespaceDeclaration> namespaces {
-			get { return prefix_lookup.Namespaces; }
-		}
+		List<NamespaceDeclaration> Namespaces => prefix_lookup.Namespaces;
 
-		internal virtual IAmbientProvider AmbientProvider {
-			get { return null; }
-		}
+		internal virtual IAmbientProvider AmbientProvider => null;
 
 		internal class ObjectState
 		{
 			public XamlType Type;
-			public bool IsGetObject;
+			FlagValue _flags;
+			static class ObjectStateFlags
+			{
+				public const int IsGetObject = 1 << 0;
+				public const int IsInstantiated = 1 << 1;
+				public const int IsXamlWriterCreated = 1 << 2;
+			}
+
+			public bool IsGetObject
+			{
+				get { return _flags.Get(ObjectStateFlags.IsGetObject) ?? false; }
+				set { _flags.Set(ObjectStateFlags.IsGetObject, value); }
+			}
+			public bool IsInstantiated
+			{
+				get { return _flags.Get(ObjectStateFlags.IsInstantiated) ?? false; }
+				set { _flags.Set(ObjectStateFlags.IsInstantiated, value); }
+			}
+			public bool IsXamlWriterCreated // affects AfterProperties() calls.
+			{
+				get { return _flags.Get(ObjectStateFlags.IsXamlWriterCreated) ?? false; }
+				set { _flags.Set(ObjectStateFlags.IsXamlWriterCreated, value); }
+			}
+
 			public int PositionalParameterIndex = -1;
 
 			public string FactoryMethod;
 			public object Value;
 			public object KeyValue;
-			public List<MemberAndValue> WrittenProperties = new List<MemberAndValue> ();
-			public bool IsInstantiated;
-			public bool IsXamlWriterCreated; // affects AfterProperties() calls.
+			public List<MemberAndValue> WrittenProperties = new List<MemberAndValue>();
+
+			public XamlMember CurrentMember => CurrentMemberState?.Member;
+
+			public MemberAndValue CurrentMemberState
+			{
+				get { return WrittenProperties.Count > 0 ? WrittenProperties[WrittenProperties.Count - 1] : null; }
+			}
 		}
 
-		object IProvideValueTarget.TargetObject
-		{
-			get { return object_states.Peek().Value; }
-		}
+		object IProvideValueTarget.TargetObject => object_states.Peek().Value;
 
-		object IProvideValueTarget.TargetProperty
-		{
-			get { return CurrentMember?.UnderlyingMember; }
-		}
+		object IProvideValueTarget.TargetProperty => CurrentMember?.UnderlyingMember;
 
-		object IRootObjectProvider.RootObject
-		{
-			get { return root_state.Value; }
-		}
+		object IRootObjectProvider.RootObject => root_state.Value;
 
 		internal class MemberAndValue
 		{
-			public MemberAndValue (XamlMember xm)
+			public MemberAndValue(XamlMember xm)
 			{
 				Member = xm;
 			}
@@ -116,168 +126,186 @@ namespace Portable.Xaml
 			public AllowedMemberLocations OccuredAs = AllowedMemberLocations.None;
 		}
 
-		public void CloseAll ()
+		public virtual void CloseAll()
 		{
-			while (object_states.Count > 0) {
-				switch (manager.State) {
-				case XamlWriteState.MemberDone:
-				case XamlWriteState.ObjectStarted: // StartObject without member
-					WriteEndObject ();
-					break;
-				case XamlWriteState.ValueWritten:
-				case XamlWriteState.ObjectWritten:
-				case XamlWriteState.MemberStarted: // StartMember without content
-					manager.OnClosingItem ();
-					WriteEndMember ();
-					break;
-				default:
-					throw new NotImplementedException (manager.State.ToString ()); // there shouldn't be anything though
+			while (object_states.Count > 0)
+			{
+				switch (manager.State)
+				{
+					case XamlWriteState.MemberDone:
+					case XamlWriteState.ObjectStarted: // StartObject without member
+						WriteEndObject();
+						break;
+					case XamlWriteState.ValueWritten:
+					case XamlWriteState.ObjectWritten:
+					case XamlWriteState.MemberStarted: // StartMember without content
+						manager.OnClosingItem();
+						WriteEndMember();
+						break;
+					default:
+						throw new NotImplementedException(manager.State.ToString()); // there shouldn't be anything though
 				}
 			}
 		}
 
-		internal string GetPrefix (string ns)
+		internal string GetPrefix(string ns)
 		{
-			foreach (var nd in namespaces)
+			foreach (var nd in Namespaces)
 				if (nd.Namespace == ns)
 					return nd.Prefix;
 			return null;
 		}
 
-		protected MemberAndValue CurrentMemberState {
-			get { return object_states.Count > 0 ? object_states.Peek ().WrittenProperties.LastOrDefault () : null; }
-		}
+		protected ObjectState CurrentState => object_states.Count > 0 ? object_states.Peek() : null;
+		protected MemberAndValue CurrentMemberState => CurrentState?.CurrentMemberState;
+		protected XamlMember CurrentMember => CurrentMemberState?.Member;
 
-		protected XamlMember CurrentMember {
-			get {
-				var mv = CurrentMemberState;
-				return mv != null ? mv.Member : null;
-			}
-		}
-
-		public void WriteGetObject ()
+		protected XamlMember LastMember => LastState?.CurrentMemberState?.Member;
+		protected ObjectState LastState
 		{
-			manager.GetObject ();
+			get
+			{
+				if (object_states.Count > 1)
+				{
+					var state = object_states.Pop();
+					var last = object_states.Peek();
+					object_states.Push(state);
+					return last;
+				}
+				return null;
+			}
+
+		}
+
+		public void WriteGetObject()
+		{
+			manager.GetObject();
 
 			var xm = CurrentMember;
 
-			var state = new ObjectState () {Type = xm.Type, IsGetObject = true};
+			var state = new ObjectState() { Type = xm.Type, IsGetObject = true };
 
-			object_states.Push (state);
+			object_states.Push(state);
 
-			OnWriteGetObject ();
+			OnWriteGetObject();
 		}
 
-		public void WriteNamespace (NamespaceDeclaration namespaceDeclaration)
+		public void WriteNamespace(NamespaceDeclaration namespaceDeclaration)
 		{
 			if (namespaceDeclaration == null)
-				throw new ArgumentNullException ("namespaceDeclaration");
+				throw new ArgumentNullException("namespaceDeclaration");
 
-			manager.Namespace ();
+			manager.Namespace();
 
-			namespaces.Add (namespaceDeclaration);
-			OnWriteNamespace (namespaceDeclaration);
+			Namespaces.Add(namespaceDeclaration);
+			OnWriteNamespace(namespaceDeclaration);
 		}
 
-		public void WriteStartObject (XamlType xamlType)
+		public void WriteStartObject(XamlType xamlType)
 		{
-			if (xamlType == null)
-				throw new ArgumentNullException ("xamlType");
+			if (ReferenceEquals(xamlType, null))
+				throw new ArgumentNullException("xamlType");
 
-			manager.StartObject ();
-			var cstate = new ObjectState () {Type = xamlType};
-			object_states.Push (cstate);
+			manager.StartObject();
+			var cstate = new ObjectState() { Type = xamlType };
+			object_states.Push(cstate);
 
-			OnWriteStartObject ();
+			OnWriteStartObject();
 		}
-		
-		public void WriteValue (object value)
-		{
-			manager.Value ();
 
-			OnWriteValue (value);
+		public void WriteValue(object value)
+		{
+			manager.Value();
+
+			OnWriteValue(value);
 		}
-		
-		public void WriteStartMember (XamlMember property)
-		{
-			if (property == null)
-				throw new ArgumentNullException ("property");
 
-			manager.StartMember ();
-			if (property == XamlLanguage.PositionalParameters)
+		public void WriteStartMember(XamlMember property)
+		{
+			if (ReferenceEquals(property, null))
+				throw new ArgumentNullException("property");
+
+			manager.StartMember();
+			if (ReferenceEquals(property, XamlLanguage.PositionalParameters))
 				// this is an exception that indicates the state manager to accept more than values within this member.
 				manager.AcceptMultipleValues = true;
 
-			var state = object_states.Peek ();
+			var state = object_states.Peek();
 			var wpl = state.WrittenProperties;
-			if (wpl.Any (wp => wp.Member == property))
-				throw new XamlDuplicateMemberException (String.Format ("Property '{0}' is already set to this '{1}' object", property, object_states.Peek ().Type));
-			wpl.Add (new MemberAndValue (property));
-			if (property == XamlLanguage.PositionalParameters)
+			for (int i = 0; i < wpl.Count; i++)
+			{
+				var wp = wpl[i];
+				if (ReferenceEquals(wp.Member, property))
+					throw new XamlDuplicateMemberException(String.Format("Property '{0}' is already set to this '{1}' object", property, object_states.Peek().Type));
+			}
+
+			wpl.Add(new MemberAndValue(property));
+			if (ReferenceEquals(property, XamlLanguage.PositionalParameters))
 				state.PositionalParameterIndex = 0;
 
-			OnWriteStartMember (property);
+			OnWriteStartMember(property);
 
 		}
-		
-		public void WriteEndObject ()
+
+		public void WriteEndObject()
 		{
-			manager.EndObject (object_states.Count > 1);
+			manager.EndObject(object_states.Count > 1);
 
-			OnWriteEndObject ();
+			OnWriteEndObject();
 
-			object_states.Pop ();
+			object_states.Pop();
 		}
 
-		public void WriteEndMember ()
+		public void WriteEndMember()
 		{
 
-			manager.EndMember ();
+			manager.EndMember();
 
-			OnWriteEndMember ();
-			
-			var state = object_states.Peek ();
-			if (CurrentMember == XamlLanguage.PositionalParameters) {
+			OnWriteEndMember();
+
+			var state = object_states.Peek();
+			if (ReferenceEquals(CurrentMember, XamlLanguage.PositionalParameters))
+			{
 				manager.AcceptMultipleValues = false;
 				state.PositionalParameterIndex = -1;
 			}
 		}
 
-		protected abstract void OnWriteEndObject ();
+		protected abstract void OnWriteEndObject();
 
-		protected abstract void OnWriteEndMember ();
+		protected abstract void OnWriteEndMember();
 
-		protected abstract void OnWriteStartObject ();
+		protected abstract void OnWriteStartObject();
 
-		protected abstract void OnWriteGetObject ();
+		protected abstract void OnWriteGetObject();
 
-		protected abstract void OnWriteStartMember (XamlMember xm);
+		protected abstract void OnWriteStartMember(XamlMember xm);
 
-		protected abstract void OnWriteValue (object value);
+		protected abstract void OnWriteValue(object value);
 
-		protected abstract void OnWriteNamespace (NamespaceDeclaration nd);
-		
-		protected string GetValueString (XamlMember xm, object value)
+		protected abstract void OnWriteNamespace(NamespaceDeclaration nd);
+
+		protected string GetValueString(XamlMember xm, object value)
 		{
 			// change XamlXmlReader too if we change here.
 			if ((value as string) == String.Empty) // FIXME: there could be some escape syntax.
 				return "\"\"";
 			if (value is string)
-				return (string) value;
+				return (string)value;
 
-			var xt = value == null ? XamlLanguage.Null : sctx.GetXamlType (value.GetType ());
+			var xt = value == null ? XamlLanguage.Null : sctx.GetXamlType(value.GetType());
 			var vs = xm.ValueSerializer ?? xt.ValueSerializer;
 			if (vs != null)
-				return vs.ConverterInstance.ConvertToString (value, service_provider);
+				return vs.ConverterInstance.ConvertToString(value, service_provider);
 			else
-				throw new XamlXmlWriterException (String.Format ("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType () : null));
+				throw new XamlXmlWriterException(String.Format("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType() : null));
 		}
 
 		#region IAmbientProvider
 
 		public IEnumerable<object> GetAllAmbientValues(params XamlType[] types)
 		{
-			return GetAllAmbientValues(null, false, types);
+			return GetAllAmbientValues(null, false, types).Select(r => r.Value);
 		}
 
 		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties)
@@ -317,9 +345,7 @@ namespace Portable.Xaml
 					{
 						if (!prop.DeclaringType.CanAssignFrom(state.Type))
 							continue;
-						if (prop.UnderlyingGetter == null)
-							continue;
-						var value = prop.UnderlyingGetter.Invoke(state.Value, null);
+						var value = prop.Invoker.GetValue(state.Value);
 						yield return new AmbientPropertyValue(prop, value);
 					}
 				}

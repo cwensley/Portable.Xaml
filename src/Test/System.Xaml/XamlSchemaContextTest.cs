@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,12 +43,12 @@ namespace MonoTests.Portable.Xaml
 	{
 		XamlSchemaContext NewStandardContext ()
 		{
-			return new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly });
+			return new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).GetTypeInfo().Assembly });
 		}
 
 		XamlSchemaContext NewThisAssemblyContext ()
 		{
-			return new XamlSchemaContext (new Assembly [] {GetType ().Assembly });
+			return new XamlSchemaContext (new Assembly [] {GetType ().GetTypeInfo().Assembly });
 		}
 
 		[Test]
@@ -77,7 +77,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Constructor ()
 		{
-			var ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).Assembly });
+			var ctx = new XamlSchemaContext (new Assembly [] {typeof (XamlSchemaContext).GetTypeInfo().Assembly });
 			Assert.AreEqual (1, ctx.ReferenceAssemblies.Count, "#1");
 		}
 
@@ -165,7 +165,7 @@ namespace MonoTests.Portable.Xaml
         [Test]
 		public void GetXamlTypeAndAllXamlTypes ()
 		{
-			var ctx = new XamlSchemaContext (new Assembly [] {typeof (string).Assembly}); // build with corlib.
+			var ctx = new XamlSchemaContext (new Assembly [] {typeof (string).GetTypeInfo().Assembly }); // build with corlib.
 			Assert.AreEqual (0, ctx.GetAllXamlTypes (XamlLanguage.Xaml2006Namespace).Count (), "#0"); // premise
 
 			var xt = ctx.GetXamlType (typeof (string));
@@ -266,11 +266,22 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (typeof (TypeExtension), xt.UnderlyingType, "#2-2");
 		}
 
-		[Test]
-		public void GetTypeFromXamlTypeNameWithClrName ()
+		[TestCase(typeof(bool))]
+		[TestCase(typeof(byte))]
+		[TestCase(typeof(char))]
+		[TestCase(typeof(DateTime))]
+		[TestCase(typeof(decimal))]
+		[TestCase(typeof(double))]
+		[TestCase(typeof(Int16))]
+		[TestCase(typeof(Int32))]
+		[TestCase(typeof(Int64))]
+		[TestCase(typeof(float))]
+		[TestCase(typeof(string))]
+		[TestCase(typeof(TimeSpan))]
+		public void GetTypeFromXamlTypeNameWithClrName (Type type)
 		{
 			// ensure that this does *not* resolve clr type name.
-			var xn = new XamlTypeName ("clr-namespace:System;assembly=mscorlib", "DateTime");
+			var xn = new XamlTypeName ("clr-namespace:System;assembly=mscorlib", type.Name);
 			var ctx = NewStandardContext ();
 			var xt = ctx.GetXamlType (xn);
 			Assert.IsNull (xt, "#1");

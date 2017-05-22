@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,42 +43,53 @@ namespace MonoTests.Portable.Xaml
 {
 	public class DummyValueSerializerContext : IValueSerializerContext
 	{
-		public DummyValueSerializerContext ()
+		public DummyValueSerializerContext()
 		{
 		}
 
-		public object GetService (Type serviceType)
+		public object GetService(Type serviceType)
 		{
-			throw new NotImplementedException ();
+			throw new NotImplementedException();
 		}
-		public IContainer Container {
-			get { throw new NotImplementedException (); }
-		}
-		public object Instance {
-			get { throw new NotImplementedException (); }
-		}
-		public void OnComponentChanged ()
+		public IContainer Container
 		{
-			throw new NotImplementedException ();
+			get { throw new NotImplementedException(); }
 		}
-		public bool OnComponentChanging ()
+		public object Instance
 		{
-			throw new NotImplementedException ();
+			get { throw new NotImplementedException(); }
 		}
-		public ValueSerializer GetValueSerializerFor (Type type)
+		public void OnComponentChanged()
 		{
-			throw new NotImplementedException ();
+			throw new NotImplementedException();
+		}
+		public bool OnComponentChanging()
+		{
+			throw new NotImplementedException();
+		}
+		public ValueSerializer GetValueSerializerFor(Type type)
+		{
+			throw new NotImplementedException();
 		}
 
-		#if PCL
-		public PropertyInfo PropertyDescriptor {
-		get { throw new NotImplementedException (); }
+#if NETSTANDARD
+		public PropertyDescriptor PropertyDescriptor {
+			get { throw new NotImplementedException (); }
 		}
 		public ValueSerializer GetValueSerializerFor (PropertyInfo descriptor)
 		{
-		throw new NotImplementedException ();
+			throw new NotImplementedException ();
 		}
-		#else
+#elif PCL
+		public PropertyInfo PropertyDescriptor
+		{
+			get { throw new NotImplementedException(); }
+		}
+		public ValueSerializer GetValueSerializerFor(PropertyInfo descriptor)
+		{
+			throw new NotImplementedException();
+		}
+#else
 		public PropertyDescriptor PropertyDescriptor {
 			get { throw new NotImplementedException (); }
 		}
@@ -86,6 +97,6 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException ();
 		}
-		#endif
+#endif
 	}
 }

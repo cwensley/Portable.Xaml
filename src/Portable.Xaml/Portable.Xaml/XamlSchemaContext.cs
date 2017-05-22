@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,8 +28,10 @@ using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
 
-using Pair = System.Collections.Generic.KeyValuePair<string,string>;
+using Pair = System.Collections.Generic.KeyValuePair<string, string>;
 using System.Diagnostics;
+using System.Collections;
+using System.IO;
 
 namespace Portable.Xaml
 {
@@ -66,34 +68,41 @@ namespace Portable.Xaml
 
 			FullyQualifyAssemblyNamesInClrNamespaces = settings.FullyQualifyAssemblyNamesInClrNamespaces;
 			SupportMarkupExtensionsWithDuplicateArity = settings.SupportMarkupExtensionsWithDuplicateArity;
+			InvokerOptions = settings.InvokerOptions;
 		}
 
-		~XamlSchemaContext ()
+		~XamlSchemaContext()
 		{
 			/*if (reference_assemblies == null)
 				AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoaded;*/
 		}
 
 		IList<Assembly> reference_assemblies;
-
-		// assembly attribute caches
-		Dictionary<string,List<string>> xaml_nss;
-		Dictionary<string,string> prefixes;
-		Dictionary<string,string> compat_nss;
-		Dictionary<string,List<XamlType>> all_xaml_types;
-		XamlType[] empty_xaml_types = new XamlType [0];
+		Dictionary<string, List<string>> xaml_nss;
+		Dictionary<string, string> prefixes;
+		Dictionary<string, string> compat_nss;
+		Dictionary<string, List<XamlType>> all_xaml_types;
+		XamlType[] empty_xaml_types = new XamlType[0];
 		Dictionary<Type, XamlType> run_time_types = new Dictionary<Type, XamlType>();
+		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
+		Dictionary<Pair, XamlDirective> xaml_directives = new Dictionary<Pair, XamlDirective>();
+		Dictionary<object, XamlMember> member_cache = new Dictionary<object, XamlMember>();
+		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
+		Dictionary<string, AssemblyInfo> assembly_cache = new Dictionary<string, AssemblyInfo>();
+
+		[EnhancedXaml]
+		public XamlInvokerOptions InvokerOptions { get; private set; } = XamlInvokerOptions.DeferCompile;
+
+		public bool SupportMarkupExtensionsWithDuplicateArity { get; private set; }
 
 		public bool FullyQualifyAssemblyNamesInClrNamespaces { get; private set; }
 
-		public IList<Assembly> ReferenceAssemblies
-		{
-			get { return reference_assemblies; }
-		}
+		public IList<Assembly> ReferenceAssemblies => reference_assemblies;
 
-		struct AssemblyInfo
+		class AssemblyInfo
 		{
-			public AssemblyName Name;
+			AssemblyName _name;
+			public AssemblyName Name => _name ?? (_name = Assembly.GetName());
 			public Assembly Assembly;
 		}
 
@@ -105,39 +114,147 @@ namespace Portable.Xaml
 			{
 				if (assembliesInScope != null)
 					return assembliesInScope;
-				var assemblies = reference_assemblies ?? GetAppDomainAssemblies();
-				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Name = r.GetName(), Assembly = r }).ToList();
+				var assemblies = reference_assemblies ?? LookupAssembliesInScope();
+
+				assembliesInScope = assemblies.Select(r => new AssemblyInfo { Assembly = r }).ToList();
 				return assembliesInScope;
 			}
 		}
 
-		IEnumerable<Assembly> GetAppDomainAssemblies()
+		static List<Assembly> cachedAssembliesInScope;
+		static IEnumerable<Assembly> LookupAssembliesInScope()
+		{
+			if (cachedAssembliesInScope != null)
+				return cachedAssembliesInScope;
+
+			var assemblies =
+				GetAppDomainAssemblies()
+#if NETSTANDARD
+				?? GetBaseDirectoryAssemblies()
+#endif
+#if !PCL136
+				?? GetUwpAssemblies()
+#endif
+				?? Enumerable.Empty<Assembly>();
+
+			cachedAssembliesInScope = assemblies.ToList();
+			return cachedAssembliesInScope;
+		}
+
+		static IEnumerable<Assembly> GetAppDomainAssemblies()
 		{
 			try
 			{
 				var appDomainType = Type.GetType("System.AppDomain", false);
 				if (appDomainType == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				var getCurrentDomain = appDomainType.GetRuntimeProperty("CurrentDomain");
 				if (getCurrentDomain == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				var domain = getCurrentDomain.GetValue(null, null);
 
 				var getAssemblies = domain.GetType().GetRuntimeMethod("GetAssemblies", new Type[] { });
 				if (getAssemblies == null)
-					return Enumerable.Empty<Assembly>();
-				var assemblies = getAssemblies.Invoke(domain, null) as IEnumerable<Assembly>;
+					return null;
+				var assemblies = getAssemblies.Invoke(domain, null) as Assembly[];
 				if (assemblies == null)
-					return Enumerable.Empty<Assembly>();
+					return null;
 				return assemblies;
 			}
 			catch
 			{
-				return Enumerable.Empty<Assembly>();
+				return null;
 			}
 		}
 
-		public bool SupportMarkupExtensionsWithDuplicateArity { get; private set; }
+#if NETSTANDARD
+		static IEnumerable<Assembly> GetBaseDirectoryAssemblies()
+		{
+			try
+			{
+				// .NET Core, we get the assemblies in the base directory.
+				var assemblyType = typeof(Assembly);
+				if (assemblyType == null)
+					return null;
+				var getEntryAssembly = assemblyType.GetRuntimeMethod("GetEntryAssembly", new Type[0]);
+				if (getEntryAssembly == null)
+					return null;
+				var entryAssembly = getEntryAssembly.Invoke(null, null) as Assembly;
+				if (entryAssembly == null)
+					return null;
+
+				var assemblies = new List<Assembly>();
+				assemblies.Add(entryAssembly);
+				foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
+				{
+					try
+					{
+						var assembly = Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(file)));
+						if (assembly != entryAssembly)
+							assemblies.Add(assembly);
+					}
+					catch { }
+				}
+
+				return assemblies;
+			}
+			catch
+			{
+				return null;
+			}
+		}
+#endif
+
+#if !PCL136
+		static IEnumerable<Assembly> GetUwpAssemblies()
+		{
+			try
+			{
+				// if we're running in UWP, get all assemblies in installed locationF
+				// an ugly hack, but there's no other option until maybe netstandard 2.0.
+				var packageType = Type.GetType("Windows.ApplicationModel.Package,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				if (packageType == null)
+					return null;
+				var current = packageType.GetRuntimeProperty("Current")?.GetValue(null);
+				if (current == null)
+					return null;
+				var installedLocation = current.GetType().GetRuntimeProperty("InstalledLocation")?.GetValue(current);
+				if (installedLocation == null)
+					return null;
+				var getFilesAsync = installedLocation.GetType().GetRuntimeMethod("GetFilesAsync", new Type[0])?.Invoke(installedLocation, null);
+				if (getFilesAsync == null)
+					return null;
+
+				var awaiterExtensions = Type.GetType("System.WindowsRuntimeSystemExtensions,System.Runtime.WindowsRuntime");
+				var interfaceType = Type.GetType("Windows.Foundation.IAsyncOperation`1,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				var storageType = Type.GetType("Windows.Storage.StorageFile,Windows.Foundation.UniversalApiContract,ContentType=WindowsRuntime");
+				var resultType = typeof(IReadOnlyList<>).MakeGenericType(storageType);
+				var interfaceResultType = interfaceType?.MakeGenericType(resultType);
+				var getAwaiterMethod = awaiterExtensions.GetRuntimeMethods().First(m => m.Name == "GetAwaiter" && m.IsGenericMethod && m.ReturnType.GetTypeInfo().IsGenericType);
+				var awaiter = getAwaiterMethod.MakeGenericMethod(resultType).Invoke(null, new object[] { getFilesAsync });
+				var results = awaiter?.GetType().GetRuntimeMethod("GetResult", new Type[0])?.Invoke(awaiter, null);
+				var nameProperty = storageType.GetRuntimeProperty("Name");
+
+				var assemblies = new List<Assembly>();
+				foreach (var result in (results as IEnumerable))
+				{
+					var name = (string)nameProperty.GetValue(result);
+					if (string.Equals(Path.GetExtension(name), ".dll", StringComparison.OrdinalIgnoreCase)
+						|| string.Equals(Path.GetExtension(name), ".exe", StringComparison.OrdinalIgnoreCase))
+					{
+						try
+						{
+							assemblies.Add(Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(name))));
+						}
+						catch { }
+					}
+				}
+				return assemblies;
+			}
+			catch { }
+			return null;
+		}
+#endif
 
 		internal string GetXamlNamespace(string clrNamespace)
 		{
@@ -201,8 +318,6 @@ namespace Portable.Xaml
 			return new XamlValueConverter<TConverterBase>(converterType, targetType);
 		}
 
-		Dictionary<Pair,XamlDirective> xaml_directives = new Dictionary<Pair,XamlDirective>();
-
 		public virtual XamlDirective GetXamlDirective(string xamlNamespace, string name)
 		{
 			XamlDirective t;
@@ -213,6 +328,33 @@ namespace Portable.Xaml
 				xaml_directives.Add(p, t);
 			}
 			return t;
+		}
+
+		Dictionary<string, XamlType> typename_lookup = new Dictionary<string, XamlType>();
+
+		internal XamlType GetXamlType(string fullTypeName)
+		{
+			if (typename_lookup.TryGetValue(fullTypeName, out XamlType xamlType))
+				return xamlType;
+			var idx = fullTypeName.IndexOf(',');
+			if (idx == -1)
+				return null;
+			var name = fullTypeName.Substring(0, idx).Trim();
+			var assemblyName = fullTypeName.Substring(idx + 1).Trim();
+			var assembly = OnAssemblyResolve(assemblyName);
+			if (assembly == null)
+				return null;
+
+			var type = assembly.GetType(name);
+			if (type == null)
+				return null;
+			xamlType = GetXamlType(type);
+			if (ReferenceEquals(xamlType, null) || xamlType.IsUnknown)
+				return null;
+
+			if (!ReferenceEquals(xamlType, null))
+				typename_lookup[fullTypeName] = xamlType;
+			return xamlType;
 		}
 
 		public virtual XamlType GetXamlType(Type type)
@@ -243,8 +385,6 @@ namespace Portable.Xaml
 			return GetXamlType(n.Namespace, n.Name, typeArgs);
 		}
 
-		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
-
 		protected internal virtual XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
 		{
 			XamlType ret;
@@ -271,24 +411,34 @@ namespace Portable.Xaml
 			if (t.PreferredXamlNamespace == ns && t.Name == name && t.TypeArguments.ListEquals(typeArgs))
 				return true;
 			if (t.IsMarkupExtension)
-				return t.PreferredXamlNamespace == ns && t.GetInternalXmlName() == name && t.TypeArguments.ListEquals(typeArgs);
+				return t.PreferredXamlNamespace == ns && t.InternalXmlName == name && t.TypeArguments.ListEquals(typeArgs);
 			else
 				return false;
 		}
 
 		protected internal virtual Assembly OnAssemblyResolve(string assemblyName)
 		{
+			if (assembly_cache.TryGetValue(assemblyName, out AssemblyInfo info))
+				return info.Assembly;
+
 			var aname = new AssemblyName(assemblyName);
-			var ainfo = AssembliesInScope.FirstOrDefault(r => r.Name.Matches(aname));
-			if (ainfo.Assembly != null)
-				return ainfo.Assembly;
+			foreach (var ainfo in AssembliesInScope)
+			{
+				if (ainfo.Name.Matches(aname))
+				{
+					assembly_cache[assemblyName] = ainfo;
+					return ainfo.Assembly;
+				}
+			}
 
 			// fallback if not found
 #if PCL136
-			return Assembly.Load(assemblyName);
+			var assembly = Assembly.Load(assemblyName);
 #else
-			return Assembly.Load(aname);
+			var assembly = Assembly.Load(aname);
 #endif
+			assembly_cache[assemblyName] = new AssemblyInfo { Assembly = assembly };
+			return assembly;
 		}
 
 		public virtual bool TryGetCompatibleXamlNamespace(string xamlNamespace, out string compatibleNamespace)
@@ -301,9 +451,8 @@ namespace Portable.Xaml
 				foreach (var ass in AssembliesInScope)
 					FillCompatibilities(ass.Assembly);
 			}
-			if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace)
-			    && GetAllXamlNamespaces().Contains(compatibleNamespace))
-				return true;
+			if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace))
+				return GetAllXamlNamespaces().Contains(compatibleNamespace);
 			if (GetAllXamlNamespaces().Contains(xamlNamespace))
 			{
 				compatibleNamespace = xamlNamespace;
@@ -440,9 +589,9 @@ namespace Portable.Xaml
 			if (xmlNamespace == XamlLanguage.Xaml2006Namespace)
 			{
 				var xt = XamlLanguage.SpecialNames.Find(xmlLocalName, xmlNamespace);
-				if (xt == null)
+				if (ReferenceEquals(xt, null))
 					xt = XamlLanguage.AllTypes.FirstOrDefault(t => TypeMatches(t, xmlNamespace, xmlLocalName, typeArguments));
-				if (xt != null)
+				if (!ReferenceEquals(xt, null))
 					return xt;
 			}
 
@@ -497,9 +646,6 @@ namespace Portable.Xaml
 			return tfn;
 		}
 
-		Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember> member_cache = new Dictionary<Tuple<MemberInfo, MemberInfo>, XamlMember>();
-		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
-
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetParameter(ParameterInfo parameterInfo)
 		{
@@ -512,7 +658,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetProperty(PropertyInfo propertyInfo)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(propertyInfo, null);
+			var key = Tuple.Create(propertyInfo.DeclaringType, propertyInfo.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -522,7 +668,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetEvent(EventInfo eventInfo)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(eventInfo, null);
+			var key = Tuple.Create(eventInfo.DeclaringType, eventInfo.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -532,7 +678,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableProperty(string attachablePropertyName, MethodInfo getter, MethodInfo setter)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(getter, setter);
+			var key = Tuple.Create(getter?.DeclaringType ?? setter.DeclaringType, getter?.Name, setter?.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;
@@ -542,7 +688,7 @@ namespace Portable.Xaml
 		[EnhancedXaml]
 		protected internal virtual XamlMember GetAttachableEvent(string attachablePropertyName, MethodInfo adder)
 		{
-			var key = new Tuple<MemberInfo, MemberInfo>(adder, null);
+			var key = Tuple.Create(adder.DeclaringType, adder.Name);
 			XamlMember member;
 			if (member_cache.TryGetValue(key, out member))
 				return member;

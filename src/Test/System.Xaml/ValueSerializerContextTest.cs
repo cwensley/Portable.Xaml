@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -42,100 +42,165 @@ using System.Xaml.Schema;
 #endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
+using System.Globalization;
+#if NETSTANDARD
+using System.ComponentModel;
+#endif
 
 namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
 	public class ValueSerializerContextTest
 	{
-		public static IServiceProvider Provider;
+		public static void RunCanConvertFromTest(ITypeDescriptorContext context, Type sourceType) => runCanConvertFrom?.Invoke(context, sourceType);
+		public static void RunConvertFromTest(ITypeDescriptorContext context, CultureInfo culture, object value) => runConvertFrom?.Invoke(context, culture, value);
+		public static void RunCanConvertToTest(ITypeDescriptorContext context, Type destinationType) => runCanConvertTo?.Invoke(context, destinationType);
+		public static void RunConvertToTest(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) => runConvertTo?.Invoke(context, culture, value, destinationType);
 
-		public static IValueSerializerContext Context {
-			get { return (IValueSerializerContext)Provider; }
-			set {
-				Provider = value;
-				if (Provider != null && runTest != null) {
-					runTest ();
-					runTest = null;
-				}
-			}
+		static Action<ITypeDescriptorContext, Type> runCanConvertFrom;
+		static Action<ITypeDescriptorContext, CultureInfo, object> runConvertFrom;
+		static Action<ITypeDescriptorContext, Type> runCanConvertTo;
+		static Action<ITypeDescriptorContext, CultureInfo, object, Type> runConvertTo;
+
+		[SetUp]
+		public void SetUp()
+		{
+			runCanConvertFrom = null;
+			runConvertFrom = null;
+			runCanConvertTo = null;
+			runConvertTo = null;
 		}
 
-		static Action runTest;
-
-		void SetupReaderService ()
+		void SetupReaderService()
 		{
-			Context = null;
-			var obj = new TestValueSerialized ();
-			var xr = new XamlObjectReader (obj);
-			while (!xr.IsEof && Context == null)
-				xr.Read ();
-			Assert.IsNotNull (Context, "SetupReader #1");
+			var obj = new TestValueSerialized();
+			var xr = new XamlObjectReader(obj);
+			while (!xr.IsEof)
+				xr.Read();
 		}
 
-		void SetupWriterService ()
+		void SetupWriterService()
 		{
-			Context = null;
-			var obj = new TestValueSerialized ();
-			var ctx = new XamlSchemaContext ();
-			var xw = new XamlObjectWriter (ctx);
-			var xt = ctx.GetXamlType (obj.GetType ());
-			xw.WriteStartObject (xt);
-			xw.WriteStartMember (XamlLanguage.Initialization);
-			xw.WriteValue ("v");
-			xw.WriteEndMember ();
-			xw.Close ();
-			Assert.IsNotNull (Provider, "SetupWriter #1");
+			var obj = new TestValueSerialized();
+			var ctx = new XamlSchemaContext();
+			var xw = new XamlObjectWriter(ctx);
+			var xt = ctx.GetXamlType(obj.GetType());
+			xw.WriteStartObject(xt);
+			xw.WriteStartMember(XamlLanguage.Initialization);
+			xw.WriteValue("v");
+			xw.WriteEndMember();
+			xw.Close();
 		}
 
 		[Test]
-		public void ReaderServiceTest ()
+		public void ReaderServiceTest()
 		{
-			runTest = () => {
-				//Assert.IsNull(Provider.GetService(typeof(IXamlNameResolver)), "#1");
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlNameProvider)), "#2");
-				//Assert.IsNull(Provider.GetService(typeof(IXamlNamespaceResolver)), "#3");
-				Assert.IsNotNull (Provider.GetService (typeof(INamespacePrefixLookup)), "#4");
-				//Assert.IsNull(Provider.GetService(typeof(IXamlTypeResolver)), "#5");
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlSchemaContextProvider)), "#6");
-				Assert.IsNull (Provider.GetService (typeof(IAmbientProvider)), "#7");
-				Assert.IsNull (Provider.GetService (typeof(IAttachedPropertyStore)), "#8");
-				Assert.IsNull (Provider.GetService (typeof(IDestinationTypeProvider)), "#9");
-				Assert.IsNull (Provider.GetService (typeof(IXamlObjectWriterFactory)), "#10");
+			bool ranConvertTo = false;
+			bool ranCanConvertTo = false;
+			runCanConvertTo = (context, destinationType) =>
+			{
+				Assert.IsNotNull(context, "#1");
+				Assert.AreEqual(typeof(string), destinationType, "#2");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlNameResolver)), "#3");
+				Assert.IsNotNull(context.GetService(typeof(IXamlNameProvider)), "#4");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlNamespaceResolver)), "#5");
+				Assert.IsNotNull(context.GetService(typeof(INamespacePrefixLookup)), "#6");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlTypeResolver)), "#7");
+				Assert.IsNotNull(context.GetService(typeof(IXamlSchemaContextProvider)), "#8");
+				Assert.IsNull(context.GetService(typeof(IAmbientProvider)), "#9");
+				Assert.IsNull(context.GetService(typeof(IAttachedPropertyStore)), "#10");
+				Assert.IsNull(context.GetService(typeof(IDestinationTypeProvider)), "#11");
+				Assert.IsNull(context.GetService(typeof(IXamlObjectWriterFactory)), "#12");
+				ranCanConvertTo = true;
 			};
-			SetupReaderService ();
+			runConvertTo = (context, culture, value, destinationType) =>
+			{
+				Assert.IsNotNull(context, "#13");
+				Assert.AreEqual(CultureInfo.InvariantCulture, culture, "#14");
+				Assert.AreEqual(typeof(string), destinationType, "#15");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlNameResolver)), "#16");
+				Assert.IsNotNull(context.GetService(typeof(IXamlNameProvider)), "#17");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlNamespaceResolver)), "#18");
+				Assert.IsNotNull(context.GetService(typeof(INamespacePrefixLookup)), "#19");
+				//Assert.IsNull(Provider.GetService(typeof(IXamlTypeResolver)), "#20");
+				Assert.IsNotNull(context.GetService(typeof(IXamlSchemaContextProvider)), "#21");
+				Assert.IsNull(context.GetService(typeof(IAmbientProvider)), "#22");
+				Assert.IsNull(context.GetService(typeof(IAttachedPropertyStore)), "#23");
+				Assert.IsNull(context.GetService(typeof(IDestinationTypeProvider)), "#24");
+				Assert.IsNull(context.GetService(typeof(IXamlObjectWriterFactory)), "#25");
+				ranConvertTo = true;
+			};
+			SetupReaderService();
+			Assert.IsTrue(ranConvertTo, "#26");
+			Assert.IsTrue(ranCanConvertTo, "#27");
 		}
 
 		[Test]
-		public void WriterServiceTest ()
+		public void WriterServiceTest()
 		{
+			bool ranConvertFrom = false;
+			bool ranCanConvertFrom = false;
 			// need to test within the call, not outside of it
-			runTest = () => {
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlNameResolver)), "#1");
-				//Assert.IsNull (Provider.GetService (typeof(IXamlNameProvider)), "#2");
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlNamespaceResolver)), "#3");
-				//Assert.IsNull (Provider.GetService (typeof(INamespacePrefixLookup)), "#4");
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlTypeResolver)), "#5");
-				Assert.IsNotNull (Provider.GetService (typeof(IXamlSchemaContextProvider)), "#6");
-				Assert.IsNotNull (Provider.GetService (typeof(IAmbientProvider)), "#7");
-				Assert.IsNull (Provider.GetService (typeof(IAttachedPropertyStore)), "#8");
-				Assert.IsNotNull (Provider.GetService (typeof(IDestinationTypeProvider)), "#9");
-				Assert.IsNull (Provider.GetService (typeof(IXamlObjectWriterFactory)), "#10");
+			runCanConvertFrom = (context, sourceType) =>
+			{
+				Assert.AreEqual(sourceType, typeof(string), "#1");
+				if (Compat.IsPortableXaml)
+				{
+					// only portable.xaml provides the context here (extended functionality)
+					Assert.IsNotNull(context, "#2");
+					Assert.IsNotNull(context.GetService(typeof(IXamlNameResolver)), "#3");
+					//Assert.IsNull (Provider.GetService (typeof(IXamlNameProvider)), "#4");
+					Assert.IsNotNull(context.GetService(typeof(IXamlNamespaceResolver)), "#5");
+					//Assert.IsNull (Provider.GetService (typeof(INamespacePrefixLookup)), "#6");
+					Assert.IsNotNull(context.GetService(typeof(IXamlTypeResolver)), "#7");
+					Assert.IsNotNull(context.GetService(typeof(IXamlSchemaContextProvider)), "#8");
+					Assert.IsNotNull(context.GetService(typeof(IAmbientProvider)), "#9");
+					Assert.IsNull(context.GetService(typeof(IAttachedPropertyStore)), "#10");
+					Assert.IsNotNull(context.GetService(typeof(IDestinationTypeProvider)), "#11");
+					Assert.IsNotNull(context.GetService(typeof(IXamlObjectWriterFactory)), "#12");
+				}
+				ranCanConvertFrom = true;
 			};
-			SetupWriterService ();
+			runConvertFrom = (context, culture, value) =>
+			{
+				Assert.IsNotNull(context, "#13");
+				Assert.AreEqual(CultureInfo.InvariantCulture, culture, "#14");
+				Assert.AreEqual("v", value, "#15");
+				Assert.IsNotNull(context.GetService(typeof(IXamlNameResolver)), "#16");
+				//Assert.IsNull (Provider.GetService (typeof(IXamlNameProvider)), "#17");
+				Assert.IsNotNull(context.GetService(typeof(IXamlNamespaceResolver)), "#18");
+				//Assert.IsNull (Provider.GetService (typeof(INamespacePrefixLookup)), "#19");
+				Assert.IsNotNull(context.GetService(typeof(IXamlTypeResolver)), "#20");
+				Assert.IsNotNull(context.GetService(typeof(IXamlSchemaContextProvider)), "#21");
+				Assert.IsNotNull(context.GetService(typeof(IAmbientProvider)), "#22");
+				Assert.IsNull(context.GetService(typeof(IAttachedPropertyStore)), "#23");
+				Assert.IsNotNull(context.GetService(typeof(IDestinationTypeProvider)), "#24");
+				Assert.IsNotNull(context.GetService(typeof(IXamlObjectWriterFactory)), "#25");
+				ranConvertFrom = true;
+			};
+			SetupWriterService();
+			Assert.IsTrue(ranConvertFrom, "#26");
+			Assert.IsTrue(ranCanConvertFrom, "#27");
 		}
 
 		[Test]
-		public void NameResolver ()
+		public void NameResolver()
 		{
-			SetupWriterService ();
+			bool ranConvertFrom = false;
+			runConvertFrom = (context, culture, sourceType) =>
+			{
+				var nr = (IXamlNameResolver)context.GetService(typeof(IXamlNameResolver));
+				Assert.IsNull(nr.Resolve("random"), "nr#1");
+				//var ft = nr.GetFixupToken (new string [] {"random"}); -> causes internal error.
+				//var ft = nr.GetFixupToken (new string [] {"random"}, true); -> causes internal error
+				//var ft = nr.GetFixupToken (new string [0], false);
+				//Assert.IsNotNull (ft, "nr#2");
+				ranConvertFrom = true;
+			};
 
-			var nr = (IXamlNameResolver)Provider.GetService (typeof(IXamlNameResolver));
-			Assert.IsNull (nr.Resolve ("random"), "nr#1");
-			//var ft = nr.GetFixupToken (new string [] {"random"}); -> causes internal error.
-			//var ft = nr.GetFixupToken (new string [] {"random"}, true); -> causes internal error
-			//var ft = nr.GetFixupToken (new string [0], false);
-			//Assert.IsNotNull (ft, "nr#2");
+			SetupWriterService();
+
+			Assert.IsTrue(ranConvertFrom, "#2");
 		}
 	}
 }

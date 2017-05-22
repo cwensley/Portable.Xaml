@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -595,7 +595,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void ConstructorArguments ()
 		{
-			string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><ArgumentAttributed xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:String>xxx</x:String><x:String>yyy</x:String></x:Arguments></ArgumentAttributed>", GetType ().Assembly.GetName ().Name);
+			string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><ArgumentAttributed xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:String>xxx</x:String><x:String>yyy</x:String></x:Arguments></ArgumentAttributed>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
 			Assert.IsFalse (sctx.FullyQualifyAssemblyNamesInClrNamespaces, "premise0");
 			var r = new XamlObjectReader (new ArgumentAttributed ("xxx", "yyy"), sctx);
 			var sw = new StringWriter ();
@@ -1084,6 +1084,70 @@ namespace MonoTests.Portable.Xaml
 			var obj = new NullableContainer () { TestProp = 5 };
 			Assert.AreEqual (ReadXml ("NullableContainer.xml").Trim (), XamlServices.Save (obj), "#1");
 		}
+
+		[Test]
+		public void Write_NumericValues()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = 123.456,
+				DecimalValue = 234.567M,
+				FloatValue = 345.678f,
+				ByteValue = 123,
+				IntValue = 123456,
+				LongValue = 234567
+			};
+			Assert.AreEqual(ReadXml("NumericValues.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_Max()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.MaxValue,
+				DecimalValue = decimal.MaxValue,
+				FloatValue = float.MaxValue,
+				ByteValue = byte.MaxValue,
+				IntValue = int.MaxValue,
+				LongValue = long.MaxValue
+			};
+			Assert.AreEqual(ReadXml("NumericValues_Max.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_PositiveInfinity()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.PositiveInfinity,
+				FloatValue = float.PositiveInfinity
+			};
+			Assert.AreEqual(ReadXml("NumericValues_PositiveInfinity.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_NegativeInfinity()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.NegativeInfinity,
+				FloatValue = float.NegativeInfinity
+			};
+			Assert.AreEqual(ReadXml("NumericValues_NegativeInfinity.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NumericValues_NaN()
+		{
+			var obj = new NumericValues
+			{
+				DoubleValue = double.NaN,
+				FloatValue = float.NaN
+			};
+			Assert.AreEqual(ReadXml("NumericValues_NaN.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
 	}
 
 	public class TestXmlWriterClass1

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -26,6 +26,8 @@ using Portable.Xaml.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Schema;
+using Portable.Xaml.Markup;
+using System.ComponentModel;
 
 namespace Portable.Xaml
 {
@@ -52,21 +54,18 @@ namespace Portable.Xaml
 		{
 			if (xamlNamespaces == null)
 				throw new ArgumentNullException ("xamlNamespaces");
-			if (xamlType == null)
+			if (ReferenceEquals(xamlType, null))
 				throw new ArgumentNullException ("xamlType");
 
 			type = xamlType;
 			xaml_namespaces = new List<string> (xamlNamespaces);
 			AllowedLocation = allowedLocation;
 			type_converter = typeConverter;
-			
-			invoker = new DirectiveMemberInvoker (this);
 		}
 
 		public AllowedMemberLocations AllowedLocation { get; private set; }
 		XamlValueConverter<TypeConverter> type_converter;
 		XamlType type;
-		XamlMemberInvoker invoker;
 		bool is_unknown;
 		IList<string> xaml_namespaces;
 
@@ -77,8 +76,8 @@ namespace Portable.Xaml
 
 		public override int GetHashCode ()
 		{
-			var name = string.IsNullOrEmpty(PreferredXamlNamespace) ? Name : PreferredXamlNamespace;
-			return name.GetHashCode();
+			var pns = PreferredXamlNamespace ?? string.Empty;
+			return pns.GetHashCode() ^ Name.GetHashCode();
 		}
 
 		public override IList<string> GetXamlNamespaces ()
@@ -103,7 +102,7 @@ namespace Portable.Xaml
 
 		protected override sealed XamlMemberInvoker LookupInvoker ()
 		{
-			return invoker;
+			return new DirectiveMemberInvoker(this);
 		}
 
 		protected override sealed bool LookupIsAmbient ()
@@ -169,6 +168,11 @@ namespace Portable.Xaml
 		}
 
 		protected override sealed MethodInfo LookupUnderlyingSetter ()
+		{
+			return null;
+		}
+
+		protected override XamlValueConverter<ValueSerializer> LookupValueSerializer()
 		{
 			return null;
 		}

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -87,12 +87,8 @@ namespace Portable.Xaml
 		
 		public XamlXmlWriter (XmlWriter xmlWriter, XamlSchemaContext schemaContext, XamlXmlWriterSettings settings)
 		{
-			if (xmlWriter == null)
-				throw new ArgumentNullException ("xmlWriter");
-			if (schemaContext == null)
-				throw new ArgumentNullException ("schemaContext");
-			this.w = xmlWriter;
-			this.sctx = schemaContext;
+			this.w = xmlWriter ?? throw new ArgumentNullException(nameof(xmlWriter));
+			this.sctx = schemaContext ?? throw new ArgumentNullException(nameof(schemaContext));
 			this.settings = settings ?? new XamlXmlWriterSettings ();
 			var manager = new XamlWriterStateManager<XamlXmlWriterException, InvalidOperationException> (true);
 			intl = new XamlXmlWriterInternal (xmlWriter, sctx, manager);
@@ -214,13 +210,11 @@ namespace Portable.Xaml
 			WritePendingStartMember (XamlNodeType.EndMember);
 
 			var member = CurrentMember;
-			if (member == XamlLanguage.Initialization)
+			if (ReferenceEquals(member, XamlLanguage.Initialization))
 				return;
-			if (member == XamlLanguage.Items)
+			if (ReferenceEquals(member, XamlLanguage.Items))
 				return;
-			if (member.Type.IsCollection && member.IsReadOnly)
-				return;
-			if (member.DeclaringType != null && member == member.DeclaringType.ContentProperty)
+			if (member == member.TargetType?.ContentProperty)
 				return;
 
 			if (inside_toplevel_positional_parameter) {
@@ -262,14 +256,14 @@ namespace Portable.Xaml
 					w.WriteString (prefix);
 					w.WriteString (":");
 				}
-				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.GetInternalXmlName () : xamlType.Name;
+				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.InternalXmlName : xamlType.Name;
 				w.WriteString (name);
 				// space between type and first member (if any).
 				if (xamlType.IsMarkupExtension && xamlType.GetSortedConstructorArguments ().GetEnumerator ().MoveNext ())
 					w.WriteString (" ");
 			} else {
 				WritePendingNamespaces ();
-				w.WriteStartElement (prefix, xamlType.GetInternalXmlName (), xamlType.PreferredXamlNamespace);
+				w.WriteStartElement (prefix, xamlType.InternalXmlName, xamlType.PreferredXamlNamespace);
 				var l = xamlType.TypeArguments;
 				if (l != null) {
 					w.WriteStartAttribute ("x", "TypeArguments", XamlLanguage.Xaml2006Namespace);
@@ -287,18 +281,23 @@ namespace Portable.Xaml
 
 		protected override void OnWriteGetObject ()
 		{
-			if (object_states.Count > 1) {
-				var state = object_states.Pop ();
 
-				if (!CurrentMember.Type.IsCollection)
-					throw new InvalidOperationException (String.Format ("WriteGetObject method can be invoked only when current member '{0}' is of collection type", CurrentMember));
+			if (object_states.Count > 1)
+			{
+				var state = object_states.Pop();
 
-				WritePendingStartMember (XamlNodeType.GetObject);
+				var member = CurrentMember;
+				if (!member.Type.IsCollection && !member.Type.IsDictionary)
+					throw new InvalidOperationException(String.Format("WriteGetObject method can be invoked only when current member '{0}' is of collection or dictionary type", CurrentMember));
+				WritePendingStartMember(XamlNodeType.GetObject);
 
-				object_states.Push (state);
+				object_states.Push(state);
 			}
 			else
-				WritePendingStartMember (XamlNodeType.GetObject);
+			{
+				var member = CurrentMember;
+				WritePendingStartMember(XamlNodeType.GetObject);
+			}
 		}
 		
 		void WritePendingStartMember (XamlNodeType nodeType)
@@ -316,13 +315,11 @@ namespace Portable.Xaml
 		
 		protected override void OnWriteStartMember (XamlMember member)
 		{
-			if (member == XamlLanguage.Initialization)
+			if (ReferenceEquals(member, XamlLanguage.Initialization))
 				return;
-			if (member == XamlLanguage.Items)
+			if (ReferenceEquals(member, XamlLanguage.Items))
 				return;
-			if (member.Type.IsCollection && member.IsReadOnly)
-				return;
-			if (member.DeclaringType != null && member == member.DeclaringType.ContentProperty)
+			if (member == member.TargetType?.ContentProperty)
 				return;
 
 			WritePendingValue (XamlNodeType.Value);
@@ -335,7 +332,7 @@ namespace Portable.Xaml
 			//   the second constructor argument.
 			// (Here "top-level" means an object that involves
 			//  StartObject i.e. the root or a collection item.)
-			var posprms = member == XamlLanguage.PositionalParameters && IsAtTopLevelObject () && object_states.Peek ().Type.HasPositionalParameters (service_provider) ? state.Type.GetSortedConstructorArguments ().GetEnumerator () : null;
+			var posprms = ReferenceEquals(member, XamlLanguage.PositionalParameters) && IsAtTopLevelObject () && object_states.Peek ().Type.HasPositionalParameters (service_provider) ? state.Type.GetSortedConstructorArguments ().GetEnumerator () : null;
 			if (posprms != null) {
 				posprms.MoveNext ();
 				var arg = posprms.Current;
@@ -352,7 +349,7 @@ namespace Portable.Xaml
 					w.WriteString ("=");
 				}
 			}
-			else if (member == XamlLanguage.PositionalParameters && posprms == null && state.Type.GetSortedConstructorArguments ().All (m => m == state.Type.ContentProperty)) // PositionalParameters and ContentProperty, excluding such cases that it is already processed above (as attribute).
+			else if (ReferenceEquals(member, XamlLanguage.PositionalParameters) && posprms == null && state.Type.GetSortedConstructorArguments ().All (m => m == state.Type.ContentProperty)) // PositionalParameters and ContentProperty, excluding such cases that it is already processed above (as attribute).
 				OnWriteStartMemberContent (state.Type, member);
 			else {
 				switch (IsAttribute (state.Type, member)) {
@@ -374,29 +371,29 @@ namespace Portable.Xaml
 			if (object_states.Count == 1)
 				return true;
 			var tmp = object_states.Pop ();
-			var parentMember = object_states.Peek ().WrittenProperties.LastOrDefault ().Member;
+			var parentMember = object_states.Peek().CurrentMemberState?.Member;
 			object_states.Push (tmp);
 
-			return parentMember == XamlLanguage.Items;
+			return ReferenceEquals(parentMember, XamlLanguage.Items);
 		}
 
 		AllowedMemberLocations IsAttribute (XamlType ownerType, XamlMember xm)
 		{
 			var xt = ownerType;
 			var mt = xm.Type;
-			if (xm == XamlLanguage.Key) {
+			if (ReferenceEquals(xm, XamlLanguage.Key)) {
 				var tmp = object_states.Pop ();
 				mt = object_states.Peek ().Type.KeyType;
 				object_states.Push (tmp);
 			}
 
-			if (xm == XamlLanguage.Initialization)
+			if (ReferenceEquals(xm, XamlLanguage.Initialization))
 				return AllowedMemberLocations.MemberElement;
 			if (mt.HasPositionalParameters (service_provider))
 				return AllowedMemberLocations.Attribute;
 			if (w.WriteState == WriteState.Content)
 				return AllowedMemberLocations.MemberElement;
-			if (xt.IsDictionary && xm != XamlLanguage.Key)
+			if (xt.IsDictionary && !ReferenceEquals(xm, XamlLanguage.Key))
 				return AllowedMemberLocations.MemberElement; // as each item holds a key.
 
 			var xd = xm as XamlDirective;
@@ -421,7 +418,7 @@ namespace Portable.Xaml
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.MemberElement;
 			string prefix = GetPrefix (xm.PreferredXamlNamespace);
-			string name = xm.IsDirective ? xm.Name : String.Concat (xt.GetInternalXmlName (), ".", xm.Name);
+			string name = xm.IsDirective ? xm.Name : String.Concat (xt.InternalXmlName, ".", xm.Name);
 			WritePendingNamespaces ();
 			w.WriteStartElement (prefix, name, xm.PreferredXamlNamespace);
 		}
@@ -465,7 +462,7 @@ namespace Portable.Xaml
 			// indent around XData, I assume they do this, instead
 			// of examining valid Text value by creating XmlReader
 			// and call XmlWriter.WriteNode().
-			if (xm.DeclaringType == XamlLanguage.XData && xm == XamlLanguage.XData.GetMember ("Text")) {
+			if (ReferenceEquals(xm.DeclaringType, XamlLanguage.XData) && xm == XamlLanguage.XData.GetMember ("Text")) {
 				w.WriteRaw (s);
 				hasPendingValue = false;
 				pendingValue = null;

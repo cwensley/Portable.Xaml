@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -38,6 +38,13 @@ using sc = System.ComponentModel;
 using System.Collections.Immutable;
 #endif
 
+#if NETSTANDARD
+using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
+using System.ComponentModel;
+using DateTimeConverter = System.ComponentModel.DateTimeConverter;
+#elif PCL
+using DateTimeConverter = Portable.Xaml.ComponentModel.DateTimeConverter;
+#endif
 
 #if PCL
 using Portable.Xaml.Markup;
@@ -53,22 +60,22 @@ using System.Xaml.Schema;
 #endif
 
 [assembly: XmlnsDefinition("http://www.domain.com/path", "XamlTest")]
- // bug #680385
+// bug #680385
 [assembly: XmlnsDefinition("http://www.domain.com/path", "SecondTest")]
- // bug #681045, same xmlns key for different clrns.
+// bug #681045, same xmlns key for different clrns.
 
 [assembly: XmlnsDefinition("http://schemas.example.com/test", "XamarinBug3003")]
- // bug #3003
+// bug #3003
 [assembly: XmlnsPrefix("http://schemas.example.com/test", "test")]
- // bug #3003
+// bug #3003
 
-[assembly:XmlnsDefinition("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
-[assembly:XmlnsDefinition("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
+[assembly: XmlnsDefinition("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
+[assembly: XmlnsDefinition("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
 
 // comment out the following to get mono's System.Xaml to go further in the tests
 [assembly: XmlnsDefinition("urn:bar", "MonoTests.Portable.Xaml.NamespaceTest")]
 
-[assembly:XmlnsCompatibleWith("urn:foo", "urn:bar")]
+[assembly: XmlnsCompatibleWith("urn:foo", "urn:bar")]
 [assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
 namespace MonoTests.Portable.Xaml.NamespaceTest
@@ -76,6 +83,8 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	public class NamespaceTestClass
 	{
 		public string Foo { get; set; }
+
+		public string Bar { get; set; }
 	}
 
 	public abstract class AbstractObject
@@ -88,10 +97,10 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 		public override string Foo { get; set; }
 	}
 
-	[ContentProperty ("Contents")]
+	[ContentProperty("Contents")]
 	public class CustomGenericType<T>
 	{
-		public List<T> Contents { get; } = new List<T> ();
+		public List<T> Contents { get; } = new List<T>();
 	}
 }
 
@@ -115,9 +124,9 @@ namespace MonoTests.Portable.Xaml
 
 	[ContentProperty("Contents")]
 	public class CustomGenericType<T>
-		where T: struct
+		where T : struct
 	{
-		public List<T> Contents { get; } = new List<T> ();
+		public List<T> Contents { get; } = new List<T>();
 	}
 
 	public class ArgumentNonAttributed
@@ -139,12 +148,12 @@ namespace MonoTests.Portable.Xaml
 
 		public string StringArg { get; private set; }
 
-		public ArgumentMultipleTypes (int arg1)
+		public ArgumentMultipleTypes(int arg1)
 		{
 			IntArg = arg1;
 		}
 
-		public ArgumentMultipleTypes (string arg1)
+		public ArgumentMultipleTypes(string arg1)
 		{
 			StringArg = arg1;
 		}
@@ -155,7 +164,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		public int IntArg { get; private set; }
 
-		public ArgumentWithIntConstructor (int arg1)
+		public ArgumentWithIntConstructor(int arg1)
 		{
 			IntArg = arg1;
 		}
@@ -211,7 +220,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		public string Foo { get; set; }
 	}
-	
+
 	//[MarkupExtensionReturnType (typeof (Array))]
 	//[ContentProperty ("Items")]  ... so, these attributes do not affect XamlObjectReader.
 	public class MyArrayExtension : MarkupExtension
@@ -320,6 +329,11 @@ namespace MonoTests.Portable.Xaml
 		public string Bar { get; set; }
 
 		public string Baz { internal get; set; }
+
+		public string WriteOnly
+		{
+			set { Baz = value; }
+		}
 
 		public string ReadOnly
 		{
@@ -677,13 +691,13 @@ namespace MonoTests.Portable.Xaml
 	{
 		public XData Markup { get; set; }
 	}
-	
+
 	// FIXME: test it with XamlXmlReader (needs to create xml first)
 	public class EventContainer
 	{
-		#pragma warning disable 67
+#pragma warning disable 67
 		public event Action Run;
-		#pragma warning restore 67
+#pragma warning restore 67
 	}
 
 	public class NamedItem
@@ -723,6 +737,15 @@ namespace MonoTests.Portable.Xaml
 		public IList<NamedItem2> References { get; private set; }
 	}
 
+	public class NamedItem3 : NamedItem2
+	{
+		public NamedItem2 Other { get; set; }
+
+#if !PCL136
+		public ImmutableArray<NamedItem3> ImmutableReferences { get; set; }
+#endif
+	}
+
 	[TypeConverter(typeof(TestValueConverter))]
 	public class TestValueSerialized
 	{
@@ -738,17 +761,17 @@ namespace MonoTests.Portable.Xaml
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			//Console.Error.WriteLine ("### {0}:{1}", sourceType, context);
-			ValueSerializerContextTest.Context = (IValueSerializerContext)context;
+			ValueSerializerContextTest.RunCanConvertFromTest(context, sourceType);
 			return true;
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object source)
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			//Console.Error.WriteLine ("##### {0}:{1}", source, context);
-			ValueSerializerContextTest.Provider = (IServiceProvider)context;
+			ValueSerializerContextTest.RunConvertFromTest(context, culture, value);
 			//var sp = context as IServiceProvider;
 			// ValueSerializerContextTest.Context = (IValueSerializerContext) context; -> causes InvalidCastException
-			if ((source as string) == "v")
+			if ((value as string) == "v")
 				return new TestValueSerialized();
 			throw new Exception("huh");
 		}
@@ -756,8 +779,19 @@ namespace MonoTests.Portable.Xaml
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
 			//Console.Error.WriteLine ("$$$ {0}:{1}", destinationType, context);
-			ValueSerializerContextTest.Context = (IValueSerializerContext)context;
-			return destinationType != typeof(MarkupExtension);
+			if (destinationType != typeof(MarkupExtension))
+			{
+				ValueSerializerContextTest.RunCanConvertToTest(context, destinationType);
+				return true;
+			}
+			return false;
+		}
+
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			ValueSerializerContextTest.RunConvertToTest(context, culture, value, destinationType);
+
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 	}
 
@@ -868,7 +902,7 @@ namespace MonoTests.Portable.Xaml
 			AttachablePropertyServices.SetProperty(target, ProtectedIdentifier, value);
 		}
 
-		static Dictionary<object,List<EventHandler>> handlers = new Dictionary<object,List<EventHandler>>();
+		static Dictionary<object, List<EventHandler>> handlers = new Dictionary<object, List<EventHandler>>();
 
 		public static void AddXHandler(object target, EventHandler handler)
 		{
@@ -893,7 +927,7 @@ namespace MonoTests.Portable.Xaml
 		{
 		}
 
-		Dictionary<AttachableMemberIdentifier,object> props = new Dictionary<AttachableMemberIdentifier,object>();
+		Dictionary<AttachableMemberIdentifier, object> props = new Dictionary<AttachableMemberIdentifier, object>();
 
 		public int PropertyCount
 		{
@@ -978,12 +1012,18 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class CustomEventArgs : EventArgs
+	{
+	}
+
 	public class EventStore
 	{
 		public bool Method1Invoked;
 
 		public event EventHandler<EventArgs> Event1;
 		public event Func<object> Event2;
+
+		public event EventHandler<CustomEventArgs> Event3;
 
 		public object Examine()
 		{
@@ -1021,7 +1061,7 @@ namespace MonoTests.Portable.Xaml
 		public object Examine()
 		{
 			if (Event1 != null)
-				Event1(this, default (TEventArgs));
+				Event1(this, default(TEventArgs));
 			if (Event2 != null)
 				return Event2();
 			else
@@ -1172,11 +1212,11 @@ namespace MonoTests.Portable.Xaml
 
 	public class DirectDictionaryContainer // for such xml that directly contains items in <*.Items> element.
 	{
-		public IDictionary<EnumValueType,int> Items { get; set; }
+		public IDictionary<EnumValueType, int> Items { get; set; }
 
 		public DirectDictionaryContainer()
 		{
-			this.Items = new Dictionary<EnumValueType,int>();
+			this.Items = new Dictionary<EnumValueType, int>();
 		}
 	}
 
@@ -1310,11 +1350,14 @@ namespace MonoTests.Portable.Xaml
 		public DeferredLoadingChild Child { get; set; }
 	}
 
+	[ContentProperty("Item")]
 	[XamlDeferLoad(typeof(TestDeferredLoader2), typeof(DeferredLoadingChild2))]
 	public class DeferredLoadingChild2
 	{
 		public XamlNodeList List { get; set; }
 		public string Foo { get; set; }
+
+		public CollectionParentGenericList Item { get; set; }
 
 		public DeferredLoadingChild2()
 		{
@@ -1472,7 +1515,7 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
-	#if !PCL136
+#if !PCL136
 
 	public class ImmutableCollectionContainer
 	{
@@ -1486,7 +1529,22 @@ namespace MonoTests.Portable.Xaml
 		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
 	}
 
-	#endif
+#endif
+
+	public class NumericValues
+	{
+		public double DoubleValue { get; set; }
+
+		public decimal DecimalValue { get; set; }
+
+		public float FloatValue { get; set; }
+
+		public byte ByteValue { get; set; }
+
+		public int IntValue { get; set; }
+
+		public long LongValue { get; set; }
+	}
 }
 
 namespace XamlTest
@@ -1565,6 +1623,16 @@ namespace SecondTest
 
 	public class CustomTypeConverterBase : TypeConverter
 	{
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			return base.ConvertTo(context, culture, value, destinationType);
+		}
+
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			return base.ConvertFrom(context, culture, value);
+		}
+
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			if (sourceType == typeof(string))
@@ -1597,10 +1665,15 @@ namespace SecondTest
 			XamlSchemaContext schemaContext = service.SchemaContext;
 			var types = new XamlType[] { schemaContext.GetXamlType(typeof(ResourcesDict)) };
 
+			// Getting based on types alone should return the value, not the AmbientPropertyValue
+			var objectValues = provider.GetAllAmbientValues(types).ToList();
+			Assert.AreEqual (1, objectValues.Count, "#1");
+
 			// ResourceDict is marked as Ambient, so the instance current being deserialized should be in this list.
-			var values = provider.GetAllAmbientValues(null, false, types).ToList();
-			Assert.AreEqual(1, values.Count, "#1");
-			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			var ambientValues = provider.GetAllAmbientValues(null, false, types).ToList();
+			Assert.AreEqual(1, ambientValues.Count, "#2");
+			CollectionAssert.AreEqual (objectValues, ambientValues.Select (r => r.Value), "#3");
+			foreach (var dict in ambientValues.Select(r => r.Value).OfType<ResourcesDict>())
 			{
 				if (dict.ContainsKey(this.Key))
 					return dict[this.Key];
@@ -1650,30 +1723,40 @@ namespace SecondTest
 				schemaContext.GetXamlType(typeof(ResourceContainer)).GetMember("Resources2")
 			};
 
-			var values = provider.GetAllAmbientValues(null, false, types, properties).ToList();
+			var values = provider.GetAllAmbientValues (types).ToList ();
 			int count = 0;
+			if (Equals (Key, "TestDictItem")) {
+				// inside ambient value, should be returned as well
+				Assert.AreEqual (1, values.Count, "#2");
+				Assert.IsInstanceOf<ResourcesDict> (values [0]);
+			} else {
+				Assert.AreEqual (0, values.Count, "#3");
+			}
+
+			var ambientValues = provider.GetAllAmbientValues(null, false, types, properties).ToList();
+			count = 0;
 			if (Equals(Key, "TestDictItem"))
 			{
 				// inside ambient value, should be returned as well
-				Assert.AreEqual(3, values.Count, "#2");
-				Assert.IsInstanceOf<ResourcesDict>(values[count].Value);
-				Assert.IsNull(values[count++].RetrievedProperty);
+				Assert.AreEqual(3, ambientValues.Count, "#4");
+				Assert.IsInstanceOf<ResourcesDict>(ambientValues[count].Value);
+				Assert.IsNull(ambientValues[count++].RetrievedProperty);
 			}
 			else
 			{
-				Assert.AreEqual(2, values.Count, "#2");
+				Assert.AreEqual(2, ambientValues.Count, "#5");
 			}
-			Assert.IsInstanceOf<ResourcesDict>(values[count].Value, "#3");
-			Assert.AreEqual(properties[0], values[count++].RetrievedProperty, "#4");
-			Assert.IsNull(values[count].Value, "#5");
-			Assert.AreEqual(properties[1], values[count++].RetrievedProperty, "#6");
+			Assert.IsInstanceOf<ResourcesDict>(ambientValues[count].Value, "#6");
+			Assert.AreEqual(properties[0], ambientValues[count++].RetrievedProperty, "#7");
+			Assert.IsNull(ambientValues[count].Value, "#8");
+			Assert.AreEqual(properties[1], ambientValues[count++].RetrievedProperty, "#9");
 
-			foreach (var dict in values.Select(r => r.Value).OfType<ResourcesDict>())
+			foreach (var dict in ambientValues.Select(r => r.Value).OfType<ResourcesDict>())
 			{
 				if (dict.ContainsKey(this.Key))
 					return dict[this.Key];
 			}
-			Assert.Fail("#7. Did not find resource");
+			Assert.Fail("#10. Did not find resource");
 			return null;
 		}
 	}

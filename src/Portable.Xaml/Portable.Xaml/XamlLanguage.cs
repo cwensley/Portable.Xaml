@@ -73,12 +73,8 @@ namespace Portable.Xaml
 
 		static readonly XamlSchemaContext sctx = new XamlSchemaContext (new Assembly [] {typeof (XamlType).GetTypeInfo().Assembly});
 
-		static XamlType XT<T> ()
-		{
-			return sctx.GetXamlType (typeof (T));
-		}
+		static XamlType XT<T> () => sctx.GetXamlType (typeof (T));
 
-		internal static readonly bool InitializingDirectives;
 		internal static readonly bool InitializingTypes;
 
 		static XamlLanguage ()
@@ -115,10 +111,6 @@ namespace Portable.Xaml
 
 			// directives
 
-			// Looks like predefined XamlDirectives have no ValueSerializer. 
-			// To handle this situation, differentiate them from non-primitive XamlMembers.
-			InitializingDirectives = true;
-
 			var nss = new string [] {XamlLanguage.Xaml2006Namespace};
 			var nssXml = new string [] {XamlLanguage.Xml1998Namespace};
 
@@ -149,26 +141,20 @@ namespace Portable.Xaml
 
 			AllDirectives = new ReadOnlyCollection<XamlDirective> (new XamlDirective [] {Arguments, AsyncRecords, Base, Class, ClassAttributes, ClassModifier, Code, ConnectionId, FactoryMethod, FieldModifier, Initialization, Items, Key, Lang, Members, Name, PositionalParameters, Space, Subclass, SynchronousMode, Shared, TypeArguments, Uid, UnknownContent});
 
-			InitializingDirectives = false;
-
 			SpecialNames = new SpecialTypeNameList ();
 		}
 
 		static readonly string [] xaml_nss = new string [] {Xaml2006Namespace};
 
-		public static IList<string> XamlNamespaces {
-			get { return xaml_nss; }
-		}
+		public static IList<string> XamlNamespaces => xaml_nss;
 
 		static readonly string [] xml_nss = new string [] {Xml1998Namespace};
 
-		public static IList<string> XmlNamespaces {
-			get { return xml_nss; }
-		}
+		public static IList<string> XmlNamespaces => xml_nss;
 
 		public static ReadOnlyCollection<XamlDirective> AllDirectives { get; private set; }
 
-		public static XamlDirective Arguments { get; private set; }
+		public static XamlDirective Arguments { get; private set; } 
 		public static XamlDirective AsyncRecords { get; private set; }
 		public static XamlDirective Base { get; private set; }
 		public static XamlDirective Class { get; private set; }

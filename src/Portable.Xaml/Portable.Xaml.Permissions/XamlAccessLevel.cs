@@ -1,3 +1,4 @@
+﻿#if !PCL && !NETSTANDARD
 //
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
@@ -26,7 +27,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Xaml;
 
-namespace System.Xaml.Permissions
+namespace Portable.Xaml.Permissions
 {
 	[SerializableAttribute]
 	public class XamlAccessLevel
@@ -73,3 +74,4 @@ namespace System.Xaml.Permissions
 		public string PrivateAccessToTypeName { get; private set; }
 	}
 }
+#endif

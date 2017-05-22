@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -50,17 +50,17 @@ namespace MonoTests.Portable.Xaml
 	{
 		// read test
 
-		XamlReader GetReader(string filename)
+		XamlReader GetReader(string filename, XamlXmlReaderSettings settings = null)
 		{
-			string xml = File.ReadAllText(Compat.GetTestFile (filename)).UpdateXml();
-			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)));
+			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
+			return new XamlXmlReader(new StringReader(xml), new XamlSchemaContext(), settings);
 		}
-		
-		void ReadTest (string filename)
+
+		void ReadTest(string filename)
 		{
-			var r = GetReader (filename);
+			var r = GetReader(filename);
 			while (!r.IsEof)
-				r.Read ();
+				r.Read();
 		}
 
 		[Test]
@@ -562,8 +562,9 @@ namespace MonoTests.Portable.Xaml
 			var obj = new Dictionary<string,object> ();
 			obj ["Foo"] = 5.0;
 			obj ["Bar"] = -6.5;
+			obj ["Woo"] = 123.45d;
 			var r = GetReader ("Dictionary_String_Double.xml");
-			Read_Dictionary (r);
+			Read_Dictionary (r, true);
 		}
 		
 		[Test]
@@ -876,7 +877,7 @@ namespace MonoTests.Portable.Xaml
 		public void LocalAssemblyShouldApplyToNamespace()
 		{
 			var settings = new XamlXmlReaderSettings();
-			settings.LocalAssembly = typeof(TestClass1).Assembly;
+			settings.LocalAssembly = typeof(TestClass1).GetTypeInfo().Assembly;
 			string xml = File.ReadAllText(Compat.GetTestFile ("LocalAssembly.xml")).UpdateXml();
 			var obj = XamlServices.Load(new XamlXmlReader(new StringReader(xml), settings));
 			Assert.IsNotNull(obj, "#1");
@@ -900,5 +901,116 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsInstanceOf<TestClass1> (obj, "#2");
 			});
 		}
+
+		[Test]
+		public void Read_NumericValues()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(123.456, obj.DoubleValue, "#2");
+			Assert.AreEqual(234.567M, obj.DecimalValue, "#3");
+			Assert.AreEqual(345.678f, obj.FloatValue, "#4");
+			Assert.AreEqual(123, obj.ByteValue, "#5");
+			Assert.AreEqual(123456, obj.IntValue, "#6");
+			Assert.AreEqual(234567, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_Max()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_Max.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.MaxValue, obj.DoubleValue, "#2");
+			Assert.AreEqual(decimal.MaxValue, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.MaxValue, obj.FloatValue, "#4");
+			Assert.AreEqual(byte.MaxValue, obj.ByteValue, "#5");
+			Assert.AreEqual(int.MaxValue, obj.IntValue, "#6");
+			Assert.AreEqual(long.MaxValue, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_PositiveInfinity()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_PositiveInfinity.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.PositiveInfinity, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.PositiveInfinity, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_NegativeInfinity()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_NegativeInfinity.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.NegativeInfinity, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.NegativeInfinity, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_NumericValues_NaN()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_NaN.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(double.NaN, obj.DoubleValue, "#2");
+			Assert.AreEqual(0, obj.DecimalValue, "#3");
+			Assert.AreEqual(float.NaN, obj.FloatValue, "#4");
+			Assert.AreEqual(0, obj.ByteValue, "#5");
+			Assert.AreEqual(0, obj.IntValue, "#6");
+			Assert.AreEqual(0, obj.LongValue, "#7");
+		}
+
+		[Test]
+		public void Read_DefaultNamespaces_ClrNamespace()
+		{
+#if PCL
+			var settings = new XamlXmlReaderSettings();
+			settings.AddNamespace(null, Compat.TestAssemblyNamespace);
+			settings.AddNamespace("x", XamlLanguage.Xaml2006Namespace);
+			var obj = (TestClass5)XamlServices.Load(GetReader("DefaultNamespaces.xml", settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(obj.Bar, "Hello");
+			Assert.AreEqual(obj.Baz, null);
+#else
+			Assert.Ignore("Not supported in System.Xaml");
+#endif
+		}
+
+		[Test]
+		public void Read_DefaultNamespaces_WithDefinedNamespace()
+		{
+#if PCL
+			var settings = new XamlXmlReaderSettings();
+			settings.AddNamespace(null, "urn:mono-test");
+			settings.AddNamespace("x", "urn:mono-test2");
+			var obj = (NamespaceTest.NamespaceTestClass)XamlServices.Load(GetReader("DefaultNamespaces_WithDefinedNamespace.xml", settings));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(obj.Foo, "Hello");
+			Assert.AreEqual(obj.Bar, null);
+#else
+			Assert.Ignore("Not supported in System.Xaml");
+#endif
+		}
+
+		[Test]
+		public void Read_NumericValues_StandardTypes()
+		{
+			var obj = (NumericValues)XamlServices.Load(GetReader("NumericValues_StandardTypes.xml"));
+			Assert.IsNotNull(obj, "#1");
+			Assert.AreEqual(123.456, obj.DoubleValue, "#2");
+			Assert.AreEqual(234.567M, obj.DecimalValue, "#3");
+			Assert.AreEqual(345.678f, obj.FloatValue, "#4");
+			Assert.AreEqual(123, obj.ByteValue, "#5");
+			Assert.AreEqual(123456, obj.IntValue, "#6");
+			Assert.AreEqual(234567, obj.LongValue, "#7");
+		}
+
 	}
 }

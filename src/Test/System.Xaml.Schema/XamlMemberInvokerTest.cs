@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -47,8 +47,9 @@ namespace MonoTests.Portable.Xaml.Schema
 		XamlSchemaContext sctx = new XamlSchemaContext (new XamlSchemaContextSettings ());
 		PropertyInfo str_len = typeof (string).GetProperty ("Length");
 		PropertyInfo sb_len = typeof (StringBuilder).GetProperty ("Length");
-		PropertyInfo xr_resolver = typeof (XmlResolver).GetProperty ("Credentials");
-		EventInfo ass_load = typeof (AppDomain).GetEvent ("AssemblyLoad");
+		EventInfo eventStore_Event1 = typeof(EventStore).GetEvent("Event1");
+		PropertyInfo testClass5_WriteOnly = typeof(TestClass5).GetProperty("WriteOnly");
+		PropertyInfo testClass5_Baz = typeof(TestClass5).GetProperty("Baz");
 
 		[Test]
 		public void ConstructorNull ()
@@ -87,9 +88,18 @@ namespace MonoTests.Portable.Xaml.Schema
 		[Test]
 		public void GetValueOnWriteOnlyProperty ()
 		{
-			var pi = xr_resolver;
+			var pi = testClass5_WriteOnly;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-			Assert.Throws<NotSupportedException> (() => i.GetValue (new XmlUrlResolver ()));
+			Assert.Throws<NotSupportedException> (() => i.GetValue (new TestClass5 ()));
+		}
+
+		[Test]
+		public void GetValueOnWriteInternalProperty()
+		{
+			var pi = testClass5_Baz;
+			var i = new XamlMemberInvoker(new XamlMember(pi, sctx));
+			var val = i.GetValue(new TestClass5 { Baz = "hello" });
+			Assert.AreEqual("hello", val);
 		}
 
 		[Test]
@@ -115,7 +125,19 @@ namespace MonoTests.Portable.Xaml.Schema
 		{
 			var pi = str_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
+#if WINDOWS_UWP
+			try
+			{
+				i.GetValue(new StringBuilder());
+				Assert.Fail("Expected TargetException");
+			}
+			catch (Exception e)
+			{
+				Assert.AreEqual("TargetException", e.GetType().Name);
+			}
+#else
 			Assert.Throws<TargetException> (() => i.GetValue (new StringBuilder ()));
+#endif
 		}
 
 		[Test]
@@ -159,7 +181,19 @@ namespace MonoTests.Portable.Xaml.Schema
 		{
 			var pi = sb_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
+#if WINDOWS_UWP
+			try
+			{
+				i.SetValue("hello", 5);
+				Assert.Fail("Expected TargetException");
+			}
+			catch (Exception e)
+			{
+				Assert.AreEqual("TargetException", e.GetType().Name);
+			}
+#else
 			Assert.Throws<TargetException> (() => i.SetValue ("hello", 5));
+#endif
 		}
 
 		// Event
@@ -167,7 +201,7 @@ namespace MonoTests.Portable.Xaml.Schema
 		[Test]
 		public void FromEvent ()
 		{
-			var ei = ass_load;
+			var ei = eventStore_Event1;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
 			Assert.IsNull (i.UnderlyingGetter, "#1");
 			Assert.AreEqual (ei.GetAddMethod (), i.UnderlyingSetter, "#2");
@@ -176,37 +210,37 @@ namespace MonoTests.Portable.Xaml.Schema
 		[Test]
 		public void GetValueOnEvent ()
 		{
-			var ei = ass_load;
+			var ei = eventStore_Event1;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			Assert.Throws<NotSupportedException> (() => i.GetValue (AppDomain.CurrentDomain));
+			Assert.Throws<NotSupportedException> (() => i.GetValue (new EventStore()));
 		}
 
 		[Test]
 		public void SetValueOnEventNull ()
 		{
-			var ei = ass_load;
+			var ei = eventStore_Event1;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			i.SetValue (AppDomain.CurrentDomain, null);
+			i.SetValue (new EventStore(), null);
 		}
 
 		[Test]
 		public void SetValueOnEventValueMismatch ()
 		{
-			var ei = ass_load;
+			var ei = eventStore_Event1;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			Assert.Throws<ArgumentException> (() => i.SetValue (AppDomain.CurrentDomain, 5));
+			Assert.Throws<ArgumentException> (() => i.SetValue (new EventStore(), 5));
 		}
 
-		void DummyAssemblyLoad (object o, AssemblyLoadEventArgs e)
+		void DummyEvent1 (object o, EventArgs e)
 		{
 		}
 
 		[Test]
 		public void SetValueOnEvent ()
 		{
-			var ei = ass_load;
+			var ei = eventStore_Event1;
 			var i = new XamlMemberInvoker (new XamlMember (ei, sctx));
-			i.SetValue (AppDomain.CurrentDomain, new AssemblyLoadEventHandler (DummyAssemblyLoad));
+			i.SetValue (new EventStore(), new EventHandler<EventArgs> (DummyEvent1));
 		}
 
 		[Test]

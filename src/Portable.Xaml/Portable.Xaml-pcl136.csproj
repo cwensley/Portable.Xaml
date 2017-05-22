@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\artifacts\pcl136\Debug</OutputPath>
+    <OutputPath>..\..\artifacts\Debug\pcl136\</OutputPath>
     <DefineConstants>DEBUG;PCL;PCL136</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,7 +26,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>..\..\artifacts\pcl136\Release</OutputPath>
+    <OutputPath>..\..\artifacts\Release\pcl136\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -39,6 +39,7 @@
     <Compile Include="Helpers\Compat259.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\FlagValue.cs" />
+    <Compile Include="Helpers\MemberExpressionExtensions.cs" />
     <Compile Include="Helpers\ReferenceValue.cs" />
     <Compile Include="Portable.Xaml\AmbientPropertyValue.cs" />
     <Compile Include="Portable.Xaml\AttachableMemberIdentifier.cs" />
