@@ -179,6 +179,15 @@ namespace Portable.Xaml
 			flags.Set(MemberFlags.IsAttachable, isAttachable);
 		}
 
+		internal XamlMember(string name, string preferredNamespace)
+		{
+			if (name == null)
+				throw new ArgumentNullException("name");
+			Name = name;
+			flags.Set(MemberFlags.IsUnknown, true);
+			ns.Set(preferredNamespace);
+		}
+
 		XamlMember(XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
 		{
 			if (schemaContext == null)
@@ -322,7 +331,7 @@ namespace Portable.Xaml
 					return String.Concat(DeclaringType.UnderlyingType.FullName, ".", Name);
 			}
 			else
-				return String.Concat("{", PreferredXamlNamespace, "}", DeclaringType.Name, ".", Name);
+				return String.Concat("{", PreferredXamlNamespace, "}", DeclaringType?.Name, ".", Name);
 		}
 
 		public virtual IList<string> GetXamlNamespaces()

@@ -1,0 +1,6 @@
+<TestClassWithDifferentBaseNamespace 
+	base:Bar="TheBar" 
+	SomeOtherProperty="OtherValue" 
+	base:TheName="MyName"
+	xmlns="urn:mono-test2" 
+	xmlns:base="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml-tests-net_4_5" />

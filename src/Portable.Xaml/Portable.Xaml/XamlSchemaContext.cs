@@ -129,15 +129,13 @@ namespace Portable.Xaml
 
 			var assemblies =
 				GetAppDomainAssemblies()
-#if NETSTANDARD
-				?? GetBaseDirectoryAssemblies()
-#endif
 #if !PCL136
+				?? GetReferencedAssemblies()
 				?? GetUwpAssemblies()
 #endif
 				?? Enumerable.Empty<Assembly>();
 
-			cachedAssembliesInScope = assemblies.ToList();
+			cachedAssembliesInScope = assemblies.Distinct().ToList();
 			return cachedAssembliesInScope;
 		}
 
@@ -167,12 +165,12 @@ namespace Portable.Xaml
 			}
 		}
 
-#if NETSTANDARD
-		static IEnumerable<Assembly> GetBaseDirectoryAssemblies()
+#if !PCL136
+		static IEnumerable<Assembly> GetReferencedAssemblies()
 		{
 			try
 			{
-				// .NET Core, we get the assemblies in the base directory.
+				// .NET Core, we get the assemblies from the entry assembly.
 				var assemblyType = typeof(Assembly);
 				if (assemblyType == null)
 					return null;
@@ -185,15 +183,39 @@ namespace Portable.Xaml
 
 				var assemblies = new List<Assembly>();
 				assemblies.Add(entryAssembly);
-				foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
+
+				var getReferencedAssemblies = assemblyType.GetRuntimeMethod("GetReferencedAssemblies", new Type[0]);
+				if (getReferencedAssemblies != null)
 				{
-					try
+					var referencedAssemblies = getReferencedAssemblies.Invoke(entryAssembly, null) as AssemblyName[];
+					if (referencedAssemblies != null)
 					{
-						var assembly = Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(file)));
-						if (assembly != entryAssembly)
-							assemblies.Add(assembly);
+						foreach (var assemblyName in referencedAssemblies)
+						{
+							try
+							{
+								assemblies.Add(Assembly.Load(assemblyName));
+							}
+							catch { }
+						}
 					}
-					catch { }
+				}
+				else
+				{
+#if NETSTANDARD
+					foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
+					{
+						try
+						{
+							var assembly = Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(file)));
+							if (assembly != entryAssembly)
+								assemblies.Add(assembly);
+						}
+						catch { }
+					}
+#else
+					return null;
+#endif
 				}
 
 				return assemblies;
@@ -203,9 +225,12 @@ namespace Portable.Xaml
 				return null;
 			}
 		}
-#endif
 
-#if !PCL136
+		static IEnumerable<Assembly> GetStandardAssemblies()
+		{
+			yield return typeof(int).GetTypeInfo().Assembly; // System.Private.CoreLib
+		}
+
 		static IEnumerable<Assembly> GetUwpAssemblies()
 		{
 			try
@@ -249,7 +274,7 @@ namespace Portable.Xaml
 						catch { }
 					}
 				}
-				return assemblies;
+				return GetStandardAssemblies().Concat(assemblies);
 			}
 			catch { }
 			return null;
@@ -261,7 +286,7 @@ namespace Portable.Xaml
 			if (clrNamespace == null) // could happen on nested generic type (see bug #680385-comment#4). Not sure if null is correct though.
 				return null;
 			if (xaml_nss == null) // fill it first
-				GetAllXamlNamespaces();
+				FillAllXamlNamespaces();
 			List<string> ret;
 			return xaml_nss.TryGetValue(clrNamespace, out ret) ? ret.FirstOrDefault() : null;
 		}
@@ -269,12 +294,15 @@ namespace Portable.Xaml
 		public virtual IEnumerable<string> GetAllXamlNamespaces()
 		{
 			if (xaml_nss == null)
-			{
-				xaml_nss = new Dictionary<string,List<string>>();
-				foreach (var ass in AssembliesInScope)
-					FillXamlNamespaces(ass);
-			}
+				FillAllXamlNamespaces();
 			return xaml_nss.Values.SelectMany(r => r).Distinct();
+		}
+
+		void FillAllXamlNamespaces()
+		{
+			xaml_nss = new Dictionary<string, List<string>>();
+			foreach (var ass in AssembliesInScope)
+				FillXamlNamespaces(ass);
 		}
 
 		public virtual ICollection<XamlType> GetAllXamlTypes(string xamlNamespace)
@@ -372,7 +400,7 @@ namespace Portable.Xaml
 		public XamlType GetXamlType(XamlTypeName xamlTypeName)
 		{
 			if (xamlTypeName == null)
-				throw new ArgumentNullException("xamlTypeName");
+				throw new ArgumentNullException(nameof(xamlTypeName));
 
 			var n = xamlTypeName;
 			if (n.TypeArguments.Count == 0) // non-generic
@@ -554,8 +582,8 @@ namespace Portable.Xaml
 			{
 				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
 				{
-					var l = types.FirstOrDefault(p => p.Key == xda.XmlNamespace).Value;
-					if (l == null)
+					List<XamlType> l;
+					if (!types.TryGetValue(xda.XmlNamespace, out l))
 					{
 						l = new List<XamlType>();
 						types.Add(xda.XmlNamespace, l);
@@ -623,6 +651,18 @@ namespace Portable.Xaml
 				var ass = OnAssemblyResolve(aname);
 				// MarkupExtension type could omit "Extension" part in XML name.
 				ret = ass?.GetType(taqn) ?? ass?.GetType(taqn + "Extension");
+
+				if (ret == null && aname == "mscorlib")
+				{
+					//foreach (var asmName in XamlType.mscorlib_assemblies)
+					{
+						ass = typeof(int).GetTypeInfo().Assembly;
+						//.NET Core hack to get type from correct assembly
+						ret = ass?.GetType(taqn) ?? ass?.GetType(taqn + "Extension");
+						////if (ret != null)
+							//break;
+					}
+				}
 				if (required && ret == null)
 					throw new XamlParseException(string.Format("Cannot resolve runtime type from XML namespace '{0}', local name '{1}' with {2} type arguments ({3})", xmlNamespace, xmlLocalName, typeArguments != null ? typeArguments.Length : 0, taqn));
 			}

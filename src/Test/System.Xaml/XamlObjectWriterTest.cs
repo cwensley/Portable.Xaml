@@ -2054,5 +2054,14 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual ("4", des.Contents [3].Foo, "#5");
 			}
 		}
+
+		[Test]
+		public void Read_InvalidPropertiesShouldThrowException()
+		{
+			Assert.Throws<XamlObjectWriterException>(() =>
+			{
+				XamlServices.Load(GetReader("InvalidPropertiesShouldThrowException.xml"));
+			});
+		}
 	}
 }
