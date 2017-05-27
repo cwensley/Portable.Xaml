@@ -3925,7 +3925,7 @@ if (i == 0) {
             Assert.AreEqual(XamlNodeType.EndMember, r.NodeType, "ebase#2");
         }
 
-		void ReadNamespace (XamlReader r, string prefix, string ns, string label)
+		protected void ReadNamespace (XamlReader r, string prefix, string ns, string label)
 		{
 			Assert.IsTrue (r.Read (), label + "-1");
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, label + "-2");
@@ -3934,7 +3934,7 @@ if (i == 0) {
 			Assert.AreEqual (ns, r.Namespace.Namespace, label + "-5");
 		}
 
-		void ReadMemberWithValue (XamlReader r, XamlMember member, string label, params object[] values)
+		protected void ReadMemberWithValue (XamlReader r, XamlMember member, string label, params object[] values)
 		{
 			ReadMember(r, member, label, () => {
 				for (int i = 0; i < values.Length; i++)
@@ -3944,7 +3944,7 @@ if (i == 0) {
 			});
 		}
 
-		void ReadObject(XamlReader r, XamlType type, string label, Action readContent = null)
+		protected void ReadObject(XamlReader r, XamlType type, string label, Action readContent = null)
 		{
 			Assert.IsTrue(r.Read(), "so#1-1");
 			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType, "so#1-2");
@@ -3957,14 +3957,14 @@ if (i == 0) {
 			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType, "eo#1-2");
 		}
 
-		void ReadValue(XamlReader r, object value, string label)
+		protected void ReadValue(XamlReader r, object value, string label)
 		{
 			Assert.IsTrue(r.Read(), label + "-1");
 			Assert.AreEqual(XamlNodeType.Value, r.NodeType, label + "-2");
 			Assert.AreEqual(value, r.Value, label + "-3");
 		}
 
-		void ReadMember (XamlReader r, XamlMember member, string label, Action readContent = null)
+		protected void ReadMember (XamlReader r, XamlMember member, string label, Action readContent = null)
 		{
 			Assert.IsTrue(r.Read(), label + "-1");
 			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType, label + "-2");

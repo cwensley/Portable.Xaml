@@ -104,6 +104,14 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	}
 }
 
+namespace MonoTests.Portable.Xaml.NamespaceTest2
+{
+	public class TestClassWithDifferentBaseNamespace : MonoTests.Portable.Xaml.TestClass5WithName
+	{
+		public string SomeOtherProperty { get; set; }
+	}
+}
+
 namespace MonoTests.Portable.Xaml
 {
 
@@ -344,6 +352,16 @@ namespace MonoTests.Portable.Xaml
 	public class TestClass6
 	{
 		public DateTime TheDateAndTime { get; set; }
+	}
+
+	[RuntimeNameProperty("TheName")]
+	public class TestClass5WithName : TestClass5
+	{
+		[sc.DefaultValue(null)]
+		public string TheName { get; set; }
+
+		[sc.DefaultValue(null)]
+		public TestClass5WithName Other { get; set; }
 	}
 
 	public class TestClassBase

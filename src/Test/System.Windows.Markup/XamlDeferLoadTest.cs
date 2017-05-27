@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -48,7 +48,7 @@ namespace MonoTests.Portable.Xaml.Markup
 		[TestCase("something", null)]
 		[TestCase(null, "something")]
 		[TestCase(null, null)]
-		public void ConstructorNullName (string loaderType, string contentType)
+		public void ConstructorNullNameString (string loaderType, string contentType)
 		{
 			Assert.Throws<ArgumentNullException> (() => new XamlDeferLoadAttribute(loaderType, contentType));
 		}
@@ -57,7 +57,7 @@ namespace MonoTests.Portable.Xaml.Markup
 		[TestCase(typeof(TestDeferredLoader), null)]
 		[TestCase(null, typeof(DeferredLoadingChild))]
 		[TestCase(null, null)]
-		public void ConstructorNullName (Type loaderType, Type contentType)
+		public void ConstructorNullNameType (Type loaderType, Type contentType)
 		{
 			Assert.Throws<ArgumentNullException> (() => new XamlDeferLoadAttribute(loaderType, contentType));
 		}

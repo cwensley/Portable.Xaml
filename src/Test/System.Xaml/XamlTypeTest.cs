@@ -916,6 +916,25 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsInstanceOf<global::Portable.Xaml.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
 #endif
 		}
+
+		[Test]
+		public void BaseClassPropertiesShouldHaveProperNamespaces()
+		{
+			var xtnamebase = sctx.GetXamlType(typeof(TestClass5WithName));
+			var xtderived = sctx.GetXamlType(typeof(NamespaceTest2.TestClassWithDifferentBaseNamespace));
+			Assert.IsNotNull(xtderived);
+			var xmname = xtderived.GetMember("TheName");
+			Assert.IsNotNull(xmname);
+			Assert.AreSame(xtnamebase, xmname.TargetType);
+			Assert.AreSame(xtnamebase, xmname.DeclaringType);
+			// note that the preferred namespace of the name member does not reflect the type we got the 
+			// member from, but the type it is declared on.
+			Assert.AreEqual(xtnamebase.PreferredXamlNamespace, xmname.PreferredXamlNamespace);
+
+			Assert.AreSame(xmname, xtderived.GetAliasedProperty(XamlLanguage.Name));
+			// not important: Assert.AreNotSame(xmname, xtnamebase.GetAliasedProperty(XamlLanguage.Name));
+			Assert.AreEqual(xmname, xtnamebase.GetAliasedProperty(XamlLanguage.Name));
+		}
 	}
 
 	class MyXamlType : XamlType

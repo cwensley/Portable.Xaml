@@ -417,22 +417,24 @@ namespace Portable.Xaml
 		void OnWriteStartMemberElement (XamlType xt, XamlMember xm)
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.MemberElement;
-			string prefix = GetPrefix (xm.PreferredXamlNamespace);
+			var ns = xm.IsAttachable || xm.IsDirective ? xm.PreferredXamlNamespace : xt.PreferredXamlNamespace;
+			string prefix = GetPrefix (ns);
 			string name = xm.IsDirective ? xm.Name : String.Concat (xt.InternalXmlName, ".", xm.Name);
 			WritePendingNamespaces ();
-			w.WriteStartElement (prefix, name, xm.PreferredXamlNamespace);
+			w.WriteStartElement (prefix, name, ns);
 		}
 		
 		void OnWriteStartMemberAttribute (XamlType xt, XamlMember xm)
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.Attribute;
+			var ns = xm.IsAttachable || xm.IsDirective ? xm.PreferredXamlNamespace : xt.PreferredXamlNamespace;
 			string name = xm.GetInternalXmlName ();
-			if (xt.PreferredXamlNamespace == xm.PreferredXamlNamespace &&
-			    !(xm is XamlDirective)) // e.g. x:Key inside x:Int should not be written as Key.
+			if (xt.PreferredXamlNamespace == ns &&
+			    !xm.IsDirective) // e.g. x:Key inside x:Int should not be written as Key.
 				w.WriteStartAttribute (name);
 			else {
-				string prefix = GetPrefix (xm.PreferredXamlNamespace);
-				w.WriteStartAttribute (prefix, name, xm.PreferredXamlNamespace);
+				string prefix = GetPrefix (ns);
+				w.WriteStartAttribute (prefix, name, ns);
 			}
 		}
 
