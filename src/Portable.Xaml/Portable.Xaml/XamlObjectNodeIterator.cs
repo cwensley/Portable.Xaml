@@ -434,7 +434,7 @@ namespace Portable.Xaml
 						continue;
 					// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
 					if (!m.IsReadPublic
-						|| !m.ShouldSerialize)
+					    || !m.ShouldSerialize(xobj.Value))
 						continue;
 
 					if (!m.IsWritePublic &&

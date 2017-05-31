@@ -1563,6 +1563,19 @@ namespace MonoTests.Portable.Xaml
 
 		public long LongValue { get; set; }
 	}
+
+	public class TestObjectWithShouldSerialize
+	{
+		public string Text { get; set; }
+
+		internal int ShouldSerializeCalled { get; set; }
+
+		bool ShouldSerializeText()
+		{
+			ShouldSerializeCalled++;
+			return !string.IsNullOrEmpty(Text) && Text != "bar";
+		}
+	}
 }
 
 namespace XamlTest
