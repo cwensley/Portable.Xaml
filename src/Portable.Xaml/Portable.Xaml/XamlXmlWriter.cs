@@ -455,10 +455,11 @@ namespace Portable.Xaml
 			XamlMember xm = CurrentMember;
 			WritePendingStartMember (nodeType);
 
-			if (w.WriteState != WriteState.Attribute)
+			var isAttribute = w.WriteState == WriteState.Attribute;
+			if (!isAttribute)
 				WritePendingNamespaces ();
 
-			string s = GetValueString (xm, pendingValue);
+			var s = GetValueString (xm, pendingValue);
 
 			// It looks like a bad practice, but since .NET disables
 			// indent around XData, I assume they do this, instead
@@ -486,6 +487,11 @@ namespace Portable.Xaml
 				w.WriteString (", ");
 				break;
 			}
+
+			// when writing a markup extension value, we use quotes for an empty string.
+			if (CurrentState.Type.IsMarkupExtension && isAttribute && s.Length == 0)
+				s = "\"\""; 
+
 			w.WriteString (s);
 
 			hasPendingValue = false;

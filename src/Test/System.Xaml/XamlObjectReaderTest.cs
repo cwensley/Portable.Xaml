@@ -1,4 +1,4 @@
-﻿//
+﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -848,6 +848,23 @@ namespace MonoTests.Portable.Xaml
 			var obj = new TestClassPropertyInternal();
 			obj.Bar = new TestClassInternal();
 			Assert.Throws<XamlObjectReaderException> (() => { var xr = new XamlObjectReader (obj); });
+		}
+
+		[Test]
+		public void Read_NamedItemWithEmptyString()
+		{
+			var obj = new NamedItem("");
+			var ctx = new XamlSchemaContext();
+			var xr = new XamlObjectReader(obj, ctx);
+			ReadNamespace(xr, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadObject(xr, ctx.GetXamlType(typeof(NamedItem)), "#1", xt =>
+			{
+				ReadMember(xr, xt.GetMember("ItemName"), "#2", xm =>
+				{
+					ReadValue(xr, string.Empty, "#3");
+				});
+			});
 		}
 	}
 }
