@@ -135,6 +135,12 @@ namespace Portable.Xaml
 		{
 			return del.Method;
 		}
+
+		public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type, string name)
+		{
+			return type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+				       .Where(r => r.Name == name);
+		}
 	}
 }
 #endif

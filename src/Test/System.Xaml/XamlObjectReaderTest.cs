@@ -866,5 +866,40 @@ namespace MonoTests.Portable.Xaml
 				});
 			});
 		}
+
+		[Test]
+		public void Read_ObjectWithShouldSerialize()
+		{
+			var obj = new TestObjectWithShouldSerialize { Text = "hello" };
+			var ctx = new XamlSchemaContext();
+			var xr = new XamlObjectReader(obj, ctx);
+			ReadNamespace(xr, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadObject(xr, ctx.GetXamlType(typeof(TestObjectWithShouldSerialize)), "#1", xt =>
+			{
+				ReadMember(xr, xt.GetMember("Text"), "#2", xm =>
+				{
+					ReadValue(xr, "hello", "#3");
+				});
+			});
+			Assert.IsFalse(xr.Read());
+			Assert.IsTrue(obj.ShouldSerializeCalled > 0);
+		}
+
+		[Test]
+		public void Read_ObjectWithShouldSerialize2()
+		{
+			var obj = new TestObjectWithShouldSerialize { Text = "bar" };
+			var ctx = new XamlSchemaContext();
+			var xr = new XamlObjectReader(obj, ctx);
+			ReadNamespace(xr, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadObject(xr, ctx.GetXamlType(typeof(TestObjectWithShouldSerialize)), "#1", xt =>
+			{
+				// no members
+			});
+			Assert.IsFalse(xr.Read());
+			Assert.IsTrue(obj.ShouldSerializeCalled > 0);
+		}
 	}
 }
