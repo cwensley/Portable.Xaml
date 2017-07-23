@@ -101,11 +101,16 @@ namespace Portable.Xaml.Schema
 			}
 			else
 			{
-				getDelegate = GetValueReflection;
+				if (Member.IsAttachable)
+					getDelegate = GetValueReflectionAttachable;
+				else
+					getDelegate = GetValueReflection;
 			}
 		}
 
 		object GetValueReflection(object instance) => UnderlyingGetter.Invoke(instance, null);
+
+		object GetValueReflectionAttachable(object instance) => UnderlyingGetter.Invoke(null, new[] {instance});
 
 		void BuildGetExpression() => getDelegate = UnderlyingGetter.BuildGetExpression();
 
