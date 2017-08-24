@@ -385,15 +385,23 @@ namespace Portable.Xaml
 				// Try markup extension
 				// FIXME: is this rule correct?
 				var v = pair.Value;
-				if (!String.IsNullOrEmpty(v) && v[0] == '{')
+				if (!string.IsNullOrEmpty(v) && v[0] == '{')
 				{
-					var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
-					pai.Parse();
-					foreach (var node in ReadMarkup(pai))
-						yield return node;
+					if (v.Length >= 2 && v[1] == '}')
+					{
+						// escaped value with {} at the beginning of the string
+						yield return Node(XamlNodeType.Value, v.Substring(2));
+					}
+					else
+					{
+						var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
+						pai.Parse();
+						foreach (var node in ReadMarkup(pai))
+							yield return node;
+					}
 				}
 				else
-					yield return Node(XamlNodeType.Value, pair.Value);
+					yield return Node(XamlNodeType.Value, v);
 
 				yield return Node(XamlNodeType.EndMember, pair.Key);
 			}

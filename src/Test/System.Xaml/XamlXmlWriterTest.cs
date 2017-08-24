@@ -1181,6 +1181,14 @@ namespace MonoTests.Portable.Xaml
 			var obj = new NamedItem("");
 			Assert.AreEqual(ReadXml("NamedItemWithEmptyString.xml").Trim(), XamlServices.Save(obj), "#1");
 		}
+
+		[Test]
+		public void Write_EscapedPropertyValue()
+		{
+			var obj = new TestClass5();
+			obj.Bar = "{ Some Value That Should Be Escaped";
+			Assert.AreEqual(ReadXml("EscapedPropertyValue.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
 	}
 
 	public class TestXmlWriterClass1

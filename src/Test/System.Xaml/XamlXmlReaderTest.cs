@@ -1088,5 +1088,21 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(ns, reader.Member.PreferredXamlNamespace);
 			Assert.IsTrue(reader.Member.IsUnknown);
 		}
+
+		[Test]
+		public void Read_EscapedPropertyValue()
+		{
+			var r = GetReader("EscapedPropertyValue.xml");
+			var ctx = r.SchemaContext;
+			ReadNamespace(r, string.Empty, Compat.TestAssemblyNamespace, "#1");
+			ReadObject(r, ctx.GetXamlType(typeof(TestClass5)), "#2", xt =>
+			{
+				ReadBase(r);
+				ReadMember(r, xt.GetMember("Bar"), "#3", xm =>
+				{
+					ReadValue(r, "{ Some Value That Should Be Escaped", "#4");
+				});
+			});
+		}
 	}
 }
