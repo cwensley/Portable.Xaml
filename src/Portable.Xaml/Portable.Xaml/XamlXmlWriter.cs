@@ -490,7 +490,9 @@ namespace Portable.Xaml
 
 			// when writing a markup extension value, we use quotes for an empty string.
 			if (CurrentState.Type.IsMarkupExtension && isAttribute && s.Length == 0)
-				s = "\"\""; 
+				s = "\"\"";
+			else if (isAttribute && s.Length > 0 && s[0] == '{')
+				w.WriteString("{}"); // escape value that starts with a curly brace
 
 			w.WriteString (s);
 
