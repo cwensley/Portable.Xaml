@@ -478,7 +478,12 @@ namespace Portable.Xaml
 			if (UnderlyingSetter != null)
 				return UnderlyingSetter.GetParameters()[1].ParameterType;
 			if (UnderlyingGetter != null)
-				return UnderlyingGetter.GetParameters()[0].ParameterType;
+			{
+				if (IsAttachable)
+					return UnderlyingGetter.ReturnType;
+				else
+					return UnderlyingGetter.GetParameters()[0].ParameterType;
+			}
 			return typeof(object);
 		}
 
