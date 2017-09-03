@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -1027,6 +1027,30 @@ namespace MonoTests.Portable.Xaml
 		public static void SetProperty(Attached2 a, string value)
 		{
 			a.Property = value;
+		}
+	}
+
+	public class Attached4
+	{
+		internal List<TestClass4> Property { get; set;  } = new List<TestClass4>();
+	}
+
+	public class AttachedWrapper4
+	{
+		public static List<TestClass4> GetSomeCollection(Attached4 attached)
+		{
+			return attached.Property;
+		}
+	}
+	public class AttachedWrapper5
+	{
+		public static List<TestClass4> GetSomeCollection(Attached4 attached)
+		{
+			return attached.Property;
+		}
+		public static void SetSomeCollection(Attached4 attached, List<TestClass4> value)
+		{
+			attached.Property = value;
 		}
 	}
 

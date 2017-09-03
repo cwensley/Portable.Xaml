@@ -27,13 +27,16 @@ namespace Portable.Xaml
 
 		public static Func<object, object> BuildGetExpression(this MethodInfo getter)
 		{
-			var declaringType = getter.DeclaringType;
+			var declaringType = getter.IsStatic ? getter.GetParameters()[0].ParameterType : getter.DeclaringType;
 
 			var instanceCast = !declaringType.GetTypeInfo().IsValueType
 				? Expression.TypeAs(s_InstanceExpression, declaringType)
 				: Expression.Convert(s_InstanceExpression, declaringType);
 
-			Expression block = Expression.TypeAs(Expression.Call(instanceCast, getter), typeof(object));
+
+			Expression block = Expression.TypeAs(
+				getter.IsStatic ? Expression.Call(null, getter, instanceCast) : Expression.Call(instanceCast, getter),
+				typeof(object));
 
 			var exp = Expression.Lambda<Func<object, object>>(block, s_InstanceExpression).Compile();
 

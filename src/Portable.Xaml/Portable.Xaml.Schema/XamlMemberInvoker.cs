@@ -91,7 +91,7 @@ namespace Portable.Xaml.Schema
 			var mode = Member.SchemaContext.InvokerOptions;
 			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
 			{
-				getDelegate = GetValueReflection;
+				getDelegate = GetGetMethod();
 				Task.Factory.StartNew(BuildGetExpression);
 			}
 			else if (mode.HasFlag(XamlInvokerOptions.Compile))
@@ -101,11 +101,22 @@ namespace Portable.Xaml.Schema
 			}
 			else
 			{
-				getDelegate = GetValueReflection;
+				getDelegate = GetGetMethod();
 			}
 		}
 
+		Func<object,object> GetGetMethod()
+		{
+			if (Member.IsAttachable)
+				return GetValueReflectionAttachable;
+			else
+				return GetValueReflection;
+		}
+		
+
 		object GetValueReflection(object instance) => UnderlyingGetter.Invoke(instance, null);
+
+		object GetValueReflectionAttachable(object instance) => UnderlyingGetter.Invoke(null, new[] {instance});
 
 		void BuildGetExpression() => getDelegate = UnderlyingGetter.BuildGetExpression();
 

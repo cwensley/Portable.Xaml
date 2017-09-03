@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -317,6 +317,27 @@ namespace MonoTests.Portable.Xaml
 			var xt = ctx.GetXamlType(tn);
 			Assert.IsNotNull(xt, "#1");
 			Assert.IsNotNull(xt.UnderlyingType, "#2");
+		}
+
+		[Test]
+		public void AttachableMemberTypeShouldBeCorrectWhenReadOnly()
+		{
+			var ctx = new XamlSchemaContext();
+			var xt = ctx.GetXamlType(typeof(AttachedWrapper4));
+			Assert.IsNotNull(xt, "#1");
+			var xm = xt.GetAttachableMember("SomeCollection");
+			Assert.IsNotNull(xm, "#2");
+			Assert.AreEqual(typeof(List<TestClass4>), xm.Type.UnderlyingType, "#3");
+		}
+		[Test]
+		public void AttachableMemberTypeShouldBeCorrect()
+		{
+			var ctx = new XamlSchemaContext();
+			var xt = ctx.GetXamlType(typeof(AttachedWrapper5));
+			Assert.IsNotNull(xt, "#1");
+			var xm = xt.GetAttachableMember("SomeCollection");
+			Assert.IsNotNull(xm, "#2");
+			Assert.AreEqual(typeof(List<TestClass4>), xm.Type.UnderlyingType, "#3");
 		}
 	}
 }

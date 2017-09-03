@@ -2063,5 +2063,26 @@ namespace MonoTests.Portable.Xaml
 				XamlServices.Load(GetReader("InvalidPropertiesShouldThrowException.xml"));
 			});
 		}
+
+		[Test]
+		public void Write_Attached_Collection()
+		{
+			Attached4 result = null;
+
+			var rsettings = new XamlXmlReaderSettings();
+			using (var reader = new XamlXmlReader(new StringReader($@"<Attached4 xmlns=""{Compat.TestAssemblyNamespace}""><AttachedWrapper4.SomeCollection><TestClass4 Foo=""SomeValue""/></AttachedWrapper4.SomeCollection></Attached4>"), rsettings))
+			{
+				var wsettings = new XamlObjectWriterSettings();
+				using (var writer = new XamlObjectWriter(reader.SchemaContext, wsettings))
+				{
+					XamlServices.Transform(reader, writer, false);
+					result = (Attached4)writer.Result;
+				}
+			}
+
+			Assert.AreEqual(1, result.Property.Count, "#1");
+			Assert.AreEqual("SomeValue", result.Property[0].Foo, "#2");
+
+		}
 	}
 }
