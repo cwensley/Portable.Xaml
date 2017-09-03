@@ -1073,8 +1073,9 @@ namespace MonoTests.Portable.Xaml
 				Event1(this, EventArgs.Empty);
 			if (Event2 != null)
 				return Event2();
-			else
-				return null;
+			if (Event3 != null)
+				Event3(this, new CustomEventArgs());
+			return null;
 		}
 
 		public void Method1()

@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -744,7 +744,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test] // bug #3003 repro
-		public void EventsAndProcessingOrder()
+		public void gsAndProcessingOrder()
 		{
 			var asm = GetType().GetTypeInfo().Assembly;
 			var context = new XamlSchemaContext(new Assembly[] { asm });
@@ -1594,6 +1594,27 @@ namespace MonoTests.Portable.Xaml
 			{
 				var res = (EventStore2<EventArgs>)XamlServices.Load(xr);
 				Assert.AreEqual("foo", res.Examine(), "#1");
+				Assert.IsTrue(res.Method1Invoked, "#2");
+			}
+		}
+
+		/// <summary>
+		/// Test binding an event to a method with a base EventArgs.
+		/// </summary>
+		/// <remarks>
+		/// This allows you to bind to events that are legal
+		/// </remarks>
+		[Test]
+		public void Write_EventStore5()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Binding events to methods with base class parameters is not supported in System.Xaml");
+
+			using (var xr = GetReader("EventStore5.xml"))
+			{
+				var res = (EventStore)XamlServices.Load(xr);
+				Assert.IsFalse(res.Method1Invoked, "#1");
+				res.Examine();
 				Assert.IsTrue(res.Method1Invoked, "#2");
 			}
 		}
