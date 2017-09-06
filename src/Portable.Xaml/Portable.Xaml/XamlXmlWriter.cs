@@ -417,22 +417,24 @@ namespace Portable.Xaml
 		void OnWriteStartMemberElement (XamlType xt, XamlMember xm)
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.MemberElement;
-			string prefix = GetPrefix (xm.PreferredXamlNamespace);
+			var ns = xm.IsAttachable || xm.IsDirective ? xm.PreferredXamlNamespace : xt.PreferredXamlNamespace;
+			string prefix = GetPrefix (ns);
 			string name = xm.IsDirective ? xm.Name : String.Concat (xt.InternalXmlName, ".", xm.Name);
 			WritePendingNamespaces ();
-			w.WriteStartElement (prefix, name, xm.PreferredXamlNamespace);
+			w.WriteStartElement (prefix, name, ns);
 		}
 		
 		void OnWriteStartMemberAttribute (XamlType xt, XamlMember xm)
 		{
 			CurrentMemberState.OccuredAs = AllowedMemberLocations.Attribute;
+			var ns = xm.IsAttachable || xm.IsDirective ? xm.PreferredXamlNamespace : xt.PreferredXamlNamespace;
 			string name = xm.GetInternalXmlName ();
-			if (xt.PreferredXamlNamespace == xm.PreferredXamlNamespace &&
-			    !(xm is XamlDirective)) // e.g. x:Key inside x:Int should not be written as Key.
+			if (xt.PreferredXamlNamespace == ns &&
+			    !xm.IsDirective) // e.g. x:Key inside x:Int should not be written as Key.
 				w.WriteStartAttribute (name);
 			else {
-				string prefix = GetPrefix (xm.PreferredXamlNamespace);
-				w.WriteStartAttribute (prefix, name, xm.PreferredXamlNamespace);
+				string prefix = GetPrefix (ns);
+				w.WriteStartAttribute (prefix, name, ns);
 			}
 		}
 
@@ -453,10 +455,11 @@ namespace Portable.Xaml
 			XamlMember xm = CurrentMember;
 			WritePendingStartMember (nodeType);
 
-			if (w.WriteState != WriteState.Attribute)
+			var isAttribute = w.WriteState == WriteState.Attribute;
+			if (!isAttribute)
 				WritePendingNamespaces ();
 
-			string s = GetValueString (xm, pendingValue);
+			var s = GetValueString (xm, pendingValue);
 
 			// It looks like a bad practice, but since .NET disables
 			// indent around XData, I assume they do this, instead
@@ -484,6 +487,13 @@ namespace Portable.Xaml
 				w.WriteString (", ");
 				break;
 			}
+
+			// when writing a markup extension value, we use quotes for an empty string.
+			if (CurrentState.Type.IsMarkupExtension && isAttribute && s.Length == 0)
+				s = "\"\"";
+			else if (isAttribute && s.Length > 0 && s[0] == '{')
+				w.WriteString("{}"); // escape value that starts with a curly brace
+
 			w.WriteString (s);
 
 			hasPendingValue = false;

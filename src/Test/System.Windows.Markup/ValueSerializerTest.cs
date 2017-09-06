@@ -97,6 +97,10 @@ namespace MonoTests.Portable.Xaml.Markup
 				// What is funny or annoying here is, that always return true for CanConvertToString() while everything fails at ConvertToString() on .NET.
 				if (t.UnderlyingType == typeof(string))
 					continue;
+#if NETSTANDARD
+				if (t.UnderlyingType == typeof(Uri))
+					continue;
+#endif
 
 				int i = 0;
 				foreach (var val in test_values)

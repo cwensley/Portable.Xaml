@@ -288,10 +288,8 @@ namespace Portable.Xaml
 		protected string GetValueString(XamlMember xm, object value)
 		{
 			// change XamlXmlReader too if we change here.
-			if ((value as string) == String.Empty) // FIXME: there could be some escape syntax.
-				return "\"\"";
-			if (value is string)
-				return (string)value;
+			if (value is string stringValue)
+				return stringValue;
 
 			var xt = value == null ? XamlLanguage.Null : sctx.GetXamlType(value.GetType());
 			var vs = xm.ValueSerializer ?? xt.ValueSerializer;

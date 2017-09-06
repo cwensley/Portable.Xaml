@@ -1,4 +1,4 @@
-﻿//
+﻿﻿﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -1148,6 +1148,47 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(ReadXml("NumericValues_NaN.xml").Trim(), XamlServices.Save(obj), "#1");
 		}
 
+		[Test]
+		public void Write_BaseClassPropertiesInSeparateNamespace()
+		{
+			var obj = new NamespaceTest2.TestClassWithDifferentBaseNamespace
+			{
+				TheName = "MyName",
+				SomeOtherProperty = "OtherValue",
+				Bar = "TheBar",
+				Baz = "TheBaz"
+			};
+			Assert.AreEqual(ReadXml("BaseClassPropertiesInSeparateNamespace.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_BaseClassPropertiesInSeparateNamespace_WithChildren()
+		{
+			var obj = new NamespaceTest2.TestClassWithDifferentBaseNamespace
+			{
+				TheName = "MyName",
+				SomeOtherProperty = "OtherValue",
+				Bar = "TheBar",
+				Baz = "TheBaz",
+				Other = new TestClass5WithName { Bar = "TheBar2" }
+			};
+			Assert.AreEqual(ReadXml("BaseClassPropertiesInSeparateNamespace_WithChildren.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_NamedItemWithEmptyString()
+		{
+			var obj = new NamedItem("");
+			Assert.AreEqual(ReadXml("NamedItemWithEmptyString.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
+
+		[Test]
+		public void Write_EscapedPropertyValue()
+		{
+			var obj = new TestClass5();
+			obj.Bar = "{ Some Value That Should Be Escaped";
+			Assert.AreEqual(ReadXml("EscapedPropertyValue.xml").Trim(), XamlServices.Save(obj), "#1");
+		}
 	}
 
 	public class TestXmlWriterClass1

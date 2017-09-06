@@ -56,6 +56,12 @@ namespace MonoTests.Portable.Xaml
 			return new XamlXmlReader(new StringReader(xml), new XamlSchemaContext(), settings);
 		}
 
+		XamlReader GetReaderText(string xml, XamlXmlReaderSettings settings = null)
+		{
+			xml = xml.UpdateXml();
+			return new XamlXmlReader(new StringReader(xml), new XamlSchemaContext(), settings);
+		}
+
 		void ReadTest(string filename)
 		{
 			var r = GetReader(filename);
@@ -1012,5 +1018,91 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(234567, obj.LongValue, "#7");
 		}
 
+		[Test]
+		public void Read_BaseClassPropertiesInSeparateNamespace()
+		{
+			var obj = (NamespaceTest2.TestClassWithDifferentBaseNamespace)XamlServices.Load(GetReader("BaseClassPropertiesInSeparateNamespace.xml"));
+			Assert.IsNotNull(obj);
+			Assert.AreEqual("MyName", obj.TheName);
+			Assert.AreEqual("OtherValue", obj.SomeOtherProperty);
+			Assert.AreEqual("TheBar", obj.Bar);
+			Assert.IsNull(obj.Baz);
+		}
+
+		[Test]
+		public void Read_BaseClassPropertiesInSeparateNamespace_WithChildren()
+		{
+			var obj = (NamespaceTest2.TestClassWithDifferentBaseNamespace)XamlServices.Load(GetReader("BaseClassPropertiesInSeparateNamespace_WithChildren.xml"));
+			Assert.IsNotNull(obj);
+			Assert.AreEqual("MyName", obj.TheName);
+			Assert.AreEqual("OtherValue", obj.SomeOtherProperty);
+			Assert.AreEqual("TheBar", obj.Bar);
+			Assert.IsNull(obj.Baz);
+			Assert.IsNotNull(obj.Other);
+			Assert.AreEqual("TheBar2", obj.Other.Bar);
+		}
+
+		[Test]
+		public void Read_InvalidPropertiesShouldBeRead()
+		{
+			var xaml = @"<TestClassWithDifferentBaseNamespace UnknownProperty=""Woo"" xmlns=""urn:mono-test2""/>";
+			var reader = GetReaderText(xaml);
+			Assert.IsTrue(reader.Read());
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, reader.NodeType);
+			Assert.AreEqual("urn:mono-test2", reader.Namespace.Namespace);
+
+			XamlType xt;
+			Assert.IsTrue(reader.Read());
+			Assert.AreEqual(XamlNodeType.StartObject, reader.NodeType);
+			Assert.AreEqual(xt = reader.SchemaContext.GetXamlType(typeof(MonoTests.Portable.Xaml.NamespaceTest2.TestClassWithDifferentBaseNamespace)), reader.Type);
+
+			ReadBase(reader);
+
+			Assert.IsTrue(reader.Read());
+			Assert.AreEqual(XamlNodeType.StartMember, reader.NodeType);
+			Assert.AreEqual("UnknownProperty", reader.Member.Name);
+			Assert.IsTrue(reader.Member.IsUnknown);
+		}
+
+		[Test]
+		public void Read_InvalidPropertiesShouldBeRead2()
+		{
+			var xaml = @"<TestClassWithDifferentBaseNamespace base:UnknownProperty=""Woo"" xmlns=""urn:mono-test2"" xmlns:base=""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml-tests-net_4_5""/>";
+			var reader = GetReaderText(xaml);
+
+			ReadNamespace(reader, string.Empty, "urn:mono-test2", "");
+
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml-tests-net_4_5".UpdateXml();
+			ReadNamespace(reader, "base", ns, "");
+
+			XamlType xt;
+			Assert.IsTrue(reader.Read());
+			Assert.AreEqual(XamlNodeType.StartObject, reader.NodeType);
+			Assert.AreEqual(xt = reader.SchemaContext.GetXamlType(typeof(MonoTests.Portable.Xaml.NamespaceTest2.TestClassWithDifferentBaseNamespace)), reader.Type);
+
+			ReadBase(reader);
+
+			Assert.IsTrue(reader.Read());
+			Assert.AreEqual(XamlNodeType.StartMember, reader.NodeType);
+			Assert.AreEqual("UnknownProperty", reader.Member.Name);
+			Assert.AreEqual(ns, reader.Member.PreferredXamlNamespace);
+			Assert.IsTrue(reader.Member.IsUnknown);
+		}
+
+		[Test]
+		public void Read_EscapedPropertyValue()
+		{
+			var r = GetReader("EscapedPropertyValue.xml");
+			var ctx = r.SchemaContext;
+			ReadNamespace(r, string.Empty, Compat.TestAssemblyNamespace, "#1");
+			ReadObject(r, ctx.GetXamlType(typeof(TestClass5)), "#2", xt =>
+			{
+				ReadBase(r);
+				ReadMember(r, xt.GetMember("Bar"), "#3", xm =>
+				{
+					ReadValue(r, "{ Some Value That Should Be Escaped", "#4");
+				});
+			});
+		}
 	}
 }

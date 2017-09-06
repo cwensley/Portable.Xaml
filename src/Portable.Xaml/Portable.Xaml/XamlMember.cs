@@ -1,4 +1,4 @@
-﻿//
+﻿﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -65,6 +65,7 @@ namespace Portable.Xaml
 		ReferenceValue<XamlValueConverter<ValueSerializer>> valueSerializer;
 		ReferenceValue<ICustomAttributeProvider> customAttributeProvider;
 		ReferenceValue<XamlValueConverter<XamlDeferringLoader>> deferringLoader;
+		ReferenceValue<MethodInfo> shouldSerializeMethod;
 
 		internal XamlSchemaContext SchemaContext => context; // should we expose this as public?
 
@@ -179,6 +180,15 @@ namespace Portable.Xaml
 			flags.Set(MemberFlags.IsAttachable, isAttachable);
 		}
 
+		internal XamlMember(string name, string preferredNamespace)
+		{
+			if (name == null)
+				throw new ArgumentNullException("name");
+			Name = name;
+			flags.Set(MemberFlags.IsUnknown, true);
+			ns.Set(preferredNamespace);
+		}
+
 		XamlMember(XamlSchemaContext schemaContext, XamlMemberInvoker invoker)
 		{
 			if (schemaContext == null)
@@ -212,11 +222,46 @@ namespace Portable.Xaml
 				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
 			}
 		}
-
-		internal bool ShouldSerialize => flags.Get(MemberFlags.ShouldSerialize) ?? flags.Set(MemberFlags.ShouldSerialize, SerializationVisibility != DesignerSerializationVisibility.Hidden);
-#else
-		internal bool ShouldSerialize => true;
 #endif
+
+		internal bool ShouldSerialize(object instance)
+		{
+			var shouldSerialize = flags.Get(MemberFlags.ShouldSerialize) ?? flags.Set(MemberFlags.ShouldSerialize, LookupShouldSerialize());
+
+			if (!shouldSerialize)
+				return false;
+
+			if (!shouldSerializeMethod.HasValue)
+				shouldSerializeMethod.Set(LookupShouldSerializeMethod());
+
+			if (shouldSerializeMethod.Value != null)
+			{
+				return (bool)shouldSerializeMethod.Value.Invoke(instance, null);
+			}
+
+			return true;
+		}
+
+		MethodInfo LookupShouldSerializeMethod()
+		{
+			foreach (var method in DeclaringType.UnderlyingType?.GetTypeInfo().GetDeclaredMethods("ShouldSerialize" + Name))
+			{
+				if (method.GetParameters().Length == 0 && method.ReturnType == typeof(bool))
+				{
+					return method;
+				}
+			}
+			return null;
+		}
+
+		bool LookupShouldSerialize()
+		{
+			bool shouldSerialize = true;
+#if !PCL || NETSTANDARD
+			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
+#endif
+			return shouldSerialize;
+		}
 
 		public bool IsAttachable => flags.Get(MemberFlags.IsAttachable) ?? false;
 
@@ -322,7 +367,7 @@ namespace Portable.Xaml
 					return String.Concat(DeclaringType.UnderlyingType.FullName, ".", Name);
 			}
 			else
-				return String.Concat("{", PreferredXamlNamespace, "}", DeclaringType.Name, ".", Name);
+				return String.Concat("{", PreferredXamlNamespace, "}", DeclaringType?.Name, ".", Name);
 		}
 
 		public virtual IList<string> GetXamlNamespaces()
@@ -433,7 +478,12 @@ namespace Portable.Xaml
 			if (UnderlyingSetter != null)
 				return UnderlyingSetter.GetParameters()[1].ParameterType;
 			if (UnderlyingGetter != null)
-				return UnderlyingGetter.GetParameters()[0].ParameterType;
+			{
+				if (IsAttachable)
+					return UnderlyingGetter.ReturnType;
+				else
+					return UnderlyingGetter.GetParameters()[0].ParameterType;
+			}
 			return typeof(object);
 		}
 

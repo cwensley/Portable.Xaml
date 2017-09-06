@@ -418,6 +418,8 @@ namespace Portable.Xaml
 			// FIXME: this condition needs to be examined. What is known to be prevented are: PositionalParameters, Initialization and Base (the last one sort of indicates there's a lot more).
 			else
 			{
+				if (property.IsUnknown)
+					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
 				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
 					InitializeObjectIfRequired(false);
 			}

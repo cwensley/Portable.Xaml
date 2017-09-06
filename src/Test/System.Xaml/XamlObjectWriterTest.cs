@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -744,7 +744,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test] // bug #3003 repro
-		public void EventsAndProcessingOrder()
+		public void gsAndProcessingOrder()
 		{
 			var asm = GetType().GetTypeInfo().Assembly;
 			var context = new XamlSchemaContext(new Assembly[] { asm });
@@ -1598,6 +1598,27 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
+		/// <summary>
+		/// Test binding an event to a method with a base EventArgs.
+		/// </summary>
+		/// <remarks>
+		/// This allows you to bind to events that are legal
+		/// </remarks>
+		[Test]
+		public void Write_EventStore5()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Binding events to methods with base class parameters is not supported in System.Xaml");
+
+			using (var xr = GetReader("EventStore5.xml"))
+			{
+				var res = (EventStore)XamlServices.Load(xr);
+				Assert.IsFalse(res.Method1Invoked, "#1");
+				res.Examine();
+				Assert.IsTrue(res.Method1Invoked, "#2");
+			}
+		}
+
 		[Test]
 		public void Write_AbstractWrapper()
 		{
@@ -2053,6 +2074,36 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual ("3", des.Contents [2].Foo, "#4");
 				Assert.AreEqual ("4", des.Contents [3].Foo, "#5");
 			}
+		}
+
+		[Test]
+		public void Read_InvalidPropertiesShouldThrowException()
+		{
+			Assert.Throws<XamlObjectWriterException>(() =>
+			{
+				XamlServices.Load(GetReader("InvalidPropertiesShouldThrowException.xml"));
+			});
+		}
+
+		[Test]
+		public void Write_Attached_Collection()
+		{
+			Attached4 result = null;
+
+			var rsettings = new XamlXmlReaderSettings();
+			using (var reader = new XamlXmlReader(new StringReader($@"<Attached4 xmlns=""{Compat.TestAssemblyNamespace}""><AttachedWrapper4.SomeCollection><TestClass4 Foo=""SomeValue""/></AttachedWrapper4.SomeCollection></Attached4>"), rsettings))
+			{
+				var wsettings = new XamlObjectWriterSettings();
+				using (var writer = new XamlObjectWriter(reader.SchemaContext, wsettings))
+				{
+					XamlServices.Transform(reader, writer, false);
+					result = (Attached4)writer.Result;
+				}
+			}
+
+			Assert.AreEqual(1, result.Property.Count, "#1");
+			Assert.AreEqual("SomeValue", result.Property[0].Foo, "#2");
+
 		}
 	}
 }

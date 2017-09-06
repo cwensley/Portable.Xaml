@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -101,6 +101,14 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	public class CustomGenericType<T>
 	{
 		public List<T> Contents { get; } = new List<T>();
+	}
+}
+
+namespace MonoTests.Portable.Xaml.NamespaceTest2
+{
+	public class TestClassWithDifferentBaseNamespace : MonoTests.Portable.Xaml.TestClass5WithName
+	{
+		public string SomeOtherProperty { get; set; }
 	}
 }
 
@@ -344,6 +352,16 @@ namespace MonoTests.Portable.Xaml
 	public class TestClass6
 	{
 		public DateTime TheDateAndTime { get; set; }
+	}
+
+	[RuntimeNameProperty("TheName")]
+	public class TestClass5WithName : TestClass5
+	{
+		[sc.DefaultValue(null)]
+		public string TheName { get; set; }
+
+		[sc.DefaultValue(null)]
+		public TestClass5WithName Other { get; set; }
 	}
 
 	public class TestClassBase
@@ -1012,6 +1030,30 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class Attached4
+	{
+		internal List<TestClass4> Property { get; set;  } = new List<TestClass4>();
+	}
+
+	public class AttachedWrapper4
+	{
+		public static List<TestClass4> GetSomeCollection(Attached4 attached)
+		{
+			return attached.Property;
+		}
+	}
+	public class AttachedWrapper5
+	{
+		public static List<TestClass4> GetSomeCollection(Attached4 attached)
+		{
+			return attached.Property;
+		}
+		public static void SetSomeCollection(Attached4 attached, List<TestClass4> value)
+		{
+			attached.Property = value;
+		}
+	}
+
 	public class CustomEventArgs : EventArgs
 	{
 	}
@@ -1031,8 +1073,9 @@ namespace MonoTests.Portable.Xaml
 				Event1(this, EventArgs.Empty);
 			if (Event2 != null)
 				return Event2();
-			else
-				return null;
+			if (Event3 != null)
+				Event3(this, new CustomEventArgs());
+			return null;
 		}
 
 		public void Method1()
@@ -1544,6 +1587,19 @@ namespace MonoTests.Portable.Xaml
 		public int IntValue { get; set; }
 
 		public long LongValue { get; set; }
+	}
+
+	public class TestObjectWithShouldSerialize
+	{
+		public string Text { get; set; }
+
+		internal int ShouldSerializeCalled { get; set; }
+
+		bool ShouldSerializeText()
+		{
+			ShouldSerializeCalled++;
+			return !string.IsNullOrEmpty(Text) && Text != "bar";
+		}
 	}
 }
 

@@ -11,14 +11,13 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<summary>Portable Xaml reader/writer</summary>
 		<description>
-Portable.Xaml is a port of mono's System.Xaml to PCL.
+Portable.Xaml is a port of mono's System.Xaml to PCL and .NET Standard.
 
 This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
 		</description>
 		<copyright>(c) Various Mono authors</copyright>
 		<tags>cross platform xaml</tags>
 		<dependencies>
-            <group targetFramework=".NETFramework4.5" />
             <group targetFramework=".NETPortable4.5-Profile259" />
             <group targetFramework=".NETPortable4.0-Profile136" />
             <group targetFramework=".NETStandard1.3">
@@ -31,7 +30,6 @@ This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
         </dependencies>
 	</metadata>
 	<files>
-		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib/net45" />
 		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib/portable-net40+sl5+win8+wpa81+wp8" />
 		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib/portable-net45+win8+wpa81+wp8" />
 		<file src="../../artifacts/$configuration$/netstandard1.3/Portable.Xaml.dll" target="lib/netstandard1.3" />

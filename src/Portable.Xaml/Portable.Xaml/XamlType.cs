@@ -69,6 +69,7 @@ namespace Portable.Xaml
 		XamlTypeInvoker invoker;
 		string explicit_ns;
 		string internalXmlName;
+		string preferredXamlNamespace;
 		Dictionary<XamlDirective, XamlMember> aliased_property_cache;
 		XamlCollectionKind? collectionKind;
 		ReferenceValue<IList<XamlType>> allowedContentTypes;
@@ -100,10 +101,10 @@ namespace Portable.Xaml
 			Type.GetType("System.Collections.ArrayList, System.Colletions.NonGeneric", false) 
 		};
 
-		static readonly string[] mscorlib_assemblies = new string[] {
-			"System.Collections.Generic",
-			"System.Private.CoreLib",
-			"System.Collections.NonGeneric"
+		internal static readonly string[] mscorlib_assemblies = new string[] {
+			/*"System.Collections.Generic",
+			"System.Collections.NonGeneric",*/
+			"System.Private.CoreLib"
 		};
 
 			/*mscorlib_types.Where(r => r != null)
@@ -132,21 +133,16 @@ namespace Portable.Xaml
 					Name = "Member";
 				else
 					Name = GetXamlName(type);
-				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
+				preferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
 			}
 			else if (!ReferenceEquals(xt = XamlLanguage.AllTypes.FirstOrDefault(t => t.UnderlyingType == type), null))
 			{
 				Name = xt.Name;
-				PreferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
+				preferredXamlNamespace = XamlLanguage.Xaml2006Namespace;
 			}
 			else
 			{
 				Name = GetXamlName(type);
-				var assembly = type.GetTypeInfo().Assembly;
-				string assemblyName = assembly.GetName().Name;
-				if (mscorlib_assemblies.Contains(assemblyName))
-					assemblyName = "mscorlib";
-				PreferredXamlNamespace = schemaContext.GetXamlNamespace(type.Namespace) ?? String.Format("clr-namespace:{0};assembly={1}", type.Namespace, assemblyName);
 			}
 			if (type.GetTypeInfo().IsGenericType)
 			{
@@ -166,7 +162,7 @@ namespace Portable.Xaml
 
 			type = typeof(object);
 			Name = unknownTypeName;
-			PreferredXamlNamespace = unknownTypeNamespace;
+			preferredXamlNamespace = unknownTypeNamespace;
 			TypeArguments = typeArguments == null || typeArguments.Count == 0 ? null : typeArguments.ToReadOnly();
 			explicit_ns = unknownTypeNamespace;
 		}
@@ -251,7 +247,22 @@ namespace Portable.Xaml
 
 		public string Name { get; private set; }
 
-		public string PreferredXamlNamespace { get; private set; }
+		public string PreferredXamlNamespace => preferredXamlNamespace ?? (preferredXamlNamespace = LookupPreferredXamlNamespace());
+
+		string LookupPreferredXamlNamespace()
+		{
+			var ns = SchemaContext.GetXamlNamespace(type.Namespace);
+			if (ns != null)
+				return ns;
+
+			var assembly = type.GetTypeInfo().Assembly;
+			var forwarded = assembly.GetCustomAttributes<TypeForwardedToAttribute>();
+			var forwarded2 = assembly.GetCustomAttributes<TypeForwardedFromAttribute>();
+			string assemblyName = assembly.GetName().Name;
+			if (mscorlib_assemblies.Contains(assemblyName))
+				assemblyName = "mscorlib";
+			return $"clr-namespace:{type.Namespace};assembly={assemblyName}";
+		}
 
 		public XamlSchemaContext SchemaContext { get; private set; }
 
@@ -475,8 +486,11 @@ namespace Portable.Xaml
 
 			if (type != null)
 			{
+				var assemblyName = type.GetTypeInfo().Assembly.GetName().Name;
+				if (mscorlib_assemblies.Contains(assemblyName))
+					assemblyName = "mscorlib";
 				// type always exists in clr namespace
-				yield return string.Format("clr-namespace:{0};assembly={1}", type.Namespace, type.GetTypeInfo().Assembly.GetName().Name);
+				yield return $"clr-namespace:{type.Namespace};assembly={assemblyName}";
 
 				// check if it's a built-in type
 				if (XamlLanguage.AllTypes.Any(r => r.UnderlyingType == type))

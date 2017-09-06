@@ -346,7 +346,7 @@ namespace Portable.Xaml
 				}
 
 				// creates name-only XamlType. Also, it does not seem that it does not store this XamlType to XamlSchemaContext (Try GetXamlType(xtn) after reading such xaml node, it will return null).
-				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments == null ? null : sti.TypeName.TypeArguments.Select<XamlTypeName,XamlType> (xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
+				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments?.Select(xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
 
 			// It could still be GetObject if current_member
@@ -385,15 +385,23 @@ namespace Portable.Xaml
 				// Try markup extension
 				// FIXME: is this rule correct?
 				var v = pair.Value;
-				if (!String.IsNullOrEmpty(v) && v[0] == '{')
+				if (!string.IsNullOrEmpty(v) && v[0] == '{')
 				{
-					var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
-					pai.Parse();
-					foreach (var node in ReadMarkup(pai))
-						yield return node;
+					if (v.Length >= 2 && v[1] == '}')
+					{
+						// escaped value with {} at the beginning of the string
+						yield return Node(XamlNodeType.Value, v.Substring(2));
+					}
+					else
+					{
+						var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
+						pai.Parse();
+						foreach (var node in ReadMarkup(pai))
+							yield return node;
+					}
 				}
 				else
-					yield return Node(XamlNodeType.Value, pair.Value);
+					yield return Node(XamlNodeType.Value, v);
 
 				yield return Node(XamlNodeType.EndMember, pair.Key);
 			}
@@ -536,8 +544,8 @@ namespace Portable.Xaml
 								atts.Add(new StringPair(r.Name, r.Value));
 								continue;
 							}
-							// Should we just ignore unknown attribute in XAML namespace or any other namespaces ?
-							// Probably yes for compatibility with future version.
+							// System.Xaml does not ignore attributes with namespaces
+							members.Add(new Pair(new XamlMember(r.LocalName, r.NamespaceURI), r.Value));
 							break;
 					}
 				} while (r.MoveToNextAttribute());
@@ -583,7 +591,9 @@ namespace Portable.Xaml
 				var xm = xt.GetMember(name);
 				if (xm != null)
 					sti.Members.Add(new Pair(xm, p.Value));
-				// ignore unknown attribute
+				else
+					// unknown attributes go through!
+					sti.Members.Add(new Pair(new XamlMember(name, xt, false), p.Value));
 			}
 		}
 

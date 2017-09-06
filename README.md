@@ -1,4 +1,4 @@
-Portable.Xaml is a fork of [mono's System.Xaml](https://github.com/mono/mono/tree/master/mcs/class/System.Xaml) converted to PCL.
+Portable.Xaml is a fork of [mono's System.Xaml](https://github.com/mono/mono/tree/master/mcs/class/System.Xaml) converted to PCL and .NET Standard.
 
 This is intended to be used to read and write Xaml on desktop, mobile, and .NET Core platforms.
 
@@ -9,7 +9,7 @@ This is intended to be used to read and write Xaml on desktop, mobile, and .NET 
 
 Portable.Xaml currently supports the following profiles:
 
-- .NET Standard 1.3 - For .NET 4.6, .NET Core, UWP, Xamarin, etc.
+- .NET Standard 1.3 - For .NET 4.6.1, .NET Core, UWP, Xamarin, etc.
 - Profile 259 - For .NET 4.5
 - Profile 136 - For .NET 4.0
 

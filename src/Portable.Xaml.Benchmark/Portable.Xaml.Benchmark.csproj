@@ -179,12 +179,6 @@
     <Compile Include="SaveComplexBenchmark.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-pcl259.csproj">
-      <Project>{179484EC-DB00-451A-AD2D-2E2AB20DE519}</Project>
-      <Name>Portable.Xaml-pcl259</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -195,6 +189,12 @@
     <EmbeddedResource Include="LoadComplexBenchmark.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj">
+      <Project>{CDC8F791-56FC-4B15-AAD2-BC460657CC02}</Project>
+      <Name>Portable.Xaml-netstandard1.3</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

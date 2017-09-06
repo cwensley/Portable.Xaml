@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Reflection;
 using System.Linq;
@@ -23,13 +23,53 @@ namespace Portable.Xaml.ComponentModel
 				if (rootObjectProvider != null && destinationTypeProvider != null) {
 					var target = rootObjectProvider.RootObject;
 					var eventType = destinationTypeProvider.GetDestinationType ();
-					var eventMethodParams = eventType.GetRuntimeMethods().First(r => r.Name == "Invoke").GetParameters ().Select(r => r.ParameterType).ToArray();
+					var eventParameters = eventType.GetRuntimeMethods().First(r => r.Name == "Invoke").GetParameters();
+					// go in reverse to match System.Xaml behaviour
+					var methods = target.GetType().GetRuntimeMethods().Reverse();
 
-					var mi = target.GetType().GetRuntimeMethods().LastOrDefault(r => r.Name == text && r.GetParameters().Select(p => p.ParameterType).SequenceEqual(eventMethodParams));
-					if (mi == null)
-						throw new XamlObjectWriterException (String.Format ("Referenced value method {0} in type {1} indicated by event {2} was not found", text, target.GetType(), eventType.FullName));
-					
-					return mi.CreateDelegate(eventType, target);
+					// find based on exact match parameter types first
+					foreach (var method in methods)
+					{
+						if (method.Name != text)
+							continue;
+						var parameters = method.GetParameters();
+						if (eventParameters.Length != parameters.Length)
+							continue;
+						if (parameters.Length == 0)
+							return method.CreateDelegate(eventType, target);
+						
+						for (int i = 0; i < parameters.Length; i++)
+						{
+							var param = parameters[i];
+							var eventParam = eventParameters[i];
+							if (param.ParameterType != eventParam.ParameterType)
+								break;
+							if (i == parameters.Length - 1)
+								return method.CreateDelegate(eventType, target);
+						}
+					}
+
+					// EnhancedXaml: Find method with compatible base class parameters
+					foreach (var method in methods)
+					{
+						if (method.Name != text)
+							continue;
+						var parameters = method.GetParameters();
+						if (parameters.Length == 0 || eventParameters.Length != parameters.Length)
+							continue;
+
+						for (int i = 0; i < parameters.Length; i++)
+						{
+							var param = parameters[i];
+							var eventParam = eventParameters[i];
+							if (!param.ParameterType.GetTypeInfo().IsAssignableFrom(eventParam.ParameterType.GetTypeInfo()))
+								break;
+							if (i == parameters.Length - 1)
+								return method.CreateDelegate(eventType, target);
+						}
+					}
+
+					throw new XamlObjectWriterException ($"Referenced value method {text} in type {target.GetType()} indicated by event {eventType.FullName} was not found");
 				}
 			}
 			return base.ConvertFrom(context, culture, value);
