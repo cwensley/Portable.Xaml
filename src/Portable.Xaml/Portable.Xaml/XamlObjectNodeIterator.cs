@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -216,7 +216,9 @@ namespace Portable.Xaml
 					if (val3 == null)
 						yield break; // do not output anything
 					val3.WriteXml(xw);
+#if !NET40
 					xw.Dispose();
+#endif
 					var obj = new XData { Text = sw.ToString() };
 					foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.XData, obj), node: node))
 						yield return xn;

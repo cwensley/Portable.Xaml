@@ -1,9 +1,10 @@
-﻿#if !NETSTANDARD
+#if !NETSTANDARD
 using System;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Portable.Xaml.ComponentModel
 {
@@ -30,7 +31,7 @@ namespace Portable.Xaml.ComponentModel
 				{
 					if (text.IndexOf(',') == -1)
 						return Enum.Parse(Type, text, true);
-					
+			
 					long enumValue = 0L;
 					var array = text.Split(',');
 					for (int i = 0; i < array.Length; i++)

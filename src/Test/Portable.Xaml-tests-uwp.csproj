@@ -12,7 +12,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.15063.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -312,7 +312,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.3.2</Version>
+      <Version>6.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Primitives">
+      <Version>4.3.0</Version>
     </PackageReference>
     <PackageReference Include="MSTest.TestAdapter">
       <Version>1.1.14</Version>
@@ -332,6 +335,9 @@
     <PackageReference Include="System.AppDomain">
       <Version>2.0.11</Version>
     </PackageReference>
+    <PackageReference Include="System.Net.NameResolution">
+      <Version>4.3.0</Version>
+    </PackageReference>
     <PackageReference Include="System.Reflection">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -347,15 +353,10 @@
     <PackageReference Include="Xamarin.Forms">
       <Version>2.3.4.231</Version>
     </PackageReference>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj">
-      <Project>{cdc8f791-56fc-4b15-aad2-bc460657cc02}</Project>
-      <Name>Portable.Xaml-netstandard1.3</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="XmlFiles\CurrentVersion.xaml">

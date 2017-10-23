@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -104,21 +104,10 @@ namespace Portable.Xaml
 		{
 			get { throw new NotImplementedException(); }
 		}
-
-#if NETSTANDARD
+		
 		public IContainer Container => throw new NotImplementedException();
 
 		public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
-#else
-		/*
-		public IContainer Container {
-			get { throw new NotImplementedException (); }
-		}*/
-		public PropertyInfo PropertyDescriptor
-		{
-			get { throw new NotImplementedException(); }
-		}
-#endif
 
 		public void OnComponentChanged()
 		{

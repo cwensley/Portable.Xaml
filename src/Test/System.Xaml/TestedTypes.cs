@@ -33,17 +33,25 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using NUnit.Framework;
+using System.ComponentModel;
 using sc = System.ComponentModel;
 #if !PCL136
 using System.Collections.Immutable;
 #endif
 
+#if NET_4_5 && !PCL
+using StringConverter = Portable.Xaml.ComponentModel.StringConverter;
+#endif
+
 #if NETSTANDARD
-using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
-using System.ComponentModel;
+using ISupportInitialize = System.ComponentModel.ISupportInitialize;
+using StringConverter = System.ComponentModel.StringConverter;
+#if !NETFX_CORE
 using DateTimeConverter = System.ComponentModel.DateTimeConverter;
+#endif
 #elif PCL
 using DateTimeConverter = Portable.Xaml.ComponentModel.DateTimeConverter;
+using StringConverter = Portable.Xaml.ComponentModel.StringConverter;
 #endif
 
 #if PCL
@@ -51,10 +59,8 @@ using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-
 #else
 using System.Windows.Markup;
-using System.ComponentModel;
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
@@ -1699,7 +1705,7 @@ namespace SecondTest
 		}
 	}
 
-	#region bug #681202
+#region bug #681202
 
 	[MarkupExtensionReturnType(typeof(object))]
 	public class ResourceExtension : MarkupExtension
@@ -1845,7 +1851,7 @@ namespace SecondTest
 		public TestObject TestProperty { get; set; }
 	}
 
-	#endregion
+#endregion
 
 	public class ResourcesDict2 : Dictionary<object, object>
 	{
@@ -1856,7 +1862,7 @@ namespace SecondTest
 		public string TestProperty { get; set; }
 	}
 
-	#region bug #683290
+#region bug #683290
 	[ContentProperty("Items")]
 	public class SimpleType
 	{
@@ -1876,7 +1882,7 @@ namespace SecondTest
 	public class ContentPropertyContainer : Dictionary<object, object>
 	{
 	}
-	#endregion
+#endregion
 }
 
 #region "xamarin bug #2927"
@@ -2020,7 +2026,9 @@ Loaded Parent
 		protected override void InsertItem(int index, BaseItem item)
 		{
 			base.InsertItem(index, item);
+#if !NETFX_CORE
 			Console.WriteLine("Item '{0}' inserted at index '{1}'", item, index);
+#endif
 		}
 	}
 

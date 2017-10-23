@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -33,6 +33,7 @@ using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
 using System.Xml.Serialization;
+using System.ComponentModel;
 
 // To use this under .NET, compile sources as:
 //

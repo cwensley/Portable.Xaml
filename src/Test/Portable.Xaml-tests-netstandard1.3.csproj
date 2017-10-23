@@ -141,9 +141,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj">
-      <Project>{CDC8F791-56FC-4B15-AAD2-BC460657CC02}</Project>
-      <Name>Portable.Xaml-netstandard1.3</Name>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj">
+      <Project>{5c61e391-2f4a-4389-8d82-972402d53bae}</Project>
+      <Name>Portable.Xaml</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

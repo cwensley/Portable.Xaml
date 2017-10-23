@@ -1,3 +1,8 @@
+#if NETSTANDARD2_0 || NET40 || NET45
+using System.Runtime.CompilerServices;
+
+[assembly:TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
+#else
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,7 +13,7 @@ using Portable.Xaml.ComponentModel;
 using System.Runtime.Serialization;
 using System.Reflection;
 
-namespace Portable.Xaml.ComponentModel
+namespace System.ComponentModel
 {
 	/// <summary>
 	/// Interface for objects that support initialization.
@@ -27,3 +32,4 @@ namespace Portable.Xaml.ComponentModel
 	}
 	
 }
+#endif

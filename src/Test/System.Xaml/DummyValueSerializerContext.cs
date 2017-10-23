@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -29,12 +29,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-#if PCL
 using Portable.Xaml.Markup;
+#if PCL
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 #else
-using System.Windows.Markup;
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
@@ -71,8 +70,6 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException();
 		}
-
-#if NETSTANDARD
 		public PropertyDescriptor PropertyDescriptor {
 			get { throw new NotImplementedException (); }
 		}
@@ -80,23 +77,10 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException ();
 		}
-#elif PCL
-		public PropertyInfo PropertyDescriptor
-		{
-			get { throw new NotImplementedException(); }
-		}
-		public ValueSerializer GetValueSerializerFor(PropertyInfo descriptor)
+
+		public ValueSerializer GetValueSerializerFor(PropertyDescriptor descriptor)
 		{
 			throw new NotImplementedException();
 		}
-#else
-		public PropertyDescriptor PropertyDescriptor {
-			get { throw new NotImplementedException (); }
-		}
-		public ValueSerializer GetValueSerializerFor (global::System.ComponentModel.PropertyDescriptor descriptor)
-		{
-			throw new NotImplementedException ();
-		}
-#endif
 	}
 }

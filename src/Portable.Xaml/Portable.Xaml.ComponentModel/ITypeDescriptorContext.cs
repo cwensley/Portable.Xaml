@@ -1,4 +1,10 @@
-﻿#if PCL && !NETSTANDARD
+#if NETSTANDARD || NET40 || NET45
+using System.Runtime.CompilerServices;
+
+[assembly: TypeForwardedTo(typeof(System.ComponentModel.ITypeDescriptorContext))]
+#endif
+
+#if PCL && !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,7 +15,7 @@ using Portable.Xaml.ComponentModel;
 using System.Runtime.Serialization;
 using System.Reflection;
 
-namespace Portable.Xaml.ComponentModel
+namespace System.ComponentModel
 {
 
 	/// <summary>
@@ -17,7 +23,17 @@ namespace Portable.Xaml.ComponentModel
 	/// </summary>
 	public interface ITypeDescriptorContext : IServiceProvider
 	{
+		IContainer Container { get; }
+
+		object Instance { get; }
+
+		PropertyDescriptor PropertyDescriptor { get; }
 	}
-	
+
+	public interface IContainer { }
+
+	public abstract class MemberDescriptor { }
+
+	public abstract class PropertyDescriptor : MemberDescriptor { }
 }
 #endif

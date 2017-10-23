@@ -108,7 +108,7 @@ namespace Portable.Xaml
 
 		public void StartThread (string threadName)
 		{
-			#if PCL136
+			#if PCL136 || NET40
 			ThreadPool.QueueUserWorkItem(state =>
 			#else
 			if (thread != null)

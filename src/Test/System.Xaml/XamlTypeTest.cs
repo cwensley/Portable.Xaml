@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -40,7 +40,10 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 #if NETSTANDARD
-using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
+using ISupportInitialize = System.ComponentModel.ISupportInitialize;
+#endif
+
+#if CORE
 using System.ComponentModel;
 #endif
 
@@ -911,7 +914,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue(xt.IsNullable, "#1");
 			Assert.AreEqual(xt.BaseType, sctx.GetXamlType(typeof(ValueType)), "#2");
 			Assert.IsNull(xt.ValueSerializer, "#3");
+#if !NETFX_CORE
 			Assert.IsNotInstanceOf<System.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
+#endif
 #if PCL
 			Assert.IsInstanceOf<global::Portable.Xaml.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
 #endif

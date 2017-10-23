@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD
+#if !NETSTANDARD
 using System;
 using System.Collections;
 using System.Globalization;

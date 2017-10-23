@@ -129,12 +129,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-pcl259.csproj">
-      <Project>{179484EC-DB00-451A-AD2D-2E2AB20DE519}</Project>
-      <Name>Portable.Xaml-pcl259</Name>
-    </ProjectReference>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj">
+      <Project>{5c61e391-2f4a-4389-8d82-972402d53bae}</Project>
+      <Name>Portable.Xaml</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿#if PCL && !NETSTANDARD
+#if !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Portable.Xaml.ComponentModel;
 using System.Runtime.Serialization;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Portable.Xaml.ComponentModel
 {
