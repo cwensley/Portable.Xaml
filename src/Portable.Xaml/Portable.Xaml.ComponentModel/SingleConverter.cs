@@ -1,4 +1,4 @@
-﻿#if PCL && !NETSTANDARD
+#if PCL && !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,7 +11,6 @@ using System.Reflection;
 
 namespace Portable.Xaml.ComponentModel
 {
-
 	public class SingleConverter : BaseNumberConverter
 	{
 		internal override bool AllowHex { get { return false; } }

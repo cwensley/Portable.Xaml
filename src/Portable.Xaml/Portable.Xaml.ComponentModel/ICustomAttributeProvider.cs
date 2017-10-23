@@ -1,8 +1,24 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
+
+#if !NETSTANDARD2_0 && !NET40 && !NET45
+namespace System.Reflection
+{
+	public interface ICustomAttributeProvider
+	{
+		object[] GetCustomAttributes(bool inherit);
+
+		object[] GetCustomAttributes(Type attributeType, bool inherit);
+
+		bool IsDefined(Type attributeType, bool inherit);
+	}
+}
+#else
+[assembly:TypeForwardedTo(typeof(ICustomAttributeProvider))]
+#endif
 
 namespace Portable.Xaml.ComponentModel
 {
@@ -58,14 +74,5 @@ namespace Portable.Xaml.ComponentModel
 		{
 			return info.IsDefined(attributeType, inherit);
 		}
-	}
-
-	public interface ICustomAttributeProvider
-	{
-		object[] GetCustomAttributes(bool inherit);
-
-		object[] GetCustomAttributes(Type attributeType, bool inherit);
-
-		bool IsDefined(Type attributeType, bool inherit);
 	}
 }

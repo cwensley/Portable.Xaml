@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -27,10 +27,10 @@ using Portable.Xaml.ComponentModel;
 using System.Reflection;
 using Portable.Xaml;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Portable.Xaml.Markup
 {
-	//[System.Runtime.CompilerServices.TypeForwardedFrom (Consts.AssemblyWindowsBase)]
 	public interface IValueSerializerContext : ITypeDescriptorContext, IServiceProvider
 	{
 		ValueSerializer GetValueSerializerFor (PropertyInfo descriptor);

@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Globalization;
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 
 namespace Portable.Xaml.ComponentModel
 {

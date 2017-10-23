@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net40;net45;netstandard2.0;netstandard1.3;portable-net4+sl5+win8+wp8;portable-net45+win8+wp8;uap10.0</TargetFrameworks>
+    <RootNamespace>Portable.Xaml</RootNamespace>
+    <AssemblyName>Portable.Xaml</AssemblyName>
+    <OutputPath>..\..\artifacts\$(Configuration)</OutputPath>
+    <DefineConstants Condition="'$(TargetFramework)' != 'net40' and '$(TargetFramework)' != 'net45'">$(DefineConstants);PCL</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.3'">$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'portable-net4+sl5+win8+wp8'">$(DefineConstants);PCL136</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'portable-net45+win8+wp8'">$(DefineConstants);PCL259;MONO</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'uap10.0'">$(DefineConstants);UAP10_0</DefineConstants>
+    <GenerateAssemblyInfo Condition="'$(TargetFramework)' != 'netstandard1.3'">false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.9" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
+    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
+    <Compile Remove="Portable.Xaml.Permissions/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.4.0" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+</Project>

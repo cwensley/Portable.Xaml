@@ -129,9 +129,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-pcl136.csproj">
-      <Project>{a283eef5-d2bf-47dd-afd6-a1db3df7cda0}</Project>
-      <Name>Portable.Xaml-pcl136</Name>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj">
+      <Project>{5c61e391-2f4a-4389-8d82-972402d53bae}</Project>
+      <Name>Portable.Xaml</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

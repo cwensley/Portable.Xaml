@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -26,9 +26,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using MonoTests.Portable.Xaml;
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 #if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
@@ -36,7 +34,6 @@ using Portable.Xaml;
 using Portable.Xaml.Schema;
 #else
 using System.Windows.Markup;
-using System.ComponentModel;
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
@@ -76,10 +73,8 @@ namespace MonoTests.Portable.Xaml.Markup
 			
 			public object Instance { get; set; }
 
-#if !PCL || NETSTANDARD
 			public IContainer Container { get; set; }
 			public PropertyDescriptor PropertyDescriptor { get; set; }
-#endif
 		}
 		
 		[Test]

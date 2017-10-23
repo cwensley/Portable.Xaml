@@ -25,9 +25,6 @@ using System.Collections.Generic;
 using Portable.Xaml.ComponentModel;
 using System.Reflection;
 using Portable.Xaml.Markup;
-#if !__MOBILE__ && !PCL
-using Portable.Xaml.Permissions;
-#endif
 using Portable.Xaml.Schema;
 
 namespace Portable.Xaml
@@ -42,9 +39,6 @@ namespace Portable.Xaml
 			: base (settings)
 		{
 			var s = settings;
-			#if !__MOBILE__ && !PCL
-			AccessLevel = s.AccessLevel;
-#endif
 			AfterBeginInitHandler = s.AfterBeginInitHandler;
 			AfterEndInitHandler = s.AfterEndInitHandler;
 			AfterPropertiesHandler = s.AfterPropertiesHandler;
@@ -64,11 +58,6 @@ namespace Portable.Xaml
 		public EventHandler<XamlObjectEventArgs> AfterPropertiesHandler { get; set; }
 		public EventHandler<XamlObjectEventArgs> BeforePropertiesHandler { get; set; }
 		public EventHandler<XamlSetValueEventArgs> XamlSetValueHandler { get; set; }
-
-#if !__MOBILE__ && !PCL
-		[MonoTODO ("Ignored")]
-		public XamlAccessLevel AccessLevel { get; set; }
-#endif
 
 		public INameScope ExternalNameScope { get; set; }
 		[MonoTODO ("Ignored")]

@@ -1,4 +1,4 @@
-﻿﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -23,7 +23,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Portable.Xaml.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Markup;
@@ -32,6 +31,8 @@ using System.Xml.Serialization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+
+using UriTypeConverter = Portable.Xaml.ComponentModel.UriTypeConverter;
 
 namespace Portable.Xaml
 {

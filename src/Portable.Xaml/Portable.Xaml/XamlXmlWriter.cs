@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -116,8 +116,10 @@ namespace Portable.Xaml
 			intl.CloseAll ();
 
 			w.Flush ();
+#if !NET40
 			if (settings.CloseOutput)
 				w.Dispose();
+#endif
 		}
 
 		public void Flush ()

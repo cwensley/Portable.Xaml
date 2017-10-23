@@ -22,13 +22,13 @@
 		<PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj" />
-	</ItemGroup>
-	<ItemGroup>
 		<Compile Remove="MainTestPage.*" />
 		<Compile Remove="UnitTestApp.*" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
 	</ItemGroup>
 </Project>

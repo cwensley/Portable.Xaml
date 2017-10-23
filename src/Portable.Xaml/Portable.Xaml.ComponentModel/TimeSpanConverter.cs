@@ -1,9 +1,10 @@
-﻿#if !NETSTANDARD
+#if !NETSTANDARD
 using System;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Portable.Xaml.ComponentModel
 {

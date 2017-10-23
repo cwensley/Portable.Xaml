@@ -50,37 +50,9 @@ using System.Security.Permissions;
 [assembly: AssemblyTitle("Portable.Xaml.dll")]
 [assembly: AssemblyDescription("Portable.Xaml.dll")]
 [assembly: AssemblyDefaultAlias("Portable.Xaml.dll")]
-[assembly: AssemblyVersion("0.15.*")]
+[assembly: AssemblyVersion("0.15.0.0")]
 [assembly: AssemblyInformationalVersion("0.18.0-alpha")]
 
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
-#endif
-
-
-#if !PCL
-
-[assembly: AssemblyCompany (Consts.MonoCompany)]
-[assembly: AssemblyProduct (Consts.MonoProduct)]
-[assembly: AssemblyCopyright (Consts.MonoCopyright)]
-[assembly: AssemblyVersion (Consts.FxVersion)]
-[assembly: SatelliteContractVersion (Consts.FxVersion)]
-[assembly: AssemblyInformationalVersion (Consts.FxFileVersion)]
-[assembly: AssemblyFileVersion (Consts.FxFileVersion)]
-
-[assembly: AssemblyDelaySign (true)]
-
-#if NET_2_1
-[assembly: AssemblyKeyFile ("../silverlight.pub")]
-#else
-[assembly: AssemblyKeyFile ("../ecma.pub")]
-[assembly: AllowPartiallyTrustedCallers]
-[assembly: ComCompatibleVersion (1, 0, 3300, 0)]
-[assembly: SecurityCritical (SecurityCriticalScope.Explicit)]
-#endif
-
-
-#if !MOBILE
-[assembly: TypeForwardedTo (typeof (System.Windows.Markup.ValueSerializerAttribute))]
-#endif
 #endif

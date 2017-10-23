@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -131,7 +131,9 @@ namespace Portable.Xaml
 				GetAppDomainAssemblies()
 #if !PCL136
 				?? GetReferencedAssemblies()
+#if !NET40 && !NET45
 				?? GetUwpAssemblies()
+#endif
 #endif
 				?? Enumerable.Empty<Assembly>();
 
@@ -231,6 +233,8 @@ namespace Portable.Xaml
 			yield return typeof(int).GetTypeInfo().Assembly; // System.Private.CoreLib
 		}
 
+#if !NET40 && !NET45
+
 		static IEnumerable<Assembly> GetUwpAssemblies()
 		{
 			try
@@ -279,6 +283,7 @@ namespace Portable.Xaml
 			catch { }
 			return null;
 		}
+#endif
 #endif
 
 		internal string GetXamlNamespace(string clrNamespace)

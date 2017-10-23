@@ -1,4 +1,8 @@
-﻿#if !NETSTANDARD
+#if NETSTANDARD || NET40 || NET45
+using System.Runtime.CompilerServices;
+
+[assembly:TypeForwardedTo(typeof(System.ComponentModel.TypeConverter))]
+#else
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,7 +13,7 @@ using Portable.Xaml.ComponentModel;
 using System.Runtime.Serialization;
 using System.Reflection;
 
-namespace Portable.Xaml.ComponentModel
+namespace System.ComponentModel
 {
 	/// <summary>
 	/// Type converter implementation, for type converter compatibility in portable class libraries.

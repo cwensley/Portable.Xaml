@@ -1,15 +1,21 @@
-﻿#if PCL && !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Portable.Xaml.ComponentModel;
 using System.Runtime.Serialization;
-using System.Reflection;
+using System.Runtime.CompilerServices;
+using Portable.Xaml;
 
-namespace Portable.Xaml.ComponentModel
+#if NETSTANDARD || NET40 || NET45
+[assembly:TypeForwardedTo(typeof(System.ComponentModel.TypeDescriptor))]
+#endif
+
+#if PCL && !NETSTANDARD
+namespace System.ComponentModel
 {
 
 	/// <summary>

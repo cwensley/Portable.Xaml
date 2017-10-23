@@ -1,4 +1,4 @@
-﻿#if PCL259 || NETSTANDARD
+#if PCL259 || NETSTANDARD || NET45 || UAP10_0
 using System;
 using System.Reflection;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿#if PCL136
+﻿#if PCL136 || NET40
 using System;
 using System.Reflection;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿﻿//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -564,7 +564,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var obj = new EventContainer ();
 			obj.Run += delegate {
+#if !NETFX_CORE
 				Console.Error.WriteLine ("done");
+#endif
 			};
 			var xr = new XamlObjectReader (obj);
 			Read_EventContainer (xr);
