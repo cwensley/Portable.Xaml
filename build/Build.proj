@@ -17,8 +17,8 @@
 	<Target Name="Build">
 
     	<Exec Command="$(Runtime) $(Nuget) restore $(SourceDir)\Portable.Xaml.sln"/>
+		<MSBuild Project="$(SourceDir)\Portable.Xaml\Portable.Xaml.csproj;$(SourceDir)\Test\Portable.Xaml-tests-core.csproj" Targets="Restore" />
     	<Exec Command="dotnet restore $(SourceDir)\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj"/>
-    	<Exec Command="dotnet restore $(SourceDir)\Test\Portable.Xaml-tests-core.csproj"/>
     	<MSBuild Projects="$(SourceDir)\Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
 
 	</Target>
@@ -31,7 +31,7 @@
 		</GetAssemblyInfo>
 
     	<MakeDir Directories="$(OutputNupkgDir)" />
-    	<Exec Command="$(Runtime) $(Nuget) pack $(SourceDir)\Portable.Xaml\Portable.Xaml.nuspec -NoDefaultExcludes -Properties Configuration=$(Configuration) -OutputDirectory $(OutputNupkgDir) -Version $(AssemblyVersion)"/>
+		<MSBuild Project="$(SourceDir)\Portable.Xaml\Portable.Xaml.csproj" Targets="Pack" Properties="Configuration=$(Configuration);Version=$(AssemblyVersion);PackageOutputPath=$(OutputNupkgDir)" />
     </Target>
 
 	<Target Name="Clean">
