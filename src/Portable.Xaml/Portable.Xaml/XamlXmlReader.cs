@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2011 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Portable.Xaml.Schema;
 
@@ -277,6 +278,11 @@ namespace Portable.Xaml
 		XamlSchemaContext sctx;
 		XamlXmlReaderSettings settings;
 		IXamlNamespaceResolver xaml_namespace_resolver;
+#if !PCL
+		static readonly Regex whitespace = new Regex("\\s+", RegexOptions.Compiled);
+#else
+		static readonly Regex whitespace = new Regex("\\s+");
+#endif
 
 		internal XmlReader Reader {
 			get { return r; }
@@ -315,8 +321,7 @@ namespace Portable.Xaml
 				yield break;
 
 			if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) {
-				//throw new XamlParseException (String.Format ("Element is expected, but got {0}", r.NodeType));
-				yield return Node (XamlNodeType.Value, r.Value);
+				yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
 				r.Read();
 				yield break;
 			}
@@ -612,6 +617,11 @@ namespace Portable.Xaml
 			return XamlLanguage.AllDirectives.FirstOrDefault (dd => (dd.AllowedLocation & loc) != 0 && dd.Name == name);
 		}
 
+		string NormalizeWhitespace(string value)
+		{
+			return whitespace.Replace(value, " ").Trim();
+		}
+
 		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType xt)
 		{
 			// this value is for Initialization, or Content property value
@@ -621,7 +631,7 @@ namespace Portable.Xaml
 			else
 				xm = XamlLanguage.Initialization;
 			yield return Node (XamlNodeType.StartMember, xm);
-			yield return Node (XamlNodeType.Value, r.Value);
+			yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
 			r.Read ();
 			yield return Node (XamlNodeType.EndMember, xm);
 		}
