@@ -1601,6 +1601,23 @@ namespace MonoTests.Portable.Xaml
 			return !string.IsNullOrEmpty(Text) && Text != "bar";
 		}
 	}
+
+	[ContentProperty("Child")]
+	public class Whitespace
+	{
+		public string TabConvertedToSpaces { get; set; }
+		public string NewlineConvertedToSpaces { get; set; }
+		public string ConsecutiveSpaces { get; set; }
+		public string SpacesAroundTags { get; set; }
+		public string Preserve { get; set; }
+		public WhitespaceChild Child { get; set; }
+	}
+
+	[ContentProperty("Content")]
+	public class WhitespaceChild
+	{
+		public string Content { get; set; }
+	}
 }
 
 namespace XamlTest
