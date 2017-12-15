@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -58,30 +58,42 @@ namespace Portable.Xaml
 			if (reader == null)
 				throw new ArgumentNullException ("reader");
 
-			switch (reader.NodeType) {
-			case XamlNodeType.Value:
-				WriteValue (reader.Value);
-				break;
-			case XamlNodeType.StartObject:
-				WriteStartObject (reader.Type);
-				break;
-			case XamlNodeType.GetObject:
-				WriteGetObject ();
-				break;
-			case XamlNodeType.EndObject:
-				WriteEndObject ();
-				break;
-			case XamlNodeType.StartMember:
-				WriteStartMember (reader.Member);
-				break;
-			case XamlNodeType.EndMember:
-				WriteEndMember ();
-				break;
-			case XamlNodeType.NamespaceDeclaration:
-				WriteNamespace (reader.Namespace);
-				break;
-			default:
-				throw NotImplemented (); // documented behavior
+			try { 
+				switch (reader.NodeType) {
+				case XamlNodeType.Value:
+					WriteValue (reader.Value);
+					break;
+				case XamlNodeType.StartObject:
+					WriteStartObject (reader.Type);
+					break;
+				case XamlNodeType.GetObject:
+					WriteGetObject ();
+					break;
+				case XamlNodeType.EndObject:
+					WriteEndObject ();
+					break;
+				case XamlNodeType.StartMember:
+					WriteStartMember (reader.Member);
+					break;
+				case XamlNodeType.EndMember:
+					WriteEndMember ();
+					break;
+				case XamlNodeType.NamespaceDeclaration:
+					WriteNamespace (reader.Namespace);
+					break;
+				default:
+					throw NotImplemented (); // documented behavior
+				}
+			} catch (Exception e) {
+				var lineNumber = 0;
+				var linePosition = 0;
+				var lineInfo = reader as IXamlLineInfo;
+				if (lineInfo != null && lineInfo.HasLineInfo) {
+					lineNumber = lineInfo.LineNumber;
+					linePosition = lineInfo.LinePosition;
+				}
+
+				throw new XamlException("Parse error.", e, lineNumber, linePosition);
 			}
 		}
 
