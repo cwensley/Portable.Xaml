@@ -278,11 +278,6 @@ namespace Portable.Xaml
 		XamlSchemaContext sctx;
 		XamlXmlReaderSettings settings;
 		IXamlNamespaceResolver xaml_namespace_resolver;
-#if !PCL
-		static readonly Regex whitespace = new Regex("\\s+", RegexOptions.Compiled);
-#else
-		static readonly Regex whitespace = new Regex("\\s+");
-#endif
 
 		internal XmlReader Reader {
 			get { return r; }
@@ -619,7 +614,52 @@ namespace Portable.Xaml
 
 		string NormalizeWhitespace(string value)
 		{
-			return whitespace.Replace(value, " ").Trim();
+			char[] sb = null;
+			int pos = 0;
+			bool lastWasWhitesp = false;
+			for (var cnt = 0; cnt < value.Length; cnt++)
+			{
+				var c = value[cnt];
+				if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
+				{
+					if (cnt == 0 || lastWasWhitesp || (sb != null && pos == 0))
+					{
+						if (sb == null)
+						{
+							sb = value.ToCharArray();
+							pos = cnt;
+						}
+
+						continue;
+					}
+
+					lastWasWhitesp = true;
+					if (sb != null)
+					{
+						sb[pos++] = ' ';
+					}
+
+					continue;
+				}
+				lastWasWhitesp = false;
+
+				if (sb != null)
+				{
+					sb[pos++] = c;
+				}
+			}
+
+			if (sb == null)
+			{
+				if (lastWasWhitesp)
+					return value.Substring(0, value.Length - 1);
+				return value;
+			}
+
+			if (lastWasWhitesp)
+				return new string(sb, 0, pos - 1);
+
+			return new string(sb, 0, pos);
 		}
 
 		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType xt)
