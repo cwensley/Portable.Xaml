@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Portable.Xaml.Schema;
@@ -614,52 +615,31 @@ namespace Portable.Xaml
 
 		string NormalizeWhitespace(string value)
 		{
-			char[] sb = null;
-			int pos = 0;
+			var sb = new StringBuilder(value.Length);
 			bool lastWasWhitesp = false;
-			for (var cnt = 0; cnt < value.Length; cnt++)
+			for (var index = 0; index < value.Length; index++)
 			{
-				var c = value[cnt];
+				var c = value[index];
 				if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
 				{
-					if (cnt == 0 || lastWasWhitesp || (sb != null && pos == 0))
-					{
-						if (sb == null)
-						{
-							sb = value.ToCharArray();
-							pos = cnt;
-						}
-
+					if (lastWasWhitesp || sb.Length == 0)
 						continue;
-					}
-
 					lastWasWhitesp = true;
-					if (sb != null)
-					{
-						sb[pos++] = ' ';
-					}
-
+					sb.Append(' ');
 					continue;
 				}
-				lastWasWhitesp = false;
-
-				if (sb != null)
+				else
 				{
-					sb[pos++] = c;
+					lastWasWhitesp = false;
 				}
-			}
 
-			if (sb == null)
-			{
-				if (lastWasWhitesp)
-					return value.Substring(0, value.Length - 1);
-				return value;
+				sb.Append(c);
 			}
 
 			if (lastWasWhitesp)
-				return new string(sb, 0, pos - 1);
+				sb.Length--;
 
-			return new string(sb, 0, pos);
+			return sb.ToString();
 		}
 
 		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType xt)
