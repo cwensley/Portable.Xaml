@@ -20,7 +20,7 @@ namespace MonoTests.Portable.Xaml
 		XamlReader GetReader(string filename)
 		{
 			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
-			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)),new XamlXmlReaderSettings{ProvideLineInfo = true});
+			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)), new XamlXmlReaderSettings{ProvideLineInfo = true});
 		}
 
 		[Test]
@@ -36,6 +36,26 @@ namespace MonoTests.Portable.Xaml
 			                                                  });
 			Assert.AreEqual(1, ex.LineNumber);
 			Assert.AreEqual(13, ex.LinePosition);
+		}
+
+		[Test]
+		public void CheckReaderPosition()
+		{
+			using(var reader = GetReader("PropertyNotFound.xml"))
+			{
+				var lineInfo = reader as IXamlLineInfo;
+				while (reader.Read())
+				{
+					if (reader.NodeType == XamlNodeType.StartMember)
+					{
+						if (reader.Member.Name == "Baz")
+						{
+							Assert.AreEqual(1, lineInfo.LineNumber);
+							Assert.AreEqual(13, lineInfo.LinePosition);
+						}
+					}
+				}
+			}
 		}
 	}
 }
