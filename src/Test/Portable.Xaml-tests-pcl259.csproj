@@ -62,6 +62,7 @@
     <Compile Include="System.Xaml\AmbientPropertyValueTest.cs" />
     <Compile Include="System.Xaml\AttachableMemberIdentifierTest.cs" />
     <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
+    <Compile Include="System.Xaml\PropertyNotFoundTest.cs" />
     <Compile Include="System.Xaml\XamlObjectWriterCollectionTests.cs" />
     <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
     <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
@@ -136,5 +137,10 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="XmlFiles\PropertyNotFound.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

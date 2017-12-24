@@ -120,6 +120,7 @@
     <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
     <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
     <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
+    <Compile Include="System.Xaml\PropertyNotFoundTest.cs" />
     <Compile Include="System.Xaml\TestedTypes.cs" />
     <Compile Include="System.Xaml\ValueSerializerContextTest.cs" />
     <Compile Include="System.Xaml\XamlBackgroundReaderTest.cs" />
@@ -290,6 +291,7 @@
     <Content Include="XmlFiles\NumericValues_StandardTypes.xml" />
     <Content Include="XmlFiles\PositionalParametersWrapper.xml" />
     <Content Include="XmlFiles\PropertyDefinition.xml" />
+    <Content Include="XmlFiles\PropertyNotFound.xml" />
     <Content Include="XmlFiles\ReadOnlyPropertyContainer.xml" />
     <Content Include="XmlFiles\Reference.xml" />
     <Content Include="XmlFiles\StaticExtension.xml" />

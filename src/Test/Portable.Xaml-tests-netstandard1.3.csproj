@@ -61,6 +61,7 @@
     <Compile Include="System.Xaml\AmbientPropertyValueTest.cs" />
     <Compile Include="System.Xaml\AttachableMemberIdentifierTest.cs" />
     <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
+    <Compile Include="System.Xaml\PropertyNotFoundTest.cs" />
     <Compile Include="System.Xaml\XamlObjectWriterCollectionTests.cs" />
     <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
     <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
@@ -145,5 +146,10 @@
       <Project>{CDC8F791-56FC-4B15-AAD2-BC460657CC02}</Project>
       <Name>Portable.Xaml-netstandard1.3</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="XmlFiles\PropertyNotFound.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

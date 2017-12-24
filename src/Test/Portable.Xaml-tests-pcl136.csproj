@@ -65,6 +65,7 @@
     <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
     <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
     <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
+    <Compile Include="System.Xaml\PropertyNotFoundTest.cs" />
     <Compile Include="System.Xaml\TestedTypes.cs" />
     <Compile Include="System.Xaml\ValueSerializerContextTest.cs" />
     <Compile Include="System.Xaml\XamlBackgroundReaderTest.cs" />
@@ -133,5 +134,10 @@
       <Project>{a283eef5-d2bf-47dd-afd6-a1db3df7cda0}</Project>
       <Name>Portable.Xaml-pcl136</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="XmlFiles\PropertyNotFound.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
