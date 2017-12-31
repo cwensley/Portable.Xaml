@@ -15,7 +15,7 @@ using System.Xaml.Schema;
 namespace MonoTests.Portable.Xaml
 {
 	[TestFixture]
-	public class PropertyNotFoundTest
+	public class XamlServicesTest
 	{
 		XamlReader GetReader(string filename)
 		{
@@ -24,7 +24,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void DoTest()
+		public void TestLineInfo()
 		{
 			var ex = Assert.Throws<XamlObjectWriterException>(() =>
 			                                                  {
@@ -34,28 +34,8 @@ namespace MonoTests.Portable.Xaml
 					                                                  Assert.Fail("Should not succeed!");
 				                                                  }
 			                                                  });
-			Assert.AreEqual(1, ex.LineNumber);
-			Assert.AreEqual(13, ex.LinePosition);
-		}
-
-		[Test]
-		public void CheckReaderPosition()
-		{
-			using(var reader = GetReader("PropertyNotFound.xml"))
-			{
-				var lineInfo = reader as IXamlLineInfo;
-				while (reader.Read())
-				{
-					if (reader.NodeType == XamlNodeType.StartMember)
-					{
-						if (reader.Member.Name == "Baz")
-						{
-							Assert.AreEqual(1, lineInfo.LineNumber);
-							Assert.AreEqual(13, lineInfo.LinePosition);
-						}
-					}
-				}
-			}
+			Assert.AreEqual(1, ex.LineNumber, "Wrong LineNumber");
+			Assert.AreEqual(13, ex.LinePosition, "Wrong LinePosition");
 		}
 	}
 }
