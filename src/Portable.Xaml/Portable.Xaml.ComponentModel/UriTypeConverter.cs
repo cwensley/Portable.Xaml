@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace Portable.Xaml.ComponentModel
 {
-	public class UriTypeConverter : TypeConverter
+	class UriTypeConverter : TypeConverter
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{

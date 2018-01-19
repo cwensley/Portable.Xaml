@@ -343,6 +343,12 @@ namespace Portable.Xaml
 		protected internal XamlValueConverter<TConverterBase> GetValueConverter<TConverterBase>(Type converterType, XamlType targetType)
 			where TConverterBase : class
 		{
+#if !HAS_TYPE_CONVERTER
+			if (typeof(TConverterBase) == typeof(TypeConverter))
+			{
+				return new XamlTypeValueConverter<TConverterBase>(converterType, targetType);
+			}
+#endif
 			return new XamlValueConverter<TConverterBase>(converterType, targetType);
 		}
 

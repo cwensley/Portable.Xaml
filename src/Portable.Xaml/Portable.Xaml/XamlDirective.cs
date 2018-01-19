@@ -49,7 +49,12 @@ namespace Portable.Xaml
 			is_unknown = true;
 		}
 
-		public XamlDirective (IEnumerable<string> xamlNamespaces, string name, XamlType xamlType, XamlValueConverter<TypeConverter> typeConverter, AllowedMemberLocations allowedLocation)
+#if HAS_TYPE_CONVERTER
+		public 
+#else
+		internal
+#endif
+		XamlDirective (IEnumerable<string> xamlNamespaces, string name, XamlType xamlType, XamlValueConverter<TypeConverter> typeConverter, AllowedMemberLocations allowedLocation)
 			: base (true, xamlNamespaces != null ? xamlNamespaces.FirstOrDefault () : null, name)
 		{
 			if (xamlNamespaces == null)
@@ -150,7 +155,12 @@ namespace Portable.Xaml
 			return type;
 		}
 
-		protected override sealed XamlValueConverter<TypeConverter> LookupTypeConverter ()
+#if HAS_TYPE_CONVERTER
+		protected
+#else
+		internal
+#endif
+		override sealed XamlValueConverter<TypeConverter> LookupTypeConverter ()
 		{
 			if (type_converter == null)
 				type_converter = base.LookupTypeConverter ();

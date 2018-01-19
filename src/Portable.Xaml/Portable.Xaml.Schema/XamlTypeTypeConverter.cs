@@ -30,36 +30,40 @@ using System.ComponentModel;
 
 namespace Portable.Xaml.Schema
 {
-	public class XamlTypeTypeConverter : TypeConverter
+	#if HAS_TYPE_CONVERTER
+	public
+	#endif
+	class XamlTypeTypeConverter : TypeConverter
 	{
-		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			return sourceType == typeof (string);
+			return sourceType == typeof(string);
 		}
 
-		public override bool CanConvertTo (ITypeDescriptorContext context, Type destinationType)
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof (string);
+			return destinationType == typeof(string);
 		}
 
-		public override Object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, Object value)
+		public override Object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, Object value)
 		{
-			throw new NotSupportedException (String.Format ("Conversion from type {0} is not supported", value != null ? value.GetType () : null));
+			throw new NotSupportedException(String.Format("Conversion from type {0} is not supported", value != null ? value.GetType() : null));
 		}
 
-		public override object ConvertTo (ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (!CanConvertTo (context, destinationType))
-				throw new NotSupportedException (String.Format ("Conversion to type {0} is not supported", destinationType));
+			if (!CanConvertTo(context, destinationType))
+				throw new NotSupportedException(String.Format("Conversion to type {0} is not supported", destinationType));
 
-			var vctx = (IValueSerializerContext) context;
-			var lookup = vctx != null ? (INamespacePrefixLookup) vctx.GetService (typeof (INamespacePrefixLookup)) : null;
+			var vctx = (IValueSerializerContext)context;
+			var lookup = vctx != null ? (INamespacePrefixLookup)vctx.GetService(typeof(INamespacePrefixLookup)) : null;
 			var xt = value as XamlType;
-			if (xt != null && destinationType == typeof (string)) {
+			if (xt != null && destinationType == typeof(string))
+			{
 				if (lookup != null)
-					return new XamlTypeName (xt).ToString (lookup);
+					return new XamlTypeName(xt).ToString(lookup);
 				else
-					return xt.UnderlyingType != null ? xt.UnderlyingType.ToString () : xt.ToString ();
+					return xt.UnderlyingType != null ? xt.UnderlyingType.ToString() : xt.ToString();
 			}
 			else
 				return base.ConvertTo (context, culture, value, destinationType); // it seems it still handles not-supported types (such as int).

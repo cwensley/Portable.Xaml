@@ -33,6 +33,10 @@ using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
 using System.ComponentModel;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("SystemValueSerializerContext")]
 
 namespace Portable.Xaml
 {
@@ -49,14 +53,100 @@ namespace Portable.Xaml
 		IDestinationTypeProvider destinationProvider;
 		IXamlObjectWriterFactory objectWriterFactory;
 
-		public ValueSerializerContext(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+#if !HAS_TYPE_CONVERTER
+
+		static bool s_valueSerializerTypeInitialized;
+		static Type s_valueSerializerType;
+
+		static Type GetValueSerializerType()
 		{
-			if (prefixLookup == null)
-				throw new ArgumentNullException("prefixLookup");
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			prefix_lookup = prefixLookup;
-			sctx = schemaContext;
+			if (s_valueSerializerTypeInitialized)
+				return s_valueSerializerType;
+			s_valueSerializerTypeInitialized = true;
+
+			// use reflection.emit to create a subclass of ValueSerializerContext that implements 
+			// System.ComponentModel.ITypeDescriptorContext since we can't access it here.
+			var typeSignature = "SystemValueSerializerContext";
+
+			var appDomainType = Type.GetType("System.AppDomain, mscorlib");
+			var assemblyBuilderAccess = Type.GetType("System.Reflection.Emit.AssemblyBuilderAccess, mscorlib");
+			var typeAttributesType = Type.GetType("System.Reflection.TypeAttributes, mscorlib");
+			var currentDomainProp = appDomainType?.GetRuntimeProperty("CurrentDomain");
+			var typeDescriptorContentType = Type.GetType("System.ComponentModel.ITypeDescriptorContext, System");
+			var containerType = Type.GetType("System.ComponentModel.IContainer, System");
+			var propertyDescriptorType = Type.GetType("System.ComponentModel.PropertyDescriptor, System");
+			if (appDomainType == null
+				|| assemblyBuilderAccess == null
+				|| typeAttributesType == null
+				|| currentDomainProp == null
+			    || typeDescriptorContentType == null
+			    || containerType == null
+			    || propertyDescriptorType == null
+			   )
+				return null;
+
+			object currentDomain = currentDomainProp.GetValue(null);
+
+			dynamic assemblyBuilder = appDomainType
+				.GetRuntimeMethod("DefineDynamicAssembly", new Type[] { typeof(AssemblyName), assemblyBuilderAccess })
+				.Invoke(currentDomain, new object[] { new AssemblyName(typeSignature), 1 });
+
+			object moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+
+			dynamic typeBuilder = moduleBuilder
+				.GetType()
+				.GetRuntimeMethod("DefineType", new Type[] { typeof(string), typeAttributesType, typeof(Type) })
+				.Invoke(moduleBuilder, new object[] { typeSignature, 0, typeof(ValueSerializerContext) }); // 0 = Class
+
+			typeBuilder.AddInterfaceImplementation(typeDescriptorContentType);
+
+			Type notImplementedException = typeof(NotImplementedException);
+			var notImplementedExceptionConstructor = notImplementedException.GetTypeInfo().GetConstructors().First(r => r.GetParameters().Length == 0);
+
+			var getSetAttr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual;;
+			//public IContainer Container => throw new NotImplementedException();
+			var propertyBuilder = typeBuilder.DefineProperty("Container", PropertyAttributes.None, containerType, null);
+			var getter = typeBuilder.DefineMethod("get_Container", getSetAttr, containerType, null);
+			var il = getter.GetILGenerator();
+			il.ThrowException(notImplementedException);
+			//il.Emit(OpCodes.Ldnull);
+			//il.Emit(OpCodes.Ret);
+			propertyBuilder.SetGetMethod(getter);
+
+			//public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
+			propertyBuilder = typeBuilder.DefineProperty("PropertyDescriptor", PropertyAttributes.None, propertyDescriptorType, null);
+			getter = typeBuilder.DefineMethod("get_PropertyDescriptor", getSetAttr, propertyDescriptorType, null);
+			il = getter.GetILGenerator();
+			il.ThrowException(notImplementedException);
+			//il.Emit(OpCodes.Ldnull);
+			//il.Emit(OpCodes.Ret);
+			propertyBuilder.SetGetMethod(getter);
+
+			s_valueSerializerType = typeBuilder.CreateType();
+			return s_valueSerializerType;
+		}
+#endif
+
+		public static ValueSerializerContext Create(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		{
+#if !HAS_TYPE_CONVERTER
+			ValueSerializerContext context;
+			var type = GetValueSerializerType();
+			if (type != null)
+				context = Activator.CreateInstance(type) as ValueSerializerContext;
+			else
+				context = new ValueSerializerContext();
+#else
+			var context = new ValueSerializerContext();
+#endif
+			context.Initialize(prefixLookup, schemaContext, ambientProvider, provideValue, rootProvider, destinationProvider, objectWriterFactory);
+			return context;
+		}
+
+		void Initialize(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		{
+			prefix_lookup = prefixLookup ?? throw new ArgumentNullException("prefixLookup");
+			sctx = schemaContext ?? throw new ArgumentNullException("schemaContext");
 			ambient_provider = ambientProvider;
 			this.provideValue = provideValue;
 			this.rootProvider = rootProvider;
@@ -95,36 +185,23 @@ namespace Portable.Xaml
 			return null;
 		}
 
-		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext
-		{
-			get { return sctx; }
-		}
+		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext => sctx;
 
-		public object Instance
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public virtual object Instance => throw new NotImplementedException();
 
-#if NETSTANDARD
+#if HAS_TYPE_CONVERTER
 		public IContainer Container => throw new NotImplementedException();
 
 		public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
 #else
-		/*
-		public IContainer Container {
-			get { throw new NotImplementedException (); }
-		}*/
-		public PropertyInfo PropertyDescriptor
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public PropertyInfo PropertyDescriptor => throw new NotImplementedException();
 #endif
 
-		public void OnComponentChanged()
+		public virtual void OnComponentChanged()
 		{
 			throw new NotImplementedException();
 		}
-		public bool OnComponentChanging ()
+		public virtual bool OnComponentChanging ()
 		{
 			throw new NotImplementedException ();
 		}

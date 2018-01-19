@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="BuildUtilities" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<PropertyGroup>
-		<UtilitiesImported>true</UtilitiesImported>
-		<UtilitiesBasePath Condition="$(UtilitiesBasePath) == ''">packages</UtilitiesBasePath>
-		<UtilitiesAssemblyPath Condition="$(UtilitiesAssemblyPath) == ''">$(UtilitiesBasePath)\UtilitiesTasks</UtilitiesAssemblyPath>
-	</PropertyGroup>
-	<UsingTask AssemblyFile="$(UtilitiesAssemblyPath)\Utilities.dll" TaskName="GetAssemblyInfo" />
-	<UsingTask AssemblyFile="$(UtilitiesAssemblyPath)\Utilities.dll" TaskName="FileUpdate" />
-	<UsingTask AssemblyFile="$(UtilitiesAssemblyPath)\Utilities.dll" TaskName="FileExtract" />
-	<UsingTask AssemblyFile="$(UtilitiesAssemblyPath)\Utilities.dll" TaskName="IncrementVersion" />
-	<Target Name="BuildUtilities" Condition="!Exists('$(UtilitiesAssemblyPath)\Utilities.dll')" >
-		<MakeDir Directories="$(UtilitiesAssemblyPath)" />
-		
-		<!-- UsingTask is not implemented in mono -->
-		<ItemGroup>
-			<Utilities Include="GetAssemblyInfo"><Text><![CDATA[
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<UsingTask TaskName="GetAssemblyInfo" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<AssemblyFileName ParameterType="System.String" Required="true" />
+			<AssemblyInformationalVersion ParameterType="System.String" Output="true" />
+			<AssemblyTitle ParameterType="System.String" Output="true" />
+			<AssemblyDescription ParameterType="System.String" Output="true" />
+			<AssemblyCopyright ParameterType="System.String" Output="true" />
+			<AssemblyCompany ParameterType="System.String" Output="true" />
+			<AssemblyName ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Xml" />
+			<Code Type="Class" Language="cs"><![CDATA[
 using System;
 using System.IO;
 using System.Text;
@@ -24,7 +22,6 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
 
 public static class Extensions
 {
@@ -36,24 +33,20 @@ public static class Extensions
 		return attributes.OfType<T>().SingleOrDefault();
 	}
 	
-	public static bool IsUnix
+	public static bool IsMono
 	{
-		get
-		{
-			return 
-				Environment.OSVersion.Platform == PlatformID.MacOSX
-				|| Environment.OSVersion.Platform == PlatformID.Unix; 
-		}
+		get { return Type.GetType("Mono.Runtime", false) != null; }
 	}
 	
 	public static string FixParameter(string value)
 	{
-		if (IsUnix)
-			return value.Replace("//", "%5C%5C");
-		return value;
+		if (IsMono)
+			return value.Replace("//", @"\");
+		else
+			return value.Replace(@"\\", @"\");
 	}
-}]]></Text></Utilities>
-			<Utilities Include="GetAssemblyInfo"><Text><![CDATA[
+}
+
 public class GetAssemblyInfo : Task
 {
 	public string AssemblyFileName { get; set; }
@@ -83,7 +76,7 @@ public class GetAssemblyInfo : Task
 		{
 			AssemblyFileName = Path.GetFullPath(AssemblyFileName);
 
-			Log.LogMessage("Getting assembly info...");
+			Log.LogMessage("Getting assembly info...", null);
 			AssemblyInformationalVersion = FileVersionInfo.GetVersionInfo(AssemblyFileName).ProductVersion;
 
 			var assembly = Assembly.LoadFrom(AssemblyFileName);
@@ -111,8 +104,47 @@ public class GetAssemblyInfo : Task
 			return false;
 		}
 	}
-}]]></Text></Utilities>
-			<Utilities Include="FileUpdate"><Text><![CDATA[
+}
+]]></Code>
+		</Task>
+	</UsingTask>
+	<UsingTask TaskName="FileUpdate" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<Pattern ParameterType="System.String" Required="true" />
+			<Replacement ParameterType="System.String" Required="true" />
+			<WarnOnNoUpdate ParameterType="System.Boolean" />
+			<IgnoreCase ParameterType="System.Boolean" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Xml" />
+			<Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public static class Extensions
+{
+	public static bool IsMono
+	{
+		get { return Type.GetType("Mono.Runtime", false) != null; }
+	}
+	
+	public static string FixParameter(string value)
+	{
+		if (IsMono)
+			return value.Replace("//", @"\");
+		else
+			return value.Replace(@"\\", @"\");
+	}
+}
+
 public class FileUpdate : Task
 {
 	public ITaskItem[] Files { get; set; }
@@ -123,27 +155,50 @@ public class FileUpdate : Task
 	
 	public bool WarnOnNoUpdate { get; set; }
 	
+	public bool IgnoreCase { get; set; }
+	
 	public FileUpdate()
 	{
 		WarnOnNoUpdate = true;
+		IgnoreCase = true;
+	}
+
+	static Encoding DetectEncoding(string filename)
+	{
+		var bom = new byte[3];
+		using (var file = new FileStream(filename, FileMode.Open, FileAccess.Read))
+		{
+			file.Read(bom, 0, 3);
+		}
+
+		if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf) return Encoding.UTF8;
+		return new UTF8Encoding(false);
 	}
 
 	public override bool Execute()
 	{
 		try
 		{
-			var regex = new Regex(Extensions.FixParameter(Pattern), RegexOptions.None);
+			var pattern = Extensions.FixParameter(Pattern);
+			RegexOptions options = RegexOptions.None;
+			if (IgnoreCase)
+				options |= RegexOptions.IgnoreCase;
+			
+			var regex = new Regex(pattern, options);
 
 			foreach (var item in Files)
 			{
 				var fileName = item.ItemSpec;
+				
+				// use the same encoding as the existing file
+				var encoding = DetectEncoding(fileName);
 
-				var text = File.ReadAllText(fileName);
+				var text = File.ReadAllText(fileName, encoding);
 
 				if (!regex.IsMatch(text))
 				{
 					if (WarnOnNoUpdate)
-						Log.LogWarning(string.Format("File '{0}' not updated", fileName));
+						Log.LogWarning("File '{0}' not updated. Pattern: '{1}'", fileName, pattern);
 					continue;
 				}
 				else
@@ -151,7 +206,7 @@ public class FileUpdate : Task
 
 				var updatedText = regex.Replace(text, Replacement);
 
-				File.WriteAllText(fileName, updatedText);
+				File.WriteAllText(fileName, updatedText, encoding);
 			}
 		}
 		catch (Exception ex)
@@ -161,8 +216,47 @@ public class FileUpdate : Task
 		}
 		return true;		
 	}
-}]]></Text></Utilities>
-			<Utilities Include="IncrementVersion"><Text><![CDATA[
+}
+]]></Code>
+		</Task>
+	</UsingTask>
+	<UsingTask TaskName="IncrementVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<Version ParameterType="System.String" Required="true" />
+			<Increment ParameterType="System.String" />
+			<RemovePrerelease ParameterType="System.Boolean" />
+			<AssemblyVersion ParameterType="System.String" Output="true" />
+			<AssemblyInformationalVersion ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Xml" />
+			<Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public static class Extensions
+{
+	public static bool IsMono
+	{
+		get { return Type.GetType("Mono.Runtime", false) != null; }
+	}
+	
+	public static string FixParameter(string value)
+	{
+		if (IsMono)
+			return value.Replace("//", @"\");
+		else
+			return value.Replace(@"\\", @"\");
+	}
+}
+
 public class IncrementVersion : Task
 {
 	public string Version { get; set; }
@@ -223,7 +317,7 @@ public class IncrementVersion : Task
 				infoString.Append (suffix);
 			else if (string.IsNullOrEmpty(suffix))
 			{
-				Log.LogError("Version is not a prerelease but RemovePrerelease was specified");
+				Log.LogError("Version is not a prerelease but RemovePrerelease was specified", null);
 				return false;
 			}
 		
@@ -238,8 +332,44 @@ public class IncrementVersion : Task
 		return true;
 	}
 }
-]]></Text></Utilities>
-			<Utilities Include="FileExtract"><Text><![CDATA[
+]]></Code>
+		</Task>
+	</UsingTask>
+	<UsingTask TaskName="FileExtract" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<File ParameterType="Microsoft.Build.Framework.ITaskItem" Required="true" />
+			<Pattern ParameterType="System.String" Required="true" />
+			<Output ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Xml" />
+			<Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Diagnostics;
+using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public static class Extensions
+{
+	public static bool IsMono
+	{
+		get { return Type.GetType("Mono.Runtime", false) != null; }
+	}
+	
+	public static string FixParameter(string value)
+	{
+		if (IsMono)
+			return value.Replace("//", @"\");
+		else
+			return value.Replace(@"\\", @"\");
+	}
+}
+
 public class FileExtract : Task
 {
 	public ITaskItem File { get; set; }
@@ -253,11 +383,9 @@ public class FileExtract : Task
 	{
 		try
 		{
-			var fileName = File.ItemSpec;
-			var pattern = Extensions.FixParameter(Pattern);
-			Log.LogMessage("Extracting '{0}' from {1}", pattern, fileName);
-			var regex = new Regex(pattern, RegexOptions.None);
+			var regex = new Regex(Extensions.FixParameter(Pattern), RegexOptions.None);
 
+			var fileName = File.ItemSpec;
 
 			var text = System.IO.File.ReadAllText(fileName);
 
@@ -267,7 +395,7 @@ public class FileExtract : Task
 				return true;
 			}
 			
-			Log.LogError(string.Format("Could not extract from '{0}'", fileName));
+			Log.LogError("Could not extract from '{0}'", fileName);
 		}
 		catch (Exception ex)
 		{
@@ -276,16 +404,27 @@ public class FileExtract : Task
 		}
 		return false;
 	}
-}]]></Text></Utilities>
-		</ItemGroup>
-		
-		<WriteLinesToFile File="$(UtilitiesAssemblyPath)\Utilities.cs" Lines="@(Utilities->'%(Text)')" Overwrite="true" />
+}
+]]></Code>
+		</Task>
+	</UsingTask>
 
-		<Csc
-			Sources="$(UtilitiesAssemblyPath)\Utilities.cs"
-			OutputAssembly="$(UtilitiesAssemblyPath)\Utilities.dll"
-			References="Microsoft.Build.Framework.dll;Microsoft.Build.Utilities.v4.0.dll;" 
-			TargetType="library"
-			/>
-	</Target>
+	<UsingTask TaskName="DownloadFile" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Address ParameterType="System.String" Required="true"/>
+      <FileName ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System" />
+      <Reference Include="System.IO" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+        	var dir = Path.GetDirectoryName(FileName);
+        	if (!Directory.Exists(dir))
+        		Directory.CreateDirectory(dir);
+            new System.Net.WebClient().DownloadFile(Address, FileName);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
 </Project>

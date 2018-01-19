@@ -38,9 +38,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 
 namespace MonoTests.Portable.Xaml.Schema
 {
@@ -112,7 +110,9 @@ namespace MonoTests.Portable.Xaml.Schema
 			// This test asserts that XamlLanguage.Object.TypeConverter.ConverterType is null for different reason.
 			var c = new XamlValueConverter<TypeConverter> (typeof (TypeConverter), XamlLanguage.Object, null);
 			Assert.IsNotNull (c.ConverterInstance, "#1");
+			#if HAS_TYPE_CONVERTER
 			Assert.IsNull (XamlLanguage.Object.TypeConverter.ConverterInstance, "#2");
+			#endif
 		}
 
 		[Test]

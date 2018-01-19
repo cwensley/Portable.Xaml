@@ -31,7 +31,10 @@ using System.ComponentModel;
 namespace Portable.Xaml.Markup
 {
 	//[System.Runtime.CompilerServices.TypeForwardedFrom (Consts.AssemblyWindowsBase)]
-	public interface IValueSerializerContext : ITypeDescriptorContext, IServiceProvider
+	public interface IValueSerializerContext : IServiceProvider
+	#if NETSTANDARD
+		, ITypeDescriptorContext
+	#endif
 	{
 		ValueSerializer GetValueSerializerFor (PropertyInfo descriptor);
 		ValueSerializer GetValueSerializerFor (Type type);

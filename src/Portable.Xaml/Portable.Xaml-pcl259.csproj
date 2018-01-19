@@ -37,22 +37,12 @@
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
-  <Import Project="..\Shared\Common.props" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Helpers\MemberExpressionExtensions.cs" />
     <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Assembly\AssemblyInfo.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\NullableConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\BoolConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\EnumConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\ISupportInitialize.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\BaseNumberConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\ITypeDescriptorContext.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\SingleConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\TypeConverterAttribute.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\TypeDescriptor.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\TypeConverter.cs" />
     <Compile Include="Portable.Xaml.Markup\AmbientAttribute.cs" />
     <Compile Include="Portable.Xaml.Markup\ArrayExtension.cs" />
     <Compile Include="Portable.Xaml.Markup\ConstructorArgumentAttribute.cs" />
@@ -172,20 +162,7 @@
     <Compile Include="Portable.Xaml.Schema\XamlTypeTypeConverter.cs" />
     <Compile Include="Portable.Xaml.Schema\XamlValueConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\ICustomAttributeProvider.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\Int32Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\Int64Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\UInt64Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\UInt32Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\DoubleConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\CharConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\Int16Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\UInt16Converter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\ByteConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\DecimalConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\TimeSpanConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\GuidConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\DateTimeConverter.cs" />
-    <Compile Include="Portable.Xaml.ComponentModel\StringConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\UriTypeConverter.cs" />
     <Compile Include="Portable.Xaml.ComponentModel\EventConverter.cs" />
     <Compile Include="Portable.Xaml\EnhancedXamlAttribute.cs" />
@@ -196,11 +173,14 @@
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\FlagValue.cs" />
     <Compile Include="Helpers\ReferenceValue.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\ITypeConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\SystemTypeConverter.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TypeConverterAttribute.cs" />
+    <Compile Include="Portable.Xaml.ComponentModel\TypeConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Portable.Xaml.Markup\ChangeLog" />
     <None Include="Portable.Xaml\ChangeLog" />
     <None Include="Portable.Xaml.Schema\ChangeLog" />
   </ItemGroup>
-  <Import Project="..\Shared\Common.targets" />
 </Project>

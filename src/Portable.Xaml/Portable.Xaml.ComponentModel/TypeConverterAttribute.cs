@@ -1,4 +1,4 @@
-﻿#if PCL && !NETSTANDARD
+﻿#if !HAS_TYPE_CONVERTER
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,13 +15,18 @@ namespace Portable.Xaml.ComponentModel
 	/// <summary>
 	/// Type converter attribute, for type converter compatibility in portable class libraries.
 	/// </summary>
-	public class TypeConverterAttribute : Attribute
+	class TypeConverterAttribute : Attribute
 	{
+		string _converterTypeName;
 		/// <summary>
 		/// Gets the name of the type for the type converter of the associated type.
 		/// </summary>
 		/// <value>The name of the type.</value>
-		public string ConverterTypeName { get; private set; }
+		public string ConverterTypeName
+		{
+			get { return _converterTypeName; }
+			set { _converterTypeName = value; }
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TypeConverterAttribute"/> class.

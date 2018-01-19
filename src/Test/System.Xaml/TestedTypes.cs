@@ -38,12 +38,9 @@ using sc = System.ComponentModel;
 using System.Collections.Immutable;
 #endif
 
-#if NETSTANDARD
+#if NETSTANDARD || PCL
 using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
 using System.ComponentModel;
-using DateTimeConverter = System.ComponentModel.DateTimeConverter;
-#elif PCL
-using DateTimeConverter = Portable.Xaml.ComponentModel.DateTimeConverter;
 #endif
 
 #if PCL
