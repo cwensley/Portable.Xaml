@@ -2105,5 +2105,22 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual("SomeValue", result.Property[0].Foo, "#2");
 
 		}
+
+		[Test]
+		public void Whitespace_ShouldBeCorrectlyHandled()
+		{
+			using (var xr = GetReader("Whitespace.xml"))
+			{
+				var des = (Whitespace)XamlServices.Load(xr);
+				Assert.AreEqual("hello world", des.TabConvertedToSpaces);
+				Assert.AreEqual("hello world", des.NewlineConvertedToSpaces);
+				Assert.AreEqual("hello world", des.ConsecutiveSpaces);
+				Assert.AreEqual("hello world", des.SpacesAroundTags);
+				Assert.AreEqual("hello world", des.Child.Content);
+
+				// TODO: xml:space="preserve" not yet implemented
+				// Assert.AreEqual("  hello world\t", des.Preserve);
+			}
+		}
 	}
 }
