@@ -3624,7 +3624,7 @@ if (i == 0) {
 			Assert.IsFalse (r.Read (), "end");
 		}
 		
-		protected void Read_AttachedProperty (XamlReader r)
+		protected void Read_AttachedProperty (XamlReader r, bool withNamespace = false)
 		{
 			var at = new XamlType (typeof (Attachable), r.SchemaContext);
 
@@ -3634,6 +3634,11 @@ if (i == 0) {
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
 			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
 			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
+
+			if (withNamespace)
+			{
+				this.ReadNamespace(r, "ns", assns, "ns#2");
+			}
 
 			// t:AttachedWrapper
 			Assert.IsTrue (r.Read (), "so#1-1");

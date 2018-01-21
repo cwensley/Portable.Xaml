@@ -682,6 +682,13 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_AttachedPropertyWithNamespace()
+		{
+			var r = GetReader("AttachedPropertyWithNamespace.xml");
+			Read_AttachedProperty(r, true);
+		}
+
+		[Test]
 		public void Read_AbstractWrapper ()
 		{
 			var r = GetReader ("AbstractContainer.xml");
