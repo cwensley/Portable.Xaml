@@ -1,112 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E9DCCDCC-03A8-4BD1-888D-CEE86468A15A}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <NoWarn>1699</NoWarn>
-    <AssemblyName>Portable.Xaml_test_netstandard</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net461</TargetFramework>
+		<RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
+		<AssemblyName>Portable.Xaml_test_netstandard</AssemblyName>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>..\..\artifacts\test\Debug\netstandard1.3\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <DefineConstants>NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <OutputPath>..\..\artifacts\test\Release\netstandard1.3\</OutputPath>
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <!-- Set AddAdditionalExplicitAssemblyReferences to false, otherwise if targetting .NET4.0, 
-  Microsoft.NETFramework.props will force a dependency on the assembly System.Core. This
-  is a problem to compile the Mono mscorlib.dll -->
-  <PropertyGroup>
-    <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-  </PropertyGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Compile Include="Categories.cs" />
-    <Compile Include="System.Windows.Markup\ArrayExtensionTest.cs" />
-    <Compile Include="System.Windows.Markup\ReferenceTest.cs" />
-    <Compile Include="System.Windows.Markup\StaticExtensionTest.cs" />
-    <Compile Include="System.Windows.Markup\TypeExtensionConverterTest.cs" />
-    <Compile Include="System.Windows.Markup\TypeExtensionTest.cs" />
-    <Compile Include="System.Windows.Markup\ValueSerializerAttributeTest.cs" />
-    <Compile Include="System.Windows.Markup\ValueSerializerTest.cs" />
-    <Compile Include="System.Windows.Markup\XDataTest.cs" />
-    <Compile Include="System.Xaml.Schema\XamlMemberInvokerTest.cs" />
-    <Compile Include="System.Xaml.Schema\XamlTypeInvokerTest.cs" />
-    <Compile Include="System.Xaml.Schema\XamlTypeNameTest.cs" />
-    <Compile Include="System.Xaml.Schema\XamlTypeTypeConverterTest.cs" />
-    <Compile Include="System.Xaml.Schema\XamlValueConverterTest.cs" />
-    <Compile Include="System.Xaml\AmbientPropertyValueTest.cs" />
-    <Compile Include="System.Xaml\AttachableMemberIdentifierTest.cs" />
-    <Compile Include="System.Xaml\AttachablePropertyServicesTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectWriterCollectionTests.cs" />
-    <Compile Include="System.Xaml\DummyValueSerializerContext.cs" />
-    <Compile Include="System.Xaml\NamespaceDeclarationTest.cs" />
-    <Compile Include="System.Xaml\TestedTypes.cs" />
-    <Compile Include="System.Xaml\ValueSerializerContextTest.cs" />
-    <Compile Include="System.Xaml\XamlBackgroundReaderTest.cs" />
-    <Compile Include="System.Xaml\XamlDirectiveTest.cs" />
-    <Compile Include="System.Xaml\XamlDuplicateMemberExceptionTest.cs" />
-    <Compile Include="System.Xaml\XamlLanguageTest.cs" />
-    <Compile Include="System.Xaml\XamlMemberTest.cs" />
-    <Compile Include="System.Xaml\XamlNodeQueueTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectEventArgsTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectReaderSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectReaderTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectWriterSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlObjectWriterTest.cs" />
-    <Compile Include="System.Xaml\XamlReaderSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlReaderTest.cs" />
-    <Compile Include="System.Xaml\XamlReaderTestBase.cs" />
-    <Compile Include="System.Xaml\XamlSchemaContextSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlSchemaContextTest.cs" />
-    <Compile Include="System.Xaml\XamlTypeTest.cs" />
-    <Compile Include="System.Xaml\XamlXmlReaderSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlXmlReaderTest.cs" />
-    <Compile Include="System.Xaml\XamlXmlWriterSettingsTest.cs" />
-    <Compile Include="System.Xaml\XamlXmlWriterTest.cs" />
-    <Compile Include="Compat.cs" />
-    <Compile Include="System.Xaml\XamlNodeListTest.cs" />
-    <Compile Include="System.Windows.Markup\XamlDeferLoadTest.cs" />
-    <Compile Include="System.Xaml\XamlDeferringLoaderTest.cs" />
-  </ItemGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	  <OutputPath>..\..\artifacts\test\Debug\netstandard1.3</OutputPath>
+		<DefineConstants>TRACE;DEBUG;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>
+		</DebugType>
+		<OutputPath>..\..\artifacts\test\Release\netstandard1.3</OutputPath>
+		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj" />
+	</ItemGroup>
   <ItemGroup>
     <Reference Include="System.Xml" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="mscorlib" />
   </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="MainTestPage.*" />
+		<Compile Remove="UnitTestApp.*" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
   <ItemGroup>
-    <None Include="XmlFiles\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj">
-      <Project>{CDC8F791-56FC-4B15-AAD2-BC460657CC02}</Project>
-      <Name>Portable.Xaml-netstandard1.3</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NUnit">
-      <Version>3.9.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Collections.Immutable">
-      <Version>1.4.0</Version>
-    </PackageReference>
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
   </ItemGroup>
 </Project>

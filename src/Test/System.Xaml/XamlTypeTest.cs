@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -932,7 +932,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNull(xt.ValueSerializer, "#3");
 #if HAS_TYPE_CONVERTER
 			Assert.IsNotInstanceOf<System.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
-			Assert.IsInstanceOf(Type.GetType("Portable.Xaml.ComponentModel.DateTimeConverter, Portable.Xaml"), xt.TypeConverter.ConverterInstance, "#4");
+#if PCL
+			Assert.IsInstanceOf(typeof(global::Portable.Xaml.XamlSchemaContext).Assembly.GetType("Portable.Xaml.ComponentModel.DateTimeConverter"), xt.TypeConverter.ConverterInstance, "#4");
+#endif
 #endif
 		}
 
