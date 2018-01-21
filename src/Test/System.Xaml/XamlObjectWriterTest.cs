@@ -2122,5 +2122,18 @@ namespace MonoTests.Portable.Xaml
 				// Assert.AreEqual("  hello world\t", des.Preserve);
 			}
 		}
+
+		[Test]
+		public void CommandContainer()
+		{
+			using (var xr = GetReader("CommandContainer.xml"))
+			{
+				var commandContainer = (CommandContainer)XamlServices.Load(xr);
+				Assert.IsNotNull(commandContainer);
+				Assert.IsNotNull(commandContainer.Command1);
+				Assert.IsInstanceOf<MyCommand>(commandContainer.Command1);
+				Assert.IsNull(commandContainer.Command2);
+			}
+		}
 	}
 }
