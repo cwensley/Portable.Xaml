@@ -17,14 +17,14 @@
     <DefineConstants>DEBUG;TRACE;NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <OutputPath>..\..\artifacts\Debug\netstandard1.3\</OutputPath>
+    <OutputPath>..\..\artifacts\test\Debug\netstandard1.3\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <DefineConstants>NET_1_1;NET_2_0;NET_3_0;NET_3_5;NET_4_0;NET_4_5;PCL259;PCL;NETSTANDARD;HAS_TYPE_CONVERTER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <OutputPath>..\..\artifacts\Release\netstandard1.3\</OutputPath>
+    <OutputPath>..\..\artifacts\test\Release\netstandard1.3\</OutputPath>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>

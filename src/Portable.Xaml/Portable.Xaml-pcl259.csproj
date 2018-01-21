@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\artifacts\Debug\pcl259\</OutputPath>
+    <OutputPath>..\..\artifacts\core\Debug\portable-net45+win8+wpa81+wp8\</OutputPath>
     <DefineConstants>DEBUG;PCL;MONO;PCL259</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +24,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>..\..\artifacts\Release\pcl259\</OutputPath>
+    <OutputPath>..\..\artifacts\core\Release\portable-net45+win8+wpa81+wp8\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>

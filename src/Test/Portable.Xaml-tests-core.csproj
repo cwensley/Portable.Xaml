@@ -6,16 +6,15 @@
 		<RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
 		<AssemblyName>Portable.Xaml_test_core</AssemblyName>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-	    <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	  <OutputPath>..\..\artifacts\Debug\</OutputPath>
+	  <OutputPath>..\..\artifacts\test\Debug\</OutputPath>
 		<DefineConstants>TRACE;NETSTANDARD;PCL;CORE;DEBUG;NETCOREAPP2_0</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>
 		</DebugType>
-		<OutputPath>..\..\artifacts\Release\</OutputPath>
+		<OutputPath>..\..\artifacts\test\Release\</OutputPath>
 		<DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;NETSTANDARD;PCL;CORE;</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>

@@ -24,7 +24,7 @@
 	
     <Target Name="Package" DependsOnTargets="Build;DownloadNuget">
 
-		<GetAssemblyInfo AssemblyFileName="$(ArtifactsDir)\$(Configuration)\pcl259\Portable.Xaml.dll">
+		<GetAssemblyInfo AssemblyFileName="$(ArtifactsDir)\core\$(Configuration)\netstandard1.3\Portable.Xaml.dll">
 			<Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyVersion" />
 		</GetAssemblyInfo>
 
