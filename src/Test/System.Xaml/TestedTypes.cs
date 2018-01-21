@@ -32,6 +32,7 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using System.Windows.Input;
 using NUnit.Framework;
 using sc = System.ComponentModel;
 #if !PCL136
@@ -111,6 +112,21 @@ namespace MonoTests.Portable.Xaml.NamespaceTest2
 
 namespace MonoTests.Portable.Xaml
 {
+	class MyCommand : ICommand
+	{
+		public event EventHandler CanExecuteChanged;
+
+		public bool CanExecute(object parameter) => true;
+
+		public void Execute(object parameter)
+		{
+		}
+	}
+
+	public static class StaticValues
+	{
+		public static ICommand Command => new MyCommand();
+	}
 
 	public class ArgumentAttributed
 	{
@@ -1614,6 +1630,12 @@ namespace MonoTests.Portable.Xaml
 	public class WhitespaceChild
 	{
 		public string Content { get; set; }
+	}
+
+	public class CommandContainer
+	{
+		public ICommand Command1 { get; set; }
+		public ICommand Command2 { get; set; }
 	}
 }
 
