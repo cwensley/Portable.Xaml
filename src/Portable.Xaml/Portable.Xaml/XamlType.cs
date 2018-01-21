@@ -270,7 +270,12 @@ namespace Portable.Xaml
 
 		public IList<XamlType> TypeArguments { get; private set; }
 
-		public XamlValueConverter<TypeConverter> TypeConverter => typeConverter.HasValue ? typeConverter.Value : typeConverter.Set(LookupTypeConverter());
+#if HAS_TYPE_CONVERTER
+		public
+#else
+		internal
+#endif
+		XamlValueConverter<TypeConverter> TypeConverter => typeConverter.HasValue ? typeConverter.Value : typeConverter.Set(LookupTypeConverter());
 
 		public Type UnderlyingType => underlying_type ?? (underlying_type = LookupUnderlyingType());
 
@@ -942,7 +947,12 @@ namespace Portable.Xaml
 			return this.GetCustomAttribute<TrimSurroundingWhitespaceAttribute>() != null;
 		}
 
-		protected virtual XamlValueConverter<TypeConverter> LookupTypeConverter()
+#if HAS_TYPE_CONVERTER
+		protected
+#else
+		internal
+#endif
+		virtual XamlValueConverter<TypeConverter> LookupTypeConverter()
 		{
 			var t = UnderlyingType;
 			if (t == null)
@@ -955,10 +965,9 @@ namespace Portable.Xaml
 
 			t = Nullable.GetUnderlyingType(t) ?? t;
 
-			var a = CustomAttributeProvider;
-			var ca = a?.GetCustomAttribute<TypeConverterAttribute>(false);
-			if (ca != null)
-				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(ca.ConverterTypeName), this);
+			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
+			if (converterName != null)
+				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(converterName), this);
 
 			if (t == typeof(object)) // This is a special case. ConverterType is null.
 				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
@@ -970,21 +979,13 @@ namespace Portable.Xaml
 				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
 
 			// It's still not decent to check CollectionConverter.
-			var tc = t.GetTypeConverter();
-			var tct = tc?.GetType();
 
-			if (tct != null
-				&& tct != typeof(TypeConverter)
-#if NETSTANDARD
-				&& tct != typeof(CollectionConverter)
-#else
-				&& tct.FullName != "System.ComponentModel.CollectionConverter"
-#endif
-				&& tct.FullName != "System.ComponentModel.ReferenceConverter"
-			)
+			var tc = t.GetTypeConverter();
+
+			if (tc != null && !tc.IsBaseTypeConverter())
 			{
-				var vc = SchemaContext.GetValueConverter<TypeConverter>(tct, this);
-				vc.InitialConverterInstance = tc;
+				var vc = SchemaContext.GetValueConverter<TypeConverter>(tc.GetType(), this);
+				vc.ConverterInstance = tc;
 				return vc;
 			}
 

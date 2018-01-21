@@ -33,7 +33,12 @@ namespace Portable.Xaml.Markup
 {
 	public class XamlSetTypeConverterEventArgs : XamlSetValueEventArgs
 	{
-		public XamlSetTypeConverterEventArgs (XamlMember member, TypeConverter typeConverter, object value, ITypeDescriptorContext serviceProvider, CultureInfo cultureInfo)
+#if HAS_TYPE_CONVERTER
+		public
+#else
+		internal
+#endif
+		XamlSetTypeConverterEventArgs (XamlMember member, TypeConverter typeConverter, object value, ITypeDescriptorContext serviceProvider, CultureInfo cultureInfo)
 			: base (member, value)
 		{
 			CultureInfo = cultureInfo;
@@ -42,8 +47,19 @@ namespace Portable.Xaml.Markup
 		}
 		
 		public CultureInfo CultureInfo { get; private set; }
-		public ITypeDescriptorContext ServiceProvider { get; private set; }
-		public TypeConverter TypeConverter { get; private set; }
+#if HAS_TYPE_CONVERTER
+		public
+#else
+		internal
+#endif
+		ITypeDescriptorContext ServiceProvider { get; private set; }
+
+#if HAS_TYPE_CONVERTER
+		public
+#else
+		internal
+#endif
+		TypeConverter TypeConverter { get; private set; }
 
 		public override void CallBase ()
 		{

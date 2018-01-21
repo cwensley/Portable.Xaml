@@ -66,6 +66,7 @@ namespace MonoTests.Portable.Xaml
 			new XamlDirective (XamlLanguage.Xaml2006Namespace, "Foo");
 		}
 
+#if HAS_TYPE_CONVERTER
 		[Test]
 		public void ConstructorComplexParamsTypeNull ()
 		{
@@ -89,7 +90,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			new XamlDirective (new string [] {"urn:foo"}, "Foo", new XamlType (typeof (object), sctx), null, AllowedMemberLocations.Any);
 		}
-
+#endif
 		[Test]
 		public void DefaultValuesWithName ()
 		{
@@ -108,7 +109,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNull (d.TargetType, "#10");
 			Assert.IsNotNull (d.Type, "#11");
 			Assert.AreEqual (typeof (object), d.Type.UnderlyingType, "#11-2");
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (d.TypeConverter, "#12");
+#endif
 			Assert.IsNull (d.ValueSerializer, "#13");
 			Assert.IsNull (d.DeferringLoader, "#14");
 			Assert.IsNull (d.UnderlyingMember, "#15");
@@ -123,6 +126,7 @@ namespace MonoTests.Portable.Xaml
 			// TODO: Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
 		}
 
+#if HAS_TYPE_CONVERTER
 		[Test]
 		public void DefaultValuesWithComplexParams ()
 		{
@@ -155,5 +159,6 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (d.IsAmbient, "#22");
 			//TODO: Assert.AreEqual (DesignerSerializationVisibility.Visible, d.SerializationVisibility, "#23");
 		}
+#endif
 	}
 }

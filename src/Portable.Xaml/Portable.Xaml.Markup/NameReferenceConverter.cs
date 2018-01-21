@@ -30,7 +30,10 @@ using System.ComponentModel;
 
 namespace Portable.Xaml.Markup
 {
-	public class NameReferenceConverter : TypeConverter
+#if HAS_TYPE_CONVERTER
+	public
+#endif
+	class NameReferenceConverter : TypeConverter
 	{
 		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
 		{

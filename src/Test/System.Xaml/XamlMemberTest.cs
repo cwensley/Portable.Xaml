@@ -196,7 +196,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (new XamlType (typeof (EventStore), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
 			Assert.AreEqual (typeof (EventHandler<CustomEventArgs>), m.Type.UnderlyingType, "#11-2");
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (m.TypeConverter, "#12"); // EventConverter
+#endif
 			Assert.IsNull (m.ValueSerializer, "#13");
 			Assert.IsNull (m.DeferringLoader, "#14");
 			Assert.AreEqual (eventStore_Event3, m.UnderlyingMember, "#15");
@@ -229,7 +231,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (new XamlType (typeof (string), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
 			Assert.AreEqual (typeof (int), m.Type.UnderlyingType, "#11-2");
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (m.TypeConverter, "#12");
+#endif
 			Assert.IsNull (m.ValueSerializer, "#13");
 			Assert.IsNull (m.DeferringLoader, "#14");
 			Assert.AreEqual (str_len, m.UnderlyingMember, "#15");
@@ -357,7 +361,9 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (new XamlType (typeof (string), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
 			Assert.AreEqual (typeof (object), m.Type.UnderlyingType, "#11-2");
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (m.TypeConverter, "#12");
+#endif
 			Assert.IsNull (m.ValueSerializer, "#13");
 			Assert.IsNull (m.DeferringLoader, "#14");
 			Assert.IsNull (m.UnderlyingMember, "#15");

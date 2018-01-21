@@ -2,12 +2,13 @@
 using System.Globalization;
 #if NETSTANDARD
 using System.ComponentModel;
+using System.Reflection;
 #endif
 
 namespace Portable.Xaml.ComponentModel
 {
 
-	public class DateTimeConverter : TypeConverter
+	class DateTimeConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{

@@ -329,6 +329,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNotNull (d.Type, "#11");
 			Assert.AreEqual (type, d.Type.UnderlyingType, "#11-2");
 
+#if HAS_TYPE_CONVERTER
 			// .NET returns StringConverter, but it should not premise that key must be string (it is object)
 			if (name == "Key")
 			{
@@ -338,6 +339,7 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsNull (d.TypeConverter, "#12");
 			else
 				Assert.IsNotNull (d.TypeConverter, "#12");
+#endif
 			Assert.IsNull (d.ValueSerializer, "#13");
 			Assert.IsNull (d.DeferringLoader, "#14");
 			Assert.IsNull (d.UnderlyingMember, "#15");
@@ -406,10 +408,12 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.Static;
 			TestXamlTypeExtension (t, "StaticExtension", typeof (StaticExtension), typeof (object), false);
+#if HAS_TYPE_CONVERTER
 			var tc = t.TypeConverter.ConverterInstance;
 			Assert.IsNotNull (tc, "#25-2");
 			Assert.IsFalse (tc.CanConvertFrom (typeof (string)), "#25-3");
 			Assert.IsTrue (tc.CanConvertTo (typeof (string)), "#25-4");
+#endif
 			Assert.IsNull (t.ContentProperty, "#27");
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -440,7 +444,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.Type;
 			TestXamlTypeExtension (t, "TypeExtension", typeof (TypeExtension), typeof (Type), false);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (t.TypeConverter.ConverterInstance, "#25-2");
+#endif
 			Assert.IsNull (t.ContentProperty, "#27");
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -646,7 +652,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.Member;
 			TestXamlTypeCommon (t, "Member", typeof (MemberDefinition), true, true, false);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (t.TypeConverter, "#25");
+#endif
 			// FIXME: test remaining members
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -666,7 +674,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.Property;
 			TestXamlTypeCommon (t, "Property", typeof (PropertyDefinition), true);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (t.TypeConverter, "#25");
+#endif
 			// FIXME: test remaining members
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -689,7 +699,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var m = XamlLanguage.Property.GetMember ("Type");
 			TestMemberCommon (m, "Type", typeof (XamlType), typeof (PropertyDefinition), true);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (m.TypeConverter, "#1");
+#endif
 			Assert.IsNull (m.ValueSerializer, "#2");
 		}
 
@@ -712,7 +724,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.Reference;
 			TestXamlTypeCommon (t, "Reference", typeof (Reference), true);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (t.TypeConverter, "#25");
+#endif
 			// FIXME: test remaining members
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -733,7 +747,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var t = XamlLanguage.XData;
 			TestXamlTypeCommon (t, "XData", typeof (XData), true);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNull (t.TypeConverter, "#25");
+#endif
 			// FIXME: test remaining members
 
 			var l = t.GetAllMembers ().ToArray ();
@@ -808,7 +824,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			TestXamlTypeCommon (t, name, underlyingType, nullable, constructorRequiresArguments);
 			Assert.IsFalse (t.IsMarkupExtension, "#14");
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (t.TypeConverter, "#25");
+#endif
 			Assert.IsNull (t.ContentProperty, "#27");
 			Assert.IsNull (t.MarkupExtensionReturnType, "#29");
 
@@ -820,10 +838,12 @@ namespace MonoTests.Portable.Xaml
 		{
 			TestXamlTypeCommon (t, name, underlyingType, true, false);
 			Assert.IsTrue (t.IsMarkupExtension, "#14");
+#if HAS_TYPE_CONVERTER
 			if (noTypeConverter)
 				Assert.IsNull (t.TypeConverter, "#25");
 			else
 				Assert.IsNotNull (t.TypeConverter, "#25");
+#endif
 			Assert.IsNotNull (t.MarkupExtensionReturnType, "#29");
 			Assert.AreEqual (extReturnType, t.MarkupExtensionReturnType.UnderlyingType, "#29-2");
 			Assert.IsNull (t.Invoker.SetMarkupExtensionHandler, "#31"); // orly?
@@ -851,8 +871,10 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNotNull (m.Type, "#11");
 			Assert.AreEqual (type, m.Type.UnderlyingType, "#11-2");
 			// Property.Type is a special case here.
+#if HAS_TYPE_CONVERTER
 			if (name == "Type" && m.DeclaringType != XamlLanguage.Property)
 				Assert.AreEqual (m.Type.TypeConverter, m.TypeConverter, "#12");
+#endif
 			// String type is a special case here.
 			if (type == typeof (string))
 				Assert.AreEqual (m.Type.ValueSerializer, m.ValueSerializer, "#13a");

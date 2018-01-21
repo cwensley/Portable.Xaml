@@ -295,7 +295,12 @@ namespace Portable.Xaml
 
 		public XamlType Type => type.HasValue ? type.Value : type.Set(LookupType());
 
-		public XamlValueConverter<TypeConverter> TypeConverter => typeConverter.HasValue ? typeConverter.Value : typeConverter.Set(LookupTypeConverter());
+#if HAS_TYPE_CONVERTER
+		public
+#else
+		internal
+#endif
+		XamlValueConverter<TypeConverter> TypeConverter => typeConverter.HasValue ? typeConverter.Value : typeConverter.Set(LookupTypeConverter());
 
 		public MemberInfo UnderlyingMember => underlying_member ?? (underlying_member = LookupUnderlyingMember());
 
@@ -487,7 +492,12 @@ namespace Portable.Xaml
 			return typeof(object);
 		}
 
-		protected virtual XamlValueConverter<TypeConverter> LookupTypeConverter()
+#if HAS_TYPE_CONVERTER
+		protected
+#else
+		internal
+#endif
+		virtual XamlValueConverter<TypeConverter> LookupTypeConverter()
 		{
 			var t = Type.UnderlyingType;
 			if (t == null)
@@ -496,14 +506,11 @@ namespace Portable.Xaml
 				return null;
 
 
-			var a = CustomAttributeProvider;
-			var ca = a != null ? a.GetCustomAttribute<TypeConverterAttribute>(false) : null;
-			if (ca != null)
-				return context.GetValueConverter<TypeConverter>(System.Type.GetType(ca.ConverterTypeName), Type);
-#if NETSTANDARD
+			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
+			if (converterName != null)
+				return context.GetValueConverter<TypeConverter>(System.Type.GetType(converterName), Type);
 			if (IsEvent)
 				return context.GetValueConverter<TypeConverter>(typeof(EventConverter), Type);
-#endif
 
 			return Type.TypeConverter;
 		}

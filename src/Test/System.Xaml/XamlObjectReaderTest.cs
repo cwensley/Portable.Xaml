@@ -367,7 +367,9 @@ namespace MonoTests.Portable.Xaml
 		{
 			var obj = Guid.NewGuid ();
 			var r = new XamlObjectReader (obj);
+#if HAS_TYPE_CONVERTER
 			Assert.IsNotNull (r.SchemaContext.GetXamlType (typeof(Guid)).TypeConverter, "premise#1");
+#endif
 			Read_CommonClrType (r, obj);
 			Assert.AreEqual (obj.ToString (), Read_Initialization (r, null), "#1");
 		}

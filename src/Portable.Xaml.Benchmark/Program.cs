@@ -9,6 +9,7 @@ using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Columns;
+using BenchmarkDotNet.Validators;
 
 namespace Portable.Xaml.Benchmark
 {
@@ -41,12 +42,16 @@ namespace Portable.Xaml.Benchmark
 				.Where(r => typeof(IXamlBenchmark).IsAssignableFrom(r) && !r.IsAbstract);
 
 
-			var config = ManualConfig
-				.Create(DefaultConfig.Instance)
-				.With(Job.Default)
-				.With(MemoryDiagnoser.Default)
-				.With(StatisticColumn.OperationsPerSecond)
-				.With(RankColumn.Arabic);
+			var config = new ManualConfig();
+        	config.Add(DefaultConfig.Instance.GetLoggers().ToArray());
+        	config.Add(DefaultConfig.Instance.GetExporters().ToArray());
+        	config.Add(DefaultConfig.Instance.GetColumnProviders().ToArray());
+
+			config.Add(JitOptimizationsValidator.DontFailOnError);
+			config.Add(Job.Default);
+			config.Add(MemoryDiagnoser.Default);
+			config.Add(StatisticColumn.OperationsPerSecond);
+			config.Add(RankColumn.Arabic);
 
 			var switcher = new BenchmarkSwitcher(types.ToArray());
 			switcher.Run(args, config);
