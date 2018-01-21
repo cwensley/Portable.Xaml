@@ -5,6 +5,8 @@
 		<BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 		<!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
 		<!--RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle-->
+	    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    	<Deterministic>False</Deterministic>
 	</PropertyGroup>
 	<Import Condition="Exists('$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props')" Project="$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props" />
 </Project>

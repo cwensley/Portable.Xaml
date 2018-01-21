@@ -7,6 +7,11 @@ namespace Portable.Xaml.ComponentModel
 
 	interface ITypeDescriptorContext : IServiceProvider
 	{
+		object Instance { get; }
+
+		void OnComponentChanged();
+
+		bool OnComponentChanging();
 	}
 
 #endif

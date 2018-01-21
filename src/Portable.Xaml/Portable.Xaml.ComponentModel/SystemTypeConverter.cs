@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Reflection;
 #if NETSTANDARD
@@ -28,11 +28,11 @@ namespace Portable.Xaml.ComponentModel
 				{
 					if (s_getConverterMethod == null)
 					{
-						var typeDescriptorType = Type.GetType("System.ComponentModel.TypeDescriptor, System");
-						s_getConverterMethod = typeDescriptorType.GetRuntimeMethod("GetConverter", new[] { typeof(Type) });
+						var typeDescriptorType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.TypeDescriptor");
+						s_getConverterMethod = typeDescriptorType?.GetRuntimeMethod("GetConverter", new[] { typeof(Type) });
 					}
 				}
-			var converter = s_getConverterMethod.Invoke(null, new object[] { type });
+			var converter = s_getConverterMethod?.Invoke(null, new object[] { type });
 			if (converter == null)
 				return null;
 			return new SystemTypeConverter(converter);
@@ -47,7 +47,7 @@ namespace Portable.Xaml.ComponentModel
 		MethodInfo _convertFrom;
 		MethodInfo _convertTo;
 
-		static readonly Type s_typeDescriptorContentType = Type.GetType("System.ComponentModel.ITypeDescriptorContext, System");
+		public static readonly Type s_typeDescriptorContentType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.ITypeDescriptorContext");
 
 		public object TypeConverter => _typeConverter;
 

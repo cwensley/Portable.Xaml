@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -43,7 +43,7 @@ namespace Portable.Xaml.Schema
 		{
 		}
 
-		static Type s_typeConverterType = Type.GetType("System.ComponentModel.TypeConverter, System");
+		static Type s_typeConverterType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.TypeConverter");
 
 		protected override TConverterBase CreateInstance()
 		{

@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -128,7 +128,7 @@ namespace Portable.Xaml
 		}
 
 #if !HAS_TYPE_CONVERTER
-		static Type s_typeConverterAttribute = Type.GetType("System.ComponentModel.TypeConverterAttribute, System");
+		static Type s_typeConverterAttribute = ReflectionHelpers.GetComponentModelType("System.ComponentModel.TypeConverterAttribute");
 		static PropertyInfo s_typeConverterTypeNameProperty = s_typeConverterAttribute?.GetRuntimeProperty("ConverterTypeName");
 #endif
 

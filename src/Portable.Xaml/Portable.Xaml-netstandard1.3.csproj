@@ -4,7 +4,6 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <RootNamespace>Portable.Xaml</RootNamespace>
     <AssemblyName>Portable.Xaml</AssemblyName>
-    <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
