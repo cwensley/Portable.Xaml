@@ -122,22 +122,21 @@ namespace Portable.Xaml
 
 			typeBuilder.AddInterfaceImplementation(typeDescriptorContextType);
 
-			Type notImplementedException = typeof(NotImplementedException);
-			var notImplementedExceptionConstructor = notImplementedException.GetTypeInfo().GetConstructors().First(r => r.GetParameters().Length == 0);
-
 			var getSetAttr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual;;
-			//public IContainer Container => throw new NotImplementedException();
+			//public IContainer Container => null;
 			var propertyBuilder = typeBuilder.DefineProperty("Container", PropertyAttributes.None, containerType, null);
 			var getter = typeBuilder.DefineMethod("get_Container", getSetAttr, containerType, null);
 			var il = getter.GetILGenerator();
-			il.ThrowException(notImplementedException);
+			il.Emit(OpCodes.Ldnull);
+			il.Emit(OpCodes.Ret);
 			propertyBuilder.SetGetMethod(getter);
 
-			//public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
+			//public PropertyDescriptor PropertyDescriptor => null;
 			propertyBuilder = typeBuilder.DefineProperty("PropertyDescriptor", PropertyAttributes.None, propertyDescriptorType, null);
 			getter = typeBuilder.DefineMethod("get_PropertyDescriptor", getSetAttr, propertyDescriptorType, null);
 			il = getter.GetILGenerator();
-			il.ThrowException(notImplementedException);
+			il.Emit(OpCodes.Ldnull);
+			il.Emit(OpCodes.Ret);
 			propertyBuilder.SetGetMethod(getter);
 
 			s_valueSerializerType = typeBuilder.CreateType();
@@ -205,14 +204,12 @@ namespace Portable.Xaml
 
 		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext => sctx;
 
-		public virtual object Instance => throw new NotImplementedException();
+		public virtual object Instance => null;
 
 #if HAS_TYPE_CONVERTER
-		public IContainer Container => throw new NotImplementedException();
+		public IContainer Container => null;
 
-		public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
-#else
-		public PropertyInfo PropertyDescriptor => throw new NotImplementedException();
+		public PropertyDescriptor PropertyDescriptor => null;
 #endif
 
 		public virtual void OnComponentChanged()
