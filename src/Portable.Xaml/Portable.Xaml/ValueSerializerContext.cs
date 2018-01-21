@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -33,6 +33,18 @@ using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
 using System.ComponentModel;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+
+#if !HAS_TYPE_CONVERTER
+
+#if STRONGNAME
+[assembly: InternalsVisibleTo("Portable.Xaml.Compat, PublicKey=0024000004800000940000000602000000240000525341310004000001000100d1c3c3fdff475bd48ad578039ab969e954c6378b6c7ab21ebcb1059d450b8c77e8260b1d6c227f6da946a45f1e67dea68e5e45daa21cd208bc9ea72c86568de861c64fd2c57d16a955ad24fb8b1cd78f4b7f9747014e69a1dfb3ea4dab6eb3a76a639dfb51eda575d5906831ca9cf251a200010d84faafb0ca64eae3504fecdc")]
+#else
+[assembly: InternalsVisibleTo("Portable.Xaml.Compat")]
+#endif
+
+#endif
 
 namespace Portable.Xaml
 {
@@ -49,14 +61,110 @@ namespace Portable.Xaml
 		IDestinationTypeProvider destinationProvider;
 		IXamlObjectWriterFactory objectWriterFactory;
 
-		public ValueSerializerContext(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+#if !HAS_TYPE_CONVERTER
+
+		static bool s_valueSerializerTypeInitialized;
+		static Type s_valueSerializerType;
+
+		static Type GetValueSerializerType()
 		{
-			if (prefixLookup == null)
-				throw new ArgumentNullException("prefixLookup");
-			if (schemaContext == null)
-				throw new ArgumentNullException("schemaContext");
-			prefix_lookup = prefixLookup;
-			sctx = schemaContext;
+			if (s_valueSerializerTypeInitialized)
+				return s_valueSerializerType;
+			s_valueSerializerTypeInitialized = true;
+
+			// use reflection.emit to create a subclass of ValueSerializerContext that implements 
+			// System.ComponentModel.ITypeDescriptorContext since we can't access it here.
+			var typeName = "SystemValueSerializerContext";
+
+			var appDomainType = ReflectionHelpers.GetCorlibType("System.AppDomain");
+			var assemblyBuilderAccess = ReflectionHelpers.GetCorlibType("System.Reflection.Emit.AssemblyBuilderAccess");
+			var typeAttributesType = ReflectionHelpers.GetCorlibType("System.Reflection.TypeAttributes");
+			var currentDomainProp = appDomainType?.GetRuntimeProperty("CurrentDomain");
+			var typeDescriptorContextType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.ITypeDescriptorContext");
+			var containerType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.IContainer");
+			var propertyDescriptorType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.PropertyDescriptor");
+			var strongNameKeyPairType = ReflectionHelpers.GetCorlibType("System.Reflection.StrongNameKeyPair");
+			if (appDomainType == null
+				|| assemblyBuilderAccess == null
+				|| typeAttributesType == null
+				|| currentDomainProp == null
+			    || typeDescriptorContextType == null
+			    || containerType == null
+			    || propertyDescriptorType == null
+			    || strongNameKeyPairType == null
+			   )
+				return null;
+
+			object currentDomain = currentDomainProp.GetValue(null);
+
+			dynamic an = new AssemblyName("Portable.Xaml.Compat");
+#if STRONGNAME
+			using (var stream = typeof(ValueSerializerContext).GetTypeInfo().Assembly.GetManifestResourceStream("Portable.Xaml.Compat.snk"))
+			{
+				var data = new byte[stream.Length];
+				stream.Read(data, 0, (int)stream.Length);
+				dynamic keyPair = Activator.CreateInstance(strongNameKeyPairType, data);
+				an.KeyPair = keyPair;
+
+			}
+#endif
+
+			dynamic assemblyBuilder = appDomainType
+				.GetRuntimeMethod("DefineDynamicAssembly", new Type[] { typeof(AssemblyName), assemblyBuilderAccess })
+				.Invoke(currentDomain, new object[] { an, 1 });
+
+			object moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+
+			dynamic typeBuilder = moduleBuilder
+				.GetType()
+				.GetRuntimeMethod("DefineType", new Type[] { typeof(string), typeAttributesType, typeof(Type) })
+				.Invoke(moduleBuilder, new object[] { typeName, 0, typeof(ValueSerializerContext) }); // 0 = Class
+
+			typeBuilder.AddInterfaceImplementation(typeDescriptorContextType);
+
+			Type notImplementedException = typeof(NotImplementedException);
+			var notImplementedExceptionConstructor = notImplementedException.GetTypeInfo().GetConstructors().First(r => r.GetParameters().Length == 0);
+
+			var getSetAttr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual;;
+			//public IContainer Container => throw new NotImplementedException();
+			var propertyBuilder = typeBuilder.DefineProperty("Container", PropertyAttributes.None, containerType, null);
+			var getter = typeBuilder.DefineMethod("get_Container", getSetAttr, containerType, null);
+			var il = getter.GetILGenerator();
+			il.ThrowException(notImplementedException);
+			propertyBuilder.SetGetMethod(getter);
+
+			//public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
+			propertyBuilder = typeBuilder.DefineProperty("PropertyDescriptor", PropertyAttributes.None, propertyDescriptorType, null);
+			getter = typeBuilder.DefineMethod("get_PropertyDescriptor", getSetAttr, propertyDescriptorType, null);
+			il = getter.GetILGenerator();
+			il.ThrowException(notImplementedException);
+			propertyBuilder.SetGetMethod(getter);
+
+			s_valueSerializerType = typeBuilder.CreateType();
+			return s_valueSerializerType;
+		}
+#endif
+
+		public static ValueSerializerContext Create(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		{
+#if !HAS_TYPE_CONVERTER
+			ValueSerializerContext context;
+			var type = GetValueSerializerType();
+			if (type != null)
+				context = Activator.CreateInstance(type) as ValueSerializerContext;
+			else
+				context = new ValueSerializerContext();
+#else
+			var context = new ValueSerializerContext();
+#endif
+			context.Initialize(prefixLookup, schemaContext, ambientProvider, provideValue, rootProvider, destinationProvider, objectWriterFactory);
+			return context;
+		}
+
+		void Initialize(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		{
+			prefix_lookup = prefixLookup ?? throw new ArgumentNullException("prefixLookup");
+			sctx = schemaContext ?? throw new ArgumentNullException("schemaContext");
 			ambient_provider = ambientProvider;
 			this.provideValue = provideValue;
 			this.rootProvider = rootProvider;
@@ -95,36 +203,23 @@ namespace Portable.Xaml
 			return null;
 		}
 
-		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext
-		{
-			get { return sctx; }
-		}
+		XamlSchemaContext IXamlSchemaContextProvider.SchemaContext => sctx;
 
-		public object Instance
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public virtual object Instance => throw new NotImplementedException();
 
-#if NETSTANDARD
+#if HAS_TYPE_CONVERTER
 		public IContainer Container => throw new NotImplementedException();
 
 		public PropertyDescriptor PropertyDescriptor => throw new NotImplementedException();
 #else
-		/*
-		public IContainer Container {
-			get { throw new NotImplementedException (); }
-		}*/
-		public PropertyInfo PropertyDescriptor
-		{
-			get { throw new NotImplementedException(); }
-		}
+		public PropertyInfo PropertyDescriptor => throw new NotImplementedException();
 #endif
 
-		public void OnComponentChanged()
+		public virtual void OnComponentChanged()
 		{
 			throw new NotImplementedException();
 		}
-		public bool OnComponentChanging ()
+		public virtual bool OnComponentChanging ()
 		{
 			throw new NotImplementedException ();
 		}

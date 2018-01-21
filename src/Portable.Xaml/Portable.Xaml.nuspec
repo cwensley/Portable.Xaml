@@ -19,7 +19,6 @@ This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
 		<tags>cross platform xaml</tags>
 		<dependencies>
             <group targetFramework=".NETPortable4.5-Profile259" />
-            <group targetFramework=".NETPortable4.0-Profile136" />
             <group targetFramework=".NETStandard1.3">
                 <dependency id="Microsoft.CSharp" version="4.3.0" />
                 <dependency id="NETStandard.Library" version="1.6.1" />
@@ -30,9 +29,8 @@ This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
         </dependencies>
 	</metadata>
 	<files>
-		<file src="../../artifacts/$configuration$/pcl136/Portable.Xaml.dll" target="lib/portable-net40+sl5+win8+wpa81+wp8" />
-		<file src="../../artifacts/$configuration$/pcl259/Portable.Xaml.dll" target="lib/portable-net45+win8+wpa81+wp8" />
-		<file src="../../artifacts/$configuration$/netstandard1.3/Portable.Xaml.dll" target="lib/netstandard1.3" />
-		<file src="../../LICENSE.txt" target="LICENSE.txt" />
+		<file src="..\..\artifacts\core\$configuration$\portable-net45+win8+wpa81+wp8\Portable.Xaml.dll" target="lib\portable-net45+win8+wpa81+wp8" />
+		<file src="..\..\artifacts\core\$configuration$\netstandard1.3\Portable.Xaml.dll" target="lib\netstandard1.3" />
+		<file src="..\..\LICENSE.txt" target="LICENSE.txt" />
 	</files>
 </package>

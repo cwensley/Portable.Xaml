@@ -45,6 +45,7 @@ using Category = NUnit.Framework.CategoryAttribute;
 
 namespace MonoTests.Portable.Xaml.Markup
 {
+#if HAS_TYPE_CONVERTER
 	[TestFixture]
 	public class TypeExtensionConverterTest
 	{
@@ -55,7 +56,7 @@ namespace MonoTests.Portable.Xaml.Markup
 				throw new NotImplementedException ();
 			}
 		}
-		
+
 		class TypeDescriptorContext : ITypeDescriptorContext
 		{
 			public object Service { get; set; }
@@ -76,7 +77,7 @@ namespace MonoTests.Portable.Xaml.Markup
 			
 			public object Instance { get; set; }
 
-#if !PCL || NETSTANDARD
+#if HAS_TYPE_CONVERTER
 			public IContainer Container { get; set; }
 			public PropertyDescriptor PropertyDescriptor { get; set; }
 #endif
@@ -142,4 +143,5 @@ namespace MonoTests.Portable.Xaml.Markup
 			Assert.Throws<NotSupportedException> (() => tc.ConvertTo (new DummyValueSerializerContext (), null, "x:Int32", typeof (TypeExtension)));
 		}
 	}
+	#endif
 }

@@ -54,13 +54,8 @@ namespace Portable.Xaml.Markup
 			if (context != null)
 				return context.GetValueSerializerFor(descriptor);
 
-			var typeConverterInfo = descriptor.GetCustomAttribute<TypeConverterAttribute>();
-			var typeConverterName = typeConverterInfo?.ConverterTypeName;
-			if (string.IsNullOrEmpty(typeConverterName))
-				return null;
-			var tcType = Type.GetType(typeConverterName);
-			var tc = Activator.CreateInstance(tcType) as TypeConverter;
-			if (tc != null && tc.GetType() != typeof(TypeConverter))
+			var tc = descriptor.GetTypeConverter();
+			if (tc != null && !tc.IsBaseTypeConverter())
 				return new TypeConverterValueSerializer(tc);
 			return null;
 		}
@@ -91,16 +86,14 @@ namespace Portable.Xaml.Markup
 				// Since System.Type does not have a valid TypeConverter, I use TypeExtensionConverter (may sound funny considering the above notes!) for this serializer.
 				return new TypeValueSerializer();
 
-#if NETSTANDARD
 			if (type == typeof(Array))
 				return null;
-#endif
 
 			// FIXME: this is hack. The complete condition is fully documented at http://msdn.microsoft.com/en-us/library/ms590363.aspx
-			if (type.GetTypeInfo().GetCustomAttribute<TypeConverterAttribute>(true) != null)
+			if (type.GetTypeInfo().GetTypeConverterName(true) != null)
 			{
 				var tc = type.GetTypeConverter();
-				if (tc != null && tc.GetType() != typeof(TypeConverter))
+				if (tc != null && !tc.IsBaseTypeConverter())
 					return new TypeConverterValueSerializer(tc);
 			}
 
@@ -109,7 +102,7 @@ namespace Portable.Xaml.Markup
 			if (type != typeof(object) || type == typeof(TimeSpan))
 			{
 				var typeConverter = type.GetTypeConverter ();
-				if (typeConverter != null && typeConverter.GetType() != typeof(TypeConverter))
+				if (typeConverter != null && !typeConverter.IsBaseTypeConverter())
 					return new TypeConverterValueSerializer (typeConverter);
 			}
 
@@ -211,7 +204,7 @@ namespace Portable.Xaml.Markup
 
 		public override string ConvertToString (object value,     IValueSerializerContext context)
 		{
-			return (string) txc.ConvertTo (context, CultureInfo.InvariantCulture, value, typeof (string));
+			return (string) txc.ConvertTo ((ITypeDescriptorContext)context, CultureInfo.InvariantCulture, value, typeof (string));
 		}
 
 		public override IEnumerable<Type> TypeReferences (object value, IValueSerializerContext context)
@@ -231,22 +224,22 @@ namespace Portable.Xaml.Markup
 
 		public override bool CanConvertFromString (string value, IValueSerializerContext context)
 		{
-			return c.CanConvertFrom (context, typeof (string));
+			return c.CanConvertFrom ((ITypeDescriptorContext)context, typeof (string));
 		}
 
 		public override bool CanConvertToString (object value, IValueSerializerContext context)
 		{
-			return c.CanConvertTo (context, typeof (string));
+			return c.CanConvertTo ((ITypeDescriptorContext)context, typeof (string));
 		}
 
 		public override object ConvertFromString (string value, IValueSerializerContext context)
 		{
-			return c.ConvertFrom (context, CultureInfo.InvariantCulture, value);
+			return c.ConvertFrom ((ITypeDescriptorContext)context, CultureInfo.InvariantCulture, value);
 		}
 
 		public override string ConvertToString (object value,     IValueSerializerContext context)
 		{
-			return value == null ? String.Empty : (string) c.ConvertTo (context, CultureInfo.InvariantCulture, value, typeof (string));
+			return value == null ? String.Empty : (string) c.ConvertTo ((ITypeDescriptorContext)context, CultureInfo.InvariantCulture, value, typeof (string));
 		}
 
 		public override IEnumerable<Type> TypeReferences (object value, IValueSerializerContext context)

@@ -12,6 +12,7 @@ if not defined VisualStudioVersion (
 
 :EnvSet
 
-msbuild -t:Package Build.proj
+set BUILD_DIR=%~dp0build
+msbuild -t:Package "%BUILD_DIR%\Build.proj"
 
 pause

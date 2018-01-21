@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -37,10 +37,17 @@ namespace Portable.Xaml
 	{
 		#region inheritance search and custom attribute provision
 
-		public static T GetCustomAttribute<T> (this ICustomAttributeProvider type, bool inherit) where T : Attribute
+		public static T GetCustomAttribute<T> (this ICustomAttributeProvider provider, bool inherit) where T : Attribute
 		{
-			foreach (var a in type.GetCustomAttributes (typeof(T), inherit))
+			foreach (var a in provider.GetCustomAttributes (typeof(T), inherit))
 				return (T)(object)a;
+			return null;
+		}
+
+		public static Attribute GetCustomAttribute(this ICustomAttributeProvider provider, Type type, bool inherit)
+		{
+			foreach (var a in provider.GetCustomAttributes(type, inherit))
+				return (Attribute)(object)a;
 			return null;
 		}
 
@@ -113,16 +120,111 @@ namespace Portable.Xaml
 			// FIXME: does this make sense?
 			var vc = xm?.TypeConverter ?? xt.TypeConverter;
 			var tc = vc?.ConverterInstance;
-			if (tc != null && tc.CanConvertTo (vsctx, typeof(string)))
-				return (string)tc.ConvertTo (vsctx, CultureInfo.InvariantCulture, obj, typeof(string));
+			if (tc != null && tc.CanConvertTo ((ITypeDescriptorContext) vsctx, typeof(string)))
+				return (string)tc.ConvertTo ((ITypeDescriptorContext)vsctx, CultureInfo.InvariantCulture, obj, typeof(string));
 			if (obj is string || obj == null)
 				return (string)obj;
 			throw new InvalidCastException (String.Format ("Cannot cast object '{0}' to string", obj.GetType ()));
 		}
 
-		public static TypeConverter GetTypeConverter (this Type type)
+#if !HAS_TYPE_CONVERTER
+		static Type s_typeConverterAttribute = ReflectionHelpers.GetComponentModelType("System.ComponentModel.TypeConverterAttribute");
+		static PropertyInfo s_typeConverterTypeNameProperty = s_typeConverterAttribute?.GetRuntimeProperty("ConverterTypeName");
+#endif
+
+		public static string GetTypeConverterName(this ICustomAttributeProvider member, bool inherit)
 		{
-			return TypeDescriptor.GetConverter (type);
+			if (member == null)
+				return null;
+			var typeConverterName = member.GetCustomAttribute<TypeConverterAttribute>(inherit)?.ConverterTypeName;
+#if !HAS_TYPE_CONVERTER
+			if (typeConverterName == null && s_typeConverterAttribute != null)
+			{
+				var systemTypeConverterInfo = member.GetCustomAttribute(s_typeConverterAttribute, inherit);
+				if (systemTypeConverterInfo != null)
+				{
+					typeConverterName = s_typeConverterTypeNameProperty.GetValue(systemTypeConverterInfo) as string;
+				}
+			}
+#endif
+			return typeConverterName;
+		}
+
+		public static string GetTypeConverterName(this MemberInfo member, bool inherit)
+		{
+			if (member == null)
+				return null;
+			var typeConverterName = member.GetCustomAttribute<TypeConverterAttribute>(inherit)?.ConverterTypeName;
+#if !HAS_TYPE_CONVERTER
+			if (typeConverterName == null && s_typeConverterAttribute != null)
+			{
+				var systemTypeConverterInfo = member.GetCustomAttribute(s_typeConverterAttribute);
+				if (systemTypeConverterInfo != null)
+				{
+					typeConverterName = s_typeConverterTypeNameProperty.GetValue(systemTypeConverterInfo) as string;
+				}
+			}
+#endif
+			return typeConverterName;
+		}
+
+		public static string GetTypeConverterName(this TypeInfo type, bool inherit)
+		{
+			if (type == null)
+				return null;
+			var typeConverterName = type.GetCustomAttribute<TypeConverterAttribute>(inherit)?.ConverterTypeName;
+#if !HAS_TYPE_CONVERTER
+			if (typeConverterName == null && s_typeConverterAttribute != null)
+			{
+				var systemTypeConverterInfo = type.GetCustomAttribute(s_typeConverterAttribute);
+				if (systemTypeConverterInfo != null)
+				{
+					typeConverterName = s_typeConverterTypeNameProperty.GetValue(systemTypeConverterInfo) as string;
+				}
+			}
+#endif
+			return typeConverterName;
+		}
+
+		public static bool IsBaseTypeConverter(this TypeConverter typeConverter)
+		{
+#if HAS_TYPE_CONVERTER
+			var type = typeConverter.GetType();
+			return type == typeof(TypeConverter)
+				|| type == typeof(CollectionConverter)
+				|| type.FullName == "System.ComponentModel.ReferenceConverter";
+#else
+			var sysType = typeConverter as SystemTypeConverter;
+			var type = sysType?.TypeConverter.GetType() ?? typeConverter.GetType();
+			var fullName = type.FullName;
+			return fullName == "System.ComponentModel.TypeConverter"
+				|| fullName == "System.ComponentModel.CollectionConverter"
+				|| fullName == "System.ComponentModel.ReferenceConverter";
+#endif
+		}
+
+		public static TypeConverter GetTypeConverter(this MemberInfo member)
+		{
+			var typeConverterName = GetTypeConverterName(member, true);
+			if (string.IsNullOrEmpty(typeConverterName))
+				return null;
+
+			var tcType = Type.GetType(typeConverterName);
+
+			var tc = Activator.CreateInstance(tcType);
+#if HAS_TYPE_CONVERTER
+			return tc as TypeConverter;
+#else
+			if (tc is TypeConverter typeConverter)
+				return typeConverter;
+
+			return new SystemTypeConverter(tc);
+#endif
+		}
+
+		public static TypeConverter GetTypeConverter(this Type type)
+		{
+			return TypeDescriptor.GetConverter(type);
 		}
 
 		/*
@@ -167,7 +269,7 @@ namespace Portable.Xaml
 			if (ReferenceEquals(member, XamlLanguage.PositionalParameters) || ReferenceEquals(member, XamlLanguage.Arguments))
 				return false; // it's up to the argument (no need to check them though, as IList<object> is not of value)
 			var typeConverter = member.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof(string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
 				return true;
 			return IsContentValue (member.Type, vsctx);
 		}
@@ -175,7 +277,7 @@ namespace Portable.Xaml
 		public static bool IsContentValue (this XamlType type, IValueSerializerContext vsctx)
 		{
 			var typeConverter = type.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo (vsctx, typeof(string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
 				return true;
 			return false;
 		}

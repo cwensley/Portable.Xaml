@@ -41,6 +41,8 @@ using System.Xaml.Schema;
 
 namespace MonoTests.Portable.Xaml.Schema
 {
+#if HAS_TYPE_CONVERTER
+
 	[TestFixture]
 	public class XamlTypeTypeConverterTest
 	{
@@ -126,4 +128,5 @@ namespace MonoTests.Portable.Xaml.Schema
 			Assert.Throws<NotSupportedException> (() => c.ConvertTo (new DummyValueSerializerContext (), null, "System.String", typeof (XamlType)), "#1");
 		}
 	}
+#endif
 }

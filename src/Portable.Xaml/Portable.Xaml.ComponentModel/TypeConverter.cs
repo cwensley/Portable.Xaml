@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD
+﻿#if !HAS_TYPE_CONVERTER
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,7 +14,7 @@ namespace Portable.Xaml.ComponentModel
 	/// <summary>
 	/// Type converter implementation, for type converter compatibility in portable class libraries.
 	/// </summary>
-	public class TypeConverter
+	class TypeConverter
 	{
 		/// <summary>
 		/// Determines whether this instance can convert from the specified sourceType.
@@ -168,7 +168,7 @@ namespace Portable.Xaml.ComponentModel
 				if (culture != null)
 					return Convert.ToString(value, culture);
 
-				return value.ToString();
+				return Convert.ToString(value);
 			}
 
 			return GetConvertToException(value, destinationType);

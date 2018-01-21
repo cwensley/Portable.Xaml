@@ -2,25 +2,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>netcoreapp1.1</TargetFramework>
+		<TargetFramework>netcoreapp2.0</TargetFramework>
 		<RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
 		<AssemblyName>Portable.Xaml_test_core</AssemblyName>
-	    <BaseIntermediateOutputPath>..\..\artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	  <OutputPath>..\..\artifacts\Debug\</OutputPath>
-		<DefineConstants>TRACE;DEBUG;NETSTANDARD;PCL;CORE;NETCOREAPP1_1</DefineConstants>
+	  <OutputPath>..\..\artifacts\test\Debug\</OutputPath>
+		<DefineConstants>TRACE;NETSTANDARD;PCL;CORE;DEBUG;NETCOREAPP2_0</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>
 		</DebugType>
-		<OutputPath>..\..\artifacts\Release\</OutputPath>
-		<DefineConstants>TRACE;RELEASE;NETCOREAPP1_1;NETSTANDARD;PCL;CORE;</DefineConstants>
+		<OutputPath>..\..\artifacts\test\Release\</OutputPath>
+		<DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;NETSTANDARD;PCL;CORE;</DefineConstants>
 	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="NUnit" Version="3.6.1" />
-		<PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
-	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj" />
 	</ItemGroup>
@@ -29,6 +25,10 @@
 		<Compile Remove="UnitTestApp.*" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
+		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="NUnit" Version="3.9.0" />
+	  <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
 	</ItemGroup>
 </Project>

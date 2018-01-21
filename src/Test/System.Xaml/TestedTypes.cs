@@ -38,12 +38,9 @@ using sc = System.ComponentModel;
 using System.Collections.Immutable;
 #endif
 
-#if NETSTANDARD
+#if NETSTANDARD || PCL
 using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
 using System.ComponentModel;
-using DateTimeConverter = System.ComponentModel.DateTimeConverter;
-#elif PCL
-using DateTimeConverter = Portable.Xaml.ComponentModel.DateTimeConverter;
 #endif
 
 #if PCL
@@ -1600,6 +1597,23 @@ namespace MonoTests.Portable.Xaml
 			ShouldSerializeCalled++;
 			return !string.IsNullOrEmpty(Text) && Text != "bar";
 		}
+	}
+
+	[ContentProperty("Child")]
+	public class Whitespace
+	{
+		public string TabConvertedToSpaces { get; set; }
+		public string NewlineConvertedToSpaces { get; set; }
+		public string ConsecutiveSpaces { get; set; }
+		public string SpacesAroundTags { get; set; }
+		public string Preserve { get; set; }
+		public WhitespaceChild Child { get; set; }
+	}
+
+	[ContentProperty("Content")]
+	public class WhitespaceChild
+	{
+		public string Content { get; set; }
 	}
 }
 

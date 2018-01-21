@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2011 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Portable.Xaml.Schema;
 
@@ -315,8 +317,7 @@ namespace Portable.Xaml
 				yield break;
 
 			if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) {
-				//throw new XamlParseException (String.Format ("Element is expected, but got {0}", r.NodeType));
-				yield return Node (XamlNodeType.Value, r.Value);
+				yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
 				r.Read();
 				yield break;
 			}
@@ -539,7 +540,7 @@ namespace Portable.Xaml
 							}
 							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
 						default:
-							if (string.IsNullOrEmpty(r.NamespaceURI))
+							if (string.IsNullOrEmpty(r.NamespaceURI) || r.LocalName.IndexOf('.') > 0)
 							{
 								atts.Add(new StringPair(r.Name, r.Value));
 								continue;
@@ -612,6 +613,35 @@ namespace Portable.Xaml
 			return XamlLanguage.AllDirectives.FirstOrDefault (dd => (dd.AllowedLocation & loc) != 0 && dd.Name == name);
 		}
 
+		string NormalizeWhitespace(string value)
+		{
+			var sb = new StringBuilder(value.Length);
+			bool lastWasWhitesp = false;
+			for (var index = 0; index < value.Length; index++)
+			{
+				var c = value[index];
+				if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
+				{
+					if (lastWasWhitesp || sb.Length == 0)
+						continue;
+					lastWasWhitesp = true;
+					sb.Append(' ');
+					continue;
+				}
+				else
+				{
+					lastWasWhitesp = false;
+				}
+
+				sb.Append(c);
+			}
+
+			if (lastWasWhitesp)
+				sb.Length--;
+
+			return sb.ToString();
+		}
+
 		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType xt)
 		{
 			// this value is for Initialization, or Content property value
@@ -621,7 +651,7 @@ namespace Portable.Xaml
 			else
 				xm = XamlLanguage.Initialization;
 			yield return Node (XamlNodeType.StartMember, xm);
-			yield return Node (XamlNodeType.Value, r.Value);
+			yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
 			r.Read ();
 			yield return Node (XamlNodeType.EndMember, xm);
 		}

@@ -42,31 +42,22 @@ namespace Portable.Xaml_tests_core2
     {
 		static void Main(string[] args)
 		{
+			var output = Console.Out; // capture console.out as nunit overrides it when running
 			var builder = new DefaultTestAssemblyBuilder();
 			var runner = new NUnitTestAssemblyRunner(builder);
 			var settings = new Dictionary<string, object>();
 			var assembly = Assembly.GetEntryAssembly();
-			var messages = new List<string>();
 			var listener = new TestListener
 			{
-				Log = message => messages.Add(message) // writing directly to console doesn't work for some reason
+				Log = output.WriteLine
 			};
 			runner.Load(assembly, settings);
 			var result = runner.Run(listener, TestFilter.Empty);
 
-			foreach (var msg in messages)
-			{
-				Console.WriteLine(msg);
-			}
 			Console.WriteLine();
 			Console.WriteLine(result.FailCount > 0 ? "FAILED" : "PASSED");
 			Console.WriteLine($"Pass: {result.PassCount}, Fail: {result.FailCount}, Skipped: {result.SkipCount}, Inconclusive: {result.InconclusiveCount}");
 			Console.WriteLine($"Duration: {result.Duration}");
-			if (Debugger.IsAttached)
-			{
-				Console.Write("Press any key to continue...");
-				Console.ReadKey(true);
-			}
 		}
     }
 }
