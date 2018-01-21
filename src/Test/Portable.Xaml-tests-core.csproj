@@ -25,9 +25,10 @@
 		<Compile Remove="UnitTestApp.*" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
+		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="NUnit" Version="3.9.0" />
+	  <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
 	</ItemGroup>
 </Project>

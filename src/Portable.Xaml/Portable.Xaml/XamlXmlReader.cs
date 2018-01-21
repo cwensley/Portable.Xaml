@@ -540,7 +540,7 @@ namespace Portable.Xaml
 							}
 							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
 						default:
-							if (string.IsNullOrEmpty(r.NamespaceURI))
+							if (string.IsNullOrEmpty(r.NamespaceURI) || r.LocalName.IndexOf('.') > 0)
 							{
 								atts.Add(new StringPair(r.Name, r.Value));
 								continue;
