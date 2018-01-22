@@ -333,7 +333,7 @@ namespace Portable.Xaml
 
 				if (types != null)
 				{
-					if (types.Any(xt => xt.UnderlyingType != null && xt.CanAssignFrom(state.Type)))
+					if (types.Any(xt => xt.UnderlyingType != null && state.Type.CanAssignTo(xt)))
 						yield return new AmbientPropertyValue(null, state.Value);
 				}
 				if (properties != null)
@@ -341,7 +341,7 @@ namespace Portable.Xaml
 					// get ambient properties in the stack
 					foreach (var prop in properties)
 					{
-						if (!prop.DeclaringType.CanAssignFrom(state.Type))
+						if (!state.Type.CanAssignTo(prop.DeclaringType))
 							continue;
 						var value = prop.Invoker.GetValue(state.Value);
 						yield return new AmbientPropertyValue(prop, value);
