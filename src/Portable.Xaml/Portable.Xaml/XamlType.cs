@@ -336,38 +336,44 @@ namespace Portable.Xaml
 			//return String.IsNullOrEmpty (PreferredXamlNamespace) ? Name : String.Concat ("{", PreferredXamlNamespace, "}", Name);
 		}
 
-		internal bool CanConvertFrom(XamlType inputType)
+		/// <summary>
+		/// Gets a value indicating this type can be assigned or converted from the specified type.
+		/// </summary>
+		/// <returns><c>true</c>, if it can be assigned or converted from the input type , <c>false</c> otherwise.</returns>
+		/// <param name="xamlType">Type to convert from.</param>
+		[EnhancedXaml]
+		public bool CanConvertFrom(XamlType xamlType)
 		{
-			if (CanAssignFrom(inputType))
+			if (xamlType.CanAssignTo(this))
 				return true;
 
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return tc.CanConvertFrom(inputType?.UnderlyingType ?? typeof(object));
+				return tc.CanConvertFrom(xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
 		}
 
-		internal bool CanConvertTo(XamlType inputType)
+		/// <summary>
+		/// Gets a value indicating this type can be assigned or converted to the specified type
+		/// </summary>
+		/// <returns><c>true</c>, if it can be assigned or converted to the input type , <c>false</c> otherwise.</returns>
+		/// <param name="xamlType">Type to convert to.</param>
+		[EnhancedXaml]
+		public bool CanConvertTo(XamlType xamlType)
 		{
-			if (CanAssignTo(inputType))
+			if (CanAssignTo(xamlType))
 				return true;
 
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return tc.CanConvertTo(inputType?.UnderlyingType ?? typeof(object));
+				return tc.CanConvertTo(xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
-		}
-
-
-		internal bool CanAssignFrom(XamlType inputType)
-		{
-			return inputType.CanAssignTo(this);
 		}
 
 		[EnhancedXaml]
@@ -958,16 +964,20 @@ namespace Portable.Xaml
 			if (t == null)
 				return null;
 
+			var xamlTypeConverter = LookupXamlTypeConverter();
+			if (xamlTypeConverter != null)
+				return new XamlXamlTypeValueConverter(xamlTypeConverter, this);
+
+			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
+			if (converterName != null)
+				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(converterName), this);
+
 			// equivalent to TypeExtension.
 			// FIXME: not sure if it should be specially handled here.
 			if (t == typeof(Type))
 				t = typeof(TypeExtension);
 
 			t = Nullable.GetUnderlyingType(t) ?? t;
-
-			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
-			if (converterName != null)
-				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(converterName), this);
 
 			if (t == typeof(object)) // This is a special case. ConverterType is null.
 				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
@@ -991,6 +1001,9 @@ namespace Portable.Xaml
 
 			return null;
 		}
+
+		[EnhancedXaml]
+		protected virtual XamlValueConverter<IXamlTypeConverter> LookupXamlTypeConverter() => null;
 
 		protected virtual Type LookupUnderlyingType ()
 		{

@@ -26,12 +26,32 @@ using Portable.Xaml.ComponentModel;
 using System.Reflection;
 using System.Linq;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Portable.Xaml.Schema
 {
+	class XamlXamlTypeValueConverter : XamlValueConverter<TypeConverter>
+	{
+		XamlValueConverter<IXamlTypeConverter> _converter;
+		public XamlXamlTypeValueConverter(XamlValueConverter<IXamlTypeConverter> converter, XamlType targetType)
+			: base(null, targetType)
+		{
+			_converter = converter;
+		}
+
+		protected override TypeConverter CreateInstance()
+		{
+			var instance = _converter.ConverterInstance;
+			if (instance == null)
+				return null;
+
+			return new XamlTypeConverter(instance);
+		}
+	}
+
+
 #if !HAS_TYPE_CONVERTER
-	class XamlTypeValueConverter<TConverterBase> : XamlValueConverter<TConverterBase>
-		where TConverterBase: class
+	class XamlTypeValueConverter : XamlValueConverter<TypeConverter>
 	{
 		public XamlTypeValueConverter(Type converterType, XamlType targetType)
 			: base(converterType, targetType)
@@ -43,32 +63,32 @@ namespace Portable.Xaml.Schema
 		{
 		}
 
-		static Type s_typeConverterType = ReflectionHelpers.GetComponentModelType("System.ComponentModel.TypeConverter");
-
-		protected override TConverterBase CreateInstance()
+		protected override TypeConverter CreateInstance()
 		{
 			if (ConverterType == null)
 				return null;
 
-			if (!typeof(TConverterBase).GetTypeInfo().IsAssignableFrom(ConverterType.GetTypeInfo())
-				&& !s_typeConverterType.GetTypeInfo().IsAssignableFrom(ConverterType.GetTypeInfo()))
-				throw new XamlSchemaException(String.Format("ConverterType '{0}' is not derived from '{1}' or '{2}' types", ConverterType, typeof(TConverterBase), s_typeConverterType));
+			var converterTypeInfo = ConverterType.GetTypeInfo();
+
+			if (!typeof(TypeConverter).GetTypeInfo().IsAssignableFrom(converterTypeInfo)
+				&& !ReflectionHelpers.TypeConverterType.GetTypeInfo().IsAssignableFrom(converterTypeInfo))
+				throw new XamlSchemaException($"ConverterType '{ConverterType}' is not derived from '{typeof(TypeConverter)}' or '{ReflectionHelpers.TypeConverterType}'");
 
 			object instance = null;
-			if (ConverterType.GetTypeInfo().GetConstructors().Any(r => r.GetParameters().Length == 0))
+			if (converterTypeInfo.GetConstructors().Any(r => r.GetParameters().Length == 0))
 				instance = Activator.CreateInstance(ConverterType);
 
-			if (ConverterType.GetTypeInfo().GetConstructors().Any(r => r.GetParameters().Length == 1 && r.GetParameters()[0].ParameterType == typeof(Type)))
+			if (converterTypeInfo.GetConstructors().Any(r => r.GetParameters().Length == 1 && r.GetParameters()[0].ParameterType == typeof(Type)))
 				instance = Activator.CreateInstance(ConverterType, TargetType.UnderlyingType);
 
-			if (instance == null)
+			if (ReferenceEquals(instance, null))
 				return null;
-			
-			var tc = instance as TConverterBase;
+
+			var tc = instance as TypeConverter;
 			if (tc != null)
 				return tc;
-			
-			return (TConverterBase)(object)new SystemTypeConverter(instance);
+
+			return new SystemTypeConverter(instance);
 		}
 	}
 #endif

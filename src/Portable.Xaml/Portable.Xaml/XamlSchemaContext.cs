@@ -346,7 +346,7 @@ namespace Portable.Xaml
 #if !HAS_TYPE_CONVERTER
 			if (typeof(TConverterBase) == typeof(TypeConverter))
 			{
-				return new XamlTypeValueConverter<TConverterBase>(converterType, targetType);
+				return new XamlTypeValueConverter(converterType, targetType) as XamlValueConverter<TConverterBase>;
 			}
 #endif
 			return new XamlValueConverter<TConverterBase>(converterType, targetType);
