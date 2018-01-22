@@ -505,6 +505,9 @@ namespace Portable.Xaml
 			if (t == typeof(object)) // it is different from XamlType.LookupTypeConverter().
 				return null;
 
+			var xamlTypeConverter = LookupXamlTypeConverter();
+			if (xamlTypeConverter != null)
+				return new XamlXamlTypeValueConverter(xamlTypeConverter, Type);
 
 			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
 			if (converterName != null)
@@ -514,6 +517,9 @@ namespace Portable.Xaml
 
 			return Type.TypeConverter;
 		}
+
+		[EnhancedXaml]
+		protected virtual XamlValueConverter<IXamlTypeConverter> LookupXamlTypeConverter() => null;
 
 		protected virtual MethodInfo LookupUnderlyingGetter()
 		{
