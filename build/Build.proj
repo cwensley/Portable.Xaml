@@ -13,7 +13,7 @@
 	</PropertyGroup>
 	<Import Project="Utilities.targets" />
 
-	<Target Name="Build" DependsOnTargets="DownloadNuget">
+	<Target Name="Build" DependsOnTargets="UpdateVersion;DownloadNuget">
     	<Exec Command="$(Runtime) $(Nuget) restore $(SourceDir)\Portable.Xaml.sln"/>
     	<MSBuild Projects="$(SourceDir)\Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
 	</Target>
@@ -44,11 +44,12 @@
 		</FileExtract>
 	</Target>
 	
-	<Target Name="UpdateVersion" DependsOnTargets="_GetVersion">
+	<Target Name="UpdateVersion" Condition="$(BuildVersion) != ''" DependsOnTargets="_GetVersion">
 
 		<Message Text="Set Version: $(BuildVersion)" Condition="$(BuildVersion) != ''" />
 
 		<PropertyGroup>
+			<SetAppveyorVersion Condition="$(BuildVersion) == ''">True</SetAppveyorVersion>
 			<BuildIncrement Condition="$(BuildVersion) == '' and $(BuildIncrement) == ''">0.1.0.0</BuildIncrement>
 			<BuildVersion Condition="$(BuildVersion) == ''">$(CurrentVersion)</BuildVersion>
 		</PropertyGroup>
@@ -64,6 +65,11 @@
 		<Message Text="New Version: $(AssemblyVersion)" />
 		<Message Text="New Informational Version: $(AssemblyInformationalVersion)" />
 		
+		<FileUpdate Files="$(BaseDir)\appveyor.yml"
+            Pattern='(?&lt;=version\\s*:\\s*)([\\w\\d\\.-]+?)(?=\\.{build})'
+            Replacement='$(AssemblyInformationalVersion)'
+            Condition="$(SetAppveyorVersion) == 'True'" />
+
 		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
             Pattern='AssemblyVersion(\\s*)[(]&quot;.*&quot;[)]'
             Replacement='AssemblyVersion$1("$(AssemblyVersion)")' />
@@ -71,6 +77,7 @@
 		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
             Pattern='AssemblyInformationalVersion(\\s*)[(]&quot;.*&quot;[)]'
             Replacement='AssemblyInformationalVersion$1(&quot;$(AssemblyInformationalVersion)&quot;)' />
+            
 	</Target>
 	
 	<Target Name="MakeRelease" DependsOnTargets="Clean;_GetVersion">

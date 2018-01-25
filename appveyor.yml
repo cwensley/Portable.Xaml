@@ -7,7 +7,7 @@ build_script:
 - cmd: >-
     cd build
 
-    msbuild /t:Package Build.proj
+    msbuild /t:Package /p:BuildVersion=%APPVEYOR_BUILD_VERSION% Build.proj
 test:
   assemblies:
     only:
