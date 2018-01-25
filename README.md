@@ -1,4 +1,4 @@
-Portable.Xaml is a fork of [mono's System.Xaml](https://github.com/mono/mono/tree/master/mcs/class/System.Xaml) converted to PCL and .NET Standard.
+Portable.Xaml is a fork of [mono's System.Xaml](https://github.com/mono/mono/tree/master/mcs/class/System.Xaml) converted to .NET Standard.
 
 This is intended to be used to read and write Xaml on desktop, mobile, and .NET Core platforms.
 
@@ -9,9 +9,8 @@ This is intended to be used to read and write Xaml on desktop, mobile, and .NET 
 
 Portable.Xaml currently supports the following profiles:
 
-- .NET Standard 1.3 - For .NET 4.6.1, .NET Core, UWP, Xamarin, etc.
-- Profile 259 - For .NET 4.5
-- Profile 136 - For .NET 4.0
+- .NET Standard 1.0 - For .NET 4.5
+- .NET Standard 1.3 - For .NET 4.6, .NET Core, UWP, Xamarin, etc.
 
 Other profiles can be contributed if desired, but these should support the widest range of platforms.
 
@@ -25,14 +24,12 @@ To get daily builds, add the [appveyor feed](https://ci.appveyor.com/nuget/porta
 
 The goal of this library is not necessarily to replicate the functionality of System.Xaml going forward, so breaking changes may occur, but only when necessary to keep migrating to Portable.Xaml straightforward.
 
-The main difference between this and System.Xaml is that it comes with its own (minimal) `TypeConverter` implementation for the PCL profiles as they do not support them. To hook into the existing `System.ComponentModel.TypeConverter` on platforms that support it, a shim can be added [to be documented].
-
 Some of the enhanced functionality of Portable.Xaml include (but not limited to):
 
-- Supports System.Collections.Immutable collections and dictionaries.
-- Automatic support for immutable types (with no default constructor) without having to use x:Arguments by using properties flagged with ConstructorArgumentAttribute automatically.
-- Easier to override ParameterInfo/PropertyInfo/MethodInfo/etc XamlMember creation from XamlSchemaContext
-- TypeConverter is used for items when adding to any ICollection&lt;T&gt; inherited list, if the type does not match.
+- Supports `System.Collections.Immutable` collections and dictionaries.
+- Automatic support for immutable types (with no default constructor) without having to use `x:Arguments` by using properties flagged with `[ConstructorArgumentAttribute]` automatically.
+- Easier to override `XamlMember` creation using `ParameterInfo/PropertyInfo/MethodInfo/etc` from `XamlSchemaContext`
+- `TypeConverter` is used for items when adding to any ICollection&lt;T&gt; inherited list, if the type does not match.
 
 
 ## Project Status

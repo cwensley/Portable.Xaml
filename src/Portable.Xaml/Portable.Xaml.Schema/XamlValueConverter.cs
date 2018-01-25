@@ -30,26 +30,6 @@ using System.Globalization;
 
 namespace Portable.Xaml.Schema
 {
-	class XamlXamlTypeValueConverter : XamlValueConverter<TypeConverter>
-	{
-		XamlValueConverter<IXamlTypeConverter> _converter;
-		public XamlXamlTypeValueConverter(XamlValueConverter<IXamlTypeConverter> converter, XamlType targetType)
-			: base(null, targetType)
-		{
-			_converter = converter;
-		}
-
-		protected override TypeConverter CreateInstance()
-		{
-			var instance = _converter.ConverterInstance;
-			if (instance == null)
-				return null;
-
-			return new XamlTypeConverter(instance);
-		}
-	}
-
-
 #if !HAS_TYPE_CONVERTER
 	class XamlTypeValueConverter : XamlValueConverter<TypeConverter>
 	{

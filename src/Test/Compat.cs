@@ -13,8 +13,10 @@ namespace MonoTests.Portable.Xaml
 		public const string Version = "core";
 #elif WINDOWS_UWP
 		public const string Version = "uwp";
-#elif NETSTANDARD
-		public const string Version = "netstandard";
+#elif NETSTANDARD1_0
+		public const string Version = "netstandard10";
+#elif NETSTANDARD1_3
+		public const string Version = "netstandard13";
 #elif PCL136
 		public const string Version = "pcl136";
 #elif PCL259
