@@ -132,9 +132,7 @@ namespace MonoTests.Portable.Xaml.Markup
 			Assert.IsNotNull(ValueSerializer.GetSerializerFor(typeof(bool)), "#6"); // has no TypeConverter (undocumented behavior)
 			Assert.IsNotNull(ValueSerializer.GetSerializerFor(typeof(byte)), "#7"); // has no TypeConverter (undocumented behavior)
 			Assert.IsNotNull(ValueSerializer.GetSerializerFor(typeof(char)), "#8"); // has no TypeConverter (undocumented behavior)
-#if !CORE
 			Assert.IsNull(ValueSerializer.GetSerializerFor(typeof(DBNull)), "#9"); // TypeCode.DBNull
-#endif
 			Assert.IsNull(ValueSerializer.GetSerializerFor(typeof(object)), "#10");
 			Assert.IsNotNull(ValueSerializer.GetSerializerFor(typeof(TimeSpan)), "#11"); // has no TypeConverter (undocumented behavior), TypeCode.Object -> unexpectedly has non-null serializer!
 

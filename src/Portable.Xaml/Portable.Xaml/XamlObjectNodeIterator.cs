@@ -31,17 +31,19 @@ using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
-using System.Xml.Serialization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+#if !NETSTANDARD1_0
+using System.Xml.Serialization;
+#endif
 
 namespace Portable.Xaml
 {
 	internal class XamlObjectNodeIterator
 	{
-		static readonly XamlObject null_object = new XamlObject (XamlLanguage.Null, null);
+		static readonly XamlObject null_object = new XamlObject(XamlLanguage.Null, null);
 
-		public XamlObjectNodeIterator (object root, XamlSchemaContext schemaContext, IValueSerializerContext vctx, XamlObjectReaderSettings settings)
+		public XamlObjectNodeIterator(object root, XamlSchemaContext schemaContext, IValueSerializerContext vctx, XamlObjectReaderSettings settings)
 		{
 			ctx = schemaContext;
 			this.root = root;
@@ -53,27 +55,30 @@ namespace Portable.Xaml
 		XamlSchemaContext ctx;
 		object root;
 		IValueSerializerContext value_serializer_ctx;
-		
-		PrefixLookup PrefixLookup {
-			get { return (PrefixLookup) value_serializer_ctx.GetService (typeof (INamespacePrefixLookup)); }
+
+		PrefixLookup PrefixLookup
+		{
+			get { return (PrefixLookup)value_serializer_ctx.GetService(typeof(INamespacePrefixLookup)); }
 		}
-		XamlNameResolver NameResolver {
-			get { return (XamlNameResolver) value_serializer_ctx.GetService (typeof (IXamlNameResolver)); }
+		XamlNameResolver NameResolver
+		{
+			get { return (XamlNameResolver)value_serializer_ctx.GetService(typeof(IXamlNameResolver)); }
 		}
 
-		public XamlSchemaContext SchemaContext {
+		public XamlSchemaContext SchemaContext
+		{
 			get { return ctx; }
 		}
-		
-		XamlType GetType (object obj)
+
+		XamlType GetType(object obj)
 		{
-			return obj == null ? XamlLanguage.Null : ctx.GetXamlType (obj.GetType ());
+			return obj == null ? XamlLanguage.Null : ctx.GetXamlType(obj.GetType());
 		}
-		
+
 		// returns StartObject, StartMember, Value, EndMember and EndObject. (NamespaceDeclaration is not included)
-		public IEnumerable<XamlNodeInfo> GetNodes ()
+		public IEnumerable<XamlNodeInfo> GetNodes()
 		{
-			var xobj = new XamlObject (GetType (root), root);
+			var xobj = new XamlObject(GetType(root), root);
 			return GetNodes(null, xobj);
 		}
 
@@ -93,8 +98,8 @@ namespace Portable.Xaml
 				}
 			}
 		}
-		
-		IEnumerable<XamlNodeInfo> GetNodes (XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null)
+
+		IEnumerable<XamlNodeInfo> GetNodes(XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null)
 		{
 			object val;
 			// Value - only for non-top-level node (thus xm != null)
@@ -185,7 +190,7 @@ namespace Portable.Xaml
 						yield return node.Set(TypeExtensionMethods.GetStringValue(xtt, xm, val, value_serializer_ctx));
 					else if (val is Type)
 						LookupType((Type)val);
-						//new XamlTypeName(xtt.SchemaContext.GetXamlType((Type)val)).ToString(value_serializer_ctx?.GetService(typeof(INamespacePrefixLookup)) as INamespacePrefixLookup);
+					//new XamlTypeName(xtt.SchemaContext.GetXamlType((Type)val)).ToString(value_serializer_ctx?.GetService(typeof(INamespacePrefixLookup)) as INamespacePrefixLookup);
 					yield break;
 				}
 
@@ -212,10 +217,16 @@ namespace Portable.Xaml
 				{
 					var sw = new StringWriter();
 					var xw = XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Auto });
+#if NETSTANDARD1_0
+					if (!ReflectionHelpers.IXmlSerializableType?.GetTypeInfo().IsAssignableFrom(val?.GetType().GetTypeInfo()) ?? false)
+						yield break; // do not output anything
+					ReflectionHelpers.IXmlSerializableWriteXmlMethod?.Invoke(val, new object[] { xw });
+#else
 					var val3 = val as IXmlSerializable;
 					if (val3 == null)
 						yield break; // do not output anything
 					val3.WriteXml(xw);
+#endif
 					xw.Dispose();
 					var obj = new XData { Text = sw.ToString() };
 					foreach (var xn in GetNodes(null, new XamlObject(XamlLanguage.XData, obj), node: node))

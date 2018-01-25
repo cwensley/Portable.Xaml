@@ -11,25 +11,27 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<summary>Portable Xaml reader/writer</summary>
 		<description>
-Portable.Xaml is a port of mono's System.Xaml to PCL and .NET Standard.
+Portable.Xaml is a port of mono's System.Xaml to .NET Standard.
 
 This allows you to read/write xaml for desktop, mobile, and .NET Core projects.
 		</description>
 		<copyright>(c) Various Mono authors</copyright>
 		<tags>cross platform xaml</tags>
 		<dependencies>
-            <group targetFramework=".NETPortable4.5-Profile259" />
-            <group targetFramework=".NETStandard1.3">
-                <dependency id="Microsoft.CSharp" version="4.3.0" />
+            <group targetFramework=".NETStandard1.0">
                 <dependency id="NETStandard.Library" version="1.6.1" />
                 <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
                 <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" />
-                <dependency id="System.Xml.XmlDocument" version="4.3.0" />
+            </group>
+            <group targetFramework=".NETStandard1.3">
+                <dependency id="NETStandard.Library" version="1.6.1" />
+                <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
+                <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" />
             </group>
         </dependencies>
 	</metadata>
 	<files>
-		<file src="..\..\artifacts\core\$configuration$\portable-net45+win8+wpa81+wp8\Portable.Xaml.dll" target="lib\portable-net45+win8+wpa81+wp8" />
+		<file src="..\..\artifacts\core\$configuration$\netstandard1.0\Portable.Xaml.dll" target="lib\netstandard1.0" />
 		<file src="..\..\artifacts\core\$configuration$\netstandard1.3\Portable.Xaml.dll" target="lib\netstandard1.3" />
 		<file src="..\..\LICENSE.txt" target="LICENSE.txt" />
 	</files>

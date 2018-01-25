@@ -1,0 +1,27 @@
+version: 0.21-alpha.{build}
+branches:
+  only:
+  - develop
+image: Visual Studio 2017
+build_script:
+- cmd: >-
+    cd build
+
+    msbuild /t:Package Build.proj
+test:
+  assemblies:
+    only:
+    - artifacts\test\Release\netstandard1.0\Portable.Xaml_test_netstandard10.dll
+    - artifacts\test\Release\netstandard1.3\Portable.Xaml_test_netstandard13.dll
+    - artifacts\test\Release\net461\Portable.Xaml_test_net_4_5.dll
+  categories:
+    except:
+    - NotWorking
+artifacts:
+- path: artifacts\nupkg\Release\*.nupkg
+notifications:
+- provider: Webhook
+  url: https://webhooks.gitter.im/e/071013049c800dc84535
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false

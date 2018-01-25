@@ -4,24 +4,21 @@
 		<OutputType>Library</OutputType>
 		<TargetFramework>net461</TargetFramework>
 		<RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
-		<AssemblyName>Portable.Xaml_test_pcl259</AssemblyName>
+		<AssemblyName>Portable.Xaml_test_netstandard10</AssemblyName>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	  <OutputPath>..\..\artifacts\test\Debug\portable-net45+win8+wpa81+wp8</OutputPath>
-		<DefineConstants>TRACE;DEBUG;PCL259;PCL</DefineConstants>
+	  <OutputPath>..\..\artifacts\test\Debug\netstandard1.0</OutputPath>
+		<DefineConstants>TRACE;DEBUG;PCL259;PCL;NETSTANDARD;NETSTANDARD1_0;HAS_TYPE_CONVERTER</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>
 		</DebugType>
-		<OutputPath>..\..\artifacts\test\Release\portable-net45+win8+wpa81+wp8</OutputPath>
-		<DefineConstants>TRACE;PCL259;PCL</DefineConstants>
+		<OutputPath>..\..\artifacts\test\Release\netstandard1.0</OutputPath>
+		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;NETSTANDARD1_0;HAS_TYPE_CONVERTER</DefineConstants>
 	</PropertyGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-pcl259.csproj" />
-	</ItemGroup>
   <ItemGroup>
     <Reference Include="System.Xml" />
     <Reference Include="System" />
@@ -41,5 +38,8 @@
     <PackageReference Include="NUnit" Version="3.9.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.0.csproj" />
   </ItemGroup>
 </Project>
