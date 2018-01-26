@@ -1,4 +1,4 @@
-﻿﻿//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,10 +28,12 @@ using System.Linq;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
-using System.Xml.Serialization;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+#if !NETSTANDARD1_0
+using System.Xml.Serialization;
+#endif
 
 namespace Portable.Xaml
 {
@@ -95,10 +97,10 @@ namespace Portable.Xaml
 		}
 
 
-		static readonly Type[] mscorlib_types = { 
-			Type.GetType("System.Collections.IList`1, System.Colletions.Generic", false), 
-			typeof(bool), 
-			Type.GetType("System.Collections.ArrayList, System.Colletions.NonGeneric", false) 
+		static readonly Type[] mscorlib_types = {
+			Type.GetType("System.Collections.IList`1, System.Colletions.Generic", false),
+			typeof(bool),
+			Type.GetType("System.Collections.ArrayList, System.Colletions.NonGeneric", false)
 		};
 
 		internal static readonly string[] mscorlib_assemblies = new string[] {
@@ -107,10 +109,10 @@ namespace Portable.Xaml
 			"System.Private.CoreLib"
 		};
 
-			/*mscorlib_types.Where(r => r != null)
-		                                                               .Select(r => r.GetTypeInfo().Assembly)
-		                                                               .Distinct()
-		                                                               .ToArray();*/
+		/*mscorlib_types.Where(r => r != null)
+																   .Select(r => r.GetTypeInfo().Assembly)
+																   .Distinct()
+																   .ToArray();*/
 		//		static readonly Type [] predefined_types = {
 		//				typeof (XData), typeof (Uri), typeof (TimeSpan), typeof (PropertyDefinition), typeof (MemberDefinition), typeof (Reference)
 		//			};
@@ -648,7 +650,11 @@ namespace Portable.Xaml
 					(
 						pi.CanWrite
 						|| IsCollectionType(pi.PropertyType)
-						|| typeof(IXmlSerializable).GetTypeInfo().IsAssignableFrom(pi.PropertyType.GetTypeInfo())
+#if NETSTANDARD1_0
+						|| (ReflectionHelpers.IXmlSerializableType?.GetTypeInfo().IsAssignableFrom(pi.PropertyType.GetTypeInfo()) ?? false)
+#else
+					    || typeof(IXmlSerializable).GetTypeInfo().IsAssignableFrom(pi.PropertyType.GetTypeInfo())
+#endif
 						|| pi.GetCustomAttribute<ConstructorArgumentAttribute>() != null
 					)
 					&& pi.GetIndexParameters().Length == 0)
@@ -844,7 +850,7 @@ namespace Portable.Xaml
 
 		protected virtual bool LookupIsXData()
 		{
-			return CanAssignTo(SchemaContext.GetXamlType(typeof(IXmlSerializable)));
+			return ReflectionHelpers.IXmlSerializableType != null && CanAssignTo(SchemaContext.GetXamlType(ReflectionHelpers.IXmlSerializableType));
 		}
 
 		protected virtual XamlType LookupItemType()
@@ -964,10 +970,6 @@ namespace Portable.Xaml
 			if (t == null)
 				return null;
 
-			var xamlTypeConverter = LookupXamlTypeConverter();
-			if (xamlTypeConverter != null)
-				return new XamlXamlTypeValueConverter(xamlTypeConverter, this);
-
 			var converterName = CustomAttributeProvider.GetTypeConverterName(false);
 			if (converterName != null)
 				return SchemaContext.GetValueConverter<TypeConverter>(Type.GetType(converterName), this);
@@ -1001,9 +1003,6 @@ namespace Portable.Xaml
 
 			return null;
 		}
-
-		[EnhancedXaml]
-		protected virtual XamlValueConverter<IXamlTypeConverter> LookupXamlTypeConverter() => null;
 
 		protected virtual Type LookupUnderlyingType ()
 		{
