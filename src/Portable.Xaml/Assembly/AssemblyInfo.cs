@@ -49,8 +49,8 @@ using System.Security.Permissions;
 [assembly: AssemblyTitle("Portable.Xaml.dll")]
 [assembly: AssemblyDescription("Portable.Xaml.dll")]
 [assembly: AssemblyDefaultAlias("Portable.Xaml.dll")]
-[assembly: AssemblyVersion("0.20.*")]
-[assembly: AssemblyInformationalVersion("0.21.0-alpha")]
+[assembly: AssemblyVersion("0.21.*")]
+[assembly: AssemblyInformationalVersion("0.22.0-alpha")]
 
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
