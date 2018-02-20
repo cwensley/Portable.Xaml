@@ -27,6 +27,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Portable.Xaml.Portable.Xaml;
 using Portable.Xaml.Schema;
 
 using Pair = System.Collections.Generic.KeyValuePair<Portable.Xaml.XamlMember,string>;
@@ -268,6 +269,10 @@ namespace Portable.Xaml
 
 			sctx = schemaContext;
 			this.settings = settings ?? default_settings;
+			if (settings?.SkipXmlCompatibilityProcessing != true)
+			{
+				xmlReader = new CompatibleXmlReader(xmlReader, schemaContext);
+			}
 
 			r = xmlReader;
 			line_info = r as IXmlLineInfo;
@@ -503,7 +508,7 @@ namespace Portable.Xaml
 			}
 			typeArgNames = null;
 			var atts = new List<StringPair>();
-
+			var tagNamespace = r.NamespaceURI;
 			if (r.MoveToFirstAttribute())
 			{
 				do
@@ -540,13 +545,13 @@ namespace Portable.Xaml
 							}
 							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
 						default:
-							if (string.IsNullOrEmpty(r.NamespaceURI) || r.LocalName.IndexOf('.') > 0)
+							if (string.IsNullOrEmpty(r.NamespaceURI) || tagNamespace == r.NamespaceURI || r.LocalName.IndexOf('.') > 0)
 							{
 								atts.Add(new StringPair(r.Name, r.Value));
 								continue;
 							}
-							// System.Xaml does not ignore attributes with namespaces
-							members.Add(new Pair(new XamlMember(r.LocalName, r.NamespaceURI), r.Value));
+							// Custom directive
+							members.Add(new Pair(SchemaContext.GetXamlDirective(r.NamespaceURI, r.LocalName), r.Value));
 							break;
 					}
 				} while (r.MoveToNextAttribute());
