@@ -8,7 +8,6 @@ using NUnit.Framework;
 #if !NET_4_5
 using Portable.Xaml;
 using Portable.Xaml.Schema;
-using Portable.Xaml.Portable.Xaml;
 #else
 using System.Xaml;
 using System.Xaml.Schema;

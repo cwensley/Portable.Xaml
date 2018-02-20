@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Portable.Xaml.Portable.Xaml
+namespace Portable.Xaml
 {
     public class CompatibleXmlReader : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
     {

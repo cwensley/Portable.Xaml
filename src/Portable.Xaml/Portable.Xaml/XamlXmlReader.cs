@@ -27,7 +27,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Portable.Xaml.Portable.Xaml;
 using Portable.Xaml.Schema;
 
 using Pair = System.Collections.Generic.KeyValuePair<Portable.Xaml.XamlMember,string>;
