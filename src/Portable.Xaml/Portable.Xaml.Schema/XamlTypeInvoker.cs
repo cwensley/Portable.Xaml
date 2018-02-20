@@ -23,6 +23,11 @@
 //
 using System;
 using System.Collections;
+#if NETSTANDARD1_3
+using DictionaryType = System.Collections.Concurrent.ConcurrentDictionary<object, object>;
+#else
+using DictionaryType = System.Collections.Generic.Dictionary<object, object>;
+#endif
 using System.Collections.Generic;
 using System.Reflection;
 using Portable.Xaml.Markup;
@@ -47,7 +52,7 @@ namespace Portable.Xaml.Schema
 			Type = type;
 		}
 		
-		Dictionary<object, object> cache;
+		DictionaryType cache;
 
 		static object s_CreateImmutableFromMutableKey = new object();
 		static object s_MutableTypeKey = new object();
@@ -56,7 +61,8 @@ namespace Portable.Xaml.Schema
 			where T: class
 		{
 			if (cache == null)
-				cache = new Dictionary<object, object>();
+				cache = new DictionaryType();
+
 			object obj;
 			if (!cache.TryGetValue(key, out obj))
 			{
@@ -133,14 +139,13 @@ namespace Portable.Xaml.Schema
 
 			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
 			{
-				addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
+				cache[key] = addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
 				Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCallExpression());
 			}
 			else
 			{
-				addDelegate = mi.BuildCallExpression();
+				cache[key] = addDelegate = mi.BuildCallExpression();
 			}
-			cache[key] = addDelegate;
 			return addDelegate;
 		}
 
@@ -204,14 +209,13 @@ namespace Portable.Xaml.Schema
 					throw new InvalidOperationException($"The dictionary type '{instanceType}' does not have 'Add' method");
 				if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
 				{
-					addDelegate = (i, k, v) => mi.Invoke(i, new object[] { k, v });
+					cache[key] = addDelegate = (i, k, v) => mi.Invoke(i, new object[] { k, v });
 					Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCall2Expression());
 				}
 				else
 				{
-					addDelegate = mi.BuildCall2Expression();
+					cache[key] = addDelegate = mi.BuildCall2Expression();
 				}
-				cache[lookupKey] = addDelegate;
 				addDelegate(instance, key, item);
 			}
 			else
