@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -23,11 +23,7 @@
 //
 using System;
 using System.Collections;
-#if NETSTANDARD1_3
-using DictionaryType = System.Collections.Concurrent.ConcurrentDictionary<object, object>;
-#else
-using DictionaryType = System.Collections.Generic.Dictionary<object, object>;
-#endif
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using Portable.Xaml.Markup;
@@ -52,7 +48,7 @@ namespace Portable.Xaml.Schema
 			Type = type;
 		}
 		
-		DictionaryType cache;
+		ConcurrentDictionary<object, object> cache;
 
 		static object s_CreateImmutableFromMutableKey = new object();
 		static object s_MutableTypeKey = new object();
@@ -61,7 +57,7 @@ namespace Portable.Xaml.Schema
 			where T: class
 		{
 			if (cache == null)
-				cache = new DictionaryType();
+				cache = new ConcurrentDictionary<object, object>();
 
 			object obj;
 			if (!cache.TryGetValue(key, out obj))
