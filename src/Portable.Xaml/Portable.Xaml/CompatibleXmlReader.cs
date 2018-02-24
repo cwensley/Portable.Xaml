@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace Portable.Xaml
 {
-    public class CompatibleXmlReader : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
+    internal class CompatibleXmlReader : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
     {
 	    class Scope
 	    {
