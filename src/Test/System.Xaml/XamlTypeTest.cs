@@ -933,7 +933,7 @@ namespace MonoTests.Portable.Xaml
 #if HAS_TYPE_CONVERTER
 			Assert.IsNotInstanceOf<System.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
 #if PCL
-			Assert.IsInstanceOf(typeof(global::Portable.Xaml.XamlSchemaContext).Assembly.GetType("Portable.Xaml.ComponentModel.DateTimeConverter"), xt.TypeConverter.ConverterInstance, "#4");
+			Assert.IsInstanceOf(typeof(global::Portable.Xaml.XamlSchemaContext).Assembly.GetType("Portable.Xaml.ComponentModel.PortableXamlDateTimeConverter"), xt.TypeConverter.ConverterInstance, "#4");
 #endif
 #endif
 		}

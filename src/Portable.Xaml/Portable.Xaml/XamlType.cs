@@ -985,7 +985,7 @@ namespace Portable.Xaml
 				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
 
 			if (t == typeof(DateTime))
-				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.DateTimeConverter), this);
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.PortableXamlDateTimeConverter), this);
 
 			if (t == typeof(Uri))
 				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
