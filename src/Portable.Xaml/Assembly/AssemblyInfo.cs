@@ -82,3 +82,7 @@ using System.Security.Permissions;
 [assembly: TypeForwardedTo (typeof (System.Windows.Markup.ValueSerializerAttribute))]
 #endif
 #endif
+
+[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard10")]
+[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard13")]
+[assembly:InternalsVisibleTo("Portable.Xaml_test_core")]

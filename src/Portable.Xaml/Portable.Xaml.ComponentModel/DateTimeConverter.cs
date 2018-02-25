@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 #if NETSTANDARD
 using System.ComponentModel;
@@ -7,8 +7,13 @@ using System.Reflection;
 
 namespace Portable.Xaml.ComponentModel
 {
+	/*
+	This class is needed to pass the following test:
+	2) MonoTests.Portable.Xaml.XamlXmlWriterTest.Write_NullableDateTime_UtcWithNoMilliseconds
+	Built-in DateTimeConverter from System.ComponentModel seems to be incompatible
 
-	class DateTimeConverter : TypeConverter
+	*/
+	class PortableXamlDateTimeConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
