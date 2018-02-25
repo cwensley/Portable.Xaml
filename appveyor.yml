@@ -13,6 +13,7 @@ test:
     only:
     - artifacts\test\Release\netstandard1.0\Portable.Xaml_test_netstandard10.dll
     - artifacts\test\Release\netstandard1.3\Portable.Xaml_test_netstandard13.dll
+    - artifacts\test\Release\netstandard1.3\Portable.Xaml_test_netstandard20.dll
     - artifacts\test\Release\net461\Portable.Xaml_test_net_4_5.dll
   categories:
     except:

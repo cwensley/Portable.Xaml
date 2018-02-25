@@ -107,7 +107,7 @@ namespace Portable.Xaml.Markup
 			}
 
 			if (type == typeof(Uri))
-				return new TypeConverterValueSerializer(new UriTypeConverter());
+				return new TypeConverterValueSerializer(new Portable.Xaml.ComponentModel.UriTypeConverter());
 			return null;
 		}
 
