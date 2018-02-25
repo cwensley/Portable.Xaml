@@ -203,7 +203,13 @@ namespace Portable.Xaml
 				else
 				{
 #if NETSTANDARD1_3
-					foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
+#if NET_451
+					var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#else
+					var baseDirectory = AppContext.BaseDirectory;
+#endif
+
+					foreach (var file in Directory.EnumerateFiles(baseDirectory, "*.dll"))
 					{
 						try
 						{

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
 
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET_451
 [assembly:TypeForwardedTo(typeof(System.Reflection.ICustomAttributeProvider))]
 #else
 namespace System.Reflection

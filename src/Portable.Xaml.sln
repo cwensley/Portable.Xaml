@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-netstandard2.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-netstandard2.0", "Test\Portable.Xaml-tests-netstandard2.0.csproj", "{F85156F6-9EB3-4918-861C-4E1C64F1DF31}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-net451", "Portable.Xaml\Portable.Xaml-net451.csproj", "{6FA230D7-5141-45E9-AB65-76C37396537B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +209,22 @@ Global
 		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x64.Build.0 = Release|Any CPU
 		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x86.ActiveCfg = Release|Any CPU
 		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x86.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x64.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x86.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|ARM.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|ARM.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x64.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x64.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
