@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -203,7 +203,7 @@ namespace Portable.Xaml
 				else
 				{
 #if NETSTANDARD1_3
-#if NET_451
+#if NET_45
 					var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 #else
 					var baseDirectory = AppContext.BaseDirectory;

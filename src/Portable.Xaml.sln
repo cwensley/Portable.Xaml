@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-netstandard2.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-netstandard2.0", "Test\Portable.Xaml-tests-netstandard2.0.csproj", "{F85156F6-9EB3-4918-861C-4E1C64F1DF31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-net451", "Portable.Xaml\Portable.Xaml-net451.csproj", "{6FA230D7-5141-45E9-AB65-76C37396537B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-net45", "Portable.Xaml\Portable.Xaml-net45.csproj", "{6FA230D7-5141-45E9-AB65-76C37396537B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
