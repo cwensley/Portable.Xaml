@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -78,13 +78,18 @@ namespace Portable.Xaml
 		}
 
 		public XamlObjectWriter(XamlSchemaContext schemaContext, XamlObjectWriterSettings settings)
+			: this(schemaContext, settings, null)
+		{
+		}
+
+		public XamlObjectWriter(XamlSchemaContext schemaContext, XamlObjectWriterSettings settings, IAmbientProvider parentAmbientProvider)
 		{
 			if (schemaContext == null)
 				throw new ArgumentNullException("schemaContext");
 			this.sctx = schemaContext;
 			this.settings = settings ?? new XamlObjectWriterSettings();
 			var manager = new XamlWriterStateManager<XamlObjectWriterException, XamlObjectWriterException>(false);
-			intl = new XamlObjectWriterInternal(this, sctx, manager);
+			intl = new XamlObjectWriterInternal(this, sctx, manager, parentAmbientProvider);
 		}
 
 		XamlSchemaContext sctx;
@@ -291,7 +296,13 @@ namespace Portable.Xaml
 		const string Xmlns2000Namespace = "http://www.w3.org/2000/xmlns/";
 
 		public XamlObjectWriterInternal(XamlObjectWriter source, XamlSchemaContext schemaContext, XamlWriterStateManager manager)
-			: base(schemaContext, manager)
+			: this(source, schemaContext, manager, null)
+		{
+		}
+		public XamlObjectWriterInternal(
+			XamlObjectWriter source, XamlSchemaContext schemaContext,
+			XamlWriterStateManager manager, IAmbientProvider parentAmbientProvider)
+			: base(schemaContext, manager, parentAmbientProvider)
 		{
 			this.source = source;
 			var ext = source.Settings.ExternalNameScope;
