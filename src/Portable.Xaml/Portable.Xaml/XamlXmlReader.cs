@@ -571,7 +571,7 @@ namespace Portable.Xaml
 
 		XamlMember FindAttachableMember(string prefix, string typeName, string memberName)
 		{
-			string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : ResolveLocalNamespace(r.NamespaceURI);
+			string apns = r.LookupNamespace (prefix);
 			var axtn = new XamlTypeName (apns, typeName, null);
 			var at = sctx.GetXamlType (axtn);
 			return at?.GetAttachableMember (memberName);
