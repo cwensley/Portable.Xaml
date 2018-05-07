@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -685,7 +685,16 @@ namespace MonoTests.Portable.Xaml
 		public void Read_AttachedPropertyWithNamespace()
 		{
 			var r = GetReader("AttachedPropertyWithNamespace.xml");
-			Read_AttachedProperty(r, true);
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
+			Read_AttachedProperty(r, ns);
+		}
+
+		[Test]
+		public void Read_AttachedPropertyOnClassWithDifferentNamespace()
+		{
+			var r = GetReader("AttachedPropertyOnClassWithDifferentNamespace.xml");
+			var ns = "clr-namespace:MonoTests.Portable.Xaml.NamespaceTest2;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
+			Read_AttachedProperty(r, ns, typeof(NamespaceTest2.AttachedWrapperWithDifferentBaseNamespace));
 		}
 
 		[Test]

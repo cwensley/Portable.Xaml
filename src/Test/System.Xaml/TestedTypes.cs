@@ -108,6 +108,16 @@ namespace MonoTests.Portable.Xaml.NamespaceTest2
 	{
 		public string SomeOtherProperty { get; set; }
 	}
+
+	public class AttachedWrapperWithDifferentBaseNamespace : AttachedPropertyStore
+	{
+		public AttachedWrapperWithDifferentBaseNamespace()
+		{
+			Value = new Attached();
+		}
+
+		public Attached Value { get; set; }
+	}
 }
 
 namespace MonoTests.Portable.Xaml

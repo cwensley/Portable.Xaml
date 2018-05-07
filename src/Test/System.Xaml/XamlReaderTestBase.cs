@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -3624,7 +3624,7 @@ if (i == 0) {
 			Assert.IsFalse (r.Read (), "end");
 		}
 		
-		protected void Read_AttachedProperty (XamlReader r, bool withNamespace = false)
+		protected void Read_AttachedProperty (XamlReader r, string additionalNamspace = null, Type wrapperType = null)
 		{
 			var at = new XamlType (typeof (Attachable), r.SchemaContext);
 
@@ -3632,18 +3632,16 @@ if (i == 0) {
 			Assert.AreEqual (XamlNodeType.NamespaceDeclaration, r.NodeType, "ns#1-2");
 			Assert.IsNotNull (r.Namespace, "ns#1-3");
 			Assert.AreEqual ("", r.Namespace.Prefix, "ns#1-4");
-			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
-			Assert.AreEqual (assns, r.Namespace.Namespace, "ns#1-5");
 
-			if (withNamespace)
+			if (additionalNamspace != null)
 			{
-				this.ReadNamespace(r, "ns", assns, "ns#2");
+				this.ReadNamespace(r, "ns", additionalNamspace, "ns#2");
 			}
 
 			// t:AttachedWrapper
 			Assert.IsTrue (r.Read (), "so#1-1");
 			Assert.AreEqual (XamlNodeType.StartObject, r.NodeType, "so#1-2");
-			var xt = new XamlType (typeof (AttachedWrapper), r.SchemaContext);
+			var xt = new XamlType (wrapperType ?? typeof(AttachedWrapper), r.SchemaContext);
 			Assert.AreEqual (xt, r.Type, "so#1-3");
 
 			if (r is XamlXmlReader)
