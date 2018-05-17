@@ -699,8 +699,19 @@ namespace Portable.Xaml
 					yield break;
 				}
 
-				// ok, then create unknown member.
-				xm = new XamlMember (name, xt, false); // FIXME: not sure if isAttachable is always false.
+				if (idx >= 0)
+				{
+					// Unknown property.
+					xm = new XamlMember(name, xt, false); // FIXME: not sure if isAttachable is always false.
+				}
+				else
+				{
+					// Unknown content member.
+					xm = XamlLanguage.UnknownContent;
+					foreach (var ni in ReadMember(xt, xm))
+						yield return ni;
+					yield break;
+				}
 			}
 
 			if (!r.IsEmptyElement) {
@@ -736,7 +747,7 @@ namespace Portable.Xaml
 				else
 					throw new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)) { LineNumber = this.LineNumber, LinePosition = this.LinePosition };
 			} else {
-				if (xm.Type.IsCollection || xm.Type.IsDictionary) {
+				if (xm.Type.IsCollection || xm.Type.IsDictionary || xm == XamlLanguage.UnknownContent) {
 					foreach (var ni in ReadCollectionItems (parentType, xm))
 						yield return ni;
 				}

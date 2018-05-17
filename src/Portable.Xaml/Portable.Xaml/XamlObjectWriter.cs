@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 // Copyright (C) 2012 Xamarin Inc. http://xamarin.com
 //
@@ -438,6 +438,8 @@ namespace Portable.Xaml
 			// FIXME: this condition needs to be examined. What is known to be prevented are: PositionalParameters, Initialization and Base (the last one sort of indicates there's a lot more).
 			else
 			{
+				if (property == XamlLanguage.UnknownContent)
+					throw new XamlObjectWriterException($"Type '{object_states.Peek().Type}' does not have a content property.");
 				if (property.IsUnknown)
 					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
 				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance

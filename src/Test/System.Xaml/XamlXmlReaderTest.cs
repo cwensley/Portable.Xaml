@@ -1120,5 +1120,49 @@ namespace MonoTests.Portable.Xaml
 				});
 			});
 		}
+
+		/// <summary>
+		/// Tests that unexpected object members are enclosed in the x:_UnknownContent intrinsic member (rather than just ignored).
+		/// </summary>
+		[Test]
+		public void Read_UnknownContent()
+		{
+			var xaml = @"<TestClass1 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><TestClass3/><TestClass4/></TestClass1>".UpdateXml ();
+			var reader = GetReaderText(xaml);
+
+			reader.Read(); // xmlns
+			Assert.AreEqual(reader.NodeType, XamlNodeType.NamespaceDeclaration);
+
+			reader.Read(); // <TestClass1>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+
+			ReadBase(reader);
+
+			reader.Read(); // StartMember (x:_UnknownContent)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);
+			Assert.AreEqual(reader.Member, XamlLanguage.UnknownContent);
+
+			reader.Read(); // <TestClass3>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass3)));
+
+			reader.Read(); // </TestClass3>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);	
+			
+			reader.Read(); // <TestClass4>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass4)));
+
+			reader.Read(); // </TestClass4>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			reader.Read(); // EndMember (x:_UnknownContent)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </TestClass1>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			Assert.IsFalse(reader.Read()); // EOF
+		}
 	}
 }

@@ -2135,5 +2135,15 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsNull(commandContainer.Command2);
 			}
 		}
+
+		[Test]
+		public void Write_UnknownContent()
+		{
+			var xw = new XamlObjectWriter(sctx);
+			xw.WriteNamespace(new NamespaceDeclaration(XamlLanguage.Xaml2006Namespace, "x"));
+			xw.WriteStartObject(xt3);
+
+			Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartMember(XamlLanguage.UnknownContent));
+		}
 	}
 }
