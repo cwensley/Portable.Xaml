@@ -1787,6 +1787,18 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsInstanceOf<DeferredLoadingChild>(obj, "#7");
 				Assert.AreEqual("Blah", ((DeferredLoadingChild)obj).Foo, "#8");
 			}
+		}		
+		
+		[Test]
+		public void Write_DeferredLoadingContainerMember2()
+		{
+			using (var xr = GetReader("DeferredLoadingContainerMember2.xml"))
+			{
+				var res = (DeferredLoadingContainerMember2)XamlServices.Load(xr);
+				var obj = res.Child();
+
+				Assert.AreEqual("Blah", obj.Foo);
+			}
 		}
 
 		[Test]

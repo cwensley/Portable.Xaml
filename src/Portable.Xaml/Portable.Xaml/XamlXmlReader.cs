@@ -354,13 +354,14 @@ namespace Portable.Xaml
 				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments?.Select(xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
 
-			// It could still be GetObject if current_member
-			// is not a directive and current type is not
+			// It could still be GetObject if current_member is not defer-loaded, it
+			// is not a directive, and current type is not
 			// a markup extension.
 			// (I'm not very sure about the condition;
 			// it could be more complex.)
 			// seealso: bug #682131
 			if (!ReferenceEquals(currentMember, null)
+			    && ReferenceEquals(currentMember.DeferringLoader, null)
 				&& !xt.CanAssignTo(currentMember.Type)
 				&& !ReferenceEquals(xt, XamlLanguage.Reference)
 			    && (

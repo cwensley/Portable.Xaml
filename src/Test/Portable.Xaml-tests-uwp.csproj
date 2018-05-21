@@ -219,6 +219,7 @@
     <Content Include="XmlFiles\DefaultNamespaces_WithDefinedNamespace.xml" />
     <Content Include="XmlFiles\DeferredLoadingCollectionContainer.xml" />
     <Content Include="XmlFiles\DeferredLoadingContainerMember.xml" />
+    <Content Include="XmlFiles\DeferredLoadingContainerMember2.xml" />
     <Content Include="XmlFiles\DeferredLoadingContainerMemberStringType.xml" />
     <Content Include="XmlFiles\DeferredLoadingContainerType.xml" />
     <Content Include="XmlFiles\DeferredLoadingWithInvalidType.xml" />

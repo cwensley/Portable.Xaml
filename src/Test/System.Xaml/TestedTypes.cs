@@ -1392,8 +1392,23 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException();
 		}
-	}
+	}	
+	
+	public class TestDeferredLoader<T> : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			var list = new XamlNodeList(xamlReader.SchemaContext);
+			XamlServices.Transform(xamlReader, list.Writer);
 
+			return new Func<T>(() => (T)XamlServices.Load(list.GetReader()));
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			throw new NotImplementedException();
+		}
+	}
 
 	public class DeferredLoadingChild
 	{
@@ -1416,6 +1431,13 @@ namespace MonoTests.Portable.Xaml
 	{
 		[XamlDeferLoad(typeof(TestDeferredLoader), typeof(DeferredLoadingChild))]
 		public DeferredLoadingChild Child { get; set; }
+	}	
+	
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMember2
+	{
+		[XamlDeferLoad(typeof(TestDeferredLoader<TestClass4>), typeof(TestClass4))]
+		public Func<TestClass4> Child { get; set; }
 	}
 
 	[ContentProperty("Item")]
