@@ -1164,5 +1164,51 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.IsFalse(reader.Read()); // EOF
 		}
+
+		/// <summary>
+		/// Tests that a property marked with [XamlDeferLoad] whose actual type is not compatible with the deferred content
+		/// produces a valid XAML node list.
+		/// </summary>
+		[Test]
+		public void Read_DeferLoadedProperty()
+		{
+			var xaml = File.ReadAllText(Compat.GetTestFile("DeferredLoadingContainerMember2.xml")).UpdateXml();
+			var reader = GetReaderText(xaml);
+
+			reader.Read(); // xmlns
+			Assert.AreEqual(reader.NodeType, XamlNodeType.NamespaceDeclaration);
+
+			reader.Read(); // <DeferredLoadingContainerMember2>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+
+			ReadBase(reader);
+
+			reader.Read(); // StartMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);
+						
+			reader.Read(); // <DeferredLoadingChild>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass4)));
+
+			reader.Read(); // StartMember (Foo)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);			
+			
+			reader.Read(); // "Blah"
+			Assert.AreEqual(reader.NodeType, XamlNodeType.Value);
+
+			reader.Read(); // EndMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </DeferredLoadingChild>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			reader.Read(); // EndMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </DeferredLoadingContainerMember2>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			Assert.IsFalse(reader.Read()); // EOF
+		}
 	}
 }
