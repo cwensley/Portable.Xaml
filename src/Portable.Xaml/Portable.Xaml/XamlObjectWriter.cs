@@ -82,6 +82,7 @@ namespace Portable.Xaml
 		{
 		}
 
+		[EnhancedXaml]
 		public XamlObjectWriter(XamlSchemaContext schemaContext, XamlObjectWriterSettings settings, IAmbientProvider parentAmbientProvider)
 		{
 			if (schemaContext == null)
