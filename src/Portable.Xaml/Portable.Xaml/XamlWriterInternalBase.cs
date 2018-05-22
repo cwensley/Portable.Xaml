@@ -50,22 +50,11 @@ namespace Portable.Xaml
 
 		protected XamlWriterInternalBase(XamlSchemaContext schemaContext, XamlWriterStateManager manager, IAmbientProvider parentAmbientProvider = null)
 		{
-			this.parentAmbientProvider = parentAmbientProvider;
+			this.object_states = new ObjectStateStack(parentAmbientProvider);
 			this.sctx = schemaContext;
 			this.manager = manager;
 			var p = new PrefixLookup(sctx) { IsCollectingNamespaces = true }; // it does not raise unknown namespace error.
-			service_provider = ValueSerializerContext.Create(p, schemaContext, GetCurrentAmbientProvider, this, this, this, this as IXamlObjectWriterFactory);
-		}
-
-
-
-		protected virtual IAmbientProvider GetCurrentAmbientProvider()
-		{
-			IAmbientProvider basicAmbientProvider = new ObjectStatesAmbientProvider(object_states);
-			var ambientProvider =
-				parentAmbientProvider == null ? basicAmbientProvider
-					: new StackAmbientProvider(basicAmbientProvider, parentAmbientProvider);
-			return ambientProvider;
+			service_provider = ValueSerializerContext.Create(p, schemaContext, object_states.GetAmbientProvider, this, this, this, this as IXamlObjectWriterFactory);
 		}
 
 		internal XamlSchemaContext sctx;
@@ -74,8 +63,7 @@ namespace Portable.Xaml
 		internal ValueSerializerContext service_provider;
 
 		internal ObjectState root_state;
-		internal readonly Stack<ObjectState> object_states = new Stack<ObjectState>();
-		internal readonly IAmbientProvider parentAmbientProvider;
+		internal readonly ObjectStateStack object_states;
 		internal PrefixLookup prefix_lookup => (PrefixLookup)service_provider.GetService(typeof(INamespacePrefixLookup));
 
 		public Type GetDestinationType() => CurrentMember?.Type.UnderlyingType;
@@ -313,6 +301,59 @@ namespace Portable.Xaml
 				return vs.ConverterInstance.ConvertToString(value, service_provider);
 			else
 				throw new XamlXmlWriterException(String.Format("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType() : null));
+		}
+
+		internal class ObjectStateStack
+		{
+			private readonly Stack<StackItem> stack = new Stack<StackItem>();
+			private readonly IAmbientProvider parentAmbientProvider;
+
+			public ObjectStateStack(IAmbientProvider parentAmbientProvider = null)
+			{
+				this.parentAmbientProvider = parentAmbientProvider;
+			}
+
+			public ObjectState Peek() => stack.Peek().ObjectState;
+
+			public ObjectState Pop() => stack.Pop().ObjectState;
+
+			public void Push(ObjectState item) => stack.Push(new StackItem(item));
+
+			public int Count => stack.Count;
+
+			public IAmbientProvider GetAmbientProvider()
+			{
+				// if we already have one for this stack state, provide
+				var existingProvider = stack.Peek().AmbientProvider;
+				if (existingProvider != null)
+				{
+					return existingProvider;
+				}
+				// else, create one, add it to stack state and return.
+				var provider = CreateAmbientProvider();
+				var state = Pop();
+				stack.Push(new StackItem(state, provider));
+				return provider;
+			}
+			private IAmbientProvider CreateAmbientProvider()
+			{
+				IAmbientProvider basicAmbientProvider = new ObjectStatesAmbientProvider(stack.Select(x => x.ObjectState));
+				var ambientProvider =
+					parentAmbientProvider == null ? basicAmbientProvider
+						: new StackAmbientProvider(basicAmbientProvider, parentAmbientProvider);
+				return ambientProvider;
+			}
+
+			private struct StackItem
+			{
+				public StackItem(ObjectState objectState, IAmbientProvider provider = null)
+				{
+					ObjectState = objectState;
+					AmbientProvider = provider;
+				}
+				public readonly ObjectState ObjectState;
+				public readonly IAmbientProvider AmbientProvider;
+			}
 		}
 
 		private class ObjectStatesAmbientProvider : IAmbientProvider
