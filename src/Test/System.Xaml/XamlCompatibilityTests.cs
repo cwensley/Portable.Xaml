@@ -59,6 +59,7 @@ namespace MonoTests.Portable.Xaml
 	<Element i2:ShouldNotIgnore='1'/>
     <Element compat:ShouldMap='1' ignoredCompat:ShouldMap='1' ignoredCompat2:ShouldMapAndPreserve='1'/>
 </Root>";
+			// TODO: Use XamlXmlParser directly with compaibility mode turned on.
 			var rdr = new CompatibleXmlReader(XmlReader.Create(new StringReader(xml)),
 				(string ns, out string mapped) =>
 				{

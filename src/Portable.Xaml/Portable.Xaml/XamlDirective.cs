@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -35,35 +35,35 @@ namespace Portable.Xaml
 	{
 		class DirectiveMemberInvoker : XamlMemberInvoker
 		{
-			public DirectiveMemberInvoker (XamlDirective directive)
-				: base (directive)
+			public DirectiveMemberInvoker(XamlDirective directive)
+				: base(directive)
 			{
 			}
 		}
 
-		public XamlDirective (string xamlNamespace, string name)
-			: this (new string [] {xamlNamespace}, name, new XamlType (typeof (object), new XamlSchemaContext (new XamlSchemaContextSettings ())), null, AllowedMemberLocations.Any)
+		public XamlDirective(string xamlNamespace, string name)
+			: this(new string[] { xamlNamespace }, name, new XamlType(typeof(object), new XamlSchemaContext(new XamlSchemaContextSettings())), null, AllowedMemberLocations.Any)
 		{
 			if (xamlNamespace == null)
-				throw new ArgumentNullException ("xamlNamespace");
+				throw new ArgumentNullException("xamlNamespace");
 			is_unknown = true;
 		}
 
 #if HAS_TYPE_CONVERTER
-		public 
+		public
 #else
 		internal
 #endif
-		XamlDirective (IEnumerable<string> xamlNamespaces, string name, XamlType xamlType, XamlValueConverter<TypeConverter> typeConverter, AllowedMemberLocations allowedLocation)
-			: base (true, xamlNamespaces != null ? xamlNamespaces.FirstOrDefault () : null, name)
+		XamlDirective(IEnumerable<string> xamlNamespaces, string name, XamlType xamlType, XamlValueConverter<TypeConverter> typeConverter, AllowedMemberLocations allowedLocation)
+			: base(true, xamlNamespaces != null ? xamlNamespaces.FirstOrDefault() : null, name)
 		{
 			if (xamlNamespaces == null)
-				throw new ArgumentNullException ("xamlNamespaces");
+				throw new ArgumentNullException("xamlNamespaces");
 			if (ReferenceEquals(xamlType, null))
-				throw new ArgumentNullException ("xamlType");
+				throw new ArgumentNullException("xamlType");
 
 			type = xamlType;
-			xaml_namespaces = new List<string> (xamlNamespaces);
+			xaml_namespaces = new List<string>(xamlNamespaces);
 			AllowedLocation = allowedLocation;
 			type_converter = typeConverter;
 		}
@@ -75,22 +75,26 @@ namespace Portable.Xaml
 		IList<string> xaml_namespaces;
 
 		// this is for XamlLanguage.UnknownContent
-		internal bool InternalIsUnknown {
+		internal bool InternalIsUnknown
+		{
 			set { is_unknown = value; }
 		}
 
-		public override int GetHashCode ()
+		public override int GetHashCode()
 		{
 			var pns = PreferredXamlNamespace ?? string.Empty;
 			return pns.GetHashCode() ^ Name.GetHashCode();
 		}
 
-		public override IList<string> GetXamlNamespaces ()
+		public override IList<string> GetXamlNamespaces()
 		{
 			return xaml_namespaces;
 		}
 
-		protected override sealed ICustomAttributeProvider LookupCustomAttributeProvider ()
+#if HAS_CUSTOM_ATTRIBUTE_PROVIDER
+		protected
+#endif
+		internal override sealed ICustomAttributeProvider LookupCustomAttributeProvider ()
 		{
 			return null; // as documented.
 		}

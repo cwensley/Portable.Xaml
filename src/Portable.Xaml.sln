@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-net_4_5", "Test\Portable.Xaml-tests-net_4_5.csproj", "{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Xaml-tests-net_4_5", "Test\System.Xaml-tests-net_4_5.csproj", "{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml.Benchmark", "Portable.Xaml.Benchmark\Portable.Xaml.Benchmark.csproj", "{AC406459-D324-4ADF-853D-A58B63396591}"
 EndProject
@@ -26,6 +26,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{39859568
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-netstandard1.0", "Portable.Xaml\Portable.Xaml-netstandard1.0.csproj", "{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-netstandard2.0", "Portable.Xaml\Portable.Xaml-netstandard2.0.csproj", "{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-netstandard2.0", "Test\Portable.Xaml-tests-netstandard2.0.csproj", "{0B86715A-8032-441E-BFE8-136A7D1BFD19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,6 +175,38 @@ Global
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x64.Build.0 = Release|Any CPU
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x86.Build.0 = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|x64.Build.0 = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Debug|x86.Build.0 = Debug|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|ARM.Build.0 = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|x64.ActiveCfg = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|x64.Build.0 = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|x86.ActiveCfg = Release|Any CPU
+		{B21ED206-4455-45E4-AE25-7EE7E4D6BD34}.Release|x86.Build.0 = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|ARM.Build.0 = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|x64.Build.0 = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Debug|x86.Build.0 = Debug|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|ARM.ActiveCfg = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|ARM.Build.0 = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|x64.ActiveCfg = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|x64.Build.0 = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|x86.ActiveCfg = Release|Any CPU
+		{0B86715A-8032-441E-BFE8-136A7D1BFD19}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

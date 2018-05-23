@@ -721,7 +721,7 @@ namespace MonoTests.Portable.Xaml
 			XamlServices.Transform (new XamlObjectReader (obj), xxw);
 			Console.Error.WriteLine (sw);
 			*/
-			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace("net_4_0", Compat.Version);
+			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".UpdateXml();
 			var settings = new XamlObjectWriterSettings();
 			bool invoked = false;
 			settings.XamlSetValueHandler = (sender, e) =>
