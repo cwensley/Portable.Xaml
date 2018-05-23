@@ -472,7 +472,7 @@ namespace Portable.Xaml
 					}
 					continue;
 				default:
-					foreach (var x in ReadMemberText (xt))
+					foreach (var x in ReadMemberText (parentType, xt))
 						yield return x;
 					continue;
 				}
@@ -647,20 +647,40 @@ namespace Portable.Xaml
 			return sb.ToString();
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType xt)
+		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType parentType, XamlType xt)
 		{
 			// this value is for Initialization, or Content property value
 			XamlMember xm;
 			if (xt.ContentProperty != null)
 				xm = xt.ContentProperty;
+			else if (xt.IsCollection)
+				xm = XamlLanguage.Items;
 			else
 				xm = XamlLanguage.Initialization;
 			yield return Node (XamlNodeType.StartMember, xm);
-			yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
-			r.Read ();
-			yield return Node (XamlNodeType.EndMember, xm);
+
+			while (r.NodeType != XmlNodeType.EndElement)
+			{
+				switch (r.NodeType)
+				{
+					case XmlNodeType.Text:
+						yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value));
+						r.Read();
+						break;
+					case XmlNodeType.Element:
+						foreach (var x in ReadObjectElement(parentType, xm))
+						{
+							yield return x;
+						}
+						break;
+					default:
+						throw new XamlParseException (String.Format ("Text or Element is expected, but got {0}", r.NodeType));
+				}
+			}
+
+			yield return Node(XamlNodeType.EndMember, xm);
 		}
-		
+
 		// member element, implicit member, children via content property, or value
 		IEnumerable<XamlXmlNodeInfo> ReadMemberElement (XamlType parentType, XamlType xt)
 		{
