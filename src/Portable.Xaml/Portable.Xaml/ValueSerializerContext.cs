@@ -55,7 +55,7 @@ namespace Portable.Xaml
 		NamespaceResolver namespace_resolver;
 		PrefixLookup prefix_lookup;
 		XamlSchemaContext sctx;
-		IAmbientProvider ambient_provider;
+		Func<IAmbientProvider> _ambientProviderProvider;
 		IProvideValueTarget provideValue;
 		IRootObjectProvider rootProvider;
 		IDestinationTypeProvider destinationProvider;
@@ -144,7 +144,7 @@ namespace Portable.Xaml
 		}
 #endif
 
-		public static ValueSerializerContext Create(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		public static ValueSerializerContext Create(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, Func<IAmbientProvider> ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
 		{
 #if !HAS_TYPE_CONVERTER
 			ValueSerializerContext context;
@@ -160,11 +160,11 @@ namespace Portable.Xaml
 			return context;
 		}
 
-		void Initialize(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, IAmbientProvider ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
+		void Initialize(PrefixLookup prefixLookup, XamlSchemaContext schemaContext, Func<IAmbientProvider> ambientProvider, IProvideValueTarget provideValue, IRootObjectProvider rootProvider, IDestinationTypeProvider destinationProvider, IXamlObjectWriterFactory objectWriterFactory)
 		{
 			prefix_lookup = prefixLookup ?? throw new ArgumentNullException("prefixLookup");
 			sctx = schemaContext ?? throw new ArgumentNullException("schemaContext");
-			ambient_provider = ambientProvider;
+			_ambientProviderProvider = ambientProvider;
 			this.provideValue = provideValue;
 			this.rootProvider = rootProvider;
 			this.destinationProvider = destinationProvider;
@@ -188,7 +188,7 @@ namespace Portable.Xaml
 			if (serviceType == typeof(IXamlTypeResolver))
 				return TypeResolver;
 			if (serviceType == typeof(IAmbientProvider))
-				return ambient_provider;
+				return _ambientProviderProvider?.Invoke();
 			if (serviceType == typeof(IXamlSchemaContextProvider))
 				return this;
 			if (serviceType == typeof(IProvideValueTarget))
