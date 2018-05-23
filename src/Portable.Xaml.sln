@@ -1,21 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-net_4_5", "Test\Portable.Xaml-tests-net_4_5.csproj", "{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-net_4_5", "Test\Portable.Xaml-tests-net_4_5.csproj", "{F4FA4B21-EF1C-48DE-8F4C-16496005FB94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml.Benchmark", "Portable.Xaml.Benchmark\Portable.Xaml.Benchmark.csproj", "{AC406459-D324-4ADF-853D-A58B63396591}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-netstandard1.3", "Portable.Xaml\Portable.Xaml-netstandard1.3.csproj", "{CDC8F791-56FC-4B15-AAD2-BC460657CC02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-netstandard1.3", "Portable.Xaml\Portable.Xaml-netstandard1.3.csproj", "{CDC8F791-56FC-4B15-AAD2-BC460657CC02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-netstandard1.0", "Test\Portable.Xaml-tests-netstandard1.0.csproj", "{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-netstandard1.0", "Test\Portable.Xaml-tests-netstandard1.0.csproj", "{FDA04C3E-7386-4F45-A7F2-C69DB33B72FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-netstandard1.3", "Test\Portable.Xaml-tests-netstandard1.3.csproj", "{E9DCCDCC-03A8-4BD1-888D-CEE86468A15A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-netstandard1.3", "Test\Portable.Xaml-tests-netstandard1.3.csproj", "{E9DCCDCC-03A8-4BD1-888D-CEE86468A15A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-uwp", "Test\Portable.Xaml-tests-uwp.csproj", "{1B4909D0-ECFB-4E32-8C02-B164DB1D64C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-tests-core", "Test\Portable.Xaml-tests-core.csproj", "{1E5C8B3A-E196-499C-9849-9876EB621A7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-core", "Test\Portable.Xaml-tests-core.csproj", "{1E5C8B3A-E196-499C-9849-9876EB621A7C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{39859568-90DD-4BA1-A525-2899C232B44E}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,7 +25,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{39859568
 		..\NuGet.Config = ..\NuGet.Config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Portable.Xaml-netstandard1.0", "Portable.Xaml\Portable.Xaml-netstandard1.0.csproj", "{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-netstandard1.0", "Portable.Xaml\Portable.Xaml-netstandard1.0.csproj", "{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-netstandard2.0", "Portable.Xaml\Portable.Xaml-netstandard2.0.csproj", "{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-tests-netstandard2.0", "Test\Portable.Xaml-tests-netstandard2.0.csproj", "{F85156F6-9EB3-4918-861C-4E1C64F1DF31}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Portable.Xaml-net45", "Portable.Xaml\Portable.Xaml-net45.csproj", "{6FA230D7-5141-45E9-AB65-76C37396537B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,9 +177,60 @@ Global
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x64.Build.0 = Release|Any CPU
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A170ABB-8861-4010-A9F0-E49A9AFDD3A6}.Release|x86.Build.0 = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|ARM.Build.0 = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|x64.Build.0 = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Debug|x86.Build.0 = Debug|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|ARM.ActiveCfg = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|ARM.Build.0 = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|x64.ActiveCfg = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|x64.Build.0 = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|x86.ActiveCfg = Release|Any CPU
+		{FA7B4570-8FB9-4699-B24D-E27D7F4D8CCF}.Release|x86.Build.0 = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|x64.Build.0 = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Debug|x86.Build.0 = Debug|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|ARM.Build.0 = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x64.ActiveCfg = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x64.Build.0 = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x86.ActiveCfg = Release|Any CPU
+		{F85156F6-9EB3-4918-861C-4E1C64F1DF31}.Release|x86.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|ARM.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x64.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Debug|x86.Build.0 = Debug|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|ARM.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|ARM.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x64.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x64.Build.0 = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6FA230D7-5141-45E9-AB65-76C37396537B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {436FBDA3-7DA0-43A9-9A8C-0E30EEF60B91}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0

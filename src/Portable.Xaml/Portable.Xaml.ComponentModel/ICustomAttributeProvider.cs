@@ -1,12 +1,28 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
 
+#if NETSTANDARD2_0 || NET_45
+[assembly:TypeForwardedTo(typeof(System.Reflection.ICustomAttributeProvider))]
+#else
+namespace System.Reflection
+{
+	public interface ICustomAttributeProvider
+	{
+		object[] GetCustomAttributes(bool inherit);
+
+		object[] GetCustomAttributes(Type attributeType, bool inherit);
+
+		bool IsDefined(Type attributeType, bool inherit);
+	}
+}
+#endif
+
 namespace Portable.Xaml.ComponentModel
 {
-	class TypeAttributeProvider : ICustomAttributeProvider
+	class TypeAttributeProvider : System.Reflection.ICustomAttributeProvider
 	{
 		readonly Type type;
 
@@ -33,7 +49,7 @@ namespace Portable.Xaml.ComponentModel
 		}
 	}
 
-	class MemberAttributeProvider : ICustomAttributeProvider
+	class MemberAttributeProvider : System.Reflection.ICustomAttributeProvider
 	{
 		readonly MemberInfo info;
 
@@ -58,14 +74,5 @@ namespace Portable.Xaml.ComponentModel
 		{
 			return info.IsDefined(attributeType, inherit);
 		}
-	}
-
-	public interface ICustomAttributeProvider
-	{
-		object[] GetCustomAttributes(bool inherit);
-
-		object[] GetCustomAttributes(Type attributeType, bool inherit);
-
-		bool IsDefined(Type attributeType, bool inherit);
 	}
 }
