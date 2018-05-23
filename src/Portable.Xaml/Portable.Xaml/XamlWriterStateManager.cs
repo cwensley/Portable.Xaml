@@ -123,6 +123,7 @@ namespace Portable.Xaml
 		// state
 		XamlWriteState state = XamlWriteState.Initial;
 		bool ns_pushed;
+		Stack<bool> in_collection = new Stack<bool>();
 		bool accept_multiple_values; // It is PositionalParameters-specific state.
 
 		public XamlWriteState State {
@@ -157,6 +158,9 @@ namespace Portable.Xaml
 			RejectNamespaces (XamlNodeType.EndObject);
 			CheckState (XamlNodeType.EndObject);
 			state = hasMoreNodes ? XamlWriteState.ObjectWritten : allow_multiple_results ? XamlWriteState.Initial : XamlWriteState.End;
+
+			// FIXME: This isn't right: EndObject gets called more times than StartObject.
+			if (in_collection.Count > 0) in_collection.Pop();
 		}
 
 		public void GetObject ()
@@ -173,11 +177,12 @@ namespace Portable.Xaml
 			ns_pushed = false;
 		}
 
-		public void StartObject ()
+		public void StartObject (XamlType xt)
 		{
 			CheckState (XamlNodeType.StartObject);
 			state = XamlWriteState.ObjectStarted;
 			ns_pushed = false;
+			in_collection.Push(xt.IsCollection);
 		}
 
 		public void Value ()
@@ -242,7 +247,7 @@ namespace Portable.Xaml
 						return;
 					break;
 				case XamlNodeType.StartObject:
-					if (allow_object_after_value)
+					if (allow_object_after_value || (in_collection.Count > 0 && in_collection.Peek()))
 						return;
 					break;
 				case XamlNodeType.EndMember:

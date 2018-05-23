@@ -210,7 +210,7 @@ namespace Portable.Xaml
 			if (ReferenceEquals(xamlType, null))
 				throw new ArgumentNullException("xamlType");
 
-			manager.StartObject();
+			manager.StartObject(xamlType);
 			var cstate = new ObjectState() { Type = xamlType };
 			object_states.Push(cstate);
 
