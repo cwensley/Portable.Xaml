@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -202,7 +202,7 @@ namespace Portable.Xaml
 				}
 				else
 				{
-#if NETSTANDARD1_3
+#if NETSTANDARD1_3 || NETSTANDARD2_0
 					foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
 					{
 						try
@@ -742,13 +742,19 @@ namespace Portable.Xaml
 		}
 
 		[EnhancedXaml]
-		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(Type type)
+#if HAS_CUSTOM_ATTRIBUTE_PROVIDER
+		protected
+#endif
+		internal virtual ICustomAttributeProvider GetCustomAttributeProvider(Type type)
 		{
 			return new TypeAttributeProvider(type);
 		}
 
 		[EnhancedXaml]
-		protected internal virtual ICustomAttributeProvider GetCustomAttributeProvider(MemberInfo member)
+#if HAS_CUSTOM_ATTRIBUTE_PROVIDER
+		protected
+#endif
+		internal virtual ICustomAttributeProvider GetCustomAttributeProvider(MemberInfo member)
 		{
 			return new MemberAttributeProvider(member);
 		}
