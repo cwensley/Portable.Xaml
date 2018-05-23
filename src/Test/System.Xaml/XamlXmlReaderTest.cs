@@ -1266,5 +1266,22 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.IsFalse(r.Read()); // EOF
 		}
+
+		[Test]
+		public void Inner_Text_And_Items_Should_Be_Added_Via_IList()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	Hello
+    <CollectionItem Name='World'/>
+	!
+</CollectionItemCollectionAddOverride>";
+			var result = (CollectionItemCollectionAddOverride)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(3, result.Count);
+			Assert.AreEqual("Hello ", result[0].Name);
+			Assert.AreEqual("World", result[1].Name);
+			Assert.AreEqual(" !", result[2].Name);
+		}
 	}
 }
