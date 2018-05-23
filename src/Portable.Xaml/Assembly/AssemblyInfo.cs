@@ -49,8 +49,8 @@ using System.Security.Permissions;
 [assembly: AssemblyTitle("Portable.Xaml.dll")]
 [assembly: AssemblyDescription("Portable.Xaml.dll")]
 [assembly: AssemblyDefaultAlias("Portable.Xaml.dll")]
-[assembly: AssemblyVersion("0.20.*")]
-[assembly: AssemblyInformationalVersion("0.21.0-alpha")]
+[assembly: AssemblyVersion("0.21.*")]
+[assembly: AssemblyInformationalVersion("0.22.0-alpha")]
 
 [assembly: AssemblyCompany("Mono development team")]
 [assembly: AssemblyCopyright("(c) Various Mono authors")]
@@ -83,6 +83,12 @@ using System.Security.Permissions;
 #endif
 #endif
 
+#if STRONGNAME
+[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard10, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
+[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard13, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
+[assembly:InternalsVisibleTo("Portable.Xaml_test_core, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
+#else
 [assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard10")]
 [assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard13")]
 [assembly:InternalsVisibleTo("Portable.Xaml_test_core")]
+#endif
