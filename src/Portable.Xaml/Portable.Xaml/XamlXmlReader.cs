@@ -321,7 +321,7 @@ namespace Portable.Xaml
 				yield break;
 
 			if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA) {
-				yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value));
+				yield return Node (XamlNodeType.Value, NormalizeWhitespace(r.Value, true, true));
 				r.Read();
 				yield break;
 			}
@@ -618,7 +618,7 @@ namespace Portable.Xaml
 			return XamlLanguage.AllDirectives.FirstOrDefault (dd => (dd.AllowedLocation & loc) != 0 && dd.Name == name);
 		}
 
-		string NormalizeWhitespace(string value)
+		string NormalizeWhitespace(string value, bool normalizeStart, bool normalizeEnd)
 		{
 			var sb = new StringBuilder(value.Length);
 			bool lastWasWhitesp = false;
@@ -627,7 +627,7 @@ namespace Portable.Xaml
 				var c = value[index];
 				if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
 				{
-					if (lastWasWhitesp || sb.Length == 0)
+					if (lastWasWhitesp || (sb.Length == 0 && normalizeStart))
 						continue;
 					lastWasWhitesp = true;
 					sb.Append(' ');
@@ -641,7 +641,7 @@ namespace Portable.Xaml
 				sb.Append(c);
 			}
 
-			if (lastWasWhitesp)
+			if (lastWasWhitesp && normalizeEnd)
 				sb.Length--;
 
 			return sb.ToString();
@@ -659,13 +659,17 @@ namespace Portable.Xaml
 				xm = XamlLanguage.Initialization;
 			yield return Node (XamlNodeType.StartMember, xm);
 
+			bool start = true;
+
 			while (r.NodeType != XmlNodeType.EndElement)
 			{
 				switch (r.NodeType)
 				{
 					case XmlNodeType.Text:
-						yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value));
+						var text = r.Value;
 						r.Read();
+						yield return Node(XamlNodeType.Value, NormalizeWhitespace(text, start, r.NodeType == XmlNodeType.EndElement));
+						start = false;
 						break;
 					case XmlNodeType.Element:
 						foreach (var x in ReadObjectElement(parentType, xm))
