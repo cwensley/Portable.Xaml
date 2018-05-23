@@ -1,4 +1,4 @@
-﻿﻿﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -215,10 +215,12 @@ namespace Portable.Xaml
 		public string PreferredXamlNamespace => ns.HasValue ? ns.Value : ns.Set(DeclaringType?.PreferredXamlNamespace);
 
 #if !PCL || NETSTANDARD
-		public DesignerSerializationVisibility SerializationVisibility {
-			get {
+		public DesignerSerializationVisibility SerializationVisibility
+		{
+			get
+			{
 				var c = this.CustomAttributeProvider;
-				var a = c == null ? null : c.GetCustomAttribute<DesignerSerializationVisibilityAttribute> (false);
+				var a = c == null ? null : c.GetCustomAttribute<DesignerSerializationVisibilityAttribute>(false);
 				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
 			}
 		}
@@ -386,7 +388,10 @@ namespace Portable.Xaml
 
 		internal ICustomAttributeProvider CustomAttributeProvider => customAttributeProvider.HasValue ? customAttributeProvider.Value : customAttributeProvider.Set(LookupCustomAttributeProvider());
 
-		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider()
+#if HAS_CUSTOM_ATTRIBUTE_PROVIDER
+		protected
+#endif
+		internal virtual ICustomAttributeProvider LookupCustomAttributeProvider()
 		{
 			return UnderlyingMember != null ? context.GetCustomAttributeProvider(UnderlyingMember) : null;
 		}

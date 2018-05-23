@@ -268,6 +268,10 @@ namespace Portable.Xaml
 
 			sctx = schemaContext;
 			this.settings = settings ?? default_settings;
+			if (settings?.SkipXmlCompatibilityProcessing != true)
+			{
+				xmlReader = new CompatibleXmlReader(xmlReader, schemaContext);
+			}
 
 			r = xmlReader;
 			line_info = r as IXmlLineInfo;
@@ -350,13 +354,14 @@ namespace Portable.Xaml
 				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments?.Select(xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
 
-			// It could still be GetObject if current_member
-			// is not a directive and current type is not
+			// It could still be GetObject if current_member is not defer-loaded, it
+			// is not a directive, and current type is not
 			// a markup extension.
 			// (I'm not very sure about the condition;
 			// it could be more complex.)
 			// seealso: bug #682131
 			if (!ReferenceEquals(currentMember, null)
+			    && ReferenceEquals(currentMember.DeferringLoader, null)
 				&& !xt.CanAssignTo(currentMember.Type)
 				&& !ReferenceEquals(xt, XamlLanguage.Reference)
 			    && (
@@ -503,7 +508,7 @@ namespace Portable.Xaml
 			}
 			typeArgNames = null;
 			var atts = new List<StringPair>();
-
+			var tagNamespace = r.NamespaceURI;
 			if (r.MoveToFirstAttribute())
 			{
 				do
@@ -540,13 +545,13 @@ namespace Portable.Xaml
 							}
 							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
 						default:
-							if (string.IsNullOrEmpty(r.NamespaceURI) || r.LocalName.IndexOf('.') > 0)
+							if (string.IsNullOrEmpty(r.NamespaceURI) || tagNamespace == r.NamespaceURI || r.LocalName.IndexOf('.') > 0)
 							{
 								atts.Add(new StringPair(r.Name, r.Value));
 								continue;
 							}
-							// System.Xaml does not ignore attributes with namespaces
-							members.Add(new Pair(new XamlMember(r.LocalName, r.NamespaceURI), r.Value));
+							// Custom directive
+							members.Add(new Pair(SchemaContext.GetXamlDirective(r.NamespaceURI, r.LocalName), r.Value));
 							break;
 					}
 				} while (r.MoveToNextAttribute());
@@ -567,7 +572,7 @@ namespace Portable.Xaml
 
 		XamlMember FindAttachableMember(string prefix, string typeName, string memberName)
 		{
-			string apns = prefix.Length > 0 ? r.LookupNamespace (prefix) : ResolveLocalNamespace(r.NamespaceURI);
+			string apns = r.LookupNamespace (prefix);
 			var axtn = new XamlTypeName (apns, typeName, null);
 			var at = sctx.GetXamlType (axtn);
 			return at?.GetAttachableMember (memberName);
@@ -695,8 +700,19 @@ namespace Portable.Xaml
 					yield break;
 				}
 
-				// ok, then create unknown member.
-				xm = new XamlMember (name, xt, false); // FIXME: not sure if isAttachable is always false.
+				if (idx >= 0)
+				{
+					// Unknown property.
+					xm = new XamlMember(name, xt, false); // FIXME: not sure if isAttachable is always false.
+				}
+				else
+				{
+					// Unknown content member.
+					xm = XamlLanguage.UnknownContent;
+					foreach (var ni in ReadMember(xt, xm))
+						yield return ni;
+					yield break;
+				}
 			}
 
 			if (!r.IsEmptyElement) {
@@ -732,7 +748,7 @@ namespace Portable.Xaml
 				else
 					throw new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)) { LineNumber = this.LineNumber, LinePosition = this.LinePosition };
 			} else {
-				if (xm.Type.IsCollection || xm.Type.IsDictionary) {
+				if (xm.Type.IsCollection || xm.Type.IsDictionary || xm == XamlLanguage.UnknownContent) {
 					foreach (var ni in ReadCollectionItems (parentType, xm))
 						yield return ni;
 				}

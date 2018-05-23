@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -772,7 +772,10 @@ namespace Portable.Xaml
 
 		internal ICustomAttributeProvider CustomAttributeProvider => attributeProvider.HasValue ? attributeProvider.Value : attributeProvider.Set(LookupCustomAttributeProvider());
 
-		protected virtual ICustomAttributeProvider LookupCustomAttributeProvider()
+#if HAS_CUSTOM_ATTRIBUTE_PROVIDER
+		protected
+#endif
+		internal virtual ICustomAttributeProvider LookupCustomAttributeProvider()
 		{
 			return UnderlyingType != null ? SchemaContext.GetCustomAttributeProvider(UnderlyingType) : null;
 		}
@@ -985,10 +988,10 @@ namespace Portable.Xaml
 				return SchemaContext.GetValueConverter<TypeConverter>(null, this);
 
 			if (t == typeof(DateTime))
-				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.DateTimeConverter), this);
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(ComponentModel.PortableXamlDateTimeConverter), this);
 
 			if (t == typeof(Uri))
-				return SchemaContext.GetValueConverter<TypeConverter>(typeof(UriTypeConverter), this);
+				return SchemaContext.GetValueConverter<TypeConverter>(typeof(Portable.Xaml.ComponentModel.UriTypeConverter), this);
 
 			// It's still not decent to check CollectionConverter.
 

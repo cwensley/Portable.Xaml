@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -60,7 +60,8 @@ namespace Portable.Xaml.ComponentModel
 		}
 	}
 
-	public interface ICustomAttributeProvider
+#if !HAS_CUSTOM_ATTRIBUTE_PROVIDER
+	interface ICustomAttributeProvider
 	{
 		object[] GetCustomAttributes(bool inherit);
 
@@ -68,4 +69,5 @@ namespace Portable.Xaml.ComponentModel
 
 		bool IsDefined(Type attributeType, bool inherit);
 	}
+#endif
 }

@@ -721,7 +721,7 @@ namespace MonoTests.Portable.Xaml
 			XamlServices.Transform (new XamlObjectReader (obj), xxw);
 			Console.Error.WriteLine (sw);
 			*/
-			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".Replace("net_4_0", Compat.Version);
+			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".UpdateXml();
 			var settings = new XamlObjectWriterSettings();
 			bool invoked = false;
 			settings.XamlSetValueHandler = (sender, e) =>
@@ -1334,6 +1334,46 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_AmbientResourceProvider()
+		{
+			// tests whether nesting order is correct when providing ambient values
+			const string resourceValue = "resource content";
+			using (var xr = GetReader("AmbientResourceProvider.xml"))
+			{
+				var outer = (AmbientResourceProvider)XamlServices.Load(xr);
+				var inner = (AmbientResourceProvider)outer.Content;
+				var wrapper = (AmbientResourceWrapper)inner.Content;
+				Assert.AreEqual(resourceValue, wrapper.Foo);
+			}
+		}
+
+#if PCL
+		// this test won't compile with System.Xaml because it uses new 3-arg constructor
+		[Test]
+		public void Write_AmbientResourceWrapper()
+		{
+			// tests whether parent ambient provider is used correctly
+			const string resourceKey = "FooResourceKey";
+			var resource = new object();
+			var ambientResourceProvider = new AmbientResourceProvider
+			{
+				Resources =
+				{
+					[resourceKey] = resource
+				}
+			};
+			var parentAmbientProvider = new SimpleAmbientProvider { Values = new[] { ambientResourceProvider } };
+			using (var xr = GetReader("AmbientResourceWrapper.xml"))
+			{
+				var writer = new XamlObjectWriter(xr.SchemaContext, new XamlObjectWriterSettings(), parentAmbientProvider);
+				XamlServices.Transform(xr, writer);
+				var des = (AmbientResourceWrapper)writer.Result;
+				Assert.AreSame(resource, des.Foo);
+			}
+		}
+#endif
+
+		[Test]
 		public void Write_StaticExtensionWrapper()
 		{
 			var ex = Assert.Throws<XamlObjectWriterException>(() =>
@@ -1787,6 +1827,18 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsInstanceOf<DeferredLoadingChild>(obj, "#7");
 				Assert.AreEqual("Blah", ((DeferredLoadingChild)obj).Foo, "#8");
 			}
+		}		
+		
+		[Test]
+		public void Write_DeferredLoadingContainerMember2()
+		{
+			using (var xr = GetReader("DeferredLoadingContainerMember2.xml"))
+			{
+				var res = (DeferredLoadingContainerMember2)XamlServices.Load(xr);
+				var obj = res.Child();
+
+				Assert.AreEqual("Blah", obj.Foo);
+			}
 		}
 
 		[Test]
@@ -2018,7 +2070,7 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
-		#if !PCL136
+#if !PCL136
 		[Test]
 		public void Write_ImmutableCollectionContainer()
 		{
@@ -2134,6 +2186,16 @@ namespace MonoTests.Portable.Xaml
 				Assert.IsInstanceOf<MyCommand>(commandContainer.Command1);
 				Assert.IsNull(commandContainer.Command2);
 			}
+		}
+
+		[Test]
+		public void Write_UnknownContent()
+		{
+			var xw = new XamlObjectWriter(sctx);
+			xw.WriteNamespace(new NamespaceDeclaration(XamlLanguage.Xaml2006Namespace, "x"));
+			xw.WriteStartObject(xt3);
+
+			Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartMember(XamlLanguage.UnknownContent));
 		}
 	}
 }

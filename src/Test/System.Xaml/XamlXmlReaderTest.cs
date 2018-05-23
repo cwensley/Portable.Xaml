@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -685,7 +685,16 @@ namespace MonoTests.Portable.Xaml
 		public void Read_AttachedPropertyWithNamespace()
 		{
 			var r = GetReader("AttachedPropertyWithNamespace.xml");
-			Read_AttachedProperty(r, true);
+			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
+			Read_AttachedProperty(r, ns);
+		}
+
+		[Test]
+		public void Read_AttachedPropertyOnClassWithDifferentNamespace()
+		{
+			var r = GetReader("AttachedPropertyOnClassWithDifferentNamespace.xml");
+			var ns = "clr-namespace:MonoTests.Portable.Xaml.NamespaceTest2;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
+			Read_AttachedProperty(r, ns, typeof(NamespaceTest2.AttachedWrapperWithDifferentBaseNamespace));
 		}
 
 		[Test]
@@ -1110,6 +1119,96 @@ namespace MonoTests.Portable.Xaml
 					ReadValue(r, "{ Some Value That Should Be Escaped", "#4");
 				});
 			});
+		}
+
+		/// <summary>
+		/// Tests that unexpected object members are enclosed in the x:_UnknownContent intrinsic member (rather than just ignored).
+		/// </summary>
+		[Test]
+		public void Read_UnknownContent()
+		{
+			var xaml = @"<TestClass1 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><TestClass3/><TestClass4/></TestClass1>".UpdateXml ();
+			var reader = GetReaderText(xaml);
+
+			reader.Read(); // xmlns
+			Assert.AreEqual(reader.NodeType, XamlNodeType.NamespaceDeclaration);
+
+			reader.Read(); // <TestClass1>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+
+			ReadBase(reader);
+
+			reader.Read(); // StartMember (x:_UnknownContent)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);
+			Assert.AreEqual(reader.Member, XamlLanguage.UnknownContent);
+
+			reader.Read(); // <TestClass3>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass3)));
+
+			reader.Read(); // </TestClass3>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);	
+			
+			reader.Read(); // <TestClass4>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass4)));
+
+			reader.Read(); // </TestClass4>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			reader.Read(); // EndMember (x:_UnknownContent)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </TestClass1>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			Assert.IsFalse(reader.Read()); // EOF
+		}
+
+		/// <summary>
+		/// Tests that a property marked with [XamlDeferLoad] whose actual type is not compatible with the deferred content
+		/// produces a valid XAML node list.
+		/// </summary>
+		[Test]
+		public void Read_DeferLoadedProperty()
+		{
+			var xaml = File.ReadAllText(Compat.GetTestFile("DeferredLoadingContainerMember2.xml")).UpdateXml();
+			var reader = GetReaderText(xaml);
+
+			reader.Read(); // xmlns
+			Assert.AreEqual(reader.NodeType, XamlNodeType.NamespaceDeclaration);
+
+			reader.Read(); // <DeferredLoadingContainerMember2>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+
+			ReadBase(reader);
+
+			reader.Read(); // StartMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);
+						
+			reader.Read(); // <DeferredLoadingChild>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartObject);
+			Assert.AreEqual(reader.Type, reader.SchemaContext.GetXamlType(typeof(TestClass4)));
+
+			reader.Read(); // StartMember (Foo)
+			Assert.AreEqual(reader.NodeType, XamlNodeType.StartMember);			
+			
+			reader.Read(); // "Blah"
+			Assert.AreEqual(reader.NodeType, XamlNodeType.Value);
+
+			reader.Read(); // EndMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </DeferredLoadingChild>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			reader.Read(); // EndMember
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndMember);
+
+			reader.Read(); // </DeferredLoadingContainerMember2>
+			Assert.AreEqual(reader.NodeType, XamlNodeType.EndObject);
+
+			Assert.IsFalse(reader.Read()); // EOF
 		}
 	}
 }

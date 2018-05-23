@@ -108,6 +108,16 @@ namespace MonoTests.Portable.Xaml.NamespaceTest2
 	{
 		public string SomeOtherProperty { get; set; }
 	}
+
+	public class AttachedWrapperWithDifferentBaseNamespace : AttachedPropertyStore
+	{
+		public AttachedWrapperWithDifferentBaseNamespace()
+		{
+			Value = new Attached();
+		}
+
+		public Attached Value { get; set; }
+	}
 }
 
 namespace MonoTests.Portable.Xaml
@@ -586,6 +596,81 @@ namespace MonoTests.Portable.Xaml
 		{
 			return Foo;
 		}
+	}
+
+	/// <summary>
+	/// Returns first ambient value matching provided key.
+	/// </summary>
+	public class AmbientValueExtension : MarkupExtension
+	{
+		public AmbientValueExtension()
+		{
+		}
+		public AmbientValueExtension(string resourceKey)
+		{
+			ResourceKey = resourceKey;
+		}
+
+		public string ResourceKey { get; set; }
+
+		public override object ProvideValue(IServiceProvider sp)
+		{
+			var schemaContext = (sp.GetService(typeof(IXamlSchemaContextProvider)) as IXamlSchemaContextProvider).SchemaContext;
+			var ambientProvider = (IAmbientProvider)sp.GetService(typeof(IAmbientProvider));
+			var resourceProviderType = schemaContext.GetXamlType(typeof(AmbientResourceProvider));
+			var ambientValues = ambientProvider.GetAllAmbientValues(resourceProviderType);
+			foreach (var resourceProvider in ambientValues.OfType<AmbientResourceProvider>())
+			{
+				if (resourceProvider.Resources.TryGetValue(ResourceKey, out var value))
+				{
+					return value;
+				}
+			}
+			throw new KeyNotFoundException("Resource not found");
+		}
+	}
+
+	/// <summary>
+	/// Simple implementation of <see cref="IAmbientProvider"/>'s single method
+	/// <see cref="IAmbientProvider.GetAllAmbientValues(XamlType[])"/> (others throw).
+	/// The method returns <see cref="Values"/>.
+	/// </summary>
+	public class SimpleAmbientProvider : IAmbientProvider
+	{
+		public IEnumerable<object> Values { get; set; }
+
+		public IEnumerable<object> GetAllAmbientValues(params XamlType[] types)
+		{
+			return Values;
+		}
+
+		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties) => throw new NotImplementedException();
+
+		public IEnumerable<AmbientPropertyValue> GetAllAmbientValues(IEnumerable<XamlType> ceilingTypes, bool searchLiveStackOnly, IEnumerable<XamlType> types, params XamlMember[] properties) => throw new NotImplementedException();
+
+		public object GetFirstAmbientValue(params XamlType[] types) => throw new NotImplementedException();
+
+		public AmbientPropertyValue GetFirstAmbientValue(IEnumerable<XamlType> ceilingTypes, params XamlMember[] properties) => throw new NotImplementedException();
+	}
+
+	/// <summary>
+	/// Ambient Resource dictionary container.
+	/// </summary>
+	[Ambient]
+	[ContentProperty(nameof(Content))]
+	public class AmbientResourceProvider
+	{
+		public Dictionary<string, object> Resources { get; } = new Dictionary<string, object>();
+
+		public object Content { get; set; }
+	}
+
+	/// <summary>
+	/// Wrapper of a single object-type property to allow ambient resource binding.
+	/// </summary>
+	public class AmbientResourceWrapper
+	{
+		public object Foo { get; set; }
 	}
 
 	public class PositionalParametersClass1 : MarkupExtension
@@ -1382,8 +1467,23 @@ namespace MonoTests.Portable.Xaml
 		{
 			throw new NotImplementedException();
 		}
-	}
+	}	
+	
+	public class TestDeferredLoader<T> : XamlDeferringLoader
+	{
+		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)
+		{
+			var list = new XamlNodeList(xamlReader.SchemaContext);
+			XamlServices.Transform(xamlReader, list.Writer);
 
+			return new Func<T>(() => (T)XamlServices.Load(list.GetReader()));
+		}
+
+		public override XamlReader Save(object value, IServiceProvider serviceProvider)
+		{
+			throw new NotImplementedException();
+		}
+	}
 
 	public class DeferredLoadingChild
 	{
@@ -1406,6 +1506,13 @@ namespace MonoTests.Portable.Xaml
 	{
 		[XamlDeferLoad(typeof(TestDeferredLoader), typeof(DeferredLoadingChild))]
 		public DeferredLoadingChild Child { get; set; }
+	}	
+	
+	[ContentProperty("Child")]
+	public class DeferredLoadingContainerMember2
+	{
+		[XamlDeferLoad(typeof(TestDeferredLoader<TestClass4>), typeof(TestClass4))]
+		public Func<TestClass4> Child { get; set; }
 	}
 
 	[ContentProperty("Item")]

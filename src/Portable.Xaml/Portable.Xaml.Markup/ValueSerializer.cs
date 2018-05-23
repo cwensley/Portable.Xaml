@@ -1,4 +1,4 @@
-﻿﻿//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -107,7 +107,7 @@ namespace Portable.Xaml.Markup
 			}
 
 			if (type == typeof(Uri))
-				return new TypeConverterValueSerializer(new UriTypeConverter());
+				return new TypeConverterValueSerializer(new Portable.Xaml.ComponentModel.UriTypeConverter());
 			return null;
 		}
 
