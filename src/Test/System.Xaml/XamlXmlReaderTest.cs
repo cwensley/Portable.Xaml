@@ -1210,5 +1210,61 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.IsFalse(reader.Read()); // EOF
 		}
+
+		[Test]
+		public void Read_CollectionShouldParseInnerTextAndItems()
+		{
+			var xaml = @"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+	Hello
+	<CollectionItem Name='World'/>
+	!
+</CollectionItemCollectionAddOverride>";
+			var r = GetReaderText(xaml);
+
+			r.Read(); // xmlns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
+
+			r.Read(); // <CollectionItemCollectionAddOverride>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			ReadBase(r);
+
+			r.Read(); // StartMember (_Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(XamlLanguage.Items, r.Member);
+
+			r.Read(); // "Hello"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("Hello ", r.Value);
+
+			r.Read(); // <CollectionItem>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			r.Read(); // StartMember (Name)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual("Name", r.Member.Name);
+
+			r.Read(); // "World"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("World", r.Value);
+
+			r.Read(); // EndMember (Name)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </CollectionItem>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // "!"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual(" !", r.Value);
+
+			r.Read(); // EndMember (_Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </CollectionItemCollectionAddOverride>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			Assert.IsFalse(r.Read()); // EOF
+		}
 	}
 }
