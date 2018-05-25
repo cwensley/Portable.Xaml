@@ -192,6 +192,7 @@ namespace Portable.Xaml
 			object_states.Push(state);
 
 			OnWriteGetObject();
+			manager.GotObject(object_states.Peek().Type);
 		}
 
 		public void WriteNamespace(NamespaceDeclaration namespaceDeclaration)
