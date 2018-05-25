@@ -1402,11 +1402,14 @@ namespace MonoTests.Portable.Xaml
 			var text = item as string;
 			if (text != null)
 				Add(new CollectionItem { Name = text });
-			var other = item as OtherItem;
-			if (other != null)
-				Add(other.CollectionItem);
 			else
-				Add((CollectionItem)item);
+			{
+				var other = item as OtherItem;
+				if (other != null)
+					Add(other.CollectionItem);
+				else
+					Add((CollectionItem)item);
+			}
 			return Count - 1;
 		}
 	}

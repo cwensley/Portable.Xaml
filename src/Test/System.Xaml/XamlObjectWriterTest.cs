@@ -49,7 +49,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		PropertyInfo str_len = typeof(string).GetProperty("Length");
 		XamlSchemaContext sctx = new XamlSchemaContext(null, null);
-		XamlType xt, xt3, xt4;
+		XamlType xt, xt3, xt4, xt5;
 		XamlMember xm2, xm3;
 
 		public XamlObjectWriterTest()
@@ -57,6 +57,7 @@ namespace MonoTests.Portable.Xaml
 			xt = new XamlType(typeof(string), sctx);
 			xt3 = new XamlType(typeof(TestClass1), sctx);
 			xt4 = new XamlType(typeof(Foo), sctx);
+			xt5 = new XamlType(typeof(List<TestClass1>), sctx);
 			xm2 = new XamlMember(typeof(TestClass1).GetProperty("TestProp1"), sctx);
 			xm3 = new XamlMember(typeof(TestClass1).GetProperty("TestProp2"), sctx);
 		}
@@ -511,6 +512,32 @@ namespace MonoTests.Portable.Xaml
 				xw.WriteStartObject(xt3); // Portable.Xaml throws here
 				xw.Close(); // .NET 4.5 throws here
 			});
+		}
+
+		[Test]
+		public void CollectionValueThenStartObject()
+		{
+			var xw = new XamlObjectWriter(sctx, null);
+			xw.WriteStartObject(xt5);
+			xw.WriteStartMember(XamlLanguage.Items);
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.Close();
+		}
+
+		[Test]
+		public void CollectionMixedObjectsAndValues()
+		{
+			var xw = new XamlObjectWriter(sctx, null);
+			xw.WriteStartObject(xt5);
+			xw.WriteStartMember(XamlLanguage.Items);
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.WriteEndObject();
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.WriteEndObject();
+			xw.Close();
 		}
 
 		[Test]
