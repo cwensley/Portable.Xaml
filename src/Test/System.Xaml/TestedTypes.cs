@@ -1446,6 +1446,28 @@ namespace MonoTests.Portable.Xaml
 		public CollectionItemCollectionAddOverride Items { get; } = new CollectionItemCollectionAddOverride();
 	}
 
+	[ContentProperty("Items")]
+	public class AddIListParent
+	{
+		public AddIListCollection Items { get; set; } = new AddIListCollection();
+	}
+
+	public class AddIListCollection : Collection<AddIListItem>, IList
+	{
+		int IList.Add(object value)
+		{
+			// If the value is added as a string prepend a '@' to identify that case.
+			if (value is AddIListItem i) Add(i);
+			else Add(new AddIListItem { Name = '@' + value.ToString() });
+			return Count;
+		}
+	}
+
+	public class AddIListItem
+	{
+		public string Name { get; set; }
+	}
+
 	public class TestDeferredLoader : XamlDeferringLoader
 	{
 		public override object Load(XamlReader xamlReader, IServiceProvider serviceProvider)

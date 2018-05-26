@@ -1214,17 +1214,17 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Read_CollectionShouldParseInnerTextAndItems()
 		{
-			var xaml = @"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+			var xaml = @"<AddIListCollection xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
 	Hello
-	<CollectionItem Name='World'/>
+	<AddIListItem Name='World'/>
 	!
-</CollectionItemCollectionAddOverride>";
+</AddIListCollection>";
 			var r = GetReaderText(xaml);
 
 			r.Read(); // xmlns
 			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
 
-			r.Read(); // <CollectionItemCollectionAddOverride>
+			r.Read(); // <AddIListCollection>
 			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
 
 			ReadBase(r);
@@ -1237,7 +1237,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
 			Assert.AreEqual("Hello ", r.Value);
 
-			r.Read(); // <CollectionItem>
+			r.Read(); // <AddIListItem>
 			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
 
 			r.Read(); // StartMember (Name)
@@ -1251,7 +1251,7 @@ namespace MonoTests.Portable.Xaml
 			r.Read(); // EndMember (Name)
 			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
 
-			r.Read(); // </CollectionItem>
+			r.Read(); // </AddIListItem>
 			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
 
 			r.Read(); // "!"
@@ -1261,7 +1261,7 @@ namespace MonoTests.Portable.Xaml
 			r.Read(); // EndMember (_Items)
 			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
 
-			r.Read(); // </CollectionItemCollectionAddOverride>
+			r.Read(); // </AddIListCollection>
 			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
 
 			Assert.IsFalse(r.Read()); // EOF
@@ -1269,6 +1269,76 @@ namespace MonoTests.Portable.Xaml
 
 		[Test]
 		public void Read_ContentCollectionShouldParseInnerTextAndItems()
+		{
+			var xaml = @"<AddIListParent xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+	Hello
+    <AddIListItem Name='World'/>
+	!
+</AddIListParent>";
+			var r = GetReaderText(xaml);
+
+			r.Read(); // xmlns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
+
+			r.Read(); // <AddIListParent>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			ReadBase(r);
+
+			r.Read(); // StartMember (Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(typeof(AddIListParent), r.Member.DeclaringType.UnderlyingType);
+			Assert.AreEqual(nameof(AddIListParent.Items), r.Member.Name);
+
+			r.Read(); // GetObject
+			Assert.AreEqual(XamlNodeType.GetObject, r.NodeType);
+
+			r.Read(); // StartMember (_Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(XamlLanguage.Items, r.Member);
+
+			r.Read(); // "Hello"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("Hello ", r.Value);
+
+			r.Read(); // <AddIListItem>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			r.Read(); // StartMember (Name)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual("Name", r.Member.Name);
+
+			r.Read(); // "World"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("World", r.Value);
+
+			r.Read(); // EndMember (Name)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </AddIListItem>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // "!"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual(" !", r.Value);
+
+			r.Read(); // EndMember (_Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </AddIListCollection>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </AddIListParent>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			Assert.IsFalse(r.Read()); // EOF
+		}
+
+		[Test]
+		public void Read_ContentCollectionWithTypeConverterShouldParseInnerTextAndItems()
 		{
 			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
 	Hello
@@ -1338,7 +1408,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void Inner_Text_And_Items_Should_Be_Added_Via_IList()
+		public void Inner_Text_And_Items_Should_Be_Added_Via_TypeConverter()
 		{
 			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
 			var xaml = $@"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
@@ -1355,7 +1425,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void Inner_Text_And_Items_Should_Be_Added_To_Content_Property_Via_IList()
+		public void Inner_Text_And_Items_Should_Be_Added_To_Content_Property_Via_TypeConverter()
 		{
 			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
 			var xaml = $@"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
@@ -1369,6 +1439,39 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual("Hello ", result.Items[0].Name);
 			Assert.AreEqual("World", result.Items[1].Name);
 			Assert.AreEqual(" !", result.Items[2].Name);
+		}
+		[Test]
+		public void Inner_Text_And_Items_Should_Be_Added_Via_IList()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<AddIListCollection xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	Hello
+    <AddIListItem Name='World'/>
+	!
+</AddIListCollection>";
+			var result = (AddIListCollection)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(3, result.Count);
+			Assert.AreEqual("@Hello ", result[0].Name);
+			Assert.AreEqual("@World", result[1].Name);
+			Assert.AreEqual("@ !", result[2].Name);
+		}
+
+		[Test]
+		public void Inner_Text_And_Items_Should_Be_Added_To_Content_Property_Via_IList()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<AddIListParent xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	Hello
+    <AddIListItem Name='World'/>
+	!
+</AddIListParent>";
+			var result = (AddIListParent)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(3, result.Items.Count);
+			Assert.AreEqual("@Hello ", result.Items[0].Name);
+			Assert.AreEqual("@World", result.Items[1].Name);
+			Assert.AreEqual("@ !", result.Items[2].Name);
 		}
 	}
 }
