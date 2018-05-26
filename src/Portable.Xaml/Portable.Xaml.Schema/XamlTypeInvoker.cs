@@ -105,7 +105,15 @@ namespace Portable.Xaml.Schema
 				}
 
 				addDelegate = CreateAddDelegate(instance, item, collectionType, itemType, key, mode);
-				addDelegate(instance, item);
+
+				try
+				{
+					addDelegate(instance, item);
+				}
+				catch (TargetInvocationException e)
+				{
+					throw e.InnerException;
+				}
 			}
 			else
 			{
@@ -160,21 +168,7 @@ namespace Portable.Xaml.Schema
 
 			if (mi == null)
 			{
-				var baseCollection = collectionType.GetTypeInfo().GetInterfaces()
-				                                   .FirstOrDefault(r => r.GetTypeInfo().IsGenericType
-				                                                   && r.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>));
-				if (baseCollection != null)
-				{
-					mi = collectionType.GetRuntimeMethod("Add", baseCollection.GetTypeInfo().GetGenericArguments());
-					if (mi == null)
-						mi = LookupAddMethod(collectionType, baseCollection);
-				}
-				else
-				{
-					mi = collectionType.GetRuntimeMethod("Add", new Type[] { typeof(object) });
-					if (mi == null)
-						mi = LookupAddMethod(collectionType, typeof(IList));
-				}
+				mi = typeof(IList).GetTypeInfo().GetDeclaredMethod("Add");
 			}
 
 			return mi;

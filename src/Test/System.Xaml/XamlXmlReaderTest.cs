@@ -1453,7 +1453,7 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.AreEqual(3, result.Count);
 			Assert.AreEqual("@Hello ", result[0].Name);
-			Assert.AreEqual("@World", result[1].Name);
+			Assert.AreEqual("World", result[1].Name);
 			Assert.AreEqual("@ !", result[2].Name);
 		}
 
@@ -1470,7 +1470,7 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.AreEqual(3, result.Items.Count);
 			Assert.AreEqual("@Hello ", result.Items[0].Name);
-			Assert.AreEqual("@World", result.Items[1].Name);
+			Assert.AreEqual("World", result.Items[1].Name);
 			Assert.AreEqual("@ !", result.Items[2].Name);
 		}
 	}

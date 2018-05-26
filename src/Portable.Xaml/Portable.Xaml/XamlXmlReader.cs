@@ -314,31 +314,57 @@ namespace Portable.Xaml
 			return ns;
 		}
 
+		IEnumerable<XamlXmlNodeInfo> ReadElementContent(XamlType parentType, XamlMember currentMember)
+		{
+			while (r.NodeType != XmlNodeType.EndElement)
+			{
+				if (currentMember == XamlLanguage.Items)
+				{
+					foreach (var x in ReadCollectionItems(parentType, currentMember))
+					{
+						if (x.NodeType == XamlNodeType.None)
+							yield break;
+						yield return x;
+					}
+				}
+				else if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA)
+				{
+					if (currentMember.Type.IsCollection || 
+						currentMember.Type.IsDictionary || 
+						currentMember == XamlLanguage.UnknownContent)
+					{
+						yield return Node(XamlNodeType.GetObject, currentMember.Type);
+						foreach (var ni in ReadMembers(parentType, currentMember.Type))
+							yield return ni;
+						yield return Node(XamlNodeType.EndObject, currentMember.Type);
+					}
+					else
+					{
+						yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value, true, true));
+						r.Read();
+					}
+				}
+				else
+				{
+					foreach (var x in ReadObjectElement(parentType, currentMember))
+					{
+						if (x.NodeType == XamlNodeType.None)
+							yield break;
+						yield return x;
+					}
+				}
+			}
+		}
+
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
 		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
 			if (r.NodeType == XmlNodeType.EndElement)
 				yield break;
 
-			if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA)
-			{
-				if (currentMember == XamlLanguage.Items)
-				{
-					foreach (var x in ReadCollectionItems(parentType, currentMember))
-						yield return x;
-				}
-				else
-				{
-					yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value, true, true));
-					r.Read();
-				}
-
-				yield break;
-			}
-
 			if (r.NodeType != XmlNodeType.Element)
 			{
-				throw new XamlParseException (String.Format ("Element is expected, but got {0}", r.NodeType));
+				throw new XamlParseException(String.Format("Element is expected, but got {0}", r.NodeType));
 			}
 
 			if (r.MoveToFirstAttribute ()) {
@@ -770,23 +796,14 @@ namespace Portable.Xaml
 				else
 					throw new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)) { LineNumber = this.LineNumber, LinePosition = this.LinePosition };
 			} else {
-				if (xm.Type.IsCollection || xm.Type.IsDictionary || xm == XamlLanguage.UnknownContent) {
-					foreach (var ni in ReadCollectionItems (parentType, xm)) {
-						if (ni.NodeType == XamlNodeType.None)
-							goto exit;
-						else
-							yield return ni;
-					}
+				foreach (var ni in ReadElementContent(parentType, xm))
+				{
+					if (ni.NodeType == XamlNodeType.None)
+						throw new Exception("should not happen");
+					yield return ni;
 				}
-				else
-					foreach (var ni in ReadObjectElement (parentType, xm)) {
-						if (ni.NodeType == XamlNodeType.None)
-							throw new Exception ("should not happen");
-						yield return ni;
-					}
 			}
 
-exit:
 			yield return Node (XamlNodeType.EndMember, xm);
 		}
 
