@@ -346,7 +346,6 @@ namespace Portable.Xaml
 			if (!state.Type.IsContentValue(service_provider))
 				InitializeObjectIfRequired(true);
 			state.IsXamlWriterCreated = true;
-			source.OnBeforeProperties(state.Value);
 		}
 
 		protected override void OnWriteGetObject()
@@ -563,6 +562,7 @@ namespace Portable.Xaml
 			state.Value = state.Type.Invoker.CreateInstance(argv);
 			state.IsInstantiated = true;
 			HandleBeginInit(state.Value);
+			source.OnBeforeProperties(state.Value);
 		}
 
 		protected override void OnWriteValue(object value)
@@ -755,6 +755,7 @@ namespace Portable.Xaml
 						state.Value = obj;
 						state.IsInstantiated = true;
 						HandleBeginInit(obj);
+						source.OnBeforeProperties(state.Value);
 
 						// set other writable properties now that the object is instantiated
 						foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
@@ -777,6 +778,7 @@ namespace Portable.Xaml
 			state.Value = obj;
 			state.IsInstantiated = true;
 			HandleBeginInit (obj);
+			source.OnBeforeProperties(state.Value);
 		}
 
 		internal IXamlNameResolver name_resolver {
