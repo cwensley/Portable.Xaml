@@ -614,9 +614,11 @@ namespace Portable.Xaml
 				ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
 			else if (ReferenceEquals(xm, XamlLanguage.Name) || xm == xt.GetAliasedProperty (XamlLanguage.Name))
 				ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
-			else if (ReferenceEquals(xm, XamlLanguage.Key))
-				state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
-			else {
+			else if (ReferenceEquals(xm, XamlLanguage.Key) || xm == xt.GetAliasedProperty(XamlLanguage.Key)) {
+				var keyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
+				state.KeyValue = keyValue;
+				ms.Value = keyValue;
+			} else {
 				if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
 					if (!xm.IsReadOnly || xm.IsConstructorArgument)
 						ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
