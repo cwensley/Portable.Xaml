@@ -171,7 +171,7 @@ namespace Portable.Xaml
 				CloseInput = closeInput ?? settings?.CloseInput ?? false,
 				IgnoreComments = true,
 				IgnoreProcessingInstructions = true,
-				IgnoreWhitespace = true,
+				//IgnoreWhitespace = true,
 				ConformanceLevel = conformance
 			};
 		}
@@ -340,7 +340,7 @@ namespace Portable.Xaml
 					}
 					else
 					{
-						yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value, true, true));
+						yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value));
 						r.Read();
 					}
 				}
@@ -359,6 +359,9 @@ namespace Portable.Xaml
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
 		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
+			if (r.NodeType == XmlNodeType.Whitespace)
+				r.MoveToContent();
+
 			if (r.NodeType == XmlNodeType.EndElement)
 				yield break;
 
@@ -654,7 +657,11 @@ namespace Portable.Xaml
 			return XamlLanguage.AllDirectives.FirstOrDefault (dd => (dd.AllowedLocation & loc) != 0 && dd.Name == name);
 		}
 
-		string NormalizeWhitespace(string value, bool normalizeStart, bool normalizeEnd)
+		string NormalizeWhitespace(
+			string value,
+			bool normalizeStart = true,
+			bool normalizeEnd = true,
+			bool whitespaceSignificant = false)
 		{
 			var sb = new StringBuilder(value.Length);
 			bool lastWasWhitesp = false;
@@ -690,7 +697,7 @@ namespace Portable.Xaml
 				if (xt.ContentProperty == null)
 				{
 					yield return Node(XamlNodeType.StartMember, XamlLanguage.Initialization);
-					yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value, true, true));
+					yield return Node(XamlNodeType.Value, NormalizeWhitespace(r.Value));
 					r.Read();
 					yield return Node(XamlNodeType.EndMember, XamlLanguage.Initialization);
 				}
@@ -809,7 +816,9 @@ namespace Portable.Xaml
 
 		IEnumerable<XamlXmlNodeInfo> ReadCollectionItems (XamlType parentType, XamlMember xm)
 		{
-			for (r.MoveToContent (); r.NodeType != XmlNodeType.EndElement; r.MoveToContent ())
+			r.MoveToContent();
+
+			while (r.NodeType != XmlNodeType.EndElement)
 			{
 				bool start = true;
 
@@ -820,8 +829,7 @@ namespace Portable.Xaml
 						case XmlNodeType.Text:
 							var text = r.Value;
 							r.Read();
-							yield return Node(XamlNodeType.Value, NormalizeWhitespace(text, start, r.NodeType == XmlNodeType.EndElement));
-							start = false;
+							yield return Node(XamlNodeType.Value, NormalizeWhitespace(text, start, r.NodeType == XmlNodeType.EndElement, true));
 							break;
 						case XmlNodeType.Element:
 							foreach (var x in ReadObjectElement(parentType, xm))
@@ -831,10 +839,22 @@ namespace Portable.Xaml
 							break;
 						case XmlNodeType.EndElement:
 							yield break;
+						case XmlNodeType.Whitespace:
+							r.Read();
+							if (!start && parentType.IsWhitespaceSignificantCollection)
+							{
+								if (r.NodeType != XmlNodeType.EndElement)
+									yield return Node(XamlNodeType.Value, " ");
+							}
+							break;
 						default:
 							throw new XamlParseException(String.Format("Text or Element is expected, but got {0}", r.NodeType));
 					}
+
+					start = false;
 				}
+
+				if (r.NodeType != XmlNodeType.EndElement) r.Read();
 			}
 		}
 		

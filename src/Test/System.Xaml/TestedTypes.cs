@@ -1463,6 +1463,11 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	[WhitespaceSignificantCollection]
+	public class WhitespaceSignificantCollection : CollectionItemCollectionAddOverride
+	{
+	}
+
 	public class AddIListItem
 	{
 		public string Name { get; set; }
