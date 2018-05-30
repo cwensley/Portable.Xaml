@@ -1473,5 +1473,34 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual("World", result.Items[1].Name);
 			Assert.AreEqual("@ !", result.Items[2].Name);
 		}
+
+		[Test]
+		public void Respects_WhitespaceSignificantCollectionAttribute_Not_Set()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<AddIListCollection xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	<AddIListItem Name='foo'/>  <AddIListItem Name='bar'/>
+</AddIListCollection>";
+			var result = (AddIListCollection)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(2, result.Count);
+			Assert.AreEqual("foo", result[0].Name);
+			Assert.AreEqual("bar", result[1].Name);
+		}
+
+		[Test]
+		public void Respects_WhitespaceSignificantCollectionAttribute_Set()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<WhitespaceSignificantCollection xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	<CollectionItem Name='foo'/>  <CollectionItem Name='bar'/>
+</WhitespaceSignificantCollection>";
+			var result = (WhitespaceSignificantCollection)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(3, result.Count);
+			Assert.AreEqual("foo", result[0].Name);
+			Assert.AreEqual(" ", result[1].Name);
+			Assert.AreEqual("bar", result[2].Name);
+		}
 	}
 }
