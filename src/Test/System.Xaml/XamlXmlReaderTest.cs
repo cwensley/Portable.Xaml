@@ -1338,6 +1338,78 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_ContentCollectionShouldParsePropertyAfterInnerItem()
+		{
+			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <CollectionItem Name='World'/>
+	<CollectionParentItem.OtherItem>True</CollectionParentItem.OtherItem>
+</CollectionParentItem>";
+			var r = GetReaderText(xaml);
+
+			r.Read(); // xmlns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
+
+			r.Read(); // <CollectionParentItem>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			ReadBase(r);
+
+			r.Read(); // StartMember (Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(typeof(CollectionParentItem), r.Member.DeclaringType.UnderlyingType);
+			Assert.AreEqual(nameof(CollectionParentItem.Items), r.Member.Name);
+
+			r.Read(); // GetObject
+			Assert.AreEqual(XamlNodeType.GetObject, r.NodeType);
+
+			r.Read(); // StartMember (_Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(XamlLanguage.Items, r.Member);
+
+			r.Read(); // <CollectionItem>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			r.Read(); // StartMember (Name)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual("Name", r.Member.Name);
+
+			r.Read(); // "World"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("World", r.Value);
+
+			r.Read(); // EndMember (Name)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </CollectionItem>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </GetObject>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // StartMember (_Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(nameof(CollectionParentItem.OtherItem), r.Member.Name);
+
+			r.Read(); // "True"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("True", r.Value);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </CollectionParentItem>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			Assert.IsFalse(r.Read()); // EOF
+		}
+
+		[Test]
 		public void Read_ContentCollectionWithTypeConverterShouldParseInnerTextAndItems()
 		{
 			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
