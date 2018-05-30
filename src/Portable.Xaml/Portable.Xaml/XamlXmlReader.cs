@@ -703,14 +703,14 @@ namespace Portable.Xaml
 				}
 				else
 				{
-					foreach (var x in ReadMember(parentType, xt.ContentProperty))
+					foreach (var x in ReadMember(xt, xt.ContentProperty))
 						yield return x;
 				}
 			}
 			else
 			{
 				yield return Node(XamlNodeType.StartMember, XamlLanguage.Items);
-				foreach (var x in ReadCollectionItems(parentType, XamlLanguage.Items))
+				foreach (var x in ReadCollectionItems(xt, XamlLanguage.Items))
 					yield return x;
 				yield return Node(XamlNodeType.EndMember, XamlLanguage.Items);
 			}
@@ -795,7 +795,7 @@ namespace Portable.Xaml
 				else if (xm.Type.IsCollection || xm.Type.IsDictionary) {
 					yield return Node (XamlNodeType.GetObject, xm.Type);
 					yield return Node (XamlNodeType.StartMember, XamlLanguage.Items);
-					foreach (var ni in ReadCollectionItems (parentType, XamlLanguage.Items))
+					foreach (var ni in ReadCollectionItems (xm.Type, XamlLanguage.Items))
 						yield return ni;
 					yield return Node (XamlNodeType.EndMember, XamlLanguage.Items);
 					yield return Node (XamlNodeType.EndObject, xm.Type);
