@@ -199,6 +199,22 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual(" test.", ((Run)result.Inlines[5]).Text);
 		}
 
+		[Test]
+		public void Respects_TrimSurroundingWhitespaceAttribute()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"
+<TextBlock xmlns='{ns}'>
+	TextBlock with <LineBreak/> line break.
+</TextBlock>";
+			var result = (TextBlock)XamlServices.Parse(xaml);
+
+			Assert.AreEqual(3, result.Inlines.Count);
+			Assert.AreEqual("TextBlock with", ((Run)result.Inlines[0]).Text);
+			Assert.IsInstanceOf<LineBreak>(result.Inlines[1]);
+			Assert.AreEqual("line break.", ((Run)result.Inlines[2]).Text);
+		}
+
 		XamlReader GetReaderText(string xml, XamlXmlReaderSettings settings = null)
 		{
 			xml = xml.UpdateXml();
@@ -261,7 +277,7 @@ namespace MonoTests.Portable.Xaml
 	}
 
 	[TrimSurroundingWhitespace]
-	public class LineBreak
+	public class LineBreak : Inline
 	{
 	}
 
