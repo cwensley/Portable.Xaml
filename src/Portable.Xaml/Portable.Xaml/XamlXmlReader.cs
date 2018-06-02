@@ -818,11 +818,23 @@ namespace Portable.Xaml
 			yield return Node (XamlNodeType.EndMember, xm);
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadCollectionItems (XamlType parentType, XamlMember xm)
+		IEnumerable<XamlXmlNodeInfo> ReadCollectionItems(XamlType parentType, XamlMember xm)
 		{
-			r.MoveToContent();
+			bool GetNextElementTrim()
+			{
+				if (r.NodeType == XmlNodeType.Element)
+				{
+					var sti = GetStartTagInfo();
+					var xt = sctx.GetXamlType(sti.TypeName);
+					return xt.TrimSurroundingWhitespace;
+				}
 
-			var start = true;
+				return true;
+			}
+
+			XamlTypeName previous = null;
+
+			r.MoveToContent();
 
 			while (r.NodeType != XmlNodeType.EndElement)
 			{
@@ -831,8 +843,15 @@ namespace Portable.Xaml
 					case XmlNodeType.Text:
 						var text = r.Value;
 						r.Read();
-						yield return Node(XamlNodeType.Value, NormalizeWhitespace(text, start, r.NodeType == XmlNodeType.EndElement, true));
+
+						var trimStart = previous == null ||
+							sctx.GetXamlType(previous).TrimSurroundingWhitespace;
+						var trimEnd = r.NodeType == XmlNodeType.EndElement ||
+							GetNextElementTrim();
+
+						yield return Node(XamlNodeType.Value, NormalizeWhitespace(text, trimStart, trimEnd));
 						break;
+
 					case XmlNodeType.Element:
 						if (parentType != null && (r.LocalName.IndexOf('.') > 0 || parentType.GetMember(r.LocalName) != null))
 						{
@@ -840,27 +859,32 @@ namespace Portable.Xaml
 							yield break;
 						}
 
+						var sti = GetStartTagInfo();
+						previous = sti.TypeName;
+
 						foreach (var x in ReadObjectElement(parentType, xm))
 						{
 							yield return x;
 						}
 						break;
+
 					case XmlNodeType.Whitespace:
 						r.Read();
-						if (!start && parentType.IsWhitespaceSignificantCollection)
+						if (previous != null &&
+							parentType.IsWhitespaceSignificantCollection &&
+							!sctx.GetXamlType(previous).TrimSurroundingWhitespace)
 						{
 							if (r.NodeType != XmlNodeType.EndElement)
 								yield return Node(XamlNodeType.Value, " ");
 						}
 						break;
+
 					default:
 						throw new XamlParseException(String.Format("Text or Element is expected, but got {0}", r.NodeType));
 				}
-
-				start = false;
 			}
 		}
-		
+
 		IEnumerable<XamlXmlNodeInfo> ReadXData ()
 		{
 			var xt = XamlLanguage.XData;
