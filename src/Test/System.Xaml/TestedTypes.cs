@@ -1749,6 +1749,18 @@ namespace MonoTests.Portable.Xaml
 		public ICommand Command1 { get; set; }
 		public ICommand Command2 { get; set; }
 	}
+
+	[ContentProperty("Items")]
+	public class DictionaryContainer
+	{
+		public Dictionary<object, DictionaryItem> Items { get; } = new Dictionary<object, DictionaryItem>();
+	}
+
+	[DictionaryKeyProperty("Key")]
+	public class DictionaryItem
+	{
+		public object Key { get; set; }
+	}
 }
 
 namespace XamlTest

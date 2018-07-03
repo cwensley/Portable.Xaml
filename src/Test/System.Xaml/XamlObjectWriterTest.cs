@@ -2224,5 +2224,37 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartMember(XamlLanguage.UnknownContent));
 		}
+
+		[Test]
+		public void Write_DictionaryKeyProperty()
+		{
+			var xw = new XamlObjectWriter(sctx);
+			var xDictionaryContainer = sctx.GetXamlType(typeof(DictionaryContainer));
+			var xDictionaryContainerItems = xDictionaryContainer.GetMember(nameof(DictionaryContainer.Items));
+			var xDictionaryItem = sctx.GetXamlType(typeof(DictionaryItem));
+			var xDictionaryItemKey = xDictionaryItem.GetMember(nameof(DictionaryItem.Key));
+			const string key = "Key";
+
+			xw.WriteNamespace(new NamespaceDeclaration(XamlLanguage.Xaml2006Namespace, "x"));
+			xw.WriteStartObject(xDictionaryContainer);
+			xw.WriteStartMember(xDictionaryContainerItems);
+			xw.WriteGetObject();
+			xw.WriteStartMember(XamlLanguage.Items);
+
+			xw.WriteStartObject(xDictionaryItem);
+			xw.WriteStartMember(xDictionaryItemKey);
+			xw.WriteValue(key);
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+
+			var result = (DictionaryContainer)xw.Result;
+			Assert.IsTrue(result.Items.TryGetValue(key, out DictionaryItem item));
+			Assert.AreEqual(key, item.Key);
+		}
 	}
 }
