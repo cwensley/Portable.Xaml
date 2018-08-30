@@ -1189,6 +1189,52 @@ namespace MonoTests.Portable.Xaml
 			obj.Bar = "{ Some Value That Should Be Escaped";
 			Assert.AreEqual(ReadXml("EscapedPropertyValue.xml").Trim(), XamlServices.Save(obj), "#1");
 		}
+
+		[Test]
+		public void Write_MarkupExtensionCommaSeparateParameters()
+		{
+			var xaml = "<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{MyExtension5  Foo=test, Bar=Bar}\" xmlns=\"clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_core\" />";
+
+			MyExtension5 e = new MyExtension5("test", "test");
+
+			var context = new XamlSchemaContext(null, null);
+			var sw = new StringWriter();
+
+			System.Xml.XmlWriter tw = System.Xml.XmlWriter.Create(sw);
+
+			XamlXmlWriter xw = new XamlXmlWriter(tw, context);
+
+			var testXType = context.GetXamlType(typeof(TestClass4));
+			var text = testXType.GetMember("Foo");
+
+			var xt = context.GetXamlType(typeof(MyExtension5));
+			var m1 = xt.GetMember("Foo");
+			var m2 = xt.GetMember("Bar");
+
+			xw.WriteStartObject(testXType);
+
+			xw.WriteStartMember(text);
+
+			xw.WriteStartObject(xt);
+			xw.WriteStartMember(m1);
+			xw.WriteValue("test");
+			xw.WriteEndMember();
+
+			xw.WriteStartMember(m2);
+			xw.WriteValue("Bar");
+			xw.WriteEndMember();
+
+			xw.WriteEndObject();
+
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+
+
+			xw.Close();
+			tw.Close();
+
+			Assert.AreEqual(xaml, sw.GetStringBuilder().ToString());
+		}
 	}
 
 	public class TestXmlWriterClass1
