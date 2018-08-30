@@ -1,4 +1,4 @@
-﻿﻿﻿﻿//
+﻿﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -1191,7 +1191,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void Write_MarkupExtensionCommaSeparateParameters()
+		public void Write_MarkupExtensionCommaSeparateAttributes()
 		{
 			var xaml = "<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{MyExtension5  Foo=test, Bar=Bar}\" xmlns=\"clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_core\" />";
 
