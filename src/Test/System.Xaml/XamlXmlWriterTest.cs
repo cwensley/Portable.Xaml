@@ -1193,7 +1193,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_MarkupExtensionCommaSeparateAttributes()
 		{
-			var xaml = $"<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{{MyExtension5 Foo=test, Bar=Bar}}\" xmlns=\"clr-namespace:{typeof(MyExtension5).Namespace};assembly=Portable.Xaml_test_core\" />";
+			var xaml = $"<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{{MyExtension5 Foo=test, Bar=Bar}}\" xmlns=\"clr-namespace:{typeof(MyExtension5).Namespace};assembly={typeof(MyExtension5).Assembly.GetName().Name}\" />";
 
 			MyExtension5 e = new MyExtension5("test", "test");
 
