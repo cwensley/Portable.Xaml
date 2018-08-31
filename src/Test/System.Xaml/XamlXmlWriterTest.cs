@@ -1,4 +1,4 @@
-﻿﻿﻿//
+﻿﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -1193,7 +1193,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_MarkupExtensionCommaSeparateAttributes()
 		{
-			var xaml = "<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{MyExtension5 Foo=test, Bar=Bar}\" xmlns=\"clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_core\" />";
+			var xaml = $"<?xml version=\"1.0\" encoding=\"utf-16\"?><TestClass4 Foo=\"{{MyExtension5 Foo=test, Bar=Bar}}\" xmlns=\"clr-namespace:{typeof(MyExtension5).Namespace};assembly=Portable.Xaml_test_core\" />";
 
 			MyExtension5 e = new MyExtension5("test", "test");
 
@@ -1233,7 +1233,7 @@ namespace MonoTests.Portable.Xaml
 			xw.Close();
 			tw.Close();
 
-			Assert.AreEqual(xaml, sw.GetStringBuilder().ToString());
+			Assert.AreEqual(xaml, sw.GetStringBuilder().Replace("  ", " ").ToString());
 		}
 	}
 
