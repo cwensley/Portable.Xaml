@@ -379,6 +379,21 @@ namespace MonoTests.Portable.Xaml
 		public DateTime TheDateAndTime { get; set; }
 	}
 
+	public class TestClass7 : ISupportInitialize
+	{
+		public int State { get; set; }
+
+		public void BeginInit()
+		{
+			State++;
+		}
+
+		public void EndInit()
+		{
+			State--;
+		}
+	}
+
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{

@@ -2256,5 +2256,32 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue(result.Items.TryGetValue(key, out DictionaryItem item));
 			Assert.AreEqual(key, item.Key);
 		}
+
+		[Test]
+		public void TestISupportInitializeBeginInitEqualsEndInit()
+		{
+			var xml =
+$@"<TestClass7 
+		xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' 
+		xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' />".UpdateXml();
+			
+			XamlSchemaContext context = new XamlSchemaContext();
+
+			TextReader tr = new StringReader(xml);
+
+			XamlObjectWriterSettings xows = new XamlObjectWriterSettings()
+			{
+				RootObjectInstance = new TestClass7()
+			};
+
+			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
+			XamlXmlReader r = new XamlXmlReader(tr);
+
+			XamlServices.Transform(r, ow);
+
+			var testClass = (TestClass7)ow.Result;
+
+			Assert.AreEqual(0, testClass.State);
+		}
 	}
 }
