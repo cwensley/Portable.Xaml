@@ -339,6 +339,7 @@ namespace Portable.Xaml
 						throw new XamlObjectWriterException(String.Format("RootObjectInstance type '{0}' is not assignable to '{1}'", obj.GetType(), state.Type));
 					state.Value = obj;
 					state.IsInstantiated = true;
+					source.OnBeforeProperties(state.Value);
 				}
 				root_state = state;
 			}
