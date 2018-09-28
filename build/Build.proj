@@ -49,7 +49,7 @@
 		<Message Text="Set Version: $(BuildVersion)" Condition="$(BuildVersion) != ''" />
 
 		<PropertyGroup>
-			<SetAppveyorVersion Condition="$(BuildVersion) == ''">True</SetAppveyorVersion>
+			<SetAppveyorVersion Condition="$(SetAppveyorVersion) == ''">True</SetAppveyorVersion>
 			<BuildIncrement Condition="$(BuildVersion) == '' and $(BuildIncrement) == ''">0.1.0.0</BuildIncrement>
 			<BuildVersion Condition="$(BuildVersion) == ''">$(CurrentVersion)</BuildVersion>
 		</PropertyGroup>
