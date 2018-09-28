@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace Portable.Xaml.Schema
@@ -105,7 +106,15 @@ namespace Portable.Xaml.Schema
 				}
 
 				addDelegate = CreateAddDelegate(instance, item, collectionType, itemType, key, mode);
-				addDelegate(instance, item);
+
+				try
+				{
+					addDelegate(instance, item);
+				}
+				catch (TargetInvocationException e)
+				{
+					ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+				}
 			}
 			else
 			{
@@ -154,15 +163,17 @@ namespace Portable.Xaml.Schema
 				var xct = type.SchemaContext.GetXamlType(collectionType);
 				if (!xct.IsCollection) // not sure why this check is done only when UnderlyingType exists...
 					throw new NotSupportedException(String.Format("Non-collection type '{0}' does not support this operation", xct));
-				if (collectionType.GetTypeInfo().IsAssignableFrom(type.UnderlyingType.GetTypeInfo()))
+				if (typeof(IList).GetTypeInfo().IsAssignableFrom(collectionType.GetTypeInfo()))
+					mi = typeof(IList).GetTypeInfo().GetDeclaredMethod("Add");
+				else if (collectionType.GetTypeInfo().IsAssignableFrom(type.UnderlyingType.GetTypeInfo()))
 					mi = GetAddMethod(type.SchemaContext.GetXamlType(itemType));
 			}
 
 			if (mi == null)
 			{
 				var baseCollection = collectionType.GetTypeInfo().GetInterfaces()
-				                                   .FirstOrDefault(r => r.GetTypeInfo().IsGenericType
-				                                                   && r.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>));
+												   .FirstOrDefault(r => r.GetTypeInfo().IsGenericType
+																   && r.GetTypeInfo().GetGenericTypeDefinition() == typeof(ICollection<>));
 				if (baseCollection != null)
 				{
 					mi = collectionType.GetRuntimeMethod("Add", baseCollection.GetTypeInfo().GetGenericArguments());

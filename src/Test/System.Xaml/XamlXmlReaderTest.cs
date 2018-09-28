@@ -1211,31 +1211,35 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse(reader.Read()); // EOF
 		}
 
+
 		[Test]
-		public void Read_CollectionShouldParseInnerTextAndItems()
+		public void Read_ContentCollectionShouldParsePropertyAfterInnerItem()
 		{
-			var xaml = @"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
-	Hello
-	<CollectionItem Name='World'/>
-	!
-</CollectionItemCollectionAddOverride>";
+			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <CollectionItem Name='World'/>
+	<CollectionParentItem.OtherItem>True</CollectionParentItem.OtherItem>
+</CollectionParentItem>";
 			var r = GetReaderText(xaml);
 
 			r.Read(); // xmlns
 			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
 
-			r.Read(); // <CollectionItemCollectionAddOverride>
+			r.Read(); // <CollectionParentItem>
 			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
 
 			ReadBase(r);
 
+			r.Read(); // StartMember (Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(typeof(CollectionParentItem), r.Member.DeclaringType.UnderlyingType);
+			Assert.AreEqual(nameof(CollectionParentItem.Items), r.Member.Name);
+
+			r.Read(); // GetObject
+			Assert.AreEqual(XamlNodeType.GetObject, r.NodeType);
+
 			r.Read(); // StartMember (_Items)
 			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
 			Assert.AreEqual(XamlLanguage.Items, r.Member);
-
-			r.Read(); // "Hello"
-			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
-			Assert.AreEqual("Hello ", r.Value);
 
 			r.Read(); // <CollectionItem>
 			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
@@ -1254,21 +1258,34 @@ namespace MonoTests.Portable.Xaml
 			r.Read(); // </CollectionItem>
 			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
 
-			r.Read(); // "!"
-			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
-			Assert.AreEqual(" !", r.Value);
-
-			r.Read(); // EndMember (_Items)
+			r.Read(); // EndMember (Items)
 			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
 
-			r.Read(); // </CollectionItemCollectionAddOverride>
+			r.Read(); // </GetObject>
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // StartMember (_Items)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(nameof(CollectionParentItem.OtherItem), r.Member.Name);
+
+			r.Read(); // "True"
+			Assert.AreEqual(XamlNodeType.Value, r.NodeType);
+			Assert.AreEqual("True", r.Value);
+
+			r.Read(); // EndMember (Items)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // </CollectionParentItem>
 			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
 
 			Assert.IsFalse(r.Read()); // EOF
 		}
 
 		[Test]
-		public void Read_ContentCollectionShouldParseInnerTextAndItems()
+		public void Read_ContentCollectionWithTypeConverterShouldParseInnerTextAndItems()
 		{
 			var xaml = @"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
 	Hello
@@ -1338,7 +1355,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void Inner_Text_And_Items_Should_Be_Added_Via_IList()
+		public void Inner_Text_And_Items_Should_Be_Added_Via_TypeConverter()
 		{
 			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
 			var xaml = $@"<CollectionItemCollectionAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
@@ -1355,7 +1372,7 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
-		public void Inner_Text_And_Items_Should_Be_Added_To_Content_Property_Via_IList()
+		public void Inner_Text_And_Items_Should_Be_Added_To_Content_Property_Via_TypeConverter()
 		{
 			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
 			var xaml = $@"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
