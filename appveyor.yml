@@ -1,4 +1,4 @@
-version: 0.21-alpha.{build}
+version: 0.23.0.{build}
 branches:
   only:
   - develop
