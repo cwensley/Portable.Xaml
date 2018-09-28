@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace Portable.Xaml.Schema
@@ -112,7 +113,7 @@ namespace Portable.Xaml.Schema
 				}
 				catch (TargetInvocationException e)
 				{
-					throw e.InnerException;
+					ExceptionDispatchInfo.Capture(e.InnerException).Throw();
 				}
 			}
 			else

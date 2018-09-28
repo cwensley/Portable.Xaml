@@ -171,7 +171,6 @@ namespace Portable.Xaml
 				CloseInput = closeInput ?? settings?.CloseInput ?? false,
 				IgnoreComments = true,
 				IgnoreProcessingInstructions = true,
-				//IgnoreWhitespace = true,
 				ConformanceLevel = conformance
 			};
 		}
