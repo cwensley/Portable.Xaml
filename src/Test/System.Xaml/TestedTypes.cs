@@ -379,6 +379,21 @@ namespace MonoTests.Portable.Xaml
 		public DateTime TheDateAndTime { get; set; }
 	}
 
+	public class TestClass7 : ISupportInitialize
+	{
+		public int State { get; set; }
+
+		public void BeginInit()
+		{
+			State++;
+		}
+
+		public void EndInit()
+		{
+			State--;
+		}
+	}
+
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{
@@ -1402,11 +1417,14 @@ namespace MonoTests.Portable.Xaml
 			var text = item as string;
 			if (text != null)
 				Add(new CollectionItem { Name = text });
-			var other = item as OtherItem;
-			if (other != null)
-				Add(other.CollectionItem);
 			else
-				Add((CollectionItem)item);
+			{
+				var other = item as OtherItem;
+				if (other != null)
+					Add(other.CollectionItem);
+				else
+					Add((CollectionItem)item);
+			}
 			return Count - 1;
 		}
 	}
@@ -1745,6 +1763,18 @@ namespace MonoTests.Portable.Xaml
 	{
 		public ICommand Command1 { get; set; }
 		public ICommand Command2 { get; set; }
+	}
+
+	[ContentProperty("Items")]
+	public class DictionaryContainer
+	{
+		public Dictionary<object, DictionaryItem> Items { get; } = new Dictionary<object, DictionaryItem>();
+	}
+
+	[DictionaryKeyProperty("Key")]
+	public class DictionaryItem
+	{
+		public object Key { get; set; }
 	}
 }
 

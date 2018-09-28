@@ -192,6 +192,7 @@ namespace Portable.Xaml
 			object_states.Push(state);
 
 			OnWriteGetObject();
+			manager.GotObject(object_states.Peek().Type);
 		}
 
 		public void WriteNamespace(NamespaceDeclaration namespaceDeclaration)
@@ -210,7 +211,7 @@ namespace Portable.Xaml
 			if (ReferenceEquals(xamlType, null))
 				throw new ArgumentNullException("xamlType");
 
-			manager.StartObject();
+			manager.StartObject(xamlType);
 			var cstate = new ObjectState() { Type = xamlType };
 			object_states.Push(cstate);
 

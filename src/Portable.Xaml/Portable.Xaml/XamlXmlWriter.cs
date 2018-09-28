@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -185,6 +185,7 @@ namespace Portable.Xaml
 		List<NamespaceDeclaration> local_nss2 = new List<NamespaceDeclaration> ();
 		bool inside_toplevel_positional_parameter;
 		bool inside_attribute_object;
+		int attribute_index;
 
 		protected override void OnWriteEndObject ()
 		{
@@ -258,6 +259,9 @@ namespace Portable.Xaml
 				}
 				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.InternalXmlName : xamlType.Name;
 				w.WriteString (name);
+
+				attribute_index = -1;
+
 				// space between type and first member (if any).
 				if (xamlType.IsMarkupExtension && xamlType.GetSortedConstructorArguments ().GetEnumerator ().MoveNext ())
 					w.WriteString (" ");
@@ -344,6 +348,11 @@ namespace Portable.Xaml
 
 			if (w.WriteState == WriteState.Attribute) {
 				if (state.PositionalParameterIndex < 0) {
+					attribute_index++;
+
+					if (attribute_index > 0)
+						w.WriteString(",");
+
 					w.WriteString (" ");
 					w.WriteString (member.Name);
 					w.WriteString ("=");

@@ -339,6 +339,8 @@ namespace Portable.Xaml
 						throw new XamlObjectWriterException(String.Format("RootObjectInstance type '{0}' is not assignable to '{1}'", obj.GetType(), state.Type));
 					state.Value = obj;
 					state.IsInstantiated = true;
+					HandleBeginInit(obj);
+					source.OnBeforeProperties(state.Value);
 				}
 				root_state = state;
 			}
@@ -346,7 +348,6 @@ namespace Portable.Xaml
 			if (!state.Type.IsContentValue(service_provider))
 				InitializeObjectIfRequired(true);
 			state.IsXamlWriterCreated = true;
-			source.OnBeforeProperties(state.Value);
 		}
 
 		protected override void OnWriteGetObject()
@@ -563,6 +564,7 @@ namespace Portable.Xaml
 			state.Value = state.Type.Invoker.CreateInstance(argv);
 			state.IsInstantiated = true;
 			HandleBeginInit(state.Value);
+			source.OnBeforeProperties(state.Value);
 		}
 
 		protected override void OnWriteValue(object value)
@@ -614,9 +616,11 @@ namespace Portable.Xaml
 				ms.Value = GetCorrectlyTypedValue (null, xm.Type, obj);
 			else if (ReferenceEquals(xm, XamlLanguage.Name) || xm == xt.GetAliasedProperty (XamlLanguage.Name))
 				ms.Value = GetCorrectlyTypedValue (xm, XamlLanguage.String, obj);
-			else if (ReferenceEquals(xm, XamlLanguage.Key))
-				state.KeyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
-			else {
+			else if (ReferenceEquals(xm, XamlLanguage.Key) || xm == xt.GetAliasedProperty(XamlLanguage.Key)) {
+				var keyValue = GetCorrectlyTypedValue (null, xt.KeyType, obj);
+				state.KeyValue = keyValue;
+				ms.Value = keyValue;
+			} else {
 				if (!AddToCollectionIfAppropriate (xt, xm, parent, obj, keyObj)) {
 					if (!xm.IsReadOnly || xm.IsConstructorArgument)
 						ms.Value = GetCorrectlyTypedValue (xm, xm.Type, obj);
@@ -634,7 +638,7 @@ namespace Portable.Xaml
 				if (xt.IsDictionary)
 					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
 				else // collection. Note that state.Type isn't usable for PositionalParameters to identify collection kind.
-					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj));
+					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj, true));
 				return true;
 			}
 			else
@@ -647,7 +651,7 @@ namespace Portable.Xaml
 		// When it is passed null, then it returns a default instance.
 		// For example, passing null as Int32 results in 0.
 		// But do not immediately try to instantiate with the type, since the type might be abstract.
-		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value)
+		object GetCorrectlyTypedValue (XamlMember xm, XamlType xt, object value, bool fallbackToString = false)
 		{
 			try
 			{
@@ -694,7 +698,9 @@ namespace Portable.Xaml
 				throw new XamlObjectWriterException(String.Format("Could not convert object \'{0}' (of type {1}) to {2}: ", value, value != null ? (object)value.GetType() : "(null)", xt) + ex.Message, ex);
 			}
 
-			throw new XamlObjectWriterException (String.Format ("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object) value.GetType () : "(null)", xt, xm));
+			return fallbackToString ?
+				value :
+				throw new XamlObjectWriterException(String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm));
 		}
 
 		XamlType ResolveTypeFromName (string name)
@@ -753,6 +759,7 @@ namespace Portable.Xaml
 						state.Value = obj;
 						state.IsInstantiated = true;
 						HandleBeginInit(obj);
+						source.OnBeforeProperties(state.Value);
 
 						// set other writable properties now that the object is instantiated
 						foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
@@ -775,6 +782,7 @@ namespace Portable.Xaml
 			state.Value = obj;
 			state.IsInstantiated = true;
 			HandleBeginInit (obj);
+			source.OnBeforeProperties(state.Value);
 		}
 
 		internal IXamlNameResolver name_resolver {

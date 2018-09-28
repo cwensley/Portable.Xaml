@@ -49,7 +49,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		PropertyInfo str_len = typeof(string).GetProperty("Length");
 		XamlSchemaContext sctx = new XamlSchemaContext(null, null);
-		XamlType xt, xt3, xt4;
+		XamlType xt, xt3, xt4, xt5;
 		XamlMember xm2, xm3;
 
 		public XamlObjectWriterTest()
@@ -57,6 +57,7 @@ namespace MonoTests.Portable.Xaml
 			xt = new XamlType(typeof(string), sctx);
 			xt3 = new XamlType(typeof(TestClass1), sctx);
 			xt4 = new XamlType(typeof(Foo), sctx);
+			xt5 = new XamlType(typeof(List<TestClass1>), sctx);
 			xm2 = new XamlMember(typeof(TestClass1).GetProperty("TestProp1"), sctx);
 			xm3 = new XamlMember(typeof(TestClass1).GetProperty("TestProp2"), sctx);
 		}
@@ -511,6 +512,32 @@ namespace MonoTests.Portable.Xaml
 				xw.WriteStartObject(xt3); // Portable.Xaml throws here
 				xw.Close(); // .NET 4.5 throws here
 			});
+		}
+
+		[Test]
+		public void CollectionValueThenStartObject()
+		{
+			var xw = new XamlObjectWriter(sctx, null);
+			xw.WriteStartObject(xt5);
+			xw.WriteStartMember(XamlLanguage.Items);
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.Close();
+		}
+
+		[Test]
+		public void CollectionMixedObjectsAndValues()
+		{
+			var xw = new XamlObjectWriter(sctx, null);
+			xw.WriteStartObject(xt5);
+			xw.WriteStartMember(XamlLanguage.Items);
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.WriteEndObject();
+			xw.WriteValue(new TestClass1());
+			xw.WriteStartObject(xt3);
+			xw.WriteEndObject();
+			xw.Close();
 		}
 
 		[Test]
@@ -2196,6 +2223,65 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject(xt3);
 
 			Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartMember(XamlLanguage.UnknownContent));
+		}
+
+		[Test]
+		public void Write_DictionaryKeyProperty()
+		{
+			var xw = new XamlObjectWriter(sctx);
+			var xDictionaryContainer = sctx.GetXamlType(typeof(DictionaryContainer));
+			var xDictionaryContainerItems = xDictionaryContainer.GetMember(nameof(DictionaryContainer.Items));
+			var xDictionaryItem = sctx.GetXamlType(typeof(DictionaryItem));
+			var xDictionaryItemKey = xDictionaryItem.GetMember(nameof(DictionaryItem.Key));
+			const string key = "Key";
+
+			xw.WriteNamespace(new NamespaceDeclaration(XamlLanguage.Xaml2006Namespace, "x"));
+			xw.WriteStartObject(xDictionaryContainer);
+			xw.WriteStartMember(xDictionaryContainerItems);
+			xw.WriteGetObject();
+			xw.WriteStartMember(XamlLanguage.Items);
+
+			xw.WriteStartObject(xDictionaryItem);
+			xw.WriteStartMember(xDictionaryItemKey);
+			xw.WriteValue(key);
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+			xw.WriteEndMember();
+			xw.WriteEndObject();
+
+			var result = (DictionaryContainer)xw.Result;
+			Assert.IsTrue(result.Items.TryGetValue(key, out DictionaryItem item));
+			Assert.AreEqual(key, item.Key);
+		}
+
+		[Test]
+		public void TestISupportInitializeBeginInitEqualsEndInit()
+		{
+			var xml =
+$@"<TestClass7 
+		xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' 
+		xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' />".UpdateXml();
+			
+			XamlSchemaContext context = new XamlSchemaContext();
+
+			TextReader tr = new StringReader(xml);
+
+			XamlObjectWriterSettings xows = new XamlObjectWriterSettings()
+			{
+				RootObjectInstance = new TestClass7()
+			};
+
+			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
+			XamlXmlReader r = new XamlXmlReader(tr);
+
+			XamlServices.Transform(r, ow);
+
+			var testClass = (TestClass7)ow.Result;
+
+			Assert.AreEqual(0, testClass.State);
 		}
 	}
 }

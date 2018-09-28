@@ -141,6 +141,9 @@ namespace Portable.Xaml
 
 		static IEnumerable<Assembly> GetAppDomainAssemblies()
 		{
+#if NETSTANDARD2_0
+			return AppDomain.CurrentDomain.GetAssemblies();
+#else
 			try
 			{
 				var appDomainType = Type.GetType("System.AppDomain", false);
@@ -163,6 +166,7 @@ namespace Portable.Xaml
 			{
 				return null;
 			}
+#endif
 		}
 
 #if !PCL136
