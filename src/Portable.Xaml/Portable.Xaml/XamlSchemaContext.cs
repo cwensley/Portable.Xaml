@@ -423,7 +423,7 @@ namespace Portable.Xaml
 			return GetXamlType(n.Namespace, n.Name, typeArgs);
 		}
 
-		protected internal virtual XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
+		protected virtual XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
 		{
 			XamlType ret;
 			var key = Tuple.Create(xamlNamespace, name);
