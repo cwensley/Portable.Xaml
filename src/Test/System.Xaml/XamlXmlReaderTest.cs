@@ -594,6 +594,34 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Looks_Up_Correct_Markup_Extension_Type_Names()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<TestClass4 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'
+								      Foo='{{Example}}'/>";
+			var ctx = new TestSchemaContext("ExampleExtension");
+			var reader = new XamlXmlReader(new StringReader(xaml), ctx);
+
+			while (reader.Read()) ;
+
+			Assert.AreEqual(new[] { "TestClass4", "ExampleExtension", "Example" }, ctx.RequestedTypeNames);
+		}
+
+		[Test]
+		public void Looks_Up_Correct_Markup_Extension_Type_Names2()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<TestClass4 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'
+								      Foo='{{ExampleExtension}}'/>";
+			var ctx = new TestSchemaContext("ExampleExtension");
+			var reader = new XamlXmlReader(new StringReader(xaml), ctx);
+
+			while (reader.Read()) ;
+
+			Assert.AreEqual(new[] { "TestClass4", "ExampleExtensionExtension", "ExampleExtension" }, ctx.RequestedTypeNames);
+		}
+
+		[Test]
 		public void Read_ArgumentAttributed ()
 		{
 			var obj = new ArgumentAttributed ("foo", "bar");
@@ -1425,6 +1453,24 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual("Hello ", result.Items[0].Name);
 			Assert.AreEqual("World", result.Items[1].Name);
 			Assert.AreEqual(" !", result.Items[2].Name);
+		}
+
+		public class TestSchemaContext : XamlSchemaContext
+		{
+			readonly string[] unknownTypeNames;
+
+			public TestSchemaContext(params string[] unknownTypeNames)
+			{
+				this.unknownTypeNames = unknownTypeNames;
+			}
+
+			public List<string> RequestedTypeNames { get; } = new List<string>();
+
+			protected override XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
+			{
+				RequestedTypeNames.Add(name);
+				return unknownTypeNames.Contains(name) ? null : base.GetXamlType(xamlNamespace, name, typeArguments);
+			}
 		}
 	}
 }
