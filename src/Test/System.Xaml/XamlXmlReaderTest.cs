@@ -555,6 +555,45 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_CustomExtensionNotFound()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<TestClass4 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'
+									  Foo='{{NotFound}}'/>";
+			var r = GetReaderText(xaml);
+
+			r.Read(); // xmlns
+			Assert.AreEqual(XamlNodeType.NamespaceDeclaration, r.NodeType);
+
+			r.Read(); // <TestClass4>
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+
+			ReadBase(r);
+
+			r.Read(); // StartMember (Foo)
+			Assert.AreEqual(XamlNodeType.StartMember, r.NodeType);
+			Assert.AreEqual(typeof(TestClass4), r.Member.DeclaringType.UnderlyingType);
+			Assert.AreEqual(nameof(TestClass4.Foo), r.Member.Name);
+
+			r.Read(); // StartObject (NotFound)
+			Assert.AreEqual(XamlNodeType.StartObject, r.NodeType);
+			Assert.True(r.Type.IsUnknown);
+			Assert.AreEqual("NotFound", r.Type.Name);
+			Assert.AreEqual($"clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}", r.Type.PreferredXamlNamespace);
+
+			r.Read(); // EndObject (NotFound)
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			r.Read(); // EndMember (foo)
+			Assert.AreEqual(XamlNodeType.EndMember, r.NodeType);
+
+			r.Read(); // EndObject (TestClass4)
+			Assert.AreEqual(XamlNodeType.EndObject, r.NodeType);
+
+			Assert.False(r.Read());
+		}
+
+		[Test]
 		public void Read_ArgumentAttributed ()
 		{
 			var obj = new ArgumentAttributed ("foo", "bar");
