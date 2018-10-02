@@ -219,6 +219,11 @@ namespace Portable.Xaml
 
 		public override void WriteStartObject(XamlType xamlType)
 		{
+			if (xamlType.IsUnknown)
+			{
+				throw new XamlObjectWriterException($"Cannot create unknown type '{xamlType}'.");
+			}
+
 			if (deferredWriter != null)
 			{
 				deferredWriter.Writer.WriteStartObject(xamlType);
