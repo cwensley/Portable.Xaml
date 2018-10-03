@@ -720,7 +720,22 @@ namespace Portable.Xaml
 		
 		void InitializeObjectIfRequired (bool waitForParameters, bool required = false)
 		{
-			var state = object_states.Peek ();
+			ObjectState state;
+			if (object_states.Count > 1)
+			{
+				state = object_states.Pop();
+				var parent_state = object_states.Peek();
+				object_states.Push(state);
+
+				if (state.CurrentMember != null && parent_state.Type.IsUsableDuringInitialization)
+				{
+					SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+				}
+			}
+			else
+				state = object_states.Peek();
+
+			
 			if (state.IsInstantiated)
 				return;
 

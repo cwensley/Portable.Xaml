@@ -2298,15 +2298,20 @@ $@"<TestClass7
 			var xamlType = new UsableDuringInitializationXamlTestType(typeof(TestClass8),context) ;
 			var xamlType2 = new XamlType(typeof(TestClass7),context);
 			
-			var xamlMember = xamlType.GetMember("Foo");
+			Assert.IsTrue(xamlType.IsUsableDuringInitialization);
+			
+			var xamlMemberFoo = xamlType.GetMember("Foo");
 			var xamlMemberBar = xamlType.GetMember("Bar");
 			
 			ow.WriteStartObject(xamlType);
+			
+			ow.WriteStartMember(xamlMemberFoo);
+			ow.WriteEndMember();
+			
 			ow.WriteStartMember(xamlMemberBar);
 			
 			ow.WriteStartObject(xamlType);
-			
-			ow.WriteStartMember(xamlMember);
+			ow.WriteStartMember(xamlMemberFoo);
 			
 			ow.WriteStartObject(xamlType2);
 			ow.WriteEndObject();
