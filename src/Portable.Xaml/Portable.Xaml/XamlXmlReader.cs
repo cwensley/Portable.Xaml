@@ -295,6 +295,18 @@ namespace Portable.Xaml
 		{
 			return new XamlXmlNodeInfo(nodeType, nodeValue, line_info);
 		}
+		
+		/// <summary>
+		/// Create new <see cref="XamlXmlNodeInfo"/> Use this overload only then you want pass deferred line info information to instance
+		/// </summary>
+		/// <param name="nodeType">Type of new node</param>
+		/// <param name="nodeValue">Value of new node</param>
+		/// <param name="lineInfo">Line info</param>
+		/// <returns></returns>
+		XamlXmlNodeInfo Node (XamlNodeType nodeType, object nodeValue, IXmlLineInfo lineInfo)
+		{
+			return new XamlXmlNodeInfo(nodeType, nodeValue, lineInfo);
+		}
 
 		public IEnumerable<XamlXmlNodeInfo> Parse ()
 		{
@@ -423,12 +435,12 @@ namespace Portable.Xaml
 
 			for (int i = 0; i < sti.Members.Count; i++)
 			{
-				var pair = sti.Members[i];
-				yield return Node(XamlNodeType.StartMember, pair.Key);
+				var memberInfo = sti.Members[i];
+				yield return Node(XamlNodeType.StartMember, memberInfo.Pair.Key, memberInfo.LineInfo);
 
 				// Try markup extension
 				// FIXME: is this rule correct?
-				var v = pair.Value;
+				var v = memberInfo.Pair.Value;
 				if (!string.IsNullOrEmpty(v) && v[0] == '{')
 				{
 					if (v.Length >= 2 && v[1] == '}')
@@ -447,7 +459,7 @@ namespace Portable.Xaml
 				else
 					yield return Node(XamlNodeType.Value, v);
 
-				yield return Node(XamlNodeType.EndMember, pair.Key);
+				yield return Node(XamlNodeType.EndMember, memberInfo.Pair.Key);
 			}
 
 			// process content members
@@ -523,7 +535,7 @@ namespace Portable.Xaml
 			string ns = ResolveLocalNamespace(r.NamespaceURI);
 			string typeArgNames;
 
-			var members = new List<Pair> ();
+			var members = new List<MemberInfo> ();
 			var atts = ProcessAttributes (r, members, out typeArgNames);
 
 			IList<XamlTypeName> typeArgs = typeArgNames == null ? null : XamlTypeName.ParseList (typeArgNames, xaml_namespace_resolver);
@@ -534,7 +546,7 @@ namespace Portable.Xaml
 		bool xmlbase_done;
 
 		// returns remaining attributes to be processed
-		List<StringPair> ProcessAttributes(XmlReader r, List<Pair> members, out string typeArgNames)
+		List<AttributeInfo> ProcessAttributes(XmlReader r, List<MemberInfo> members, out string typeArgNames)
 		{
 			// base (top element)
 			if (!xmlbase_done)
@@ -542,10 +554,10 @@ namespace Portable.Xaml
 				xmlbase_done = true;
 				string xmlbase = r.GetAttribute("base", XamlLanguage.Xml1998Namespace) ?? r.BaseURI;
 				if (xmlbase != null)
-					members.Add(new Pair(XamlLanguage.Base, xmlbase));
+					members.Add(new MemberInfo(new Pair(XamlLanguage.Base, xmlbase), line_info));
 			}
 			typeArgNames = null;
-			var atts = new List<StringPair>();
+			var atts = new List<AttributeInfo>();
 			var tagNamespace = r.NamespaceURI;
 			if (r.MoveToFirstAttribute())
 			{
@@ -559,10 +571,10 @@ namespace Portable.Xaml
 								case "base":
 									continue; // already processed.
 								case "lang":
-									members.Add(new Pair(XamlLanguage.Lang, r.Value));
+									members.Add(new MemberInfo(new Pair(XamlLanguage.Lang, r.Value), line_info));
 									continue;
 								case "space":
-									members.Add(new Pair(XamlLanguage.Space, r.Value));
+									members.Add(new MemberInfo(new Pair(XamlLanguage.Space, r.Value), line_info));
 									continue;
 							}
 							break;
@@ -578,18 +590,19 @@ namespace Portable.Xaml
 									typeArgNames = r.Value;
 									continue;
 								}
-								members.Add(new Pair(d, r.Value));
+								members.Add(new MemberInfo(new Pair(d, r.Value), line_info));
 								continue;
 							}
 							throw new NotSupportedException(String.Format("Attribute '{0}' is not supported", r.Name));
 						default:
 							if (string.IsNullOrEmpty(r.NamespaceURI) || tagNamespace == r.NamespaceURI || r.LocalName.IndexOf('.') > 0)
 							{
-								atts.Add(new StringPair(r.Name, r.Value));
+								atts.Add(new AttributeInfo(new StringPair(r.Name, r.Value), line_info));
 								continue;
 							}
 							// Custom directive
-							members.Add(new Pair(SchemaContext.GetXamlDirective(r.NamespaceURI, r.LocalName), r.Value));
+							members.Add(new MemberInfo(new Pair(SchemaContext.GetXamlDirective(r.NamespaceURI, r.LocalName), r.Value), 
+								line_info));
 							break;
 					}
 				} while (r.MoveToNextAttribute());
@@ -622,22 +635,22 @@ namespace Portable.Xaml
 			for (int i = 0; i < sti.Attributes.Count; i++)
 			{
 				var p = sti.Attributes[i];
-				int idx = p.Key.IndexOf(':');
-				string prefix = idx > 0 ? p.Key.Substring(0, idx) : String.Empty;
-				string name = idx > 0 ? p.Key.Substring(idx + 1) : p.Key;
+				int idx = p.StringPair.Key.IndexOf(':');
+				string prefix = idx > 0 ? p.StringPair.Key.Substring(0, idx) : String.Empty;
+				string name = idx > 0 ? p.StringPair.Key.Substring(idx + 1) : p.StringPair.Key;
 
 				var am = FindAttachableMember(prefix, name);
 				if (am != null)
 				{
-					sti.Members.Add(new Pair(am, p.Value));
+					sti.Members.Add(new MemberInfo(new Pair(am, p.StringPair.Value), p.LineInfo));
 					continue;
 				}
 				var xm = xt.GetMember(name);
 				if (xm != null)
-					sti.Members.Add(new Pair(xm, p.Value));
+					sti.Members.Add(new MemberInfo(new Pair(xm, p.StringPair.Value), p.LineInfo));
 				else
 					// unknown attributes go through!
-					sti.Members.Add(new Pair(new XamlMember(name, xt, false), p.Value));
+					sti.Members.Add(new MemberInfo(new Pair(new XamlMember(name, xt, false), p.StringPair.Value), p.LineInfo));
 			}
 		}
 
@@ -903,13 +916,77 @@ namespace Portable.Xaml
 			get { return line_info != null && line_info.HasLineInfo () ? line_info.LinePosition : 0; }
 		}
 
+		internal struct LineInfo : IXmlLineInfo
+		{
+			public LineInfo(IXmlLineInfo xamlLineInfo)
+			{
+				if (xamlLineInfo != null)
+				{
+					LineNumber = xamlLineInfo.LineNumber;
+					LinePosition = xamlLineInfo.LinePosition;
+					LinePosition = xamlLineInfo.LinePosition;
+				}
+				else
+				{
+					LineNumber = 0;
+					LinePosition = 0;
+				}
+			}
+
+			public bool HasLineInfo() => true;
+			public int LineNumber { get; }
+			public int LinePosition { get; }
+		}
+		
+		/// <summary>
+		/// Information about member in xaml document
+		/// </summary>
+		internal struct MemberInfo
+		{
+			public MemberInfo(Pair pair, LineInfo lineInfo)
+			{
+				Pair = pair;
+				LineInfo = lineInfo;
+			}
+			
+			public MemberInfo(Pair pair, IXmlLineInfo lineInfo)
+			{
+				Pair = pair;
+				LineInfo = new LineInfo(lineInfo);
+			}
+			
+			public Pair Pair;
+			public LineInfo LineInfo;
+		}
+		
+		/// <summary>
+		/// Information about attribute in xaml document
+		/// </summary>
+		internal struct AttributeInfo
+		{
+			public AttributeInfo(StringPair stringPair, LineInfo lineInfo)
+			{
+				StringPair = stringPair;
+				LineInfo = lineInfo;
+			}
+			
+			public AttributeInfo(StringPair stringPair, IXmlLineInfo lineInfo)
+			{
+				StringPair = stringPair;
+				LineInfo = new LineInfo(lineInfo);
+			}
+			
+			public StringPair StringPair;
+			public LineInfo LineInfo;
+		}
+
 		internal struct StartTagInfo
 		{
 			public string Name;
 			public string Namespace;
 			public XamlTypeName TypeName;
-			public List<Pair> Members;
-			public List<StringPair> Attributes;
+			public List<MemberInfo> Members;
+			public List<AttributeInfo> Attributes;
 		}
 		
 		internal class NamespaceResolver : IXamlNamespaceResolver
