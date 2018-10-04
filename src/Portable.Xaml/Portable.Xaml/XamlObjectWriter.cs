@@ -455,8 +455,27 @@ namespace Portable.Xaml
 					throw new XamlObjectWriterException($"Type '{object_states.Peek().Type}' does not have a content property.");
 				if (property.IsUnknown)
 					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
-				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
+				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)
+				) // x:Name requires an object instance
+				{
 					InitializeObjectIfRequired(false);
+
+					ObjectState state;
+					if (object_states.Count > 1)
+					{
+						state = object_states.Pop();
+						var parent_state = object_states.Peek();
+						object_states.Push(state);
+
+						if (!parent_state.IsAlreadyAttachedToParent && parent_state.CurrentMember != null &&
+						    parent_state.Type.IsUsableDuringInitialization &&
+						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
+						{
+							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							parent_state.IsAlreadyAttachedToParent = true;
+						}
+					}
+				}
 			}
 		}
 
@@ -529,7 +548,7 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated)
+				if (state.IsInstantiated && !state.IsAlreadyAttachedToParent)
 					SetValue(member, state.Value, value);
 			}
 		}
@@ -720,21 +739,7 @@ namespace Portable.Xaml
 		
 		void InitializeObjectIfRequired (bool waitForParameters, bool required = false)
 		{
-			ObjectState state;
-			if (object_states.Count > 1)
-			{
-				state = object_states.Pop();
-				var parent_state = object_states.Peek();
-				object_states.Push(state);
-
-				if (state.CurrentMember != null && parent_state.Type.IsUsableDuringInitialization)
-				{
-					SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
-				}
-			}
-			else
-				state = object_states.Peek();
-
+			var state = object_states.Peek();
 			
 			if (state.IsInstantiated)
 				return;

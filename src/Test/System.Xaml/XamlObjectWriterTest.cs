@@ -2306,6 +2306,8 @@ $@"<TestClass7
 			ow.WriteStartObject(xamlType);
 			
 			ow.WriteStartMember(xamlMemberFoo);
+			ow.WriteStartObject(xamlType2);
+			ow.WriteEndObject();
 			ow.WriteEndMember();
 			
 			ow.WriteStartMember(xamlMemberBar);
@@ -2322,6 +2324,13 @@ $@"<TestClass7
 		
 			ow.WriteEndMember();
 			ow.WriteEndObject();
+
+			var result = (TestClass8)ow.Result;
+			Assert.True(result.Foo != null);
+			Assert.True(result.Bar != null);
+			Assert.True(result.Bar.Foo != null);
+			Assert.False(ReferenceEquals(result, result.Bar));
+
 		}
 	}
 }
