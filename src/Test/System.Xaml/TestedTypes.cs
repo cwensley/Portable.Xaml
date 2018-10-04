@@ -412,7 +412,6 @@ namespace MonoTests.Portable.Xaml
 				
 				//The value must be not initialized yet
 				Assert.IsNull(_bar.Foo);
-				Assert.Equals(State, 0);
 			}
 		}
 
