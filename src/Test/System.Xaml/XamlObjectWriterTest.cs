@@ -2295,7 +2295,7 @@ $@"<TestClass7
 
 			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
 		
-			var xamlType = new UsableDuringInitializationXamlTestType(typeof(TestClass8),context) ;
+			var xamlType = new XamlType(typeof(TestClass8),context);
 			var xamlType2 = new XamlType(typeof(TestClass7),context);
 			
 			Assert.IsTrue(xamlType.IsUsableDuringInitialization);

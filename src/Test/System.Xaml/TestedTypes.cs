@@ -394,44 +394,36 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
-  	public class UsableDuringInitializationXamlTestType : XamlType
-	{
-		protected UsableDuringInitializationXamlTestType(string typeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext) : base(typeName, typeArguments, schemaContext)
-		{
-		}
-
-		public UsableDuringInitializationXamlTestType(string unknownTypeNamespace, string unknownTypeName, IList<XamlType> typeArguments, XamlSchemaContext schemaContext) : base(unknownTypeNamespace, unknownTypeName, typeArguments, schemaContext)
-		{
-		}
-
-		public UsableDuringInitializationXamlTestType(Type underlyingType, XamlSchemaContext schemaContext) : base(underlyingType, schemaContext)
-		{
-		}
-
-		public UsableDuringInitializationXamlTestType(Type underlyingType, XamlSchemaContext schemaContext, XamlTypeInvoker invoker) : base(underlyingType, schemaContext, invoker)
-		{
-		}
-
-		protected override bool LookupUsableDuringInitialization()
-		{
-			return true;
-		}
-	}
-	
-	public class TestClass8
+  	[UsableDuringInitialization(true)]
+	public class TestClass8 : ISupportInitialize
 	{
 		private TestClass8 _bar;
-
+		
+		public int State { get; set; }
+		
 		public TestClass7 Foo { get; set; }
+		
 		public TestClass8 Bar
 		{
 			get => _bar;
 			set
 			{
 				_bar = value;
-				//The value not initialized yet
+				
+				//The value must be not initialized yet
 				Assert.IsNull(_bar.Foo);
+				Assert.Equals(State, 0);
 			}
+		}
+
+		public void BeginInit()
+		{
+			State++;
+		}
+
+		public void EndInit()
+		{
+			State--;
 		}
 	}
 	

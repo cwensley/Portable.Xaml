@@ -455,8 +455,7 @@ namespace Portable.Xaml
 					throw new XamlObjectWriterException($"Type '{object_states.Peek().Type}' does not have a content property.");
 				if (property.IsUnknown)
 					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
-				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)
-				) // x:Name requires an object instance
+				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
 				{
 					InitializeObjectIfRequired(false);
 
@@ -739,8 +738,7 @@ namespace Portable.Xaml
 		
 		void InitializeObjectIfRequired (bool waitForParameters, bool required = false)
 		{
-			var state = object_states.Peek();
-			
+			var state = object_states.Peek ();
 			if (state.IsInstantiated)
 				return;
 
