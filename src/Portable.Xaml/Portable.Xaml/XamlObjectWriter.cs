@@ -24,7 +24,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Portable.Xaml.ComponentModel;
+
+#if HAS_ISUPPORT_INITIALIZE
+	using ISupportInitialize = System.ComponentModel.ISupportInitialize;
+#else
+	using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
+#endif
+
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
