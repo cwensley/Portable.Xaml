@@ -393,6 +393,18 @@ namespace MonoTests.Portable.Xaml
 			State--;
 		}
 	}
+	
+	[ContentProperty(nameof(Items))]
+	public class CollectionCannotBeAssigned
+	{
+		readonly List<TestClass4> items = new List<TestClass4>();
+
+		public List<TestClass4> Items
+		{
+			get => items;
+			set => throw new Exception("This should not happen.");
+		}
+	}
 
   	[UsableDuringInitialization(true)]
 	public class TestClass8 : ISupportInitialize
@@ -1322,7 +1334,7 @@ namespace MonoTests.Portable.Xaml
 		Four
 	}
 
-	[ContentProperty("ListOfItems")]
+	[ContentProperty(nameof(ListOfItems))]
 	public class CollectionContentProperty
 	{
 		public IList<SimpleClass> ListOfItems { get; set; }
