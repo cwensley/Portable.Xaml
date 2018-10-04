@@ -97,6 +97,8 @@ namespace Portable.Xaml
 				set { _flags.Set(ObjectStateFlags.IsXamlWriterCreated, value); }
 			}
 
+			public bool IsValueProvidedByParent { get; set; }
+
 			public int PositionalParameterIndex = -1;
 
 			public string FactoryMethod;

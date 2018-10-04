@@ -2283,5 +2283,18 @@ $@"<TestClass7
 
 			Assert.AreEqual(0, testClass.State);
 		}
+		
+		
+		[Test]
+		public void CollectionShouldNotBeAssigned()
+		{
+			var xml = $@"
+<CollectionCannotBeAssigned xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <TestClass4/>	
+</CollectionCannotBeAssigned>".UpdateXml();
+			var result = (CollectionCannotBeAssigned)XamlServices.Parse(xml);
+
+			Assert.AreEqual(1, result.Items.Count);
+		}
 	}
 }

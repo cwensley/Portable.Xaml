@@ -360,6 +360,10 @@ namespace Portable.Xaml
 				instance = state.Type.Invoker.ToMutable(instance);
 			if (instance == null)
 				throw new XamlObjectWriterException(String.Format("The value  for '{0}' property is null", xm.Name));
+			
+			//if the type is immutable then we need set value
+			if(!state.Type.IsImmutable)
+				object_states.Peek().IsValueProvidedByParent = true;
 			state.Value = instance;
 			state.IsInstantiated = true;
 			object_states.Push(state);
@@ -529,7 +533,8 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated)
+				if (state.IsInstantiated && !(state.IsValueProvidedByParent 
+												&& state.CurrentMember.Type.IsCollection))
 					SetValue(member, state.Value, value);
 			}
 		}
@@ -539,7 +544,7 @@ namespace Portable.Xaml
 			try
 			{
 				if (!source.OnSetValue(target, member, value))
-					member.Invoker.SetValue(target, value);
+						member.Invoker.SetValue(target, value);
 			}
 			catch (Exception ex)
 			{
