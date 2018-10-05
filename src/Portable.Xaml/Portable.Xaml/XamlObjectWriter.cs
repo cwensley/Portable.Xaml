@@ -461,7 +461,25 @@ namespace Portable.Xaml
 				if (property.IsUnknown)
 					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
 				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
+				{
 					InitializeObjectIfRequired(false);
+
+					ObjectState state;
+					if (object_states.Count > 1)
+					{
+						state = object_states.Pop();
+						var parent_state = object_states.Peek();
+						object_states.Push(state);
+
+						if (!parent_state.IsAlreadyAttachedToParent && parent_state.CurrentMember != null &&
+						    parent_state.Type.IsUsableDuringInitialization &&
+						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
+						{
+							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							parent_state.IsAlreadyAttachedToParent = true;
+						}
+					}
+				}
 			}
 		}
 
@@ -534,7 +552,7 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated)
+				if (state.IsInstantiated && !state.IsAlreadyAttachedToParent)
 					SetValue(member, state.Value, value);
 			}
 		}

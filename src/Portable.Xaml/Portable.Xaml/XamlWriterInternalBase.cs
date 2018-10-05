@@ -110,6 +110,8 @@ namespace Portable.Xaml
 			{
 				get { return WrittenProperties.Count > 0 ? WrittenProperties[WrittenProperties.Count - 1] : null; }
 			}
+
+			public bool IsAlreadyAttachedToParent { get; set; }
 		}
 
 		object IProvideValueTarget.TargetObject => object_states.Peek().Value;

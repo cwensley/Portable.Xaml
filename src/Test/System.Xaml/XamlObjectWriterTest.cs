@@ -2295,5 +2295,54 @@ $@"<TestClass7
 
 			Assert.AreEqual(0, testClass.State);
 		}
+		
+		[Test]
+		public void TestIsUsableDuringInitializationCorrectUsingOnMemberStart()
+		{
+			//NOTE: The assertion are happen in the TestClass8! Here just invoking methods 
+		
+			XamlSchemaContext context = new XamlSchemaContext();
+		
+			XamlObjectWriterSettings xows = new XamlObjectWriterSettings();
+
+			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
+		
+			var xamlType = new XamlType(typeof(TestClass8),context);
+			var xamlType2 = new XamlType(typeof(TestClass7),context);
+			
+			Assert.IsTrue(xamlType.IsUsableDuringInitialization);
+			
+			var xamlMemberFoo = xamlType.GetMember("Foo");
+			var xamlMemberBar = xamlType.GetMember("Bar");
+			
+			ow.WriteStartObject(xamlType);
+			
+			ow.WriteStartMember(xamlMemberFoo);
+			ow.WriteStartObject(xamlType2);
+			ow.WriteEndObject();
+			ow.WriteEndMember();
+			
+			ow.WriteStartMember(xamlMemberBar);
+			
+			ow.WriteStartObject(xamlType);
+			ow.WriteStartMember(xamlMemberFoo);
+			
+			ow.WriteStartObject(xamlType2);
+			ow.WriteEndObject();
+			
+			ow.WriteEndMember();
+			
+			ow.WriteEndObject();
+		
+			ow.WriteEndMember();
+			ow.WriteEndObject();
+
+			var result = (TestClass8)ow.Result;
+			Assert.True(result.Foo != null);
+			Assert.True(result.Bar != null);
+			Assert.True(result.Bar.Foo != null);
+			Assert.False(ReferenceEquals(result, result.Bar));
+
+		}
 	}
 }

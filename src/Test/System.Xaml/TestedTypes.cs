@@ -394,6 +394,38 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+  	[UsableDuringInitialization(true)]
+	public class TestClass8 : ISupportInitialize
+	{
+		private TestClass8 _bar;
+		
+		public int State { get; set; }
+		
+		public TestClass7 Foo { get; set; }
+		
+		public TestClass8 Bar
+		{
+			get => _bar;
+			set
+			{
+				_bar = value;
+				
+				//The value must be not initialized yet
+				Assert.IsNull(_bar.Foo);
+			}
+		}
+
+		public void BeginInit()
+		{
+			State++;
+		}
+
+		public void EndInit()
+		{
+			State--;
+		}
+	}
+	
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{
