@@ -325,7 +325,11 @@ namespace Portable.Xaml
 			XamlTypeName xtn;
 			if (!XamlTypeName.TryParse (Name, nsResolver, out xtn))
 				throw Error ("Failed to parse type name '{0}'", Name);
-			Type = sctx.GetXamlType (xtn) ?? new XamlType(xtn.Namespace, xtn.Name, null, sctx);
+
+			var xtnFirst = new XamlTypeName(xtn.Namespace, xtn.Name + "Extension", xtn.TypeArguments);
+			Type = sctx.GetXamlType (xtnFirst) ??
+				sctx.GetXamlType(xtn) ??
+				new XamlType(xtn.Namespace, xtn.Name, null, sctx);
 
 			ParseArgument();
 			if (!Read('}'))
