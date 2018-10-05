@@ -46,6 +46,13 @@ namespace MonoTests.Portable.Xaml
 	[TestFixture]
 	public partial class XamlReaderTest
 	{
+		
+		XamlReader GetReader(string filename)
+		{
+			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
+			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)), new XamlXmlReaderSettings { ProvideLineInfo = true });
+		}
+		
 		[Test]
 		public void ReadSubtree1 ()
 		{
@@ -101,6 +108,26 @@ namespace MonoTests.Portable.Xaml
 			Assert.AreEqual (XamlNodeType.EndObject, xr.NodeType, "#6-3");
 			Assert.IsFalse (sr.Read (), "#7");
 			Assert.AreEqual (XamlNodeType.None, xr.NodeType, "#7-2");
+		}
+		
+		[Test]
+		public void CheckReaderPosition()
+		{
+			using (var reader = GetReader("PropertyNotFound.xml"))
+			{
+				var lineInfo = reader as IXamlLineInfo;
+				while (reader.Read())
+				{
+					if (reader.NodeType == XamlNodeType.StartMember)
+					{
+						if (reader.Member.Name == "Baz")
+						{
+							Assert.AreEqual(1, lineInfo.LineNumber, "Wrong LineNumber");
+							Assert.AreEqual(13, lineInfo.LinePosition, "Wrong LinePosition");
+						}
+					}
+				}
+			}
 		}
 	}
 }
