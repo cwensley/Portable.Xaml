@@ -80,6 +80,7 @@ namespace Portable.Xaml
 				public const int IsInstantiated = 1 << 1;
 				public const int IsXamlWriterCreated = 1 << 2;
 				public const int IsValueProvidedByInstance = 1 << 3;
+				public const int IsAlreadyAttachedToParent = 1 << 4;
 			}
 
 			public bool IsGetObject
@@ -98,12 +99,24 @@ namespace Portable.Xaml
 				set { _flags.Set(ObjectStateFlags.IsXamlWriterCreated, value); }
 			}
 
+			/// <summary>
+			/// Show what the value was taken from object instance
+			/// </summary>
 			public bool IsValueProvidedByInstance
 			{
 				get { return _flags.Get(ObjectStateFlags.IsValueProvidedByInstance) ?? false; }
 				set { _flags.Set(ObjectStateFlags.IsValueProvidedByInstance, value); }
 			}
 
+			/// <summary>
+			/// Show what the value in object state is already attached to the parent
+			/// </summary>
+			public bool IsAlreadyAttachedToParent
+			{
+				get { return _flags.Get(ObjectStateFlags.IsAlreadyAttachedToParent) ?? false; }
+				set { _flags.Set(ObjectStateFlags.IsAlreadyAttachedToParent, value); }
+			}
+			
 			public int PositionalParameterIndex = -1;
 
 			public string FactoryMethod;
@@ -118,7 +131,7 @@ namespace Portable.Xaml
 				get { return WrittenProperties.Count > 0 ? WrittenProperties[WrittenProperties.Count - 1] : null; }
 			}
 
-			public bool IsAlreadyAttachedToParent { get; set; }
+			
 		}
 
 		object IProvideValueTarget.TargetObject => object_states.Peek().Value;
