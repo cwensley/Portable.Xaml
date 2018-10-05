@@ -2226,6 +2226,18 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_UnknownType()
+		{
+			var sw = new StringWriter();
+			var xw = new XamlObjectWriter(sctx);
+			xw.WriteStartObject(xt3);
+			xw.WriteStartMember(xt3.GetMember("TestProp1"));
+
+			var ex = Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartObject(new XamlType("unk", "unknown", null, sctx)));
+			Assert.AreEqual("Cannot create unknown type '{unk}unknown'.", ex.Message);
+		}
+
+		[Test]
 		public void Write_DictionaryKeyProperty()
 		{
 			var xw = new XamlObjectWriter(sctx);
