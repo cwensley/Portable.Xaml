@@ -395,14 +395,16 @@ namespace MonoTests.Portable.Xaml
 	}
 	
 	[ContentProperty(nameof(Items))]
-	public class CollectionCannotBeAssigned
+	public class CollectionAssignnmentTest
 	{
-		readonly List<TestClass4> items = new List<TestClass4>();
+		List<TestClass4> items = new List<TestClass4>();
+
+		public bool Assigned { get; private set; }
 
 		public List<TestClass4> Items
 		{
 			get => items;
-			set => throw new Exception("This should not happen.");
+			set { items = value; Assigned = true; }
 		}
 	}
 

@@ -368,7 +368,7 @@ namespace Portable.Xaml
 			
 			//if the type is immutable then we need set value
 			if(!state.Type.IsImmutable)
-				object_states.Peek().IsValueProvidedByParent = true;
+				object_states.Peek().IsValueProvidedByInstance = true;
 			state.Value = instance;
 			state.IsInstantiated = true;
 			object_states.Push(state);
@@ -556,7 +556,7 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated && !(state.IsValueProvidedByParent 
+				if (state.IsInstantiated && !(state.IsValueProvidedByInstance 
 												&& state.CurrentMember.Type.IsCollection))
 					SetValue(member, state.Value, value);
 			}

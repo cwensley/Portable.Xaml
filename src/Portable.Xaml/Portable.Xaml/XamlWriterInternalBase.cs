@@ -79,6 +79,7 @@ namespace Portable.Xaml
 				public const int IsGetObject = 1 << 0;
 				public const int IsInstantiated = 1 << 1;
 				public const int IsXamlWriterCreated = 1 << 2;
+				public const int IsValueProvidedByInstance = 1 << 3;
 			}
 
 			public bool IsGetObject
@@ -97,7 +98,11 @@ namespace Portable.Xaml
 				set { _flags.Set(ObjectStateFlags.IsXamlWriterCreated, value); }
 			}
 
-			public bool IsValueProvidedByParent { get; set; }
+			public bool IsValueProvidedByInstance
+			{
+				get { return _flags.Get(ObjectStateFlags.IsValueProvidedByInstance) ?? false; }
+				set { _flags.Set(ObjectStateFlags.IsValueProvidedByInstance, value); }
+			}
 
 			public int PositionalParameterIndex = -1;
 
