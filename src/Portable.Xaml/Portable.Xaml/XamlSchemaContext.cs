@@ -414,7 +414,7 @@ namespace Portable.Xaml
 
 			var n = xamlTypeName;
 			if (n.TypeArguments.Count == 0) // non-generic
-				return GetXamlType(n.Namespace, n.Name);
+				return GetXamlType(n.Namespace, n.Name, null);
 
 			// generic
 			XamlType[] typeArgs = new XamlType [n.TypeArguments.Count];
