@@ -79,7 +79,7 @@ namespace Portable.Xaml
 				public const int IsGetObject = 1 << 0;
 				public const int IsInstantiated = 1 << 1;
 				public const int IsXamlWriterCreated = 1 << 2;
-				public const int IsValueProvidedByParent = 1 << 3; 
+				public const int IsValueProvidedByParent = 1 << 3;
 			}
 
 			public bool IsGetObject
