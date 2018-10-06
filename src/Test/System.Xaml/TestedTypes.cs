@@ -1808,6 +1808,18 @@ namespace MonoTests.Portable.Xaml
 	{
 		public object Key { get; set; }
 	}
+
+	public class PrependFooConverter : TypeConverter
+	{
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => true;
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) => "Foo" + value.ToString();
+	}
+
+	public class TypeConverterUsed
+	{
+		[TypeConverter(typeof(PrependFooConverter))]
+		public string Value { get; set; }
+	}
 }
 
 namespace XamlTest
