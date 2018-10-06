@@ -645,6 +645,30 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	[TypeConverter(typeof(StringConverter))]
+	public class MyExtension8 : MarkupExtension
+	{
+		public MyExtension8()
+		{
+		}
+
+		public MyExtension8(string arg1)
+		{
+			Foo = arg1;
+		}
+
+		[ConstructorArgument("arg1")]
+		public string Foo { get; set; }
+
+		[ConstructorArgument("arg2")]
+		public Type Bar { get; set; }
+
+		public override object ProvideValue(IServiceProvider provider)
+		{
+			return "provided_value";
+		}
+	}
+
 	/// <summary>
 	/// Returns first ambient value matching provided key.
 	/// </summary>

@@ -640,6 +640,18 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Read_CustomExtensionWithPositionalAndNamedWithChild()
+		{
+			var xml = @"
+<ValueWrapper 
+	StringValue='{MyExtension8 SomeValue, Bar={x:Type x:String}}' 
+	xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+	xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' />
+".UpdateXml();
+			var result = (ValueWrapper)XamlServices.Parse(xml);
+		}
+
+		[Test]
 		public void Read_CustomExtensionWithPositonalAfterExplicitProperty()
 		{
 			// cannot have positional property after named property
