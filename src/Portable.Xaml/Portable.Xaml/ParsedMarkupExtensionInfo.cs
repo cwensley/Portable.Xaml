@@ -315,7 +315,7 @@ namespace Portable.Xaml
 			var info = new ParsedMarkupExtensionInfo (this);
 			try {
 				info.Parse ();
-				index = info.index;
+				index += info.index;
 				return info;
 			} catch {
 			}
