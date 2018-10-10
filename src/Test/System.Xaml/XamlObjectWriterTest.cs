@@ -2342,7 +2342,22 @@ $@"<TestClass7
 			Assert.True(result.Bar != null);
 			Assert.True(result.Bar.Foo != null);
 			Assert.False(ReferenceEquals(result, result.Bar));
+		}
 
+
+		[Test]
+		public void TestIsUsableDuringInitializationCallingProvideValueOnMarkupExtensionWithParameters()
+		{
+			var xml = @"
+<TestClass8 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+  <TestClass8.Bar>
+    <TestClass8 Baz='{My Bar=Yes}'/>
+  </TestClass8.Bar>
+</TestClass8>".UpdateXml();
+
+			var result = (TestClass8)XamlServices.Parse(xml);
+
+			Assert.AreEqual("provided_value", result.Bar.Baz);
 		}
 	}
 }
