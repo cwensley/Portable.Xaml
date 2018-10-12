@@ -383,18 +383,7 @@ namespace Portable.Xaml
 			{
 				// validate that the provided value is a markup extension, throws InvalidCastException if not
 				var markupExtension = (MarkupExtension)obj;
-				try
-				{
-					obj = markupExtension.ProvideValue(service_provider);
-				}
-				catch (XamlObjectWriterException)
-				{
-					throw;
-				}
-				catch (Exception ex)
-				{
-					throw new XamlObjectWriterException("An error occured getting provided value", ex);
-				}
+				obj = GetMarkupExtensionProvidedValue(markupExtension);
 			}
 
 			// call this (possibly) before the object is added to parent collection. (bug #3003 also expects this)
@@ -475,7 +464,17 @@ namespace Portable.Xaml
 						    parent_state.Type.IsUsableDuringInitialization &&
 						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
 						{
-							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							if (state.Type.IsMarkupExtension)
+							{
+								var markupExtension = (MarkupExtension)state.Value;
+								var obj = GetMarkupExtensionProvidedValue(markupExtension);
+								SetValue(parent_state.CurrentMember, parent_state.Value, obj);
+							}
+							else
+							{
+								SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							}
+
 							parent_state.IsAlreadyAttachedToParent = true;
 						}
 					}
@@ -724,6 +723,28 @@ namespace Portable.Xaml
 			return fallbackToString ?
 				value :
 				throw new XamlObjectWriterException(String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm));
+		}
+
+		/// <summary>
+		/// Returns provided value from extension 
+		/// </summary>
+		/// <param name="value">Markup extension</param>
+		/// <returns>Object evaluated by markup</returns>
+		/// <exception cref="XamlObjectWriterException">Throws then we can't get the provided value</exception>
+		object GetMarkupExtensionProvidedValue(MarkupExtension value)
+		{
+			try
+			{
+				return value.ProvideValue(service_provider);
+			}
+			catch (XamlObjectWriterException)
+			{
+				throw;
+			}
+			catch (Exception ex)
+			{
+				throw new XamlObjectWriterException("An error occured getting provided value", ex);
+			}			
 		}
 
 		XamlType ResolveTypeFromName (string name)
