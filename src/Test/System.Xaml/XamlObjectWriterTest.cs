@@ -23,6 +23,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -2233,6 +2234,9 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartObject(xt3);
 			xw.WriteStartMember(xt3.GetMember("TestProp1"));
 
+			// This is needed because .NET exception messages depend on the current UI culture, which may not always be English.
+			CultureInfo.CurrentUICulture = new CultureInfo("en-us");
+
 			var ex = Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartObject(new XamlType("unk", "unknown", null, sctx)));
 			Assert.AreEqual("Cannot create unknown type '{unk}unknown'.", ex.Message);
 		}
@@ -2306,43 +2310,31 @@ $@"<TestClass7
 			XamlObjectWriterSettings xows = new XamlObjectWriterSettings();
 
 			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
-		
-			var xamlType = new XamlType(typeof(TestClass8),context);
-			var xamlType2 = new XamlType(typeof(TestClass7),context);
+
+			var parentXamlType = new XamlType(typeof(TestClass8), context);
+			var childXamlType = new XamlType(typeof(TestClass9), context);
 			
-			Assert.IsTrue(xamlType.IsUsableDuringInitialization);
+			Assert.IsTrue(childXamlType.IsUsableDuringInitialization);
 			
-			var xamlMemberFoo = xamlType.GetMember("Foo");
-			var xamlMemberBar = xamlType.GetMember("Bar");
+			var xamlMemberFoo = childXamlType.GetMember(nameof(TestClass9.Foo));
+			var xamlMemberBar = parentXamlType.GetMember(nameof(TestClass8.Bar));
 			
-			ow.WriteStartObject(xamlType);
-			
-			ow.WriteStartMember(xamlMemberFoo);
-			ow.WriteStartObject(xamlType2);
-			ow.WriteEndObject();
-			ow.WriteEndMember();
-			
+			ow.WriteStartObject(parentXamlType);
 			ow.WriteStartMember(xamlMemberBar);
-			
-			ow.WriteStartObject(xamlType);
+
+			ow.WriteStartObject(childXamlType);
 			ow.WriteStartMember(xamlMemberFoo);
-			
-			ow.WriteStartObject(xamlType2);
+			ow.WriteStartObject(xamlMemberFoo.Type);
 			ow.WriteEndObject();
-			
 			ow.WriteEndMember();
-			
 			ow.WriteEndObject();
-		
+
 			ow.WriteEndMember();
 			ow.WriteEndObject();
 
 			var result = (TestClass8)ow.Result;
-			Assert.True(result.Foo != null);
-			Assert.True(result.Bar != null);
-			Assert.True(result.Bar.Foo != null);
-			Assert.False(ReferenceEquals(result, result.Bar));
-
+			Assert.IsTrue(result.Bar.IsInitialized);
+			Assert.IsNotNull(result.Bar.Foo);
 		}
 	}
 }

@@ -471,12 +471,12 @@ namespace Portable.Xaml
 						var parent_state = object_states.Peek();
 						object_states.Push(state);
 
-						if (!parent_state.IsAlreadyAttachedToParent && parent_state.CurrentMember != null &&
-						    parent_state.Type.IsUsableDuringInitialization &&
+						if (parent_state.CurrentMember != null &&
+						    state.Type.IsUsableDuringInitialization &&
 						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
 						{
 							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
-							parent_state.IsAlreadyAttachedToParent = true;
+							parent_state.CurrentMemberState.IsAlreadySet = true;
 						}
 					}
 				}
@@ -552,7 +552,7 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated && !state.IsAlreadyAttachedToParent)
+				if (state.IsInstantiated && !state.CurrentMemberState.IsAlreadySet)
 					SetValue(member, state.Value, value);
 			}
 		}

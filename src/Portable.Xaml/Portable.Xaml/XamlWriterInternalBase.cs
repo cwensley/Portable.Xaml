@@ -110,8 +110,6 @@ namespace Portable.Xaml
 			{
 				get { return WrittenProperties.Count > 0 ? WrittenProperties[WrittenProperties.Count - 1] : null; }
 			}
-
-			public bool IsAlreadyAttachedToParent { get; set; }
 		}
 
 		object IProvideValueTarget.TargetObject => object_states.Peek().Value;
@@ -130,6 +128,7 @@ namespace Portable.Xaml
 			public XamlMember Member;
 			public object Value;
 			public AllowedMemberLocations OccuredAs = AllowedMemberLocations.None;
+			public bool IsAlreadySet;
 		}
 
 		public virtual void CloseAll()
