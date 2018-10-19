@@ -438,6 +438,20 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 	
+	[ContentProperty(nameof(Items))]
+	public class CollectionAssignnmentTest
+	{
+		List<TestClass4> items = new List<TestClass4>();
+
+		public bool Assigned { get; private set; }
+
+		public List<TestClass4> Items
+		{
+			get => items;
+			set { items = value; Assigned = true; }
+		}
+	}
+	
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{
