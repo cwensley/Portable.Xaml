@@ -2317,8 +2317,9 @@ $@"<TestClass7
 			Assert.IsTrue(childXamlType.IsUsableDuringInitialization);
 			
 			var xamlMemberFoo = childXamlType.GetMember(nameof(TestClass9.Foo));
+			var xamlMemberBaz = childXamlType.GetMember(nameof(TestClass9.Baz));
 			var xamlMemberBar = parentXamlType.GetMember(nameof(TestClass8.Bar));
-			
+
 			ow.WriteStartObject(parentXamlType);
 			ow.WriteStartMember(xamlMemberBar);
 
@@ -2326,6 +2327,9 @@ $@"<TestClass7
 			ow.WriteStartMember(xamlMemberFoo);
 			ow.WriteStartObject(xamlMemberFoo.Type);
 			ow.WriteEndObject();
+			ow.WriteEndMember();
+			ow.WriteStartMember(xamlMemberBaz);
+			ow.WriteValue("Test");
 			ow.WriteEndMember();
 			ow.WriteEndObject();
 
@@ -2335,6 +2339,7 @@ $@"<TestClass7
 			var result = (TestClass8)ow.Result;
 			Assert.IsTrue(result.Bar.IsInitialized);
 			Assert.IsNotNull(result.Bar.Foo);
+			Assert.AreEqual(result.Bar.Baz, "Test");
 		}
 	}
 }

@@ -420,6 +420,8 @@ namespace MonoTests.Portable.Xaml
 	{
 		public TestClass7 Foo { get; set; }
 
+		public string Baz { get; set; }
+
 		public bool IsInitialized { get; private set;}
 
 		/// <inheritdoc />

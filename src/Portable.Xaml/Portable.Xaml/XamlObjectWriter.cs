@@ -471,8 +471,8 @@ namespace Portable.Xaml
 						var parent_state = object_states.Peek();
 						object_states.Push(state);
 
-						if (parent_state.CurrentMember != null &&
-						    state.Type.IsUsableDuringInitialization &&
+						if (state.Type.IsUsableDuringInitialization &&
+						    parent_state.CurrentMemberState?.IsAlreadySet == false &&
 						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
 						{
 							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
