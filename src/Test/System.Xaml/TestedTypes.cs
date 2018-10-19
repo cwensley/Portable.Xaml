@@ -394,35 +394,47 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
-  	[UsableDuringInitialization(true)]
-	public class TestClass8 : ISupportInitialize
+	public class TestClass8
 	{
-		private TestClass8 _bar;
-		
-		public int State { get; set; }
-		
-		public TestClass7 Foo { get; set; }
-		
-		public TestClass8 Bar
+		private TestClass9 _bar;
+
+		public TestClass9 Bar
 		{
 			get => _bar;
 			set
 			{
+				// Make sure we don't set this value twice.
+				Assert.IsNull(_bar);
+
 				_bar = value;
 				
-				//The value must be not initialized yet
+				// The value must be instantiated, but not yet initialized.
+				Assert.IsFalse(_bar.IsInitialized);
 				Assert.IsNull(_bar.Foo);
 			}
 		}
+	}
 
+  	[UsableDuringInitialization(true)]
+	public class TestClass9 : ISupportInitialize
+	{
+		public TestClass7 Foo { get; set; }
+
+		public string Baz { get; set; }
+
+		public bool IsInitialized { get; private set;}
+
+		/// <inheritdoc />
 		public void BeginInit()
 		{
-			State++;
+			Assert.IsFalse(IsInitialized);
 		}
 
+		/// <inheritdoc />
 		public void EndInit()
 		{
-			State--;
+			Assert.IsFalse(IsInitialized);
+			IsInitialized = true;
 		}
 	}
 	
