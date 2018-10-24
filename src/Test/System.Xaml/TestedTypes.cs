@@ -437,6 +437,27 @@ namespace MonoTests.Portable.Xaml
 			IsInitialized = true;
 		}
 	}
+
+	[ContentProperty(nameof(Items))]
+	public class TestClass10
+	{
+		public TestClass10()
+		{
+			var collection = new ObservableCollection<TestClass9>();
+			collection.CollectionChanged += (sender, args) =>
+			{
+				foreach (TestClass9 item in args.NewItems)
+				{
+					Assert.IsFalse(item.IsInitialized);
+					Assert.IsNull(item.Baz);
+				}
+			};
+
+			Items = collection;
+		}
+
+		public IList<TestClass9> Items { get; }
+	}
 	
 	[ContentProperty(nameof(Items))]
 	public class CollectionAssignnmentTest

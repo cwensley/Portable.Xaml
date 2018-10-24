@@ -2341,6 +2341,20 @@ $@"<TestClass7
 			Assert.IsNotNull(result.Bar.Foo);
 			Assert.AreEqual(result.Bar.Baz, "Test");
 		}
+
+		[Test]
+		public void TestIsUsableDuringInitializationWithCollection()
+		{
+			string xml =
+				@"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+					<TestClass9 Baz='Test'/>
+				  </TestClass10>".UpdateXml();
+
+			// Note: The most important assert is invoked inside the TestClass10 (CollectionChanged).
+			var result = (TestClass10)XamlServices.Parse(xml);
+			Assert.AreEqual(result.Items.Count, 1);
+			Assert.AreEqual(result.Items[0].Baz, "Test");
+		}
 		
 		[Test]
 		public void CollectionShouldNotBeAssigned()
