@@ -65,6 +65,7 @@ namespace Portable.Xaml
 			public const int ConstructionRequiresArguments = 1 << 12;
 			public const int IsImmutable = 1 << 13;
 			public const int IsImmutableCollection = 1 << 14;
+			public const int ShouldSerialize = 1 << 15;
 		}
 
 		Type type, underlying_type;
@@ -90,6 +91,7 @@ namespace Portable.Xaml
 		IList<string> xamlNamespaces;
 		IList<XamlMember> constructorArguments;
 		Dictionary<string, XamlMember> memberLookup;
+		ReferenceValue<MethodInfo> shouldSerializeMethod;
 
 		public XamlType(Type underlyingType, XamlSchemaContext schemaContext)
 			: this(underlyingType, schemaContext, null)
@@ -1047,6 +1049,74 @@ namespace Portable.Xaml
 			return null;
 		}
 
+#if !PCL || NETSTANDARD
+		/// <summary>
+		/// Visability object during serialization. This property lookup attribute <see cref="System.ComponentModel.DesignerSerializationVisibilityAttribute"/>
+		/// </summary>
+		public DesignerSerializationVisibility SerializationVisibility
+		{
+			get
+			{
+				var c = this.CustomAttributeProvider;
+				var a = c == null ? null : c.GetCustomAttribute<DesignerSerializationVisibilityAttribute>(false);
+				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
+			}
+		}
+#endif
+		
+		/// <summary>
+		/// Check instance can it serialize using <see cref="LookupShouldSerialize"/> and check the ShouldSerialize method in underlaing class 
+		/// </summary>
+		/// <param name="instance">The instance of the object (instance type must equals <see cref="UnderlyingType"/>)</param>
+		internal bool ShouldSerialize(object instance)
+		{
+			var shouldSerialize = flags.Get(TypeFlags.ShouldSerialize) ?? flags.Set(TypeFlags.ShouldSerialize, LookupShouldSerialize());
+
+			if (!shouldSerialize)
+				return false;
+
+			if (!shouldSerializeMethod.HasValue)
+				shouldSerializeMethod.Set(LookupShouldSerializeMethod());
+
+			if (shouldSerializeMethod.Value != null)
+			{
+				return (bool)shouldSerializeMethod.Value.Invoke(instance, null);
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Lookup the method with name "ShouldSerialize" with return type is boolean and 0 arguments
+		/// </summary>
+		/// <returns>Method info if method found and null if not</returns>
+		MethodInfo LookupShouldSerializeMethod()
+		{
+			var methods = UnderlyingType?.GetTypeInfo().GetDeclaredMethods("ShouldSerialize");
+			if (methods != null)
+				foreach (var method in methods)
+				{
+					if (method.GetParameters().Length == 0 && method.ReturnType == typeof(bool))
+					{
+						return method;
+					}
+				}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Lookup SerializationVisability attribute 
+		/// </summary>
+		bool LookupShouldSerialize()
+		{
+			bool shouldSerialize = true;
+#if !PCL || NETSTANDARD
+			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
+#endif
+			return shouldSerialize;
+		}
+		
 		static string GetXamlName (Type type)
 		{
 			string n;
