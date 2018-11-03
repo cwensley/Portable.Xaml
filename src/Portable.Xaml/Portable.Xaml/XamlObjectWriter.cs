@@ -433,7 +433,13 @@ namespace Portable.Xaml
 				pending_name_references.Add((NameFixupRequired)obj);
 			}
 			else
-				StoreAppropriatelyTypedValue(obj, state.KeyValue);
+			{
+				// UsableDuringInitialization type may have already been attached to its parent in OnWriteStartMember.
+				if (!(state.Type.IsUsableDuringInitialization && state.WrittenProperties.Count > 0 && CurrentMemberState?.IsAlreadySet == true)) 
+				{
+					StoreAppropriatelyTypedValue(obj, state.KeyValue);
+				}
+			}
 
 			HandleEndInit(obj);
 
@@ -475,11 +481,14 @@ namespace Portable.Xaml
 						var parent_state = object_states.Peek();
 						object_states.Push(state);
 
-						if (state.Type.IsUsableDuringInitialization &&
-						    parent_state.CurrentMemberState?.IsAlreadySet == false &&
-						    !(parent_state.Type.IsCollection || parent_state.Type.IsDictionary))
+						if (state.Type.IsUsableDuringInitialization)
 						{
-							SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							if (!AddToCollectionIfAppropriate(parent_state.Type, parent_state.CurrentMember, parent_state.Value, state.Value, state.KeyValue) && 
+							    !parent_state.CurrentMemberState.IsAlreadySet)
+							{
+								SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+							}
+
 							parent_state.CurrentMemberState.IsAlreadySet = true;
 						}
 					}
