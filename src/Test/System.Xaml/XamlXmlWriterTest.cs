@@ -1261,7 +1261,7 @@ namespace MonoTests.Portable.Xaml
 			}
 			else
 			{
-				var xaml = @"<ShouldSerializeInCollectionTest xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_netstandard20"" xmlns:scg=""clr-namespace:System.Collections.Generic;assembly=mscorlib"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+				var xaml = @"<ShouldSerializeInCollectionTest xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5"" xmlns:scg=""clr-namespace:System.Collections.Generic;assembly=mscorlib"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
   <ShouldSerializeInCollectionTest.Collection>
     <scg:List x:TypeArguments=""ShouldSerializeInvisibleTest"" Capacity=""4"">
       <ShouldSerializeInvisibleTest IsVisibleInXml=""True"" Value=""This is visible"" />
