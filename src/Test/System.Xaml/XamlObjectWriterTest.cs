@@ -2347,7 +2347,7 @@ $@"<TestClass7
 		{
 			string xml =
 				@"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
-					<TestClass9 Baz='Test1'/>
+					<TestClass9 Baz='Test1' Bar='42'/>
 					<TestClass9 Baz='Test2'/>
 					<TestClass9/>
 				  </TestClass10>".UpdateXml();
@@ -2356,6 +2356,7 @@ $@"<TestClass7
 			var result = (TestClass10)XamlServices.Parse(xml);
 			Assert.AreEqual(3, result.Items.Count);
 			Assert.AreEqual("Test1", result.Items[0].Baz);
+			Assert.AreEqual(42, result.Items[0].Bar);
 			Assert.AreEqual("Test2", result.Items[1].Baz);
 			Assert.IsNull(result.Items[2].Baz);
 		}

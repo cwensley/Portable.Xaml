@@ -420,6 +420,8 @@ namespace MonoTests.Portable.Xaml
 	{
 		public TestClass7 Foo { get; set; }
 
+		public int Bar { get; set; }
+
 		public string Baz { get; set; }
 
 		public bool IsInitialized { get; private set;}
@@ -449,6 +451,7 @@ namespace MonoTests.Portable.Xaml
 				foreach (TestClass9 item in args.NewItems)
 				{
 					Assert.IsFalse(item.IsInitialized);
+					Assert.Zero(item.Bar);
 					Assert.IsNull(item.Baz);
 				}
 			};
