@@ -2350,15 +2350,22 @@ $@"<TestClass7
 					<TestClass9 Baz='Test1' Bar='42'/>
 					<TestClass9 Baz='Test2'/>
 					<TestClass9/>
+					<TestClass9/>
 				  </TestClass10>".UpdateXml();
 
 			// Note: The most important assert is invoked inside the TestClass10 (CollectionChanged).
 			var result = (TestClass10)XamlServices.Parse(xml);
-			Assert.AreEqual(3, result.Items.Count);
+
+			Assert.AreEqual(4, result.Items.Count);
+
 			Assert.AreEqual("Test1", result.Items[0].Baz);
 			Assert.AreEqual(42, result.Items[0].Bar);
+
 			Assert.AreEqual("Test2", result.Items[1].Baz);
+			Assert.Zero(result.Items[1].Bar);
+
 			Assert.IsNull(result.Items[2].Baz);
+			Assert.Zero(result.Items[2].Bar);
 		}
 		
 		[Test]
