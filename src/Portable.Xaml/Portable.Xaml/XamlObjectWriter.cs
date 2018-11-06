@@ -483,13 +483,17 @@ namespace Portable.Xaml
 
 						if (state.Type.IsUsableDuringInitialization)
 						{
-							if (!AddToCollectionIfAppropriate(parent_state.Type, parent_state.CurrentMember, parent_state.Value, state.Value, state.KeyValue) && 
-							    !parent_state.CurrentMemberState.IsAlreadySet)
+							// Make sure that we invoke this block only once, while setting the very first property.
+							if (state.WrittenProperties.Count == 1)
 							{
-								SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
-							}
+								if (!AddToCollectionIfAppropriate(parent_state.Type, parent_state.CurrentMember, parent_state.Value, state.Value, state.KeyValue) && 
+								    !parent_state.CurrentMemberState.IsAlreadySet)
+								{
+									SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+								}
 
-							parent_state.CurrentMemberState.IsAlreadySet = true;
+								parent_state.CurrentMemberState.IsAlreadySet = true;
+							}
 						}
 					}
 				}
