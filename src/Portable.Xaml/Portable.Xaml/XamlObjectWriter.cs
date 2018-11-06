@@ -870,8 +870,9 @@ namespace Portable.Xaml
 			if (si == null)
 				return;
 			si.BeginInit ();
-#endif
 			source.OnAfterBeginInit (value);
+#endif
+			
 		}
 		
 		void HandleEndInit (object value)
@@ -881,8 +882,9 @@ namespace Portable.Xaml
 			if (si == null)
 				return;
 			si.EndInit ();
-#endif
 			source.OnAfterEndInit (value);
+#endif
+			
 		}
 
 		public void WriteDeferred(XamlDeferringLoader loader, XamlNodeList nodeList, bool setValue)
