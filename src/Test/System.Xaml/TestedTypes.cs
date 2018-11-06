@@ -459,7 +459,9 @@ namespace MonoTests.Portable.Xaml
 		public IList<TestClass9> Items { get; }
 	}
 	
-
+#if PCL
+	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
+#endif
 	public class ShouldSerializeInvisibleTest
 	{
 		private string _value;
@@ -475,7 +477,7 @@ namespace MonoTests.Portable.Xaml
 		/// </summary>
 		public bool IsVisibleInXml { get; set; } = false;
 
-		public bool ShouldSerialize()
+		public bool CustomShouldSerializeMethod()
 		{
 			return IsVisibleInXml;
 		}

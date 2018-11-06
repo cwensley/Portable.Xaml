@@ -1092,15 +1092,19 @@ namespace Portable.Xaml
 		/// <returns>Method info if method found and null if not</returns>
 		MethodInfo LookupShouldSerializeMethod()
 		{
-			var methods = UnderlyingType?.GetTypeInfo().GetDeclaredMethods("ShouldSerialize");
-			if (methods != null)
-				foreach (var method in methods)
-				{
-					if (method.GetParameters().Length == 0 && method.ReturnType == typeof(bool))
+			var attr = this.CustomAttributeProvider.GetCustomAttribute<ShouldSerializeAttribute>(false);
+			if (attr != null)
+			{
+				var methods = UnderlyingType?.GetTypeInfo().GetDeclaredMethods(attr.MethodName);
+				if (methods != null)
+					foreach (var method in methods)
 					{
-						return method;
+						if (method.GetParameters().Length == 0 && method.ReturnType == typeof(bool))
+						{
+							return method;
+						}
 					}
-				}
+			}
 
 			return null;
 		}
