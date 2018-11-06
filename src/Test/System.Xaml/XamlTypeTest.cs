@@ -40,7 +40,6 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 #if NETSTANDARD
-using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
 using System.ComponentModel;
 #endif
 

@@ -774,6 +774,9 @@ namespace MonoTests.Portable.Xaml
 		[Test] // bug #3003 repro
 		public void gsAndProcessingOrder()
 		{
+			if (Compat.IsPortableXaml && !Compat.HasISupportInitializeInterface)
+				Assert.Ignore("The ISupportInitialize starts support from netstandard20");
+			
 			var asm = GetType().GetTypeInfo().Assembly;
 			var context = new XamlSchemaContext(new Assembly[] { asm });
 			var output = XamarinBug3003.TestContext.Writer;
@@ -2304,7 +2307,10 @@ $@"<TestClass7
 		public void TestIsUsableDuringInitializationCorrectUsingOnMemberStart()
 		{
 			//NOTE: The assertion are happen in the TestClass8! Here just invoking methods 
-		
+
+			if (Compat.IsPortableXaml && !Compat.HasISupportInitializeInterface)
+				Assert.Ignore("The ISupportInitialize starts support from netstandard20");
+
 			XamlSchemaContext context = new XamlSchemaContext();
 		
 			XamlObjectWriterSettings xows = new XamlObjectWriterSettings();

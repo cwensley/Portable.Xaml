@@ -40,7 +40,6 @@ using System.Collections.Immutable;
 #endif
 
 #if NETSTANDARD || PCL
-using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
 using System.ComponentModel;
 #endif
 

@@ -11,13 +11,13 @@
   </PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 	  <OutputPath>..\..\artifacts\test\Debug\netstandard2.0</OutputPath>
-		<DefineConstants>TRACE;DEBUG;PCL259;PCL;NETSTANDARD;NETSTANDARD2_0;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER</DefineConstants>
+		<DefineConstants>TRACE;DEBUG;PCL259;PCL;NETSTANDARD;NETSTANDARD2_0;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER;HAS_ISUPPORT_INITIALIZE</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>
 		</DebugType>
 		<OutputPath>..\..\artifacts\test\Release\netstandard2.0</OutputPath>
-		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;NETSTANDARD2_0;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER</DefineConstants>
+		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;NETSTANDARD2_0;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER;HAS_ISUPPORT_INITIALIZE</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard2.0.csproj" />

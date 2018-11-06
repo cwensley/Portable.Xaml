@@ -35,6 +35,9 @@ using System.Xml;
 #if !NETSTANDARD1_0
 using System.Xml.Serialization;
 #endif
+#if NETSTANDARD
+using System.ComponentModel;
+#endif
 
 // To use this under .NET, compile sources as:
 //
@@ -862,19 +865,23 @@ namespace Portable.Xaml
 
 		void HandleBeginInit (object value)
 		{
+#if HAS_ISUPPORT_INITIALIZE
 			var si = value as ISupportInitialize;
 			if (si == null)
 				return;
 			si.BeginInit ();
+#endif
 			source.OnAfterBeginInit (value);
 		}
 		
 		void HandleEndInit (object value)
 		{
+#if HAS_ISUPPORT_INITIALIZE
 			var si = value as ISupportInitialize;
 			if (si == null)
 				return;
 			si.EndInit ();
+#endif
 			source.OnAfterEndInit (value);
 		}
 
