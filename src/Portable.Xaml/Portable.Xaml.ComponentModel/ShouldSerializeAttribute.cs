@@ -6,6 +6,7 @@ namespace Portable.Xaml.ComponentModel
 	/// This attribute defines method, which responcible for object serialization.
 	/// The method have to returns bool type and hasn't arguments.
 	/// </summary>
+	[EnhancedXaml]
 	public class ShouldSerializeAttribute : Attribute
 	{
 		public ShouldSerializeAttribute(string methodName)

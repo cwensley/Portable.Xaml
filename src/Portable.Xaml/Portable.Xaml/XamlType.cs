@@ -1053,6 +1053,7 @@ namespace Portable.Xaml
 		/// <summary>
 		/// Visability object during serialization. This property lookup attribute <see cref="System.ComponentModel.DesignerSerializationVisibilityAttribute"/>
 		/// </summary>
+		[EnhancedXaml]
 		public DesignerSerializationVisibility SerializationVisibility
 		{
 			get
