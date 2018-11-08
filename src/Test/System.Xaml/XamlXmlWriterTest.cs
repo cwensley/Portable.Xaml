@@ -1235,6 +1235,46 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.AreEqual(xaml, sw.GetStringBuilder().Replace("  ", " ").ToString());
 		}
+		
+		[Test]
+		public void Write_ShouldSerializeObject()
+		{
+			if (!Compat.IsPortableXaml)
+			{
+				Assert.Ignore("This is not support in System.Xaml");
+			}
+			else
+			{
+				var instance = new ShouldSerializeInvisibleTest();
+				var actual = XamlServices.Save(instance);
+
+				Assert.IsEmpty(actual);
+			}
+		}
+		
+		[Test]
+		public void Write_ShoudSerializeObjectInCollection()
+		{
+			if (!Compat.IsPortableXaml)
+			{
+				Assert.Ignore("This is not support in System.Xaml");
+			}
+			else
+			{
+				var xaml = @"<ShouldSerializeInCollectionTest xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5"" xmlns:scg=""clr-namespace:System.Collections.Generic;assembly=mscorlib"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+  <ShouldSerializeInCollectionTest.Collection>
+    <scg:List x:TypeArguments=""ShouldSerializeInvisibleTest"" Capacity=""4"">
+      <ShouldSerializeInvisibleTest IsVisibleInXml=""True"" Value=""This is visible"" />
+      <ShouldSerializeInvisibleTest IsVisibleInXml=""True"" Value=""This is visible"" />
+    </scg:List>
+  </ShouldSerializeInCollectionTest.Collection>
+</ShouldSerializeInCollectionTest>".UpdateXml();
+				
+				var instance = new ShouldSerializeInCollectionTest();
+				var actual = XamlServices.Save(instance);
+				Assert.AreEqual(xaml, actual);
+			}
+		}
 	}
 
 	public class TestXmlWriterClass1

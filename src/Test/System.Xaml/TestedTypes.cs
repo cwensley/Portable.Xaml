@@ -461,6 +461,44 @@ namespace MonoTests.Portable.Xaml
 		public IList<TestClass9> Items { get; }
 	}
 	
+#if PCL
+	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
+#endif
+	public class ShouldSerializeInvisibleTest
+	{
+		private string _value;
+
+		public string Value
+		{
+			get  =>  $"This is {((IsVisibleInXml)?"":"in")}visible";
+			set => _value = value;
+		}
+
+		/// <summary>
+		/// This is invisible by default
+		/// </summary>
+		public bool IsVisibleInXml { get; set; } = false;
+
+		public bool CustomShouldSerializeMethod()
+		{
+			return IsVisibleInXml;
+		}
+	}
+
+	public class ShouldSerializeInCollectionTest
+	{
+		public ShouldSerializeInCollectionTest()
+		{
+			Collection = new List<ShouldSerializeInvisibleTest>();
+			Collection.Add(new ShouldSerializeInvisibleTest());
+			Collection.Add(new ShouldSerializeInvisibleTest() {IsVisibleInXml = true});
+			Collection.Add(new ShouldSerializeInvisibleTest());
+			Collection.Add(new ShouldSerializeInvisibleTest() {IsVisibleInXml = true});
+		}
+		
+		public List<ShouldSerializeInvisibleTest> Collection { get; set; }
+	}
+
 	[ContentProperty(nameof(Items))]
 	public class CollectionAssignnmentTest
 	{

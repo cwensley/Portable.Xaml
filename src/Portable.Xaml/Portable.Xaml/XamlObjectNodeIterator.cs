@@ -101,6 +101,9 @@ namespace Portable.Xaml
 
 		IEnumerable<XamlNodeInfo> GetNodes(XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null)
 		{
+			//If the item is invisible for the serialization then we must just skip it and return empty nodes info
+			if (!xobj.Type.ShouldSerialize(xobj.Value)) yield break;
+
 			object val;
 			// Value - only for non-top-level node (thus xm != null)
 			if (xm != null)
