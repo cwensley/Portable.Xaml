@@ -39,6 +39,16 @@ namespace MonoTests.Portable.Xaml
 
 		public const string TestAssemblyNamespace = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + TestAssemblyName;
 
+#if NETSTANDARD 		
+#if HAS_ISUPPORT_INITIALIZE
+		public const bool HasISupportInitializeInterface = true;
+#else
+		public const bool HasISupportInitializeInterface = false;
+#endif
+#else
+		public const bool HasISupportInitializeInterface = true;
+#endif	
+		
 
 		public static string Fixup(this string str)
 		{

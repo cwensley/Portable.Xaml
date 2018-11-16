@@ -35,6 +35,9 @@ using System.Xml;
 #if !NETSTANDARD1_0
 using System.Xml.Serialization;
 #endif
+#if NETSTANDARD
+using System.ComponentModel;
+#endif
 
 // To use this under .NET, compile sources as:
 //
@@ -217,6 +220,11 @@ namespace Portable.Xaml
 
 		public override void WriteStartObject(XamlType xamlType)
 		{
+			if (xamlType.IsUnknown)
+			{
+				throw new XamlObjectWriterException($"Cannot create unknown type '{xamlType}'.");
+			}
+
 			if (deferredWriter != null)
 			{
 				deferredWriter.Writer.WriteStartObject(xamlType);
@@ -365,6 +373,10 @@ namespace Portable.Xaml
 				instance = state.Type.Invoker.ToMutable(instance);
 			if (instance == null)
 				throw new XamlObjectWriterException(String.Format("The value  for '{0}' property is null", xm.Name));
+			
+			//if the type is immutable then we need set value
+			if(!state.Type.IsImmutable)
+				object_states.Peek().IsValueProvidedByParent = true;
 			state.Value = instance;
 			state.IsInstantiated = true;
 			object_states.Push(state);
@@ -429,7 +441,13 @@ namespace Portable.Xaml
 				pending_name_references.Add((NameFixupRequired)obj);
 			}
 			else
-				StoreAppropriatelyTypedValue(obj, state.KeyValue);
+			{
+				// UsableDuringInitialization type may have already been attached to its parent in OnWriteStartMember.
+				if (!(state.Type.IsUsableDuringInitialization && state.WrittenProperties.Count > 0 && CurrentMemberState?.IsAlreadySet == true)) 
+				{
+					StoreAppropriatelyTypedValue(obj, state.KeyValue);
+				}
+			}
 
 			HandleEndInit(obj);
 
@@ -461,7 +479,32 @@ namespace Portable.Xaml
 				if (property.IsUnknown)
 					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
 				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
+				{
 					InitializeObjectIfRequired(false);
+
+					ObjectState state;
+					if (object_states.Count > 1)
+					{
+						state = object_states.Pop();
+						var parent_state = object_states.Peek();
+						object_states.Push(state);
+
+						if (state.Type.IsUsableDuringInitialization)
+						{
+							// Make sure that we invoke this block only once, while setting the very first property.
+							if (state.WrittenProperties.Count == 1)
+							{
+								if (!AddToCollectionIfAppropriate(parent_state.Type, parent_state.CurrentMember, parent_state.Value, state.Value, state.KeyValue) && 
+								    !parent_state.CurrentMemberState.IsAlreadySet)
+								{
+									SetValue(parent_state.CurrentMember, parent_state.Value, state.Value);
+								}
+
+								parent_state.CurrentMemberState.IsAlreadySet = true;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -534,7 +577,8 @@ namespace Portable.Xaml
 			{
 				var state = object_states.Peek();
 				// won't be instantiated yet if dealing with a type that has no default constructor
-				if (state.IsInstantiated)
+				if (state.IsInstantiated && !state.CurrentMemberState.IsAlreadySet 
+				                         && !(state.IsValueProvidedByParent && state.CurrentMember.Type.IsCollection))
 					SetValue(member, state.Value, value);
 			}
 		}
@@ -826,20 +870,26 @@ namespace Portable.Xaml
 
 		void HandleBeginInit (object value)
 		{
+#if HAS_ISUPPORT_INITIALIZE
 			var si = value as ISupportInitialize;
 			if (si == null)
 				return;
 			si.BeginInit ();
 			source.OnAfterBeginInit (value);
+#endif
+			
 		}
 		
 		void HandleEndInit (object value)
 		{
+#if HAS_ISUPPORT_INITIALIZE
 			var si = value as ISupportInitialize;
 			if (si == null)
 				return;
 			si.EndInit ();
 			source.OnAfterEndInit (value);
+#endif
+			
 		}
 
 		public void WriteDeferred(XamlDeferringLoader loader, XamlNodeList nodeList, bool setValue)
