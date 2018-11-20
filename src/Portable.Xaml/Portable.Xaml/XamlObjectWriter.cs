@@ -114,8 +114,7 @@ namespace Portable.Xaml
 			}
 		}
 
-		//int line, column;
-		bool lineinfo_was_given;
+		int line, column;
 
 		internal XamlObjectWriterSettings Settings
 		{
@@ -139,14 +138,13 @@ namespace Portable.Xaml
 
 		public bool ShouldProvideLineInfo
 		{
-			get { return lineinfo_was_given; }
+			get { return true; }
 		}
 
 		public void SetLineInfo(int lineNumber, int linePosition)
 		{
-			//			line = lineNumber;
-			//			column = linePosition;
-			lineinfo_was_given = true;
+			line = lineNumber;
+			column = linePosition;
 		}
 
 		public void Clear()
@@ -256,6 +254,13 @@ namespace Portable.Xaml
 				deferredWriter.DeferCount++;
 				return;
 			}
+
+			if (property.IsUnknown)
+				throw new XamlObjectWriterException($"Cannot set unknown member '{property}'")
+				{
+					LineNumber = line,
+					LinePosition = column
+				};
 
 			intl.WriteStartMember(property);
 
