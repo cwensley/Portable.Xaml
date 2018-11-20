@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using System.IO;
 #if PCL
 using Portable.Xaml.Markup;
 using Portable.Xaml;
@@ -338,6 +339,31 @@ namespace MonoTests.Portable.Xaml
 			var xm = xt.GetAttachableMember("SomeCollection");
 			Assert.IsNotNull(xm, "#2");
 			Assert.AreEqual(typeof(List<TestClass4>), xm.Type.UnderlyingType, "#3");
+		}
+
+		[Test]
+		public void PassesNullToGetXamlType_typeArguments_ForNoArguments()
+		{
+			var xml = File.ReadAllText(Compat.GetTestFile("Int32.xml")).UpdateXml();
+			var ctx = new TestGetXamlTypeArgumentsNull();
+			var reader = new XamlXmlReader(new StringReader(xml), ctx);
+			var writer = new XamlObjectWriter(ctx);
+
+			XamlServices.Transform(reader, writer);
+
+			Assert.True(ctx.Invoked);
+		}
+
+		private class TestGetXamlTypeArgumentsNull : XamlSchemaContext
+		{
+			public bool Invoked { get; set; }
+
+			protected override XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
+			{
+				Assert.IsNull(typeArguments);
+				Invoked = true;
+				return base.GetXamlType(xamlNamespace, name, typeArguments);
+			}
 		}
 	}
 }

@@ -23,6 +23,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -773,6 +774,9 @@ namespace MonoTests.Portable.Xaml
 		[Test] // bug #3003 repro
 		public void gsAndProcessingOrder()
 		{
+			if (Compat.IsPortableXaml && !Compat.HasISupportInitializeInterface)
+				Assert.Ignore("The ISupportInitialize starts support from netstandard20");
+			
 			var asm = GetType().GetTypeInfo().Assembly;
 			var context = new XamlSchemaContext(new Assembly[] { asm });
 			var output = XamarinBug3003.TestContext.Writer;
@@ -2226,6 +2230,21 @@ namespace MonoTests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_UnknownType()
+		{
+			var sw = new StringWriter();
+			var xw = new XamlObjectWriter(sctx);
+			xw.WriteStartObject(xt3);
+			xw.WriteStartMember(xt3.GetMember("TestProp1"));
+
+			// This is needed because .NET exception messages depend on the current UI culture, which may not always be English.
+			CultureInfo.CurrentUICulture = new CultureInfo("en-us");
+
+			var ex = Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartObject(new XamlType("unk", "unknown", null, sctx)));
+			Assert.AreEqual("Cannot create unknown type '{unk}unknown'.", ex.Message);
+		}
+
+		[Test]
 		public void Write_DictionaryKeyProperty()
 		{
 			var xw = new XamlObjectWriter(sctx);
@@ -2282,6 +2301,122 @@ $@"<TestClass7
 			var testClass = (TestClass7)ow.Result;
 
 			Assert.AreEqual(0, testClass.State);
+		}
+		
+		[Test]
+		public void TestIsUsableDuringInitializationCorrectUsingOnMemberStart()
+		{
+			//NOTE: The assertion are happen in the TestClass8! Here just invoking methods 
+
+			if (Compat.IsPortableXaml && !Compat.HasISupportInitializeInterface)
+				Assert.Ignore("The ISupportInitialize starts support from netstandard20");
+
+			XamlSchemaContext context = new XamlSchemaContext();
+		
+			XamlObjectWriterSettings xows = new XamlObjectWriterSettings();
+
+			XamlObjectWriter ow = new XamlObjectWriter(context, xows);
+
+			var parentXamlType = new XamlType(typeof(TestClass8), context);
+			var childXamlType = new XamlType(typeof(TestClass9), context);
+			
+			Assert.IsTrue(childXamlType.IsUsableDuringInitialization);
+			
+			var xamlMemberFoo = childXamlType.GetMember(nameof(TestClass9.Foo));
+			var xamlMemberBaz = childXamlType.GetMember(nameof(TestClass9.Baz));
+			var xamlMemberBar = parentXamlType.GetMember(nameof(TestClass8.Bar));
+
+			ow.WriteStartObject(parentXamlType);
+			ow.WriteStartMember(xamlMemberBar);
+
+			ow.WriteStartObject(childXamlType);
+			ow.WriteStartMember(xamlMemberFoo);
+			ow.WriteStartObject(xamlMemberFoo.Type);
+			ow.WriteEndObject();
+			ow.WriteEndMember();
+			ow.WriteStartMember(xamlMemberBaz);
+			ow.WriteValue("Test");
+			ow.WriteEndMember();
+			ow.WriteEndObject();
+
+			ow.WriteEndMember();
+			ow.WriteEndObject();
+
+			var result = (TestClass8)ow.Result;
+			Assert.IsTrue(result.Bar.IsInitialized);
+			Assert.IsNotNull(result.Bar.Foo);
+			Assert.AreEqual(result.Bar.Baz, "Test");
+		}
+
+		[Test]
+		public void TestIsUsableDuringInitializationWithCollection()
+		{
+			string xml =
+				@"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+					<TestClass9 Baz='Test1' Bar='42'/>
+					<TestClass9 Baz='Test2'/>
+					<TestClass9/>
+					<TestClass9/>
+				  </TestClass10>".UpdateXml();
+
+			// Note: The most important assert is invoked inside the TestClass10 (CollectionChanged).
+			var result = (TestClass10)XamlServices.Parse(xml);
+
+			Assert.AreEqual(4, result.Items.Count);
+
+			Assert.AreEqual("Test1", result.Items[0].Baz);
+			Assert.AreEqual(42, result.Items[0].Bar);
+
+			Assert.AreEqual("Test2", result.Items[1].Baz);
+			Assert.Zero(result.Items[1].Bar);
+
+			Assert.IsNull(result.Items[2].Baz);
+			Assert.Zero(result.Items[2].Bar);
+		}
+		
+		[Test]
+		public void CollectionShouldNotBeAssigned()
+		{
+			var xml = $@"
+<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <TestClass4/>	
+</CollectionAssignnmentTest>".UpdateXml();
+			var result = (CollectionAssignnmentTest)XamlServices.Parse(xml);
+
+			Assert.False(result.Assigned);
+			Assert.AreEqual(1, result.Items.Count);
+		}
+
+		[Test]
+		public void CollectionShouldNotBeAssigned2()
+		{
+			var xml = $@"
+<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <TestClass4/>	
+    <TestClass4/>	
+</CollectionAssignnmentTest>".UpdateXml();
+			var result = (CollectionAssignnmentTest)XamlServices.Parse(xml);
+
+			Assert.False(result.Assigned);
+			Assert.AreEqual(2, result.Items.Count);
+		}
+
+		[Test]
+		public void CollectionShouldBeAssigned()
+		{
+			var xml = $@"
+<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+					  	   xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+						   xmlns:scg='clr-namespace:System.Collections.Generic;assembly=mscorlib'>
+	<scg:List x:TypeArguments='TestClass4'>
+		<TestClass4/>	
+		<TestClass4/>	
+	</scg:List>
+</CollectionAssignnmentTest>".UpdateXml();
+			var result = (CollectionAssignnmentTest)XamlServices.Parse(xml);
+
+			Assert.True(result.Assigned);
+			Assert.AreEqual(2, result.Items.Count);
 		}
 	}
 }

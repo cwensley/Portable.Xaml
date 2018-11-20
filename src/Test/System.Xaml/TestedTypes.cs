@@ -40,7 +40,6 @@ using System.Collections.Immutable;
 #endif
 
 #if NETSTANDARD || PCL
-using ISupportInitialize = Portable.Xaml.ComponentModel.ISupportInitialize;
 using System.ComponentModel;
 #endif
 
@@ -394,6 +393,126 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
+	public class TestClass8
+	{
+		private TestClass9 _bar;
+
+		public TestClass9 Bar
+		{
+			get => _bar;
+			set
+			{
+				// Make sure we don't set this value twice.
+				Assert.IsNull(_bar);
+
+				_bar = value;
+				
+				// The value must be instantiated, but not yet initialized.
+				Assert.IsFalse(_bar.IsInitialized);
+				Assert.IsNull(_bar.Foo);
+			}
+		}
+	}
+
+  	[UsableDuringInitialization(true)]
+	public class TestClass9 : ISupportInitialize
+	{
+		public TestClass7 Foo { get; set; }
+
+		public int Bar { get; set; }
+
+		public string Baz { get; set; }
+
+		public bool IsInitialized { get; private set;}
+
+		/// <inheritdoc />
+		public void BeginInit()
+		{
+			Assert.IsFalse(IsInitialized);
+		}
+
+		/// <inheritdoc />
+		public void EndInit()
+		{
+			Assert.IsFalse(IsInitialized);
+			IsInitialized = true;
+		}
+	}
+
+	[ContentProperty(nameof(Items))]
+	public class TestClass10
+	{
+		public TestClass10()
+		{
+			var collection = new ObservableCollection<TestClass9>();
+			collection.CollectionChanged += (sender, args) =>
+			{
+				foreach (TestClass9 item in args.NewItems)
+				{
+					Assert.IsFalse(item.IsInitialized);
+					Assert.Zero(item.Bar);
+					Assert.IsNull(item.Baz);
+				}
+			};
+
+			Items = collection;
+		}
+
+		public IList<TestClass9> Items { get; }
+	}
+	
+#if PCL
+	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
+#endif
+	public class ShouldSerializeInvisibleTest
+	{
+		private string _value;
+
+		public string Value
+		{
+			get  =>  $"This is {((IsVisibleInXml)?"":"in")}visible";
+			set => _value = value;
+		}
+
+		/// <summary>
+		/// This is invisible by default
+		/// </summary>
+		public bool IsVisibleInXml { get; set; } = false;
+
+		public bool CustomShouldSerializeMethod()
+		{
+			return IsVisibleInXml;
+		}
+	}
+
+	public class ShouldSerializeInCollectionTest
+	{
+		public ShouldSerializeInCollectionTest()
+		{
+			Collection = new List<ShouldSerializeInvisibleTest>();
+			Collection.Add(new ShouldSerializeInvisibleTest());
+			Collection.Add(new ShouldSerializeInvisibleTest() {IsVisibleInXml = true});
+			Collection.Add(new ShouldSerializeInvisibleTest());
+			Collection.Add(new ShouldSerializeInvisibleTest() {IsVisibleInXml = true});
+		}
+		
+		public List<ShouldSerializeInvisibleTest> Collection { get; set; }
+	}
+
+	[ContentProperty(nameof(Items))]
+	public class CollectionAssignnmentTest
+	{
+		List<TestClass4> items = new List<TestClass4>();
+
+		public bool Assigned { get; private set; }
+
+		public List<TestClass4> Items
+		{
+			get => items;
+			set { items = value; Assigned = true; }
+		}
+	}
+	
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{
@@ -610,6 +729,30 @@ namespace MonoTests.Portable.Xaml
 		public override object ProvideValue(IServiceProvider sp)
 		{
 			return Foo;
+		}
+	}
+
+	[TypeConverter(typeof(StringConverter))]
+	public class MyExtension8 : MarkupExtension
+	{
+		public MyExtension8()
+		{
+		}
+
+		public MyExtension8(string arg1)
+		{
+			Foo = arg1;
+		}
+
+		[ConstructorArgument("arg1")]
+		public string Foo { get; set; }
+
+		[ConstructorArgument("arg2")]
+		public Type Bar { get; set; }
+
+		public override object ProvideValue(IServiceProvider provider)
+		{
+			return "provided_value";
 		}
 	}
 

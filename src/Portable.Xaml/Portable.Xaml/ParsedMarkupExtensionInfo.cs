@@ -65,8 +65,24 @@ namespace Portable.Xaml
 
 		public ParsedMarkupExtensionInfo(ParsedMarkupExtensionInfo info)
 		{
-			this.value = info.value;
-			this.index = info.index;
+			//before creating new ParsedMarkupExtensionInfo with another ParsedMarkupExtensionInfo
+			//we must calculate bounds of our new pmei. Scan rest of string and search first true-close bracket 
+			int nastedExtensionsCount = 0;
+
+			for (int i = info.index + 1; i < info.value.Length; i++)
+			{
+				if (info.value[i] == '{') nastedExtensionsCount++;
+				if (info.value[i] == '}')
+					if (nastedExtensionsCount > 0)
+						nastedExtensionsCount--;
+					else
+					{
+						this.value = info.value.Substring(info.index, i - info.index + 1);
+						break;
+					}
+			}
+
+			this.index = 0;
 			this.nsResolver = info.nsResolver;
 			this.sctx = info.sctx;
 		}
@@ -95,7 +111,7 @@ namespace Portable.Xaml
 
 		string ReadUntil (char[] ch, bool readToEnd = false, bool skip = true, char? escape = null)
 		{
-			var endidx = IndexOfAnyEscaped (new char[] { '}' }, value, escape, index);
+			var endidx = value.Length;
 			var idx = IndexOfAnyEscaped (ch, value, escape, index);
 			string val = null;
 			if (idx >= 0 && idx <= endidx)
@@ -234,6 +250,12 @@ namespace Portable.Xaml
 			switch (Current)
 			{
 			case '{':
+				// escaped sequence
+				if (value.Length - 1 > index && value[index + 1] == '}')
+				{
+					index += 2;
+					return ReadUntil(',', true, escape: '\\');
+				}
 				var markup = ReadMarkup();
 				if (markup != null)
 				{
@@ -293,7 +315,7 @@ namespace Portable.Xaml
 			var info = new ParsedMarkupExtensionInfo (this);
 			try {
 				info.Parse ();
-				index = info.index;
+				index += info.index;
 				return info;
 			} catch {
 			}
@@ -319,17 +341,23 @@ namespace Portable.Xaml
 
 		public void Parse ()
 		{
-			if (!Read('{'))
-				throw Error ("Invalid markup extension attribute. It should begin with '{{', but was {0}", value);
+			//Get all inside brackets
+			if (value.Length > 1 && (value[0] != '{' || value[value.Length-1] != '}'))
+			{
+				throw new XamlParseException("Invalid markup extension attribute. It should begin with '{{' and end with '}}'");
+			}
+			value = value.Substring(1, value.Length - 2);
 			Name = ReadUntil (' ', true);
 			XamlTypeName xtn;
 			if (!XamlTypeName.TryParse (Name, nsResolver, out xtn))
 				throw Error ("Failed to parse type name '{0}'", Name);
-			Type = sctx.GetXamlType (xtn);
+
+			var xtnFirst = new XamlTypeName(xtn.Namespace, xtn.Name + "Extension", xtn.TypeArguments);
+			Type = sctx.GetXamlType (xtnFirst) ??
+				sctx.GetXamlType(xtn) ??
+				new XamlType(xtn.Namespace, xtn.Name, null, sctx);
 
 			ParseArgument();
-			if (!Read('}'))
-				throw Error ("Expected '}}' in the markup extension attribute: '{0}'", value);
 		}
 
 		static Exception Error (string format, params object[] args)

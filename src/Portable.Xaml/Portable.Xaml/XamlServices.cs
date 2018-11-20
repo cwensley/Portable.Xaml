@@ -123,7 +123,15 @@ namespace Portable.Xaml
 			if (xamlReader.NodeType == XamlNodeType.None)
 				xamlReader.Read ();
 
+			var xamlLineInfo = xamlReader as IXamlLineInfo;
+			var xamlLineConsumer = xamlWriter as IXamlLineInfoConsumer;
+			var shouldSetLineInfo = xamlLineInfo != null && xamlLineConsumer != null && xamlLineConsumer.ShouldProvideLineInfo && xamlLineInfo.HasLineInfo;
+
 			while (!xamlReader.IsEof) {
+				if (shouldSetLineInfo)
+				{
+					xamlLineConsumer.SetLineInfo(xamlLineInfo.LineNumber, xamlLineInfo.LinePosition);
+				}
 				xamlWriter.WriteNode (xamlReader);
 				xamlReader.Read ();
 			}
