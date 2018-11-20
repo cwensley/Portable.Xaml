@@ -93,7 +93,7 @@
 		
 	    <MSBuild Projects="$(MSBuildProjectFile)" Targets="UpdateVersion" Properties="BuildVersion=$(AssemblyInformationalVersion)" />
 		<PropertyGroup>
-			<Branch>release\$(AssemblyInformationalVersion)</Branch>
+			<Branch>release/$(AssemblyInformationalVersion)</Branch>
 			<NewVersion>$(AssemblyInformationalVersion)</NewVersion>
 			<NewDevelopVersion>$(AssemblyInformationalVersion)-alpha</NewDevelopVersion>
 		</PropertyGroup>
