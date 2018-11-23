@@ -1,6 +1,6 @@
 Portable.Xaml is a fork of [mono's System.Xaml](https://github.com/mono/mono/tree/master/mcs/class/System.Xaml) converted to .NET Standard.
 
-This is intended to be used to read and write Xaml on desktop, mobile, and .NET Core platforms.
+This is intended to be used to read and write XAML on desktop, mobile, and .NET Core platforms.
 
 [![Join the chat at https://gitter.im/cwensley/Portable.Xaml](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cwensley/Portable.Xaml?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build status](https://ci.appveyor.com/api/projects/status/tsbibgrcmd73a7tl/branch/master?svg=true)](https://ci.appveyor.com/project/cwensley/portable-xaml/branch/master)
@@ -29,14 +29,14 @@ Some of the enhanced functionality of Portable.Xaml include (but not limited to)
 - Supports `System.Collections.Immutable` collections and dictionaries.
 - Automatic support for immutable types (with no default constructor) without having to use `x:Arguments` by using properties flagged with `[ConstructorArgumentAttribute]` automatically.
 - Easier to override `XamlMember` creation using `ParameterInfo/PropertyInfo/MethodInfo/etc` from `XamlSchemaContext`
-- `TypeConverter` is used for items when adding to any ICollection&lt;T&gt; inherited list, if the type does not match.
+- `TypeConverter` is used for items when adding to any `ICollection<T>` inherited list, if the type does not match.
 
 
 ## Project Status
 
-While this library should be usable to read & write xaml files including markup extensions, it may have some bugs.
+While this library should be usable to read & write XAML files including markup extensions, it may have some bugs.
 
-Contributors are more than welcome! Ideally this library can become well supported to bring xaml to more applications.
+Contributors are more than welcome! Ideally this library can become well supported to bring XAML to more applications.
 
 ## Performance
 
