@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BenchmarkDotNet.Attributes;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +10,7 @@ using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Validators;
+using BenchmarkDotNet.Toolchains.CsProj;
 
 namespace Portable.Xaml.Benchmark
 {
@@ -49,6 +50,11 @@ namespace Portable.Xaml.Benchmark
 
 			config.Add(JitOptimizationsValidator.DontFailOnError);
 			config.Add(Job.Default);
+			//config.Add(Job.Clr.With(CsProjClassicNetToolchain.Net461));
+			//config.Add(Job.Clr.With(CsProjClassicNetToolchain.Net472));
+			//config.Add(Job.Core.With(CsProjCoreToolchain.NetCoreApp20));
+			//config.Add(Job.Core.With(CsProjCoreToolchain.NetCoreApp21));
+			//config.Add(Job.Core.With(CsProjCoreToolchain.NetCoreApp30));
 			config.Add(MemoryDiagnoser.Default);
 			config.Add(StatisticColumn.OperationsPerSecond);
 			config.Add(RankColumn.Arabic);

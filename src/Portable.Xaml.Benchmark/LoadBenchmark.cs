@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using BenchmarkDotNet.Attributes;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BenchmarkDotNet.Attributes.Columns;
 using System.Diagnostics;
 
 namespace Portable.Xaml.Benchmark
@@ -44,16 +43,6 @@ namespace Portable.Xaml.Benchmark
 		{
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(stream);
-		}
-
-		OmniXaml.Services.XamlLoader loader;
-		[Benchmark]
-		public void OmniXamlBenchmark()
-		{
-			loader = loader ?? new OmniXaml.Services.XamlLoader(AppDomain.CurrentDomain.GetAssemblies());
-
-			using (var stream = new StreamReader(GetStream()))
-				loader.Load(stream.ReadToEnd());
 		}
 	}
 }
