@@ -8,8 +8,6 @@ using System.Linq;
 
 [assembly: System.Windows.Markup.XmlnsDefinition ("http://example.com/benchmark", "Portable.Xaml.Benchmark")]
 
-[assembly: OmniXaml.Attributes.XmlnsDefinition("http://example.com/benchmark", "Portable.Xaml.Benchmark")]
-
 namespace Portable.Xaml.Benchmark
 {
 	[Portable.Xaml.Markup.ContentProperty ("Children")]
@@ -18,7 +16,6 @@ namespace Portable.Xaml.Benchmark
 	{
 		public string StringProperty { get; set; }
 
-		[OmniXaml.Attributes.Content]
 		public List<ChildObject> Children { get; } = new List<ChildObject> ();
 	}
 

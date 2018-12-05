@@ -1,5 +1,6 @@
 artifacts
 *.userprefs
+bin/
 obj/
 packages/
 .vs/

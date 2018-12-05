@@ -1,89 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AC406459-D324-4ADF-853D-A58B63396591}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Portable.Xaml.Benchmark</RootNamespace>
-    <AssemblyName>Portable.Xaml.Benchmark</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\artifacts\benchmark\Debug\net461\</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\artifacts\benchmark\Release\net461\</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LoadBenchmark.cs" />
-    <Compile Include="TestObject.cs" />
-    <Compile Include="LoadSimpleBenchmark.cs" />
-    <Compile Include="LoadComplexBenchmark.cs" />
-    <Compile Include="SaveBenchmark.cs" />
-    <Compile Include="XamlBenchmark.cs" />
-    <Compile Include="SaveSimpleBenchmark.cs" />
-    <Compile Include="SaveComplexBenchmark.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="LoadSimpleBenchmark.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LoadComplexBenchmark.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj">
-      <Project>{CDC8F791-56FC-4B15-AAD2-BC460657CC02}</Project>
-      <Name>Portable.Xaml-netstandard1.3</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet">
-      <Version>0.10.12</Version>
-    </PackageReference>
-    <PackageReference Include="OmniXAML">
-      <Version>2.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="OmniXaml.Attributes">
-      <Version>2.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="OmniXaml.Services">
-      <Version>2.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Collections.Immutable">
-      <Version>1.4.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Microsoft.NET.SDK">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net461</TargetFrameworks>
+        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="LoadSimpleBenchmark.xml"/>
+        <EmbeddedResource Include="LoadComplexBenchmark.xml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="System.Xaml" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.11.3"/>
+        <PackageReference Include="System.Collections.Immutable" Version="1.5.0"/>
+    </ItemGroup>
 </Project>
