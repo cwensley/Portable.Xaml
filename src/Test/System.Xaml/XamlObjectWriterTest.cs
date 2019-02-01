@@ -2429,5 +2429,27 @@ $@"<TestClass7
 			Assert.AreEqual(2, ex.LineNumber);
 			Assert.AreEqual(6, ex.LinePosition);
 		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForNotFoundProperty()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Baz='baz'
+    NotFound='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForInvalidPropertyValue()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Baz='baz'
+    Bar='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+		}
 	}
 }

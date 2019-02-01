@@ -457,7 +457,7 @@ namespace Portable.Xaml
 					}
 				}
 				else
-					yield return Node(XamlNodeType.Value, v);
+					yield return Node(XamlNodeType.Value, v, memberInfo.LineInfo);
 
 				yield return Node(XamlNodeType.EndMember, memberInfo.Member);
 			}
