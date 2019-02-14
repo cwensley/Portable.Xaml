@@ -45,11 +45,17 @@ namespace Portable.Xaml
 		{
 		}
 
+		public XamlObjectWriterException(string message, Exception innerException, int lineNumber, int linePosition)
+			: base(message, innerException, lineNumber, linePosition)
+		{
+
+		}
+
 		#if !PCL
 		protected XamlObjectWriterException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{
 		}
-		#endif
+#endif
 	}
 }

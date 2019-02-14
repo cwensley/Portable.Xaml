@@ -2418,5 +2418,16 @@ $@"<TestClass7
 			Assert.True(result.Assigned);
 			Assert.AreEqual(2, result.Items.Count);
 		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForNotFoundType()
+		{
+			string xml = @"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <NotFound/>
+</TestClass10>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			Assert.AreEqual(2, ex.LineNumber);
+			Assert.AreEqual(6, ex.LinePosition);
+		}
 	}
 }

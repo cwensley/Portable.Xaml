@@ -114,12 +114,13 @@ namespace Portable.Xaml
 			}
 		}
 
-		int line, column;
-
 		internal XamlObjectWriterSettings Settings
 		{
 			get { return settings; }
 		}
+
+		internal int Line { get; private set; }
+		internal int Column { get; private set; }
 
 		public virtual object Result
 		{
@@ -143,8 +144,8 @@ namespace Portable.Xaml
 
 		public void SetLineInfo(int lineNumber, int linePosition)
 		{
-			line = lineNumber;
-			column = linePosition;
+			Line = lineNumber;
+			Column = linePosition;
 		}
 
 		public void Clear()
@@ -222,7 +223,7 @@ namespace Portable.Xaml
 		{
 			if (xamlType.IsUnknown)
 			{
-				throw new XamlObjectWriterException($"Cannot create unknown type '{xamlType}'.");
+				throw new XamlObjectWriterException($"Cannot create unknown type '{xamlType}'.", null, Line, Column);
 			}
 
 			if (deferredWriter != null)
@@ -256,11 +257,7 @@ namespace Portable.Xaml
 			}
 
 			if (property.IsUnknown)
-				throw new XamlObjectWriterException($"Cannot set unknown member '{property}'")
-				{
-					LineNumber = line,
-					LinePosition = column
-				};
+				throw new XamlObjectWriterException($"Cannot set unknown member '{property}'", null, Line, Column);
 
 			intl.WriteStartMember(property);
 
@@ -349,7 +346,11 @@ namespace Portable.Xaml
 				if (obj != null)
 				{
 					if (state.Type.UnderlyingType != null && !state.Type.UnderlyingType.GetTypeInfo().IsAssignableFrom(obj.GetType().GetTypeInfo()))
-						throw new XamlObjectWriterException(String.Format("RootObjectInstance type '{0}' is not assignable to '{1}'", obj.GetType(), state.Type));
+						throw new XamlObjectWriterException(
+							String.Format("RootObjectInstance type '{0}' is not assignable to '{1}'", obj.GetType(), state.Type),
+							null,
+							source.Line,
+							source.Column);
 					state.Value = obj;
 					state.IsInstantiated = true;
 					HandleBeginInit(obj);
@@ -372,7 +373,7 @@ namespace Portable.Xaml
 			if (state.Type.IsImmutable)
 				instance = state.Type.Invoker.ToMutable(instance);
 			if (instance == null)
-				throw new XamlObjectWriterException(String.Format("The value  for '{0}' property is null", xm.Name));
+				throw new XamlObjectWriterException(String.Format("The value  for '{0}' property is null", xm.Name), null, source.Line, source.Column);
 			
 			//if the type is immutable then we need set value
 			if(!state.Type.IsImmutable)
@@ -405,7 +406,7 @@ namespace Portable.Xaml
 				}
 				catch (Exception ex)
 				{
-					throw new XamlObjectWriterException("An error occured getting provided value", ex);
+					throw new XamlObjectWriterException("An error occured getting provided value", ex, source.Line, source.Column);
 				}
 			}
 
@@ -475,9 +476,9 @@ namespace Portable.Xaml
 			else
 			{
 				if (property == XamlLanguage.UnknownContent)
-					throw new XamlObjectWriterException($"Type '{object_states.Peek().Type}' does not have a content property.");
+					throw new XamlObjectWriterException($"Type '{object_states.Peek().Type}' does not have a content property.", null, source.Line, source.Column);
 				if (property.IsUnknown)
-					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'");
+					throw new XamlObjectWriterException($"Cannot set unknown member '{property}'", null, source.Line, source.Column);
 				if (!property.IsDirective || ReferenceEquals(property, XamlLanguage.Name)) // x:Name requires an object instance
 				{
 					InitializeObjectIfRequired(false);
@@ -539,7 +540,11 @@ namespace Portable.Xaml
 						}
 					}
 					if (!found)
-						throw new XamlObjectWriterException(String.Format("Specified static factory method '{0}' for type '{1}' was not found", state.FactoryMethod, state.Type));
+						throw new XamlObjectWriterException(
+							String.Format("Specified static factory method '{0}' for type '{1}' was not found", state.FactoryMethod, state.Type),
+							null,
+							source.Line,
+							source.Column);
 				}
 				else
 					PopulateObject(true, (List<object>)state.Value);
@@ -592,7 +597,7 @@ namespace Portable.Xaml
 			}
 			catch (Exception ex)
 			{
-				throw new XamlObjectWriterException($"Set value of member '{member}' threw an exception", ex);
+				throw new XamlObjectWriterException($"Set value of member '{member}' threw an exception", ex, source.Line, source.Column);
 			}
 		}
 
@@ -605,7 +610,7 @@ namespace Portable.Xaml
 			var args = state.Type.GetSortedConstructorArguments(contents)?.ToArray();
 			var argt = args != null ? (from arg in args select arg.Type).ToArray() : positionalParameters;
 			if (argt == null)
-				throw new XamlObjectWriterException($"Could not find matching constructor for type {state.Type}");
+				throw new XamlObjectWriterException($"Could not find matching constructor for type {state.Type}", null, source.Line, source.Column);
 
 			var argv = new object[argt.Count];
 			for (int i = 0; i < argv.Length; i++)
@@ -744,12 +749,20 @@ namespace Portable.Xaml
 			catch (Exception ex)
 			{
 				// For + ex.Message, the runtime should print InnerException message like .NET does.
-				throw new XamlObjectWriterException(String.Format("Could not convert object \'{0}' (of type {1}) to {2}: ", value, value != null ? (object)value.GetType() : "(null)", xt) + ex.Message, ex);
+				throw new XamlObjectWriterException(
+					String.Format("Could not convert object \'{0}' (of type {1}) to {2}: ", value, value != null ? (object)value.GetType() : "(null)", xt) + ex.Message,
+					ex,
+					source.Line,
+					source.Column);
 			}
 
 			return fallbackToString ?
 				value :
-				throw new XamlObjectWriterException(String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm));
+				throw new XamlObjectWriterException(
+					String.Format("Value '{0}' (of type {1}) is not of or convertible to type {2} (member {3})", value, value != null ? (object)value.GetType() : "(null)", xt, xm),
+					null,
+					source.Line,
+					source.Column);
 		}
 
 		XamlType ResolveTypeFromName (string name)
@@ -800,7 +813,7 @@ namespace Portable.Xaml
 						// immutable type (no default constructor), so we create based on supplied constructor arguments 
 						var args = state.Type.GetSortedConstructorArguments(constructorProps)?.ToList();
 						if (args == null)
-							throw new XamlObjectWriterException($"Could not find constructor for {state.Type} based on supplied members");
+							throw new XamlObjectWriterException($"Could not find constructor for {state.Type} based on supplied members", null, source.Line, source.Column);
 
 						var argValues = args.Select(r => r.Value).ToArray();
 
@@ -814,7 +827,7 @@ namespace Portable.Xaml
 						foreach (var prop in state.WrittenProperties.Where(p => args.All(r => r.Member != p.Member)))
 						{
 							if (prop.Member.IsReadOnly && prop.Member.IsConstructorArgument)
-								throw new XamlObjectWriterException($"Member {prop.Member} is read only and cannot be used in any constructor");
+								throw new XamlObjectWriterException($"Member {prop.Member} is read only and cannot be used in any constructor", null, source.Line, source.Column);
 							if (!prop.Member.IsReadOnly)
 								SetValue(prop.Member, prop.Value);
 						}
@@ -846,7 +859,7 @@ namespace Portable.Xaml
 					// FIXME: sort out relationship between name_scope and name_resolver. (unify to name_resolver, probably)
 					var obj = name_scope.FindName (name) ?? name_resolver.Resolve (name, out isFullyInitialized);
 					if (obj == null)
-						throw new XamlObjectWriterException (String.Format ("Unresolved object reference '{0}' was found", name));
+						throw new XamlObjectWriterException (String.Format ("Unresolved object reference '{0}' was found", name), null, source.Line, source.Column);
 
 					if (fixup.ListIndex != null)
 						((IList)fixup.Value)[fixup.ListIndex.Value] = obj;
