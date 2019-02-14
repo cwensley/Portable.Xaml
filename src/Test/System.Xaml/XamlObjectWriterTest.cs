@@ -2451,5 +2451,17 @@ $@"<TestClass7
 			Assert.AreEqual(3, ex.LineNumber);
 			Assert.AreEqual(5, ex.LinePosition);
 		}
+
+		[Test]
+		public void ExceptionShouldBeThrownWhenSetterThrows()
+		{
+			string xml = @"<SetterThatThrows xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Throw='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			Assert.AreEqual(2, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+			Assert.IsInstanceOf<NotSupportedException>(ex.InnerException);
+			Assert.AreEqual("Whoops!", ex.InnerException.Message);
+		}
 	}
 }

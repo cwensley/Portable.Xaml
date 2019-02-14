@@ -595,6 +595,10 @@ namespace Portable.Xaml
 				if (!source.OnSetValue(target, member, value))
 					member.Invoker.SetValue(target, value);
 			}
+			catch (TargetInvocationException ex)
+			{
+				throw new XamlObjectWriterException($"Set value of member '{member}' threw an exception", ex.InnerException, source.Line, source.Column);
+			}
 			catch (Exception ex)
 			{
 				throw new XamlObjectWriterException($"Set value of member '{member}' threw an exception", ex, source.Line, source.Column);
