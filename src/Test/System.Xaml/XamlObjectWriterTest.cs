@@ -2425,7 +2425,7 @@ $@"<TestClass7
 			string xml = @"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
     <NotFound/>
 </TestClass10>".UpdateXml();
-			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
 			Assert.AreEqual(2, ex.LineNumber);
 			Assert.AreEqual(6, ex.LinePosition);
 		}
@@ -2436,7 +2436,7 @@ $@"<TestClass7
 			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
     Baz='baz'
     NotFound='foo'/>".UpdateXml();
-			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
 			Assert.AreEqual(3, ex.LineNumber);
 			Assert.AreEqual(5, ex.LinePosition);
 		}
@@ -2447,7 +2447,7 @@ $@"<TestClass7
 			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
     Baz='baz'
     Bar='foo'/>".UpdateXml();
-			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
 			Assert.AreEqual(3, ex.LineNumber);
 			Assert.AreEqual(5, ex.LinePosition);
 		}
@@ -2457,11 +2457,19 @@ $@"<TestClass7
 		{
 			string xml = @"<SetterThatThrows xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
     Throw='foo'/>".UpdateXml();
-			var ex = Assert.Throws<XamlObjectWriterException>(() => XamlServices.Parse(xml));
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
 			Assert.AreEqual(2, ex.LineNumber);
 			Assert.AreEqual(5, ex.LinePosition);
 			Assert.IsInstanceOf<NotSupportedException>(ex.InnerException);
 			Assert.AreEqual("Whoops!", ex.InnerException.Message);
+		}
+
+		object ParseWithLineInfo(string xaml)
+		{
+			var stringReader = new StringReader(xaml);
+			var settings = new XamlXmlReaderSettings { ProvideLineInfo = true };
+			var xamlReader = new XamlXmlReader(stringReader, settings);
+			return XamlServices.Load(xamlReader);
 		}
 	}
 }
