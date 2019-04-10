@@ -628,7 +628,7 @@ namespace Portable.Xaml
 		protected override void OnWriteValue(object value)
 		{
 			if (CurrentMemberState.Value != null)
-				throw WithLineInfo(new XamlDuplicateMemberException(String.Format("Member '{0}' is already written to current type '{1}'", CurrentMember, object_states.Peek().Type)));
+				throw WithLineInfo(new XamlDuplicateMemberException(CurrentMember, object_states.Peek().Type));
 			StoreAppropriatelyTypedValue(value, null);
 		}
 
