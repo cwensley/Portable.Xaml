@@ -248,7 +248,7 @@ namespace Portable.Xaml
 			{
 				var wp = wpl[i];
 				if (ReferenceEquals(wp.Member, property))
-					throw WithLineInfo(new XamlDuplicateMemberException(String.Format("Property '{0}' is already set to this '{1}' object", property, object_states.Peek().Type)));
+					throw WithLineInfo(new XamlDuplicateMemberException(property, object_states.Peek().Type));
 			}
 
 			wpl.Add(new MemberAndValue(property));
