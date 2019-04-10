@@ -26,6 +26,7 @@ using Portable.Xaml.ComponentModel;
 using System.Reflection;
 using Portable.Xaml.Markup;
 using Portable.Xaml.Schema;
+using System.Diagnostics;
 
 namespace Portable.Xaml
 {
@@ -54,7 +55,7 @@ namespace Portable.Xaml
 		public Uri BaseUri { get; set; }
 		public bool IgnoreUidsOnPropertyElements { get; set; }
 		public Assembly LocalAssembly { get; set; }
-		public bool ProvideLineInfo { get; set; }
+		public bool ProvideLineInfo { get; set; } = Debugger.IsAttached;
 		public bool ValuesMustBeString { get; set; }
 	}
 }
