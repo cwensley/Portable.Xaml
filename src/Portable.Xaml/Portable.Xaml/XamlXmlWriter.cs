@@ -303,7 +303,12 @@ namespace Portable.Xaml
 				WritePendingStartMember(XamlNodeType.GetObject);
 			}
 		}
-		
+
+		protected override XamlException WithLineInfo(XamlException ex)
+		{
+			return ex;
+		}
+
 		void WritePendingStartMember (XamlNodeType nodeType)
 		{
 			var cm = CurrentMemberState;

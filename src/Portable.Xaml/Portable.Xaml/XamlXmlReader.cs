@@ -817,7 +817,7 @@ namespace Portable.Xaml
 					yield return Node (XamlNodeType.EndObject, xm.Type);
 				}
 				else
-					throw new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)) { LineNumber = this.LineNumber, LinePosition = this.LinePosition };
+					throw WithLineInfo(new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)));
 			} else {
 				foreach (var ni in ReadElementContent(parentType, xm))
 				{
@@ -906,6 +906,12 @@ namespace Portable.Xaml
 			yield return Node (XamlNodeType.Value, r.ReadInnerXml ());
 			yield return Node (XamlNodeType.EndMember, xm);
 			yield return Node (XamlNodeType.EndObject, xt);
+		}
+
+		XamlException WithLineInfo(XamlException ex)
+		{
+			ex.SetLineInfo(LineNumber, LinePosition);
+			return ex;
 		}
 
 		public int LineNumber {

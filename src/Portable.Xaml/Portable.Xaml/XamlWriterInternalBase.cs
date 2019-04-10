@@ -248,7 +248,7 @@ namespace Portable.Xaml
 			{
 				var wp = wpl[i];
 				if (ReferenceEquals(wp.Member, property))
-					throw new XamlDuplicateMemberException(String.Format("Property '{0}' is already set to this '{1}' object", property, object_states.Peek().Type));
+					throw WithLineInfo(new XamlDuplicateMemberException(String.Format("Property '{0}' is already set to this '{1}' object", property, object_states.Peek().Type)));
 			}
 
 			wpl.Add(new MemberAndValue(property));
@@ -310,6 +310,8 @@ namespace Portable.Xaml
 			else
 				throw new XamlXmlWriterException(String.Format("Value type is '{0}' but it must be either string or any type that is convertible to string indicated by TypeConverterAttribute.", value != null ? value.GetType() : null));
 		}
+
+		protected abstract XamlException WithLineInfo(XamlException ex);
 
 		internal class ObjectStateStack
 		{
