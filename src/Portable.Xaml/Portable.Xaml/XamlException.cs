@@ -50,8 +50,8 @@ namespace Portable.Xaml
 			if (lineNumber <= 0)
 				return message;
 			if (linePosition <= 0)
-				return String.Format ("{0} at line {1}", message, lineNumber);
-			return String.Format ("{0} at line {1}, position {2}", message, lineNumber, linePosition);
+				return String.Format ("'{0}' Line number '{1}'", message, lineNumber);
+			return String.Format ("'{0}' Line number '{1}' and line position '{2}'.", message, lineNumber, linePosition);
 		}
 
 		public XamlException (string message, Exception innerException, int lineNumber, int linePosition)
@@ -61,13 +61,19 @@ namespace Portable.Xaml
 			LinePosition = linePosition;
 		}
 
-		public int LineNumber { get; protected internal set; }
-		public int LinePosition { get; protected internal set; }
+		public int LineNumber { get; protected set; }
+		public int LinePosition { get; protected set; }
 		public override string Message {
 			get { return FormatLine (base.Message, LineNumber, LinePosition); }
 		}
 
-		#if !PCL
+		internal void SetLineInfo(int lineNumber, int linePosition)
+		{
+			LineNumber = lineNumber;
+			LinePosition = linePosition;
+		}
+
+#if !PCL
 		protected XamlException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{
@@ -80,6 +86,6 @@ namespace Portable.Xaml
 			info.AddValue ("lineNumber", LineNumber);
 			info.AddValue ("linePosition", LinePosition);
 		}
-		#endif
+#endif
 	}
 }

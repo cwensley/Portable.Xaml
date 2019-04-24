@@ -460,7 +460,16 @@ namespace MonoTests.Portable.Xaml
 
 		public IList<TestClass9> Items { get; }
 	}
-	
+
+	public class SetterThatThrows
+	{
+		public string Throw
+		{
+			get => "Hello";
+			set => throw new NotSupportedException("Whoops!");
+		} 
+	}
+
 #if PCL
 	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
 #endif

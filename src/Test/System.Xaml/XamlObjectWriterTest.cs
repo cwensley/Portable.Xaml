@@ -2418,5 +2418,117 @@ $@"<TestClass7
 			Assert.True(result.Assigned);
 			Assert.AreEqual(2, result.Items.Count);
 		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForNotFoundType()
+		{
+			string xml = @"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+    <NotFound/>
+</TestClass10>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(2, ex.LineNumber);
+			Assert.AreEqual(6, ex.LinePosition);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForNotFoundProperty()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Baz='baz'
+    NotFound='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForInvalidPropertyValue()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Baz='baz'
+    Bar='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownWhenSetterThrows()
+		{
+			string xml = @"<SetterThatThrows xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Throw='foo'/>".UpdateXml();
+			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(2, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+			Assert.IsInstanceOf<NotSupportedException>(ex.InnerException);
+			Assert.AreEqual("Whoops!", ex.InnerException.Message);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForDuplicateAttribute()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+    Baz='foo'
+    Baz='bar'/>".UpdateXml();
+			var ex = Assert.Throws<XmlException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+			Assert.AreEqual(5, ex.LinePosition);
+			Assert.AreEqual("'Baz' is a duplicate attribute name. Line 3, position 5.", ex.Message);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForDuplicateContent()
+		{
+			string xml = @"<ContentIncludedClass xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+												 xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+	<x:String>Foo</x:String>
+	<x:String>Bar</x:String>
+</ContentIncludedClass>".UpdateXml();
+			var ex = Assert.Throws<XamlDuplicateMemberException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(4, ex.LineNumber);
+			Assert.AreEqual(3, ex.LinePosition);
+			Assert.AreEqual(typeof(ContentIncludedClass), ex.ParentType.UnderlyingType);
+			Assert.AreEqual("Content", ex.DuplicateMember.Name);
+			Assert.AreEqual("''Content' property has already been set on 'ContentIncludedClass'.' Line number '4' and line position '3'.", ex.Message);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForDuplicateElement()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+  <TestClass9.Baz>foo</TestClass9.Baz>
+  <TestClass9.Baz>bar</TestClass9.Baz>
+</TestClass9>".UpdateXml();
+			var ex = Assert.Throws<XamlDuplicateMemberException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(3, ex.LineNumber);
+
+			// System.Xaml reports column 4 here but we report column 19. 19 actually makes more sense here so don't test this.
+			//
+			//Assert.AreEqual(4, ex.LinePosition);
+			//Assert.AreEqual("''Baz' property has already been set on 'TestClass9'.' Line number '3' and line position '4'.", ex.Message);
+		}
+
+		[Test]
+		public void ExceptionShouldBeThrownForDuplicateAttributeAndElement()
+		{
+			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' Baz='foo'>
+  <TestClass9.Baz>foo</TestClass9.Baz>
+</TestClass9>".UpdateXml();
+			var ex = Assert.Throws<XamlDuplicateMemberException>(() => ParseWithLineInfo(xml));
+			Assert.AreEqual(2, ex.LineNumber);
+
+			// System.Xaml reports column 4 here but we report column 19. 19 actually makes more sense here so don't test this.
+			//
+			// Assert.AreEqual(4, ex.LinePosition);
+			// Assert.AreEqual("''Baz' property has already been set on 'TestClass9'.' Line number '2' and line position '4'.", ex.Message);
+		}
+
+		object ParseWithLineInfo(string xaml)
+		{
+			var stringReader = new StringReader(xaml);
+			var settings = new XamlXmlReaderSettings { ProvideLineInfo = true };
+			var xamlReader = new XamlXmlReader(stringReader, settings);
+			return XamlServices.Load(xamlReader);
+		}
 	}
 }

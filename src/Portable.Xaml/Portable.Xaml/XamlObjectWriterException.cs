@@ -50,6 +50,6 @@ namespace Portable.Xaml
 			: base (info, context)
 		{
 		}
-		#endif
+#endif
 	}
 }

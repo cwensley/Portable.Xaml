@@ -36,7 +36,7 @@ namespace Portable.Xaml
 		}
 
 		public XamlDuplicateMemberException (XamlMember member, XamlType type)
-			: this (String.Format ("duplicate member '{0}' in type '{1}'", member, type))
+			: this (String.Format ("'{0}' property has already been set on '{1}'.", member?.Name, type?.Name))
 		{
 			DuplicateMember = member;
 			ParentType = type;
