@@ -679,12 +679,13 @@ namespace Portable.Xaml
 
 
 			// ensure only the referenced types are allowed
-			if (
-				ret == null
-				|| (reference_assemblies != null && !reference_assemblies.Contains(ret.GetTypeInfo().Assembly))
-			)
+			if ((reference_assemblies != null && !reference_assemblies.Contains(ret.GetTypeInfo().Assembly)))
 				return null;
 
+			// we need to return the unknown type instead of null for more readable errors
+			if(ret == null)
+				return new XamlType(xmlNamespace, xmlLocalName, null, this);
+			
 			return GetXamlType(genArgs == null ? ret : ret.MakeGenericType(genArgs));
 		}
 

@@ -353,7 +353,10 @@ namespace Portable.Xaml
 				throw Error ("Failed to parse type name '{0}'", Name);
 
 			var xtnFirst = new XamlTypeName(xtn.Namespace, xtn.Name + "Extension", xtn.TypeArguments);
-			Type = sctx.GetXamlType (xtnFirst) ??
+			var xtFirst = sctx.GetXamlType(xtnFirst);
+			
+			//if type with Extension postfix is not resolved or unknown we try to get it without the prefix 
+			Type = ((xtFirst == null || xtFirst.IsUnknown)? null: xtFirst) ??
 				sctx.GetXamlType(xtn) ??
 				new XamlType(xtn.Namespace, xtn.Name, null, sctx);
 

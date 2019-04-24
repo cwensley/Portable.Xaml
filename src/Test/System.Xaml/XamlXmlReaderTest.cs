@@ -1580,5 +1580,23 @@ namespace MonoTests.Portable.Xaml
 				return unknownTypeNames.Contains(name) ? null : base.GetXamlType(xamlNamespace, name, typeArguments);
 			}
 		}
+		
+		[Test]
+		public void More_Readable_Error_Info()
+		{
+			var assembly = this.GetType().GetTypeInfo().Assembly.FullName;
+			var xaml = $@"<CollectionParentItem xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={assembly}'>
+	Hello
+    <CollectionIte />
+	!
+</CollectionParentItem>";
+
+			Assert.Catch<XamlObjectWriterException>(() =>
+			{
+				var res = ((CollectionParentItem) XamlServices.Parse(xaml));
+			});
+
+
+		}
 	}
 }
