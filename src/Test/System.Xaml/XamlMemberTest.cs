@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using NUnit.Framework;
 using Tests.Portable.Xaml.NamespaceTest;
@@ -52,6 +53,7 @@ namespace Tests.Portable.Xaml
 		EventInfo eventStore_Event3 = typeof (EventStore).GetEvent ("Event3");
 		PropertyInfo str_len = typeof (string).GetProperty ("Length");
 		PropertyInfo sb_len = typeof (StringBuilder).GetProperty ("Length");
+		PropertyInfo dummy_ignored_prop = typeof(XamlMemberTest).GetProperty ("DummyIgnoredProp");
 		MethodInfo dummy_add = typeof (XamlMemberTest).GetMethod ("DummyAddMethod");
 		MethodInfo dummy_get = typeof (XamlMemberTest).GetMethod ("DummyGetMethod");
 		MethodInfo dummy_set = typeof (XamlMemberTest).GetMethod ("DummySetMethod");
@@ -270,6 +272,17 @@ namespace Tests.Portable.Xaml
 			public void DummySetMethod (object o, int v)
 			{
 			}
+		}
+
+		[IgnoreDataMember]
+		public int DummyIgnoredProp { get; set; }
+
+		[Test]
+		public void ShouldNotSerializeIgnoredDataMember()
+		{
+			var m = new XamlMember (dummy_ignored_prop, sctx);
+			var b = m.ShouldSerialize(null);
+			Assert.IsFalse(b, "#1");
 		}
 
 		[Test]

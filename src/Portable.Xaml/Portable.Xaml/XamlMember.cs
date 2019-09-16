@@ -29,6 +29,7 @@ using Portable.Xaml.Schema;
 using System.Linq;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace Portable.Xaml
 {
@@ -224,6 +225,16 @@ namespace Portable.Xaml
 			}
 		}
 
+		internal bool IgnoreDataMember
+		{
+			get
+			{
+				var c = this.CustomAttributeProvider;
+				var a = c == null ? null : c.GetCustomAttribute<IgnoreDataMemberAttribute>(false);
+				return a != null;
+			}
+		}
+
 		internal bool ShouldSerialize(object instance)
 		{
 			var shouldSerialize = flags.Get(MemberFlags.ShouldSerialize) ?? flags.Set(MemberFlags.ShouldSerialize, LookupShouldSerialize());
@@ -258,6 +269,7 @@ namespace Portable.Xaml
 		{
 			bool shouldSerialize = true;
 			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
+			shouldSerialize &= !IgnoreDataMember;
 			return shouldSerialize;
 		}
 
