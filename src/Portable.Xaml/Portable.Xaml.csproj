@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.0;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <RootNamespace>Portable.Xaml</RootNamespace>
+    <AssemblyName>Portable.Xaml</AssemblyName>
+    <DefineConstants>PCL;DEBUG;HAS_TYPE_CONVERTER</DefineConstants>
+    <OutputPath>..\..\artifacts\core\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyTitle>Portable.Xaml</AssemblyTitle>
+    <Description>Portable.Xaml</Description>
+    
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <DefineConstants>$(DefineConstants);HAS_CUSTOM_ATTRIBUTE_PROVIDER;HAS_ISUPPORT_INITIALIZE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework) != 'netstandard2.0'">
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+  </ItemGroup>
+</Project>

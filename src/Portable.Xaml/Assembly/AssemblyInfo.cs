@@ -46,16 +46,6 @@ using System.Security.Permissions;
 [assembly: CLSCompliant(true)]
 //[assembly: ComVisible (false)]
 
-[assembly: AssemblyTitle("Portable.Xaml.dll")]
-[assembly: AssemblyDescription("Portable.Xaml.dll")]
-[assembly: AssemblyDefaultAlias("Portable.Xaml.dll")]
-[assembly: AssemblyVersion("0.24.*")]
-[assembly: AssemblyInformationalVersion("0.25.0-alpha")]
-
-[assembly: AssemblyCompany("Mono development team")]
-[assembly: AssemblyCopyright("(c) Various Mono authors")]
-
-
 #if !PCL
 
 [assembly: AssemblyCompany (Consts.MonoCompany)]

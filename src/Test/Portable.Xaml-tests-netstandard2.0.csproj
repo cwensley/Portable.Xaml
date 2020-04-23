@@ -19,9 +19,6 @@
 		<OutputPath>..\..\artifacts\test\Release\netstandard2.0</OutputPath>
 		<DefineConstants>TRACE;PCL259;PCL;NETSTANDARD;NETSTANDARD2_0;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER;HAS_ISUPPORT_INITIALIZE</DefineConstants>
 	</PropertyGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard2.0.csproj" />
-	</ItemGroup>
   <ItemGroup>
     <Reference Include="System.Xml" />
     <Reference Include="System" />
@@ -38,8 +35,14 @@
 		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.9.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
   </ItemGroup>
 </Project>

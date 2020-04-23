@@ -1,135 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Package" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<PropertyGroup>
-		<Configuration Condition="$(Configuration) == ''">Release</Configuration>
-		<Platform Condition="$(Platform) == ''">Any CPU</Platform>
-        <BaseDir Condition="$(BaseDir) == ''">..</BaseDir>
-        <SourceDir Condition="$(SourceDir) == ''">$(BaseDir)\src</SourceDir>
-        <ArtifactsDir>$(BaseDir)\artifacts</ArtifactsDir>
-        <ToolsDir>$(ArtifactsDir)\tools</ToolsDir>
-        <Nuget>$(ToolsDir)\nuget.exe</Nuget>
-        <OutputNupkgDir Condition="$(OutputNupkgDir) == ''">$(ArtifactsDir)\nupkg\$(Configuration)</OutputNupkgDir>
-        <Runtime Condition="$(OS) == 'Unix'">mono</Runtime>
-	</PropertyGroup>
-	<Import Project="Utilities.targets" />
+  <PropertyGroup>
+    <Configuration Condition="$(Configuration) == ''">Release</Configuration>
+    <Platform Condition="$(Platform) == ''">Any CPU</Platform>
+  </PropertyGroup>
+  <Import Project="..\Directory.Build.props" />
+  
+  <Import Project="Utilities.targets" />
 
-	<Target Name="Build" DependsOnTargets="UpdateVersion;DownloadNuget">
-    	<Exec Command="$(Runtime) $(Nuget) restore $(SourceDir)\Portable.Xaml.sln"/>
-    	<MSBuild Projects="$(SourceDir)\Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
-	</Target>
-	
-	<Target Name="DownloadNuget" Condition="!Exists('$(Nuget)')">
-	    <DownloadFile Address="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" FileName="$(Nuget)" />
-	</Target>
-	
-    <Target Name="Package" DependsOnTargets="Build;DownloadNuget">
+  <Target Name="Build" DependsOnTargets="UpdateVersion">
+    <MSBuild Projects="$(SourceDir)Portable.Xaml.sln" Targets="Restore" Properties="Configuration=$(Configuration);Platform=$(Platform);_RestoreNuget=True"/>
+    <MSBuild Projects="$(SourceDir)Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
+  </Target>
 
-		<GetAssemblyInfo AssemblyFileName="$(ArtifactsDir)\core\$(Configuration)\netstandard1.3\Portable.Xaml.dll">
-			<Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyVersion" />
-		</GetAssemblyInfo>
+  <Target Name="Package" DependsOnTargets="Build">
 
-    	<MakeDir Directories="$(OutputNupkgDir)" />
-    	<Exec Command="$(Runtime) $(Nuget) pack $(SourceDir)\Portable.Xaml\Portable.Xaml.nuspec -NoDefaultExcludes -Properties Configuration=$(Configuration) -OutputDirectory $(OutputNupkgDir) -Version $(AssemblyVersion)"/>
-    </Target>
+    <MSBuild Projects="$(SourceDir)Portable.Xaml\Portable.Xaml.csproj" Targets="Pack" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
+  </Target>
 
-	<Target Name="Clean">
-		<RemoveDir Directories="$(ArtifactsDir)"/>
-	</Target>
-	
-	<Target Name="_GetVersion">
-		<FileExtract File="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
-			Pattern='(?&lt;=AssemblyInformationalVersion(\\s*)[(]&quot;).*(?=&quot;[)])'
-			Condition="$(BuildVersion) == ''">
-			<Output TaskParameter="Output" PropertyName="CurrentVersion" />
-		</FileExtract>
-	</Target>
-	
-	<Target Name="UpdateVersion" Condition="$(BuildVersion) != ''" DependsOnTargets="_GetVersion">
+  <Target Name="Clean">
+    <RemoveDir Directories="$(ArtifactsDir)"/>
+  </Target>
 
-		<Message Text="Set Version: $(BuildVersion)" Condition="$(BuildVersion) != ''" />
+  <Target Name="UpdateVersion" Condition="$(BuildVersion) != ''">
 
-		<PropertyGroup>
-			<SetAppveyorVersion Condition="$(SetAppveyorVersion) == ''">True</SetAppveyorVersion>
-			<BuildIncrement Condition="$(BuildVersion) == '' and $(BuildIncrement) == ''">0.1.0.0</BuildIncrement>
-			<BuildVersion Condition="$(BuildVersion) == ''">$(CurrentVersion)</BuildVersion>
-		</PropertyGroup>
-		
-		<Message Text="Current Version: $(CurrentVersion)" Condition="$(CurrentVersion) != ''" />
-		<Message Text="Incrementing by: $(BuildIncrement)" Condition="$(BuildIncrement) != ''" />
+    <Message Text="Set Version: $(BuildVersion)" Condition="$(BuildVersion) != ''" />
 
-		<IncrementVersion Version="$(BuildVersion)" Increment="$(BuildIncrement)">
-			<Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
-			<Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyInformationalVersion" />
-		</IncrementVersion>
-		
-		<Message Text="New Version: $(AssemblyVersion)" />
-		<Message Text="New Informational Version: $(AssemblyInformationalVersion)" />
-		
-		<FileUpdate Files="$(BaseDir)\appveyor.yml"
+    <PropertyGroup>
+      <SetAppveyorVersion Condition="$(SetAppveyorVersion) == ''">True</SetAppveyorVersion>
+      <BuildIncrement Condition="$(BuildVersion) == '' and $(BuildIncrement) == ''">0.1.0.0</BuildIncrement>
+      <BuildVersion Condition="$(BuildVersion) == ''">$(InformationalVersion)</BuildVersion>
+    </PropertyGroup>
+
+    <Message Text="Current Version: $(CurrentVersion)" Condition="$(CurrentVersion) != ''" />
+    <Message Text="Incrementing by: $(BuildIncrement)" Condition="$(BuildIncrement) != ''" />
+
+    <IncrementVersion Version="$(BuildVersion)" Increment="$(BuildIncrement)">
+      <Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
+      <Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyInformationalVersion" />
+    </IncrementVersion>
+
+    <Message Text="New Version: $(AssemblyVersion)" />
+    <Message Text="New Informational Version: $(AssemblyInformationalVersion)" />
+
+    <FileUpdate Files="$(BasePath)appveyor.yml"
             Pattern='(?&lt;=version\\s*:\\s*)([\\w\\d\\.-]+?)(?=\\.{build})'
             Replacement='$(AssemblyInformationalVersion)'
             Condition="$(SetAppveyorVersion) == 'True'" />
 
-		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
-            Pattern='AssemblyVersion(\\s*)[(]&quot;.*&quot;[)]'
-            Replacement='AssemblyVersion$1("$(AssemblyVersion)")' />
-
-		<FileUpdate Files="$(SourceDir)\Portable.Xaml\Assembly\AssemblyInfo.cs"
-            Pattern='AssemblyInformationalVersion(\\s*)[(]&quot;.*&quot;[)]'
-            Replacement='AssemblyInformationalVersion$1(&quot;$(AssemblyInformationalVersion)&quot;)' />
+    <FileUpdate Files="$(BasePath)Directory.Build.props"
+            Pattern='(?&lt;=&lt;Version&gt;)[^&lt;]+'
+            Replacement='$(AssemblyVersion)' />
             
-	</Target>
-	
-	<Target Name="MakeRelease" DependsOnTargets="Clean;_GetVersion">
-		<Exec Command='git diff --quiet HEAD' IgnoreExitCode="true">
-			<Output TaskParameter="ExitCode" PropertyName="HasChanges" />
-		</Exec>
-		<Error Text="The current working copy is dirty. Commit or stash your changes" Condition="$(HasChanges) != '0'" />
+    <FileUpdate Files="$(BasePath)Directory.Build.props"
+            Pattern='(?&lt;=&lt;InformationalVersion&gt;)[^&lt;]+'
+            Replacement='$(AssemblyInformationalVersion)' />
 
-		<IncrementVersion Version="$(CurrentVersion)" RemovePrerelease="true">
-			<Output TaskParameter="AssemblyVersion" PropertyName="AssemblyVersion" />
-			<Output TaskParameter="AssemblyInformationalVersion" PropertyName="AssemblyInformationalVersion" />
-		</IncrementVersion>
-		
-	    <MSBuild Projects="$(MSBuildProjectFile)" Targets="UpdateVersion" Properties="BuildVersion=$(AssemblyInformationalVersion)" />
-		<PropertyGroup>
-			<Branch>release/$(AssemblyInformationalVersion)</Branch>
-			<NewVersion>$(AssemblyInformationalVersion)</NewVersion>
-			<NewDevelopVersion>$(AssemblyInformationalVersion)-alpha</NewDevelopVersion>
-		</PropertyGroup>
-		<!-- Would be nice to use git flow here, but not usually installed -->
-		<Exec Command='git checkout develop' />
-		<Exec Command='git checkout -b "$(Branch)"' />
-		<Exec Command='git add -u' />
-		<Exec Command='git commit -m "Updating to $(NewVersion)"' />
-		
-		<!-- update develop -->
-		<Exec Command='git checkout develop' />
-		<Exec Command='git merge --no-ff "$(Branch)"' />
-		
-		<!-- update master -->
-		<Exec Command='git checkout master' />
-		<Exec Command='git merge --no-ff "$(Branch)"' IgnoreExitCode="true">
-			<Output TaskParameter="ExitCode" PropertyName="MergeError" />
-		</Exec>
-		<Warning Text="Merge errors, using develop version.  Check merge result in master." Condition="$(MergeError) != '0'" />
-		<Exec Command='git reset --hard' Condition="$(MergeError) != '0'" />
-		 <!-- dangerous! using develop if any conflicts. -->
-		<Exec Command='git merge --no-ff --strategy-option theirs "$(Branch)"' Condition="$(MergeError) != '0'" />
+  </Target>
 
-		<!-- tag version and delete release branch -->
-		<Exec Command='git tag "$(NewVersion)"' />
-		<Exec Command='git branch -d "$(Branch)"' />
-
-		<!-- update develop version -->
-		<Exec Command='git checkout develop' />
-		<MSBuild Projects="$(MSBuildProjectFile)" Targets="UpdateVersion" Properties="BuildVersion=$(NewDevelopVersion);BuildIncrement=0.1.0.0" />
-		<Exec Command='git add -u' />
-		<Exec Command='git commit -m "Updating to $(AssemblyInformationalVersion)"' />
-		
-		<!-- checkout master and build packages -->
-		<Exec Command='git checkout master' />
-		<MSBuild Projects="$(MSBuildProjectFile)" Targets="Package" />
-	</Target>
-	
 </Project>

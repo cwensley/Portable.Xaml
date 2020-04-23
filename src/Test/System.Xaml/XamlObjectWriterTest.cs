@@ -870,10 +870,14 @@ namespace MonoTests.Portable.Xaml
 
 		// common use case based tests (to other readers/writers).
 
-		XamlReader GetReader(string filename)
+		XamlReader GetReader(string filename, XamlXmlReaderSettings settings = null)
 		{
 			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
-			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)));
+			var xmlReader = XmlReader.Create(new StringReader(xml));
+			if (settings == null)
+				return new XamlXmlReader(xmlReader);
+			else
+				return new XamlXmlReader(xmlReader, settings);
 		}
 
 		[Test]
@@ -2199,10 +2203,44 @@ namespace MonoTests.Portable.Xaml
 				Assert.AreEqual("hello world", des.NewlineConvertedToSpaces);
 				Assert.AreEqual("hello world", des.ConsecutiveSpaces);
 				Assert.AreEqual("hello world", des.SpacesAroundTags);
+				Assert.AreEqual("  hello world\t", des.Preserve);
+				Assert.AreEqual("hello world", des.Default);
 				Assert.AreEqual("hello world", des.Child.Content);
+			}
+		}
 
-				// TODO: xml:space="preserve" not yet implemented
-				// Assert.AreEqual("  hello world\t", des.Preserve);
+		[Test]
+		public void Whitespace_ShouldBeCorrectlyHandledWithSpacePreserve()
+		{
+			using (var xr = GetReader("Whitespace.xml", new XamlXmlReaderSettings { XmlSpacePreserve = true }))
+			{
+				var des = (Whitespace)XamlServices.Load(xr);
+				Assert.AreEqual("hello\tworld", des.TabConvertedToSpaces);
+				Assert.AreEqual("hello\t\n  world", des.NewlineConvertedToSpaces);
+				Assert.AreEqual("hello     \tworld", des.ConsecutiveSpaces);
+				Assert.AreEqual("  \n    hello world  \n  ", des.SpacesAroundTags);
+				Assert.AreEqual("  hello world\t", des.Preserve);
+				Assert.AreEqual("hello world", des.Default);
+				Assert.AreEqual("\n    hello world\n  ", des.Child.Content);
+			}
+		}
+
+		[Test]
+		public void Whitespace_ShouldUseXmlPreserveFromParentElement()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("Not supported in System.Xaml");
+
+			using (var xr = GetReader("Whitespace_FromParent.xml"))
+			{
+				var des = (Whitespace)XamlServices.Load(xr);
+				Assert.AreEqual("hello world", des.TabConvertedToSpaces);
+				Assert.AreEqual("hello world", des.NewlineConvertedToSpaces);
+				Assert.AreEqual("hello world", des.ConsecutiveSpaces);
+				Assert.AreEqual("hello world", des.SpacesAroundTags);
+				Assert.AreEqual("  hello world\t", des.Preserve);
+				Assert.AreEqual("hello world", des.Default);
+				Assert.AreEqual("\n    hello world\n  ", des.Child.Content);
 			}
 		}
 

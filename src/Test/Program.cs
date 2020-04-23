@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework.Internal;
 using System.Reflection;
 using NUnit.Framework.Api;
@@ -12,6 +12,12 @@ namespace Portable.Xaml_tests_core2
 	public class TestListener : ITestListener
 	{
 		public Action<string> Log { get; set; }
+
+		public void SendMessage(TestMessage message)
+		{
+			Log(message.Message);
+		}
+
 		public void TestFinished(ITestResult result)
 		{
 			if (!result.HasChildren)

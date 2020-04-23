@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>netcoreapp2.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
 		<AssemblyName>Portable.Xaml_test_core</AssemblyName>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -12,10 +12,8 @@
 		<DefineConstants>TRACE;NETSTANDARD;PCL;CORE;DEBUG;NETCOREAPP2_0</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>
-		</DebugType>
 		<OutputPath>..\..\artifacts\test\Release\</OutputPath>
-		<DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;NETSTANDARD;PCL;CORE;</DefineConstants>
+		<DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;NETSTANDARD;PCL;CORE</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="MainTestPage.*" />
@@ -28,10 +26,13 @@
 		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="NUnit" Version="3.9.0" />
-	  <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+	  <PackageReference Include="NUnit" Version="3.12.0" />
+	  <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard2.0.csproj" />
+	  <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
 	</ItemGroup>
 </Project>

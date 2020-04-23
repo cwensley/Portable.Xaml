@@ -2,12 +2,12 @@ version: 0.25.0-alpha.{build}
 branches:
   only:
   - develop
-image: Visual Studio 2017
+image: Visual Studio 2019
 build_script:
 - cmd: >-
     cd build
 
-    msbuild /t:Package /p:BuildVersion=%APPVEYOR_BUILD_VERSION% Build.proj
+    msbuild /t:Package /v:Minimal /p:BuildVersion=%APPVEYOR_BUILD_VERSION% Build.proj
 test:
   assemblies:
     only:
@@ -20,6 +20,7 @@ test:
     - NotWorking
 artifacts:
 - path: artifacts\nupkg\Release\*.nupkg
+- path: artifacts\nupkg\Release\*.snupkg
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/071013049c800dc84535
