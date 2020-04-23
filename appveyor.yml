@@ -19,8 +19,8 @@ test:
     except:
     - NotWorking
 artifacts:
-- path: artifacts\nupkg\Release\*.nupkg
-- path: artifacts\nupkg\Release\*.snupkg
+- path: artifacts\nuget\Release\*.nupkg
+- path: artifacts\nuget\Release\*.snupkg
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/071013049c800dc84535
