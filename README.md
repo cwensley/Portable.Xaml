@@ -10,7 +10,8 @@ This is intended to be used to read and write XAML on desktop, mobile, and .NET 
 Portable.Xaml currently supports the following profiles:
 
 - .NET Standard 1.0 - For .NET 4.5
-- .NET Standard 1.3 - For .NET 4.6, .NET Core, UWP, Xamarin, etc.
+- .NET Standard 1.3 - For .NET 4.6
+- .NET Standard 2.0 - For mono, .NET Core, UWP, Xamarin, etc.
 
 Other profiles can be contributed if desired, but these should support the widest range of platforms.
 
@@ -45,21 +46,27 @@ What about performance you ask? Portable.Xaml's performance has been drastically
 Here's some results using [BenchmarkDotNet](http://benchmarkdotnet.org):
 
 ### Load
-|              Method |       Mean |     StdDev |    Op/s | Scaled |    Gen 0 |  Allocated |
-|-------------------- |-----------:|-----------:|--------:|-------:|---------:|-----------:|
-|        PortableXaml |   569.8 us |  16.294 us | 1,754.9 |   1.00 |  11.7188 |   50.56 KB |
-|          SystemXaml | 1,325.2 us |  11.485 us |   754.6 |   2.33 |  35.1563 |  151.53 KB |
-| PortableXamlNoCache | 1,409.3 us |   7.649 us |   709.6 |   2.48 |  25.3906 |  106.38 KB |
-|   SystemXamlNoCache | 1,892.2 us |  28.304 us |   528.5 |   3.32 |  44.9219 |  184.67 KB |
-|   OmniXamlBenchmark | 8,095.5 us | 310.062 us |   123.5 |  14.22 | 406.2500 | 1689.29 KB |
-      
+|              Method |       Runtime |       Mean |       Error |   StdDev |    Op/s | Ratio | RatioSD | Rank |   Gen 0 |   Gen 1 |  Gen 2 | Allocated |
+|-------------------- |-------------- |-----------:|------------:|---------:|--------:|------:|--------:|-----:|--------:|--------:|-------:|----------:|
+|        PortableXaml |      .NET 4.8 |   614.6 us |   323.19 us | 17.72 us | 1,627.1 |  1.00 |    0.00 |    1 | 17.5781 |  0.9766 |      - |  113271 B |
+| PortableXamlNoCache |      .NET 4.8 | 1,694.8 us | 1,785.79 us | 97.89 us |   590.0 |  2.76 |    0.23 |    4 |       - |       - |      - |  254008 B |
+|          SystemXaml |      .NET 4.8 |   785.1 us |    99.78 us |  5.47 us | 1,273.7 |  1.28 |    0.04 |    2 | 40.0391 |  2.9297 |      - |  257822 B |
+|   SystemXamlNoCache |      .NET 4.8 | 1,127.7 us |   187.94 us | 10.30 us |   886.7 |  1.84 |    0.05 |    3 | 50.7813 | 25.3906 | 1.9531 |  321342 B |
+|                     |               |            |             |          |         |       |         |      |         |         |        |           |
+|        PortableXaml | .NET Core 3.1 |   471.7 us |    17.33 us |  0.95 us | 2,120.0 |  1.00 |    0.00 |    1 | 12.6953 |  0.9766 |      - |  106952 B |
+| PortableXamlNoCache | .NET Core 3.1 | 1,011.9 us |   157.52 us |  8.63 us |   988.2 |  2.15 |    0.02 |    2 | 23.4375 | 11.7188 |      - |  201949 B |
+
+
 ### Save
-|              Method |       Mean |    StdDev |    Op/s | Scaled |   Gen 0 | Allocated |
-|-------------------- |-----------:|----------:|--------:|-------:|--------:|----------:|
-|        PortableXaml |   481.8 us |  2.805 us | 2,075.4 |   1.00 | 26.8555 |  110.4 KB |
-|          SystemXaml |   809.2 us | 12.997 us | 1,235.8 |   1.68 | 28.3203 |  117.2 KB |
-| PortableXamlNoCache | 1,060.2 us | 34.809 us |   943.3 |   2.20 | 33.2031 | 138.91 KB |
-|   SystemXamlNoCache | 1,151.5 us | 18.052 us |   868.5 |   2.39 | 33.2031 | 139.17 KB |
+|              Method |       Runtime |     Mean |     Error |   StdDev |    Op/s | Ratio | RatioSD | Rank |   Gen 0 |   Gen 1 |  Gen 2 | Allocated |
+|-------------------- |-------------- |---------:|----------:|---------:|--------:|------:|--------:|-----:|--------:|--------:|-------:|----------:|
+|        PortableXaml |      .NET 4.8 | 380.5 us |  37.76 us |  2.07 us | 2,627.9 |  1.00 |    0.00 |    1 | 30.2734 |  2.4414 |      - |  192242 B |
+| PortableXamlNoCache |      .NET 4.8 | 727.0 us | 228.94 us | 12.55 us | 1,375.5 |  1.91 |    0.04 |    4 | 36.1328 |  0.9766 |      - |  234264 B |
+|          SystemXaml |      .NET 4.8 | 506.5 us |  62.80 us |  3.44 us | 1,974.1 |  1.33 |    0.02 |    2 | 33.2031 |  4.8828 |      - |  214071 B |
+|   SystemXamlNoCache |      .NET 4.8 | 697.6 us | 378.09 us | 20.72 us | 1,433.6 |  1.83 |    0.04 |    3 | 39.0625 | 19.5313 | 1.9531 |  251932 B |
+|                     |               |          |           |          |         |       |         |      |         |         |        |           |
+|        PortableXaml | .NET Core 3.1 | 329.8 us |  23.11 us |  1.27 us | 3,032.0 |  1.00 |    0.00 |    1 | 22.4609 |  1.9531 |      - |  191088 B |
+| PortableXamlNoCache | .NET Core 3.1 | 576.9 us |  46.65 us |  2.56 us | 1,733.5 |  1.75 |    0.01 |    2 | 26.3672 | 12.6953 |      - |  227713 B |
 
 ## License
 
