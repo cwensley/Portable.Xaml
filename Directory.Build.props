@@ -1,12 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<PropertyGroup>
-		<BasePath>$(MSBuildThisFileDirectory)</BasePath>
-		<BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-		<!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
-		<RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<Deterministic>False</Deterministic>
-	</PropertyGroup>
-	<Import Condition="Exists('$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props')" Project="$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props" />
+  <PropertyGroup>
+    <BasePath>$(MSBuildThisFileDirectory)</BasePath>
+    <SourceDir Condition="$(SourceDir) == ''">$(BasePath)\src\</SourceDir>
+    <ArtifactsDir>$(BasePath)\artifacts\</ArtifactsDir>
+
+    <BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <PackageOutputPath>$(BasePath)artifacts\nuget\$(Configuration)\</PackageOutputPath>
+    <!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
+    <RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>False</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>0.25.0.0</Version>
+    <InformationalVersion>0.25.0-alpha</InformationalVersion>
+    <Company>Mono development team</Company>
+    <Copyright>(c) Various Mono authors</Copyright>
+
+    <PackageVersion>$(InformationalVersion)</PackageVersion>
+    <PackageLicenseFile>Portable.Xaml-LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+
+    <AssemblyVersionMajorMinor>$([System.Version]::Parse($([System.String]::Copy('$(Version)').Replace('.*', ''))).ToString(2))</AssemblyVersionMajorMinor>
+    <DaysSince2000>$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2000-01-01T00:00:00Z'))).TotalDays.ToString('0'))</DaysSince2000>
+    <SecondsOfTodayHalved>$([MSBuild]::Divide($([System.DateTime]::Now.Subtract($([System.DateTime]::Today)).TotalSeconds), 2).ToString('0'))</SecondsOfTodayHalved>
+    <FileVersion>$(AssemblyVersionMajorMinor).$(DaysSince2000).$(SecondsOfTodayHalved)</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(BasePath)LICENSE.txt" PackageCopyToOutput="False" Pack="True" PackagePath="$(PackageLicenseFile)">
+      <Link>Portable.Xaml-LICENSE.txt</Link>
+    </None>
+  </ItemGroup>
+
+  <Import Condition="Exists('$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props')" Project="$(MSBuildThisFileDirectory)..\Portable.Xaml.Common.props" />
 </Project>

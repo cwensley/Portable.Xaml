@@ -1,21 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.SDK">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFrameworks>net461</TargetFrameworks>
-        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    </PropertyGroup>
-    <ItemGroup>
-        <EmbeddedResource Include="LoadSimpleBenchmark.xml"/>
-        <EmbeddedResource Include="LoadComplexBenchmark.xml"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Reference Include="System.Xaml" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Portable.Xaml\Portable.Xaml-netstandard1.3.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.11.3"/>
-        <PackageReference Include="System.Collections.Immutable" Version="1.5.0"/>
-    </ItemGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\artifacts\benchmark\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="LoadSimpleBenchmark.xml" />
+    <EmbeddedResource Include="LoadComplexBenchmark.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
+  </ItemGroup>
 </Project>

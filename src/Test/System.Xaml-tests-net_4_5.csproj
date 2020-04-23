@@ -13,8 +13,6 @@
 		<DefineConstants>TRACE;DEBUG;NET_4_5;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>
-		</DebugType>
 		<OutputPath>..\..\artifacts\test\Release</OutputPath>
 		<DefineConstants>TRACE;NET_4_5;HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER</DefineConstants>
 	</PropertyGroup>
@@ -35,8 +33,11 @@
 		<None Update="XmlFiles\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.9.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
