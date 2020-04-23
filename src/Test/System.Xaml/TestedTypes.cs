@@ -1902,6 +1902,7 @@ namespace MonoTests.Portable.Xaml
 		public string ConsecutiveSpaces { get; set; }
 		public string SpacesAroundTags { get; set; }
 		public string Preserve { get; set; }
+		public string Default { get; set; }
 		public WhitespaceChild Child { get; set; }
 	}
 

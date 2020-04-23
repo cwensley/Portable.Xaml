@@ -6,9 +6,9 @@
   <Whitespace.SpacesAroundTags>  
     hello world  
   </Whitespace.SpacesAroundTags>
-  <Whitespace.Preserve><x:String xml:space="preserve">  hello world	</x:String></Whitespace.Preserve>
-  <Whitespace.Default><x:String xml:space="default">  hello world	</x:String></Whitespace.Default>
-  <WhitespaceChild>
+  <Whitespace.Preserve xml:space="preserve">  hello world	</Whitespace.Preserve>
+  <Whitespace.Default xml:space="default">  hello world	</Whitespace.Default>
+  <WhitespaceChild xml:space="preserve">
     hello world
   </WhitespaceChild>
 </Whitespace>

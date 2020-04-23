@@ -109,7 +109,6 @@ namespace Portable.Xaml
 			throw new NotSupportedException("Cannot load directly from a file with this profile");
 		}
 #else
-		static readonly XmlReaderSettings file_reader_settings = new XmlReaderSettings { CloseInput = true };
 
 		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
@@ -367,6 +366,8 @@ namespace Portable.Xaml
 			}
 		}
 
+		Stack<bool> _preserveWhitespace = new Stack<bool>();
+
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
 		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
@@ -427,7 +428,6 @@ namespace Portable.Xaml
 				yield break;
 			}
 
-
 			yield return Node (XamlNodeType.StartObject, xt);
 
 			// process attribute members (including MarkupExtensions)
@@ -464,10 +464,16 @@ namespace Portable.Xaml
 
 			// process content members
 			if (!r.IsEmptyElement) {
+				if (sti.PreserveWhitespace != null)
+					_preserveWhitespace.Push(sti.PreserveWhitespace.Value);
+
 				r.Read ();
 				foreach (var ni in ReadMembers (parentType, xt))
 					yield return ni;
 				r.ReadEndElement ();
+
+				if (sti.PreserveWhitespace != null)
+					_preserveWhitespace.Pop();
 			}
 			else
 				r.Read (); // consume empty element.
@@ -536,17 +542,17 @@ namespace Portable.Xaml
 			string typeArgNames;
 
 			var members = new List<MemberInfo> ();
-			var atts = ProcessAttributes (r, members, out typeArgNames);
+			var atts = ProcessAttributes (r, members, out typeArgNames, out var preserveWhitespace);
 
 			IList<XamlTypeName> typeArgs = typeArgNames == null ? null : XamlTypeName.ParseList (typeArgNames, xaml_namespace_resolver);
 			var xtn = new XamlTypeName (ns, name, typeArgs);
-			return new StartTagInfo { Name = name, Namespace = ns, TypeName = xtn, Members = members, Attributes = atts};
+			return new StartTagInfo { Name = name, Namespace = ns, TypeName = xtn, Members = members, Attributes = atts, PreserveWhitespace = preserveWhitespace};
 		}
 
 		bool xmlbase_done;
 
 		// returns remaining attributes to be processed
-		List<AttributeInfo> ProcessAttributes(XmlReader r, List<MemberInfo> members, out string typeArgNames)
+		List<AttributeInfo> ProcessAttributes(XmlReader r, List<MemberInfo> members, out string typeArgNames, out bool? preserveWhitespace)
 		{
 			// base (top element)
 			if (!xmlbase_done)
@@ -557,6 +563,7 @@ namespace Portable.Xaml
 					members.Add(new MemberInfo(XamlLanguage.Base, xmlbase, line_info));
 			}
 			typeArgNames = null;
+			preserveWhitespace = null;
 			var atts = new List<AttributeInfo>();
 			var tagNamespace = r.NamespaceURI;
 			if (r.MoveToFirstAttribute())
@@ -575,6 +582,10 @@ namespace Portable.Xaml
 									continue;
 								case "space":
 									members.Add(new MemberInfo(XamlLanguage.Space, r.Value, line_info));
+									if (r.Value == "preserve")
+										preserveWhitespace = true;
+									if (r.Value == "default")
+										preserveWhitespace = false;
 									continue;
 							}
 							break;
@@ -672,16 +683,24 @@ namespace Portable.Xaml
 		string NormalizeWhitespace(
 			string value,
 			bool normalizeStart = true,
-			bool normalizeEnd = true,
-			bool whitespaceSignificant = false)
+			bool normalizeEnd = true)
 		{
-			var sb = new StringBuilder(value.Length);
+			var preserve = _preserveWhitespace.Count > 0 ? _preserveWhitespace.Peek() : settings.XmlSpacePreserve;
+			if (preserve)
+				return value;
+
+			StringBuilder sb = null;
 			bool lastWasWhitesp = false;
 			for (var index = 0; index < value.Length; index++)
 			{
 				var c = value[index];
 				if (c == ' ' || c == '\n' || c == '\t' || c == '\r')
 				{
+					if (sb == null)
+					{
+						sb = new StringBuilder(value.Length);
+						sb.Append(value, 0, index);
+					}
 					if (lastWasWhitesp || (sb.Length == 0 && normalizeStart))
 						continue;
 					lastWasWhitesp = true;
@@ -693,8 +712,11 @@ namespace Portable.Xaml
 					lastWasWhitesp = false;
 				}
 
-				sb.Append(c);
+				sb?.Append(c);
 			}
+
+			if (sb == null)
+				return value;
 
 			if (lastWasWhitesp && normalizeEnd)
 				sb.Length--;
@@ -783,11 +805,30 @@ namespace Portable.Xaml
 			}
 
 			if (!r.IsEmptyElement) {
+				bool popWhitespace = false;
+				if (r.HasAttributes)
+				{
+					var space = r.GetAttribute("space", XamlLanguage.Xml1998Namespace);
+					if (space == "preserve")
+					{
+						_preserveWhitespace.Push(true);
+						popWhitespace = true;
+					}
+					else if (space == "default")
+					{
+						_preserveWhitespace.Push(false);
+						popWhitespace = true;
+					}
+				}
+
 				r.Read ();
 				foreach (var ni in ReadMember (xt, xm))
 					yield return ni;
 				r.MoveToContent ();
 				r.ReadEndElement ();
+
+				if (popWhitespace)
+					_preserveWhitespace.Pop();
 			}
 			else
 				r.Read ();
@@ -1024,6 +1065,7 @@ namespace Portable.Xaml
 		{
 			public string Name;
 			public string Namespace;
+			public bool? PreserveWhitespace;
 			public XamlTypeName TypeName;
 			public List<MemberInfo> Members;
 			public List<AttributeInfo> Attributes;
