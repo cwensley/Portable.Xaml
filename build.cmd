@@ -16,6 +16,6 @@ if not defined VisualStudioVersion (
 :EnvSet
 
 set BUILD_DIR=%~dp0build
-msbuild -t:Package -p:BuildVersion=%1 "%BUILD_DIR%\Build.proj"
+msbuild -t:Package -v:Minimal -p:BuildVersion=%1 "%BUILD_DIR%\Build.proj"
 
 pause

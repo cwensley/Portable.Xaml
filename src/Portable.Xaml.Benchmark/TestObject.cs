@@ -6,12 +6,16 @@ using System.Linq;
 
 [assembly: Portable.Xaml.Markup.XmlnsDefinition ("http://example.com/benchmark", "Portable.Xaml.Benchmark")]
 
+#if NETFRAMEWORK
 [assembly: System.Windows.Markup.XmlnsDefinition ("http://example.com/benchmark", "Portable.Xaml.Benchmark")]
+#endif
 
 namespace Portable.Xaml.Benchmark
 {
 	[Portable.Xaml.Markup.ContentProperty ("Children")]
+#if NETFRAMEWORK
 	[System.Windows.Markup.ContentProperty ("Children")]
+#endif
 	public class TestObject
 	{
 		public string StringProperty { get; set; }

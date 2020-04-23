@@ -5,12 +5,10 @@
     <SourceDir Condition="$(SourceDir) == ''">$(BasePath)\src\</SourceDir>
     <ArtifactsDir>$(BasePath)\artifacts\</ArtifactsDir>
 
-    <BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(OS)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <PackageOutputPath>$(BasePath)artifacts\nuget\$(Configuration)\</PackageOutputPath>
     <!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
     <RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Deterministic>False</Deterministic>
   </PropertyGroup>
 
   <PropertyGroup>

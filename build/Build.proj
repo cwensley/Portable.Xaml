@@ -9,8 +9,8 @@
   <Import Project="Utilities.targets" />
 
   <Target Name="Build" DependsOnTargets="UpdateVersion">
-    <MSBuild Projects="$(SourceDir)Portable.Xaml.sln" Targets="Restore" Properties="Configuration=$(Configuration);Platform=$(Platform);_RestoreNuget=True"/>
-    <MSBuild Projects="$(SourceDir)Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
+    <MSBuild Projects="$(BasePath)Portable.Xaml.sln" Targets="Restore" Properties="Configuration=$(Configuration);Platform=$(Platform);_RestoreNuget=True"/>
+    <MSBuild Projects="$(BasePath)Portable.Xaml.sln" Targets="$(PackageTargets)" Properties="Configuration=$(Configuration);Platform=$(Platform)"/>
   </Target>
 
   <Target Name="Package" DependsOnTargets="Build">
