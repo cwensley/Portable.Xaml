@@ -33,7 +33,7 @@ jobs:
     - name: Get strong name key
       id: get_strong_name
       uses: timheuer/base64-to-file@v1
-      if: github.event_name == 'release' || github.event.name == 'push'
+      if: github.event_name == 'release' || github.event_name == 'push'
       with:
         fileName: 'Portable.Xaml.snk'
         encodedString: ${{ secrets.STRONG_NAME_KEY }}
