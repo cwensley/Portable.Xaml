@@ -1,4 +1,4 @@
-<MyRootClass xmlns="clr-namespace:XamarinBug2927;assembly=Portable.Xaml_test_net_4_0" >
+<MyRootClass xmlns="clr-namespace:XamarinBug2927;assembly=Tests.Portable.Xaml" >
   <MyRootClass.Child>
     <MyChildClass>
       <MyChildClass.Descendant>

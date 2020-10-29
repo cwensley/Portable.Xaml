@@ -1,4 +1,6 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-msbuild /t:Package /v:Minimal /p:BuildVersion=$1 $DIR/build/Build.proj
+dotnet build /v:Minimal /p:BuildVersion=$1 $DIR/Portable.Xaml.sln
+
+dotnet pack /v:Minimal /p:BuildVersion=$1 $DIR/Portable.Xaml.sln

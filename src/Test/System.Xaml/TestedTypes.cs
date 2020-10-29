@@ -35,15 +35,10 @@ using System.Xml.Serialization;
 using System.Windows.Input;
 using NUnit.Framework;
 using sc = System.ComponentModel;
-#if !PCL136
 using System.Collections.Immutable;
-#endif
-
-#if NETSTANDARD || PCL
 using System.ComponentModel;
-#endif
 
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -51,7 +46,6 @@ using Portable.Xaml.Schema;
 
 #else
 using System.Windows.Markup;
-using System.ComponentModel;
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
@@ -66,16 +60,16 @@ using System.Xaml.Schema;
 [assembly: XmlnsPrefix("http://schemas.example.com/test", "test")]
 // bug #3003
 
-[assembly: XmlnsDefinition("urn:mono-test", "MonoTests.Portable.Xaml.NamespaceTest")]
-[assembly: XmlnsDefinition("urn:mono-test2", "MonoTests.Portable.Xaml.NamespaceTest2")]
+[assembly: XmlnsDefinition("urn:mono-test", "Tests.Portable.Xaml.NamespaceTest")]
+[assembly: XmlnsDefinition("urn:mono-test2", "Tests.Portable.Xaml.NamespaceTest2")]
 
 // comment out the following to get mono's System.Xaml to go further in the tests
-[assembly: XmlnsDefinition("urn:bar", "MonoTests.Portable.Xaml.NamespaceTest")]
+[assembly: XmlnsDefinition("urn:bar", "Tests.Portable.Xaml.NamespaceTest")]
 
 [assembly: XmlnsCompatibleWith("urn:foo", "urn:bar")]
 [assembly: XmlnsCompatibleWith("urn:foo2", "urn:bar2")]
 
-namespace MonoTests.Portable.Xaml.NamespaceTest
+namespace Tests.Portable.Xaml.NamespaceTest
 {
 	public class NamespaceTestClass
 	{
@@ -101,9 +95,9 @@ namespace MonoTests.Portable.Xaml.NamespaceTest
 	}
 }
 
-namespace MonoTests.Portable.Xaml.NamespaceTest2
+namespace Tests.Portable.Xaml.NamespaceTest2
 {
-	public class TestClassWithDifferentBaseNamespace : MonoTests.Portable.Xaml.TestClass5WithName
+	public class TestClassWithDifferentBaseNamespace : Tests.Portable.Xaml.TestClass5WithName
 	{
 		public string SomeOtherProperty { get; set; }
 	}
@@ -119,7 +113,7 @@ namespace MonoTests.Portable.Xaml.NamespaceTest2
 	}
 }
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	class MyCommand : ICommand
 	{
@@ -470,7 +464,7 @@ namespace MonoTests.Portable.Xaml
 		} 
 	}
 
-#if PCL
+#if PORTABLE_XAML
 	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
 #endif
 	public class ShouldSerializeInvisibleTest
@@ -1026,9 +1020,7 @@ namespace MonoTests.Portable.Xaml
 	{
 		public NamedItem2 Other { get; set; }
 
-#if !PCL136
 		public ImmutableArray<NamedItem3> ImmutableReferences { get; set; }
-#endif
 	}
 
 	[TypeConverter(typeof(TestValueConverter))]
@@ -1721,7 +1713,7 @@ namespace MonoTests.Portable.Xaml
 	[ContentProperty("Child")]
 	public class DeferredLoadingContainerMemberStringType
 	{
-		[XamlDeferLoad("MonoTests.Portable.Xaml.TestDeferredLoader," + Compat.TestAssemblyName, "MonoTests.Portable.Xaml.DeferredLoadingChild," + Compat.TestAssemblyName)]
+		[XamlDeferLoad("Tests.Portable.Xaml.TestDeferredLoader," + Compat.TestAssemblyName, "Tests.Portable.Xaml.DeferredLoadingChild," + Compat.TestAssemblyName)]
 		public DeferredLoadingChild Child { get; set; }
 	}
 
@@ -1850,8 +1842,6 @@ namespace MonoTests.Portable.Xaml
 		}
 	}
 
-#if !PCL136
-
 	public class ImmutableCollectionContainer
 	{
 		public ImmutableArray<ImmutableCollectionItem> ImmutableArray { get; set; }
@@ -1863,8 +1853,6 @@ namespace MonoTests.Portable.Xaml
 		public ImmutableDictionary<string, ImmutableCollectionItem> ImmutableDictionary { get; set; }
 		public ImmutableSortedDictionary<string, ImmutableCollectionItem> ImmutableSortedDictionary { get; set; }
 	}
-
-#endif
 
 	public class NumericValues
 	{

@@ -27,7 +27,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -39,7 +39,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml.Schema
+namespace Tests.Portable.Xaml.Schema
 {
 	[TestFixture]
 	public class XamlTypeNameTest
@@ -146,7 +146,7 @@ namespace MonoTests.Portable.Xaml.Schema
 		[Test]
 		public void ToStringTypeArgumentsNullEntry ()
 		{
-			#if PCL
+			#if PORTABLE_XAML
 			Assert.Throws<ArgumentNullException> (() => {
 			#else
 			Assert.Throws<NullReferenceException> (() => {

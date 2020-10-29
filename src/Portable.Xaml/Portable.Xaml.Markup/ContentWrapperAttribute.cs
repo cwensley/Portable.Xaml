@@ -35,7 +35,7 @@ namespace Portable.Xaml.Markup
 		
 		public Type ContentWrapper { get; private set; }
 
-#if !__MOBILE__ && !PCL
+#if !NETSTANDARD1_0
 		public override Object TypeId {
 			get { return this; }
 		}

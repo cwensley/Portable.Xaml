@@ -1,4 +1,4 @@
-<ArgumentMultipleTypes xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ArgumentMultipleTypes xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Arguments>
     <x:String>foo</x:String>
   </x:Arguments>

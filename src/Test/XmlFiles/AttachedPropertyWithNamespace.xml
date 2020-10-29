@@ -1,6 +1,6 @@
 <AttachedWrapper ns:Attachable.Foo="x" 
-				 xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0"
-				 xmlns:ns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0">
+				 xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"
+				 xmlns:ns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml">
   <AttachedWrapper.Value>
     <Attached ns:Attachable.Foo="y" />
   </AttachedWrapper.Value>

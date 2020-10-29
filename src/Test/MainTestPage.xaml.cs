@@ -23,7 +23,7 @@
 using System.Reflection;
 using NUnit.Runner.Services;
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
     public sealed partial class MainPage
     {

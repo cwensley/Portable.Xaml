@@ -214,7 +214,6 @@ namespace Portable.Xaml
 
 		public string PreferredXamlNamespace => ns.HasValue ? ns.Value : ns.Set(DeclaringType?.PreferredXamlNamespace);
 
-#if !PCL || NETSTANDARD
 		public DesignerSerializationVisibility SerializationVisibility
 		{
 			get
@@ -224,7 +223,6 @@ namespace Portable.Xaml
 				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
 			}
 		}
-#endif
 
 		internal bool ShouldSerialize(object instance)
 		{
@@ -259,9 +257,7 @@ namespace Portable.Xaml
 		bool LookupShouldSerialize()
 		{
 			bool shouldSerialize = true;
-#if !PCL || NETSTANDARD
 			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
-#endif
 			return shouldSerialize;
 		}
 

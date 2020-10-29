@@ -1,5 +1,5 @@
-<TestClassWithDifferentBaseNamespace Bar="TheBar" SomeOtherProperty="OtherValue" TheName="MyName" xmlns="urn:mono-test2" xmlns:mpx="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5">
+<TestClassWithDifferentBaseNamespace Bar="TheBar" SomeOtherProperty="OtherValue" TheName="MyName" xmlns="urn:mono-test2" xmlns:tpx="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml">
   <TestClassWithDifferentBaseNamespace.Other>
-    <mpx:TestClass5WithName Bar="TheBar2" />
+    <tpx:TestClass5WithName Bar="TheBar2" />
   </TestClassWithDifferentBaseNamespace.Other>
 </TestClassWithDifferentBaseNamespace>

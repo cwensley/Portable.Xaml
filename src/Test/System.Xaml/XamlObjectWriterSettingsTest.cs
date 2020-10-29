@@ -26,7 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -38,7 +38,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectWriterSettingsTest
@@ -71,7 +71,7 @@ namespace MonoTests.Portable.Xaml
 			
 			var rsettings = new XamlXmlReaderSettings ();
 			
-			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
+			var xml = String.Format (@"<RootObjectInstanceTestClass Property=""Test"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly={0}""></RootObjectInstanceTestClass>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
 			using (var reader = new XamlXmlReader (new StringReader (xml), rsettings)) {
 				var wsettings = new XamlObjectWriterSettings ();
 				wsettings.RootObjectInstance = obj;

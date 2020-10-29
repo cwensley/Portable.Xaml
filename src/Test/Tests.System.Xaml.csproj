@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net45;net48</TargetFrameworks>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <DebugType>portable</DebugType>
+		<DefineConstants>HAS_TYPE_CONVERTER;HAS_CUSTOM_ATTRIBUTE_PROVIDER</DefineConstants>
+    <IsPackable>False</IsPackable>
+	</PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="MainTestPage.*" />
+		<Compile Remove="UnitTestApp.*" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="MainTestPage.*" />
+		<None Remove="UnitTestApp.*" />
+		<None Remove="*.appxmanifest" />
+		<None Remove="XmlFiles\**" />
+		<EmbeddedResource Include="XmlFiles\*.*" />
+	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+	<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+  </ItemGroup>
+</Project>

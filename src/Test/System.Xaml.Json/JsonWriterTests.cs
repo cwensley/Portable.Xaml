@@ -1,9 +1,9 @@
-﻿#if PCL
+﻿#if PORTABLE_XAML
 using System;
 using NUnit.Framework;
 using Portable.Xaml.Json;
 
-namespace MonoTests.Portable.Xaml.Json
+namespace Tests.Portable.Xaml.Json
 {
 	[TestFixture]
 	public class JsonWriterTests
@@ -13,7 +13,7 @@ namespace MonoTests.Portable.Xaml.Json
 		{
 			var instance = new TestClass4 { Foo = "bar", Bar = "foo" };
 			var json = XamlJsonServices.Save(instance);
-			var expected = @"{""$ns"":""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0"",""$type"":""TestClass4"",""Bar"":""foo"",""Foo"":""bar""}";
+			var expected = @"{""$ns"":""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"",""$type"":""TestClass4"",""Bar"":""foo"",""Foo"":""bar""}";
 			Assert.AreEqual(expected.UpdateJson(), json);
 		}
 
@@ -22,7 +22,7 @@ namespace MonoTests.Portable.Xaml.Json
 		{
 			var instance = new TestClass4 { Foo = "bar", Bar = null};
 			var json = XamlJsonServices.Save(instance);
-			var expected = @"{""$ns"":""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0"",""$ns:x"":""http://schemas.microsoft.com/winfx/2006/xaml"",""$type"":""TestClass4"",""Bar"":null,""Foo"":""bar""}";
+			var expected = @"{""$ns"":""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"",""$ns:x"":""http://schemas.microsoft.com/winfx/2006/xaml"",""$type"":""TestClass4"",""Bar"":null,""Foo"":""bar""}";
 			Assert.AreEqual(expected.UpdateJson(), json);
 		}
 
@@ -31,7 +31,7 @@ namespace MonoTests.Portable.Xaml.Json
 		{
 			var instance = new ListWrapper { Items = { 1, 2, 5 } };
 			var json = XamlJsonServices.Save(instance);
-			var expected = @"{""$ns"":""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0"",""$ns:x"":""http://schemas.microsoft.com/winfx/2006/xaml"",""$type"":""ListWrapper"",""Items"":[1,2,5]}";
+			var expected = @"{""$ns"":""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"",""$ns:x"":""http://schemas.microsoft.com/winfx/2006/xaml"",""$type"":""ListWrapper"",""Items"":[1,2,5]}";
 			Assert.AreEqual(expected.UpdateJson(), json);
 		}
 	}

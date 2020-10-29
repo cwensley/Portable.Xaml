@@ -29,7 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -43,7 +43,7 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectWriterTest
@@ -725,7 +725,7 @@ namespace MonoTests.Portable.Xaml
 			Attached2 result = null;
 
 			var rsettings = new XamlXmlReaderSettings();
-			using (var reader = new XamlXmlReader(new StringReader(String.Format(@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly={0}""></Attached2>", typeof(AttachedWrapper3).GetTypeInfo().Assembly.GetName().Name)), rsettings))
+			using (var reader = new XamlXmlReader(new StringReader(String.Format(@"<Attached2 AttachedWrapper3.Property=""Test"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly={0}""></Attached2>", typeof(AttachedWrapper3).GetTypeInfo().Assembly.GetName().Name)), rsettings))
 			{
 				var wsettings = new XamlObjectWriterSettings();
 				using (var writer = new XamlObjectWriter(reader.SchemaContext, wsettings))
@@ -749,7 +749,7 @@ namespace MonoTests.Portable.Xaml
 			XamlServices.Transform (new XamlObjectReader (obj), xxw);
 			Console.Error.WriteLine (sw);
 			*/
-			var xml = "<TestClass3 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".UpdateXml();
+			var xml = "<TestClass3 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><TestClass3.Nested><TestClass3 Nested='{x:Null}' /></TestClass3.Nested></TestClass3>".UpdateXml();
 			var settings = new XamlObjectWriterSettings();
 			bool invoked = false;
 			settings.XamlSetValueHandler = (sender, e) =>
@@ -872,7 +872,7 @@ namespace MonoTests.Portable.Xaml
 
 		XamlReader GetReader(string filename, XamlXmlReaderSettings settings = null)
 		{
-			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
+			string xml = Compat.GetTestFileText(filename).UpdateXml();
 			var xmlReader = XmlReader.Create(new StringReader(xml));
 			if (settings == null)
 				return new XamlXmlReader(xmlReader);
@@ -953,7 +953,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_Type2()
 		{
-			var obj = typeof(MonoTests.Portable.Xaml.TestClass1);
+			var obj = typeof(Tests.Portable.Xaml.TestClass1);
 			using (var xr = GetReader("Type2.xml"))
 			{
 				var des = XamlServices.Load(xr);
@@ -1328,7 +1328,7 @@ namespace MonoTests.Portable.Xaml
 			{
 				var des = XamlServices.Load(xr);
 				// StringConverter is used and the resulting value comes from ToString().
-				Assert.AreEqual("MonoTests.Portable.Xaml.MyExtension3", des, "#1");
+				Assert.AreEqual("Tests.Portable.Xaml.MyExtension3", des, "#1");
 			}
 		}
 
@@ -1382,7 +1382,7 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
-#if PCL
+#if PORTABLE_XAML
 		// this test won't compile with System.Xaml because it uses new 3-arg constructor
 		[Test]
 		public void Write_AmbientResourceWrapper()
@@ -1577,7 +1577,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void Write_XmlSerializableWrapper()
 		{
-			var assns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
+			var assns = "clr-namespace:Tests.Portable.Xaml;assembly=" + GetType().GetTypeInfo().Assembly.GetName().Name;
 			using (var xr = GetReader("XmlSerializableWrapper.xml"))
 			{
 				var des = (XmlSerializableWrapper)XamlServices.Load(xr);
@@ -1941,7 +1941,6 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
-#if !PCL136
 		[Test]
 		public void Write_ImmutableTypeWithNames()
 		{
@@ -1963,7 +1962,6 @@ namespace MonoTests.Portable.Xaml
 
 			}
 		}
-#endif
 
 		[Test]
 		[Category(Categories.NotOnSystemXaml)]
@@ -2105,7 +2103,6 @@ namespace MonoTests.Portable.Xaml
 			}
 		}
 
-#if !PCL136
 		[Test]
 		public void Write_ImmutableCollectionContainer()
 		{
@@ -2135,7 +2132,6 @@ namespace MonoTests.Portable.Xaml
 				CollectionAssert.AreEqual(expected, res.ImmutableSortedSet.Select(r => r.Foo), "#7-2");
 			}
 		}
-#endif
 
 		[Test]
 		public void Write_GenericTypeWithClrNamespace ()
@@ -2276,7 +2272,9 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartMember(xt3.GetMember("TestProp1"));
 
 			// This is needed because .NET exception messages depend on the current UI culture, which may not always be English.
+#if !NET45
 			CultureInfo.CurrentUICulture = new CultureInfo("en-us");
+#endif
 
 			var ex = Assert.Throws<XamlObjectWriterException>(() => xw.WriteStartObject(new XamlType("unk", "unknown", null, sctx)));
 			Assert.AreEqual("Cannot create unknown type '{unk}unknown'.", ex.Message);
@@ -2319,7 +2317,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			var xml =
 $@"<TestClass7 
-		xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' 
+		xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml' 
 		xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' />".UpdateXml();
 			
 			XamlSchemaContext context = new XamlSchemaContext();
@@ -2390,7 +2388,7 @@ $@"<TestClass7
 		public void TestIsUsableDuringInitializationWithCollection()
 		{
 			string xml =
-				@"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+				@"<TestClass10 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
 					<TestClass9 Baz='Test1' Bar='42'/>
 					<TestClass9 Baz='Test2'/>
 					<TestClass9/>
@@ -2416,7 +2414,7 @@ $@"<TestClass7
 		public void CollectionShouldNotBeAssigned()
 		{
 			var xml = $@"
-<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+<CollectionAssignnmentTest xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
     <TestClass4/>	
 </CollectionAssignnmentTest>".UpdateXml();
 			var result = (CollectionAssignnmentTest)XamlServices.Parse(xml);
@@ -2429,7 +2427,7 @@ $@"<TestClass7
 		public void CollectionShouldNotBeAssigned2()
 		{
 			var xml = $@"
-<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+<CollectionAssignnmentTest xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
     <TestClass4/>	
     <TestClass4/>	
 </CollectionAssignnmentTest>".UpdateXml();
@@ -2443,7 +2441,7 @@ $@"<TestClass7
 		public void CollectionShouldBeAssigned()
 		{
 			var xml = $@"
-<CollectionAssignnmentTest xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+<CollectionAssignnmentTest xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
 					  	   xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
 						   xmlns:scg='clr-namespace:System.Collections.Generic;assembly=mscorlib'>
 	<scg:List x:TypeArguments='TestClass4'>
@@ -2460,7 +2458,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForNotFoundType()
 		{
-			string xml = @"<TestClass10 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+			string xml = @"<TestClass10 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
     <NotFound/>
 </TestClass10>".UpdateXml();
 			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
@@ -2471,7 +2469,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForNotFoundProperty()
 		{
-			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+			string xml = @"<TestClass9 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
     Baz='baz'
     NotFound='foo'/>".UpdateXml();
 			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
@@ -2482,7 +2480,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForInvalidPropertyValue()
 		{
-			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+			string xml = @"<TestClass9 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
     Baz='baz'
     Bar='foo'/>".UpdateXml();
 			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
@@ -2493,7 +2491,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownWhenSetterThrows()
 		{
-			string xml = @"<SetterThatThrows xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+			string xml = @"<SetterThatThrows xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
     Throw='foo'/>".UpdateXml();
 			var ex = Assert.Throws<XamlObjectWriterException>(() => ParseWithLineInfo(xml));
 			Assert.AreEqual(2, ex.LineNumber);
@@ -2505,7 +2503,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForDuplicateAttribute()
 		{
-			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+			string xml = @"<TestClass9 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
     Baz='foo'
     Baz='bar'/>".UpdateXml();
 			var ex = Assert.Throws<XmlException>(() => ParseWithLineInfo(xml));
@@ -2517,7 +2515,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForDuplicateContent()
 		{
-			string xml = @"<ContentIncludedClass xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'
+			string xml = @"<ContentIncludedClass xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'
 												 xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
 	<x:String>Foo</x:String>
 	<x:String>Bar</x:String>
@@ -2533,7 +2531,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForDuplicateElement()
 		{
-			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'>
+			string xml = @"<TestClass9 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
   <TestClass9.Baz>foo</TestClass9.Baz>
   <TestClass9.Baz>bar</TestClass9.Baz>
 </TestClass9>".UpdateXml();
@@ -2549,7 +2547,7 @@ $@"<TestClass7
 		[Test]
 		public void ExceptionShouldBeThrownForDuplicateAttributeAndElement()
 		{
-			string xml = @"<TestClass9 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' Baz='foo'>
+			string xml = @"<TestClass9 xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml' Baz='foo'>
   <TestClass9.Baz>foo</TestClass9.Baz>
 </TestClass9>".UpdateXml();
 			var ex = Assert.Throws<XamlDuplicateMemberException>(() => ParseWithLineInfo(xml));

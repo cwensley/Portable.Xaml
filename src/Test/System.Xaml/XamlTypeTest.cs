@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -43,7 +43,7 @@ using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 using System.ComponentModel;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	// FIXME: enable DeferringLoader tests.
 	[TestFixture]
@@ -494,7 +494,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsFalse (t.IsNameValid, "#2"); // see #4
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("XamlTypeTest+TestClass3", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:Tests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (TestClass3), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -533,7 +533,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (t.IsNameValid, "#2");
 			Assert.IsFalse (t.IsUnknown, "#3");
 			Assert.AreEqual ("ArgumentAttributed", t.Name, "#4");
-			Assert.AreEqual ("clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
+			Assert.AreEqual ("clr-namespace:Tests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name, t.PreferredXamlNamespace, "#5");
 			Assert.IsNull (t.TypeArguments, "#6");
 			Assert.AreEqual (typeof (ArgumentAttributed), t.UnderlyingType, "#7");
 			Assert.IsTrue (t.ConstructionRequiresArguments, "#8");
@@ -931,7 +931,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsNull(xt.ValueSerializer, "#3");
 #if HAS_TYPE_CONVERTER
 			Assert.IsNotInstanceOf<System.ComponentModel.DateTimeConverter>(xt.TypeConverter.ConverterInstance, "#4");
-#if PCL
+#if PORTABLE_XAML
 			Assert.IsInstanceOf(typeof(global::Portable.Xaml.XamlSchemaContext).Assembly.GetType("Portable.Xaml.ComponentModel.PortableXamlDateTimeConverter"), xt.TypeConverter.ConverterInstance, "#4");
 #endif
 #endif

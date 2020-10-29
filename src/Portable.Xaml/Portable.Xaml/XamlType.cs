@@ -1049,7 +1049,6 @@ namespace Portable.Xaml
 			return null;
 		}
 
-#if !PCL || NETSTANDARD
 		/// <summary>
 		/// Visability object during serialization. This property lookup attribute <see cref="System.ComponentModel.DesignerSerializationVisibilityAttribute"/>
 		/// </summary>
@@ -1063,7 +1062,6 @@ namespace Portable.Xaml
 				return a != null ? a.Visibility : DesignerSerializationVisibility.Visible;
 			}
 		}
-#endif
 		
 		/// <summary>
 		/// Check instance can it serialize using <see cref="LookupShouldSerialize"/> and check the ShouldSerialize method in underlaing class 
@@ -1116,9 +1114,7 @@ namespace Portable.Xaml
 		bool LookupShouldSerialize()
 		{
 			bool shouldSerialize = true;
-#if !PCL || NETSTANDARD
 			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
-#endif
 			return shouldSerialize;
 		}
 		

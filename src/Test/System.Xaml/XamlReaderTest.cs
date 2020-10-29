@@ -29,7 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
@@ -41,7 +41,7 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public partial class XamlReaderTest
@@ -49,7 +49,7 @@ namespace MonoTests.Portable.Xaml
 		
 		XamlReader GetReader(string filename)
 		{
-			string xml = File.ReadAllText(Compat.GetTestFile(filename)).UpdateXml();
+			string xml = Compat.GetTestFileText(filename).UpdateXml();
 			return new XamlXmlReader(XmlReader.Create(new StringReader(xml)), new XamlXmlReaderSettings { ProvideLineInfo = true });
 		}
 		

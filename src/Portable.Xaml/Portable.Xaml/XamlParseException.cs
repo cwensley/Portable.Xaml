@@ -50,7 +50,7 @@ namespace Portable.Xaml
 		{
 		}
 
-		#if !PCL
+		#if HAS_SERIALIZATION_INFO
 		protected XamlParseException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{

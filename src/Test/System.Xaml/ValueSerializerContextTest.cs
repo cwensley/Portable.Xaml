@@ -28,11 +28,11 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using NUnit.Framework;
-using MonoTests.Portable.Xaml;
+using Tests.Portable.Xaml;
 using System.Globalization;
 using System.ComponentModel;
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -44,7 +44,7 @@ using System.Xaml.Schema;
 #endif
 
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class ValueSerializerContextTest

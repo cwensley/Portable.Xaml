@@ -37,9 +37,7 @@ namespace Portable.Xaml
 			q = new XamlNodeQueue (r.SchemaContext) { LineInfoProvider = r as IXamlLineInfo };
 		}
 
-		#if !PCL136
 		Task thread;
-		#endif
 		readonly XamlReader r;
 		XamlNodeQueue q;
 		bool read_all_done, do_work = true;
@@ -108,13 +106,9 @@ namespace Portable.Xaml
 
 		public void StartThread (string threadName)
 		{
-			#if PCL136
-			ThreadPool.QueueUserWorkItem(state =>
-			#else
 			if (thread != null)
 				throw new InvalidOperationException ("Thread has already started");
 			thread = Task.Run (() =>
-			#endif
 			{
 				try {
 					while (do_work && r.Read ()) {

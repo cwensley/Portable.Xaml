@@ -7,7 +7,7 @@
     <ProjectGuid>{1B4909D0-ECFB-4E32-8C02-B164DB1D64C6}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MonoTests.Portable.Xaml</RootNamespace>
+    <RootNamespace>Tests.Portable.Xaml</RootNamespace>
     <AssemblyName>Portable.Xaml_test_uwp</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>

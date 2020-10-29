@@ -5,14 +5,14 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using NUnit.Framework;
-#if !NET_4_5
+#if PORTABLE_XAML
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 #else
 using System.Xaml;
 using System.Xaml.Schema;
 #endif
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
     public class XamlCompatibilityTests
@@ -24,7 +24,7 @@ namespace MonoTests.Portable.Xaml
 	    }
 
 
-#if !NET_4_5
+#if PORTABLE_XAML
 		[Test]
 	    public void CheckIgnorable()
 		{

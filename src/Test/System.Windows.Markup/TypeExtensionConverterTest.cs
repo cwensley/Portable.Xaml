@@ -25,11 +25,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
-using MonoTests.Portable.Xaml;
+using Tests.Portable.Xaml;
 #if NETSTANDARD
 using System.ComponentModel;
 #endif
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -43,7 +43,7 @@ using System.Xaml.Schema;
 
 using Category = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml.Markup
+namespace Tests.Portable.Xaml.Markup
 {
 #if HAS_TYPE_CONVERTER
 	[TestFixture]

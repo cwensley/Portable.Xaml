@@ -103,13 +103,6 @@ namespace Portable.Xaml
 			Initialize(CreateReader(stream, settings), schemaContext, settings);
 		}
 
-#if PCL136
-		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
-		{
-			throw new NotSupportedException("Cannot load directly from a file with this profile");
-		}
-#else
-
 		public XamlXmlReader(string fileName, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
 			Initialize(CreateReader(fileName, settings), schemaContext, settings);
@@ -119,7 +112,6 @@ namespace Portable.Xaml
 		{
 			return CreateReader(XmlReader.Create(fileName, CreateReaderSettings(settings, closeInput: true)), settings);
 		}
-#endif
 
 		public XamlXmlReader(TextReader textReader, XamlSchemaContext schemaContext, XamlXmlReaderSettings settings)
 		{
