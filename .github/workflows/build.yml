@@ -42,7 +42,7 @@ jobs:
       run: dotnet build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }} "/p:AssemblyOriginatorKeyFile=${{ steps.get_strong_name.outputs.filePath }}"
 
     - name: Pack
-      run: dotnet pack ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+      run: dotnet pack --no-build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
