@@ -29,6 +29,7 @@ using Portable.Xaml.Schema;
 using System.Linq;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace Portable.Xaml
 {
@@ -52,6 +53,7 @@ namespace Portable.Xaml
 			public const int IsDirective = 1 << 11;
 			public const int ShouldSerialize = 1 << 12;
 			public const int RequiresChildNode = 1 << 13;
+			public const int IgnoreDataMember = 1 << 14;
 		}
 		XamlType target_type;
 		MemberInfo underlying_member;
@@ -224,12 +226,26 @@ namespace Portable.Xaml
 			}
 		}
 
-		internal bool ShouldSerialize(object instance)
+		internal bool LookupIgnoreDataMember()
+		{
+			var c = this.CustomAttributeProvider;
+			var a = c == null ? null : c.GetCustomAttribute<IgnoreDataMemberAttribute>(false);
+			return a != null;
+		}
+
+		internal bool ShouldSerialize(object instance, bool useIgnoreDataMemberAttribute)
 		{
 			var shouldSerialize = flags.Get(MemberFlags.ShouldSerialize) ?? flags.Set(MemberFlags.ShouldSerialize, LookupShouldSerialize());
 
 			if (!shouldSerialize)
 				return false;
+
+			if (useIgnoreDataMemberAttribute)
+			{
+				var ignoreDataMember = flags.Get(MemberFlags.IgnoreDataMember) ?? flags.Set(MemberFlags.IgnoreDataMember, LookupIgnoreDataMember());
+				if (ignoreDataMember)
+					return false;
+			}
 
 			if (!shouldSerializeMethod.HasValue)
 				shouldSerializeMethod.Set(LookupShouldSerializeMethod());
@@ -256,9 +272,20 @@ namespace Portable.Xaml
 
 		bool LookupShouldSerialize()
 		{
-			bool shouldSerialize = true;
-			shouldSerialize &= SerializationVisibility != DesignerSerializationVisibility.Hidden;
-			return shouldSerialize;
+			if (SerializationVisibility == DesignerSerializationVisibility.Hidden)
+				return false;
+
+			if (!IsReadPublic)
+				return false;
+			
+			if (!IsWritePublic
+				&& !Type.IsXData
+				&& !Type.IsArray
+				&& !Type.IsCollection
+				&& !Type.IsDictionary)
+				return false;
+
+			return true;
 		}
 
 		public bool IsAttachable => flags.Get(MemberFlags.IsAttachable) ?? false;

@@ -37,6 +37,7 @@ using NUnit.Framework;
 using sc = System.ComponentModel;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 #if PORTABLE_XAML
 using Portable.Xaml.Markup;
@@ -1880,6 +1881,12 @@ namespace Tests.Portable.Xaml
 			ShouldSerializeCalled++;
 			return !string.IsNullOrEmpty(Text) && Text != "bar";
 		}
+	}
+
+	public class TestObjectWithIgnoredMember
+	{
+		[IgnoreDataMember]
+		public string Text { get; set; }
 	}
 
 	[ContentProperty("Child")]

@@ -447,15 +447,7 @@ namespace Portable.Xaml
 					if (args != null && args.Contains(m))
 						continue;
 					// do not return non-public members (of non-collection/xdata). Not sure why .NET filters out them though.
-					if (!m.IsReadPublic
-					    || !m.ShouldSerialize(xobj.Value))
-						continue;
-
-					if (!m.IsWritePublic &&
-						!m.Type.IsXData &&
-						!m.Type.IsArray &&
-						!m.Type.IsCollection &&
-						!m.Type.IsDictionary)
+					if (!m.ShouldSerialize(xobj.Value, settings.UseIgnoreDataMemberAttribute))
 						continue;
 
 					yield return member.Set(xobj, m);

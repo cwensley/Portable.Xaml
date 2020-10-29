@@ -903,5 +903,26 @@ namespace Tests.Portable.Xaml
 			Assert.IsFalse(xr.Read());
 			Assert.IsTrue(obj.ShouldSerializeCalled > 0);
 		}
+
+		[Test]
+		public void Read_ObjectWithIgnoredMember()
+		{
+			if (!Compat.IsPortableXaml)
+				Assert.Ignore("System.Xaml does not support IgnoreDataMemberAttribute");
+
+#if PORTABLE_XAML
+			var obj = new TestObjectWithIgnoredMember { Text = "bar" };
+			var ctx = new XamlSchemaContext();
+			var xrs = new XamlObjectReaderSettings { UseIgnoreDataMemberAttribute = true  };
+			var xr = new XamlObjectReader(obj, ctx, xrs);
+			ReadNamespace(xr, "", Compat.TestAssemblyNamespace, "ns1");
+
+			ReadObject(xr, ctx.GetXamlType(typeof(TestObjectWithIgnoredMember)), "#1", xt =>
+			{
+				// no members
+			});
+			Assert.IsFalse(xr.Read());
+#endif
+		}
 	}
 }
