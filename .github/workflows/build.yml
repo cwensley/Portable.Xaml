@@ -22,15 +22,24 @@ jobs:
       PlatformBuildParameters: ""
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.403
 
+    - name: Get strong name key
+      id: get_strong_name
+      uses: timheuer/base64-to-file@v1
+      if: github.event_name == 'release' || github.event.name == 'push'
+      with:
+        fileName: 'Portable.Xaml.snk'
+        encodedString: ${{ secrets.STRONG_NAME_KEY }}
+    
     - name: Build
-      run: dotnet build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+      run: dotnet build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }} "/p:AssemblyOriginatorKeyFile=${{ steps.get_strong_name.outputs.filePath }}"
 
     - name: Pack
       run: dotnet pack ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}

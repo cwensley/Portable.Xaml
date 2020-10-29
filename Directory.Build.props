@@ -43,6 +43,11 @@
     <RepositoryUrl>$(PackageProjectUrl).git</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(AssemblyOriginatorKeyFile) != '' AND Exists($(AssemblyOriginatorKeyFile))">
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <DefineConstants>$(DefineConstants);STRONGNAME</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Include="$(BasePath)LICENSE.txt" PackageCopyToOutput="False" Pack="True" PackagePath="$(PackageLicenseFile)">
