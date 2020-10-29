@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ develop ]
   release:
-    type: published
+    types: [ published ]
 
 env:
   BuildVersion: "CI.${{ github.run_id }}"
