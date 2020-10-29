@@ -104,6 +104,19 @@ namespace Portable.Xaml
 			AssemblyName _name;
 			public AssemblyName Name => _name ?? (_name = Assembly.GetName());
 			public Assembly Assembly;
+
+			public IEnumerable<T> TryGetAttributes<T>()
+				where T: System.Attribute
+			{
+				try {
+					return Assembly.GetCustomAttributes<T>();
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine("Error getting attributes for assembly '{0}': {1}", Name, ex);
+					return Enumerable.Empty<T>();
+				}
+			}
 		}
 
 		IList<AssemblyInfo> assembliesInScope;
@@ -334,7 +347,7 @@ namespace Portable.Xaml
 			{
 				prefixes = new Dictionary<string,string>();
 				foreach (var ass in AssembliesInScope)
-					FillPrefixes(ass.Assembly);
+					FillPrefixes(ass);
 			}
 			string ret;
 			return prefixes.TryGetValue(xmlns, out ret) ? ret : "p"; // default
@@ -479,7 +492,7 @@ namespace Portable.Xaml
 			{
 				compat_nss = new Dictionary<string,string>();
 				foreach (var ass in AssembliesInScope)
-					FillCompatibilities(ass.Assembly);
+					FillCompatibilities(ass);
 			}
 			if (compat_nss.TryGetValue(xamlNamespace, out compatibleNamespace))
 				return GetAllXamlNamespaces().Contains(compatibleNamespace);
@@ -512,7 +525,7 @@ namespace Portable.Xaml
 		{
 			try
 			{
-				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes(typeof(XmlnsDefinitionAttribute)))
+				foreach (XmlnsDefinitionAttribute xda in ass.TryGetAttributes<XmlnsDefinitionAttribute>())
 				{
 					List<string> namespaces;
 					if (!xaml_nss.TryGetValue(xda.ClrNamespace, out namespaces))
@@ -529,15 +542,15 @@ namespace Portable.Xaml
 			}
 		}
 
-		void FillPrefixes(Assembly ass)
+		void FillPrefixes(AssemblyInfo ass)
 		{
-			foreach (XmlnsPrefixAttribute xpa in ass.GetCustomAttributes (typeof (XmlnsPrefixAttribute)))
+			foreach (XmlnsPrefixAttribute xpa in ass.TryGetAttributes<XmlnsPrefixAttribute>())
 				prefixes.Add(xpa.XmlNamespace, xpa.Prefix);
 		}
 
-        void FillCompatibilities(Assembly ass)
+        void FillCompatibilities(AssemblyInfo ass)
 		{
-			foreach (XmlnsCompatibleWithAttribute xca in ass.GetCustomAttributes (typeof (XmlnsCompatibleWithAttribute)))
+			foreach (XmlnsCompatibleWithAttribute xca in ass.TryGetAttributes<XmlnsCompatibleWithAttribute>())
 				compat_nss.Add(xca.OldNamespace, xca.NewNamespace);
 		}
 
@@ -546,7 +559,7 @@ namespace Portable.Xaml
 			if (genArgs != null)
 				name += "`" + genArgs.Length;
 			foreach (var ass in AssembliesInScope)
-				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
+				foreach (XmlnsDefinitionAttribute xda in ass.TryGetAttributes<XmlnsDefinitionAttribute>())
 				{
 					if (xamlNamespace != xda.XmlNamespace)
 						continue;
@@ -578,7 +591,7 @@ namespace Portable.Xaml
 		{
 			try
 			{
-				foreach (XmlnsDefinitionAttribute xda in ass.Assembly.GetCustomAttributes (typeof (XmlnsDefinitionAttribute)))
+				foreach (XmlnsDefinitionAttribute xda in ass.TryGetAttributes<XmlnsDefinitionAttribute>())
 				{
 					List<XamlType> l;
 					if (!types.TryGetValue(xda.XmlNamespace, out l))

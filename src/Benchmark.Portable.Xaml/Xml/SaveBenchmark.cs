@@ -42,7 +42,14 @@ namespace Benchmark.Portable.Xaml.Xml
 		{
 			using (var writer = new StringWriter())
 				System.Xaml.XamlServices.Save(writer, Instance);
+
 		}
+#else
+		[Benchmark]
+		public void SystemXaml() => throw new NotImplementedException();
+		
+		[Benchmark]
+		public void SystemXamlNoCache() => throw new NotImplementedException();
 #endif
 	}
 }
