@@ -33,8 +33,22 @@ namespace Portable.Xaml
 	{
 		public bool RequireExplicitContentVisibility { get; set; }
 
+		/// <summary>
+		/// Gets or sets a value indicating that default property values should not be serialized.
+		/// </summary>
+		/// <remarks>
+		/// This will also use the DefaultValueAttribute to determine if the value is default, otherwise it is the default for the type.
+		/// </remarks>
+		/// <value>True to only serialize properties that have non-default values, false to serialize all properties</value>
 		[EnhancedXaml]
 		public bool IgnoreDefaultValues { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating that System.ComponentModel.IgnoreDataMemberAttribute is used to determine if the property should be serialized.
+		/// </summary>
+		/// <value>True to ignore properties with the IgnoreDataMember attribute, false otherwise.</value>
+		[EnhancedXaml]
+		public bool UseIgnoreDataMemberAttribute { get; set; }
 	}
 }
 

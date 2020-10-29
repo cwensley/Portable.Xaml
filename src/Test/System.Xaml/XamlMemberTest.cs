@@ -280,9 +280,18 @@ namespace Tests.Portable.Xaml
 		[Test]
 		public void ShouldNotSerializeIgnoredDataMember()
 		{
+			var t = new XamlType(GetType(), sctx);
+			var members = t.GetAllMembers().ToList();
+			var member = members.FirstOrDefault(r => r.Name == "DummyIgnoredProp");
+			Assert.IsNotNull(member, "#1.1");
+			Assert.AreEqual(System.ComponentModel.DesignerSerializationVisibility.Visible, member.SerializationVisibility, "#1.2");
+			Assert.IsFalse(member.IsReadOnly, "#1.3");
+#if PORTABLE_XAML
+			// is there no way to test ignored properties in System.Xaml?
 			var m = new XamlMember (dummy_ignored_prop, sctx);
-			var b = m.ShouldSerialize(null);
-			Assert.IsFalse(b, "#1");
+			Assert.IsFalse(m.ShouldSerialize(null, true), "#2.1");
+			Assert.IsTrue(m.ShouldSerialize(null, false), "#2.2");
+#endif
 		}
 
 		[Test]
