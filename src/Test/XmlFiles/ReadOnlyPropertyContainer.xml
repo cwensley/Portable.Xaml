@@ -1,1 +1,1 @@
-<ReadOnlyPropertyContainer Foo="x" xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0" />
+<ReadOnlyPropertyContainer Foo="x" xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml" />

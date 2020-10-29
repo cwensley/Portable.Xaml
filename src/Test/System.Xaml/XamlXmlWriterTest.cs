@@ -27,7 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -41,7 +41,7 @@ using System.Xaml.Schema;
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlXmlWriterTest
@@ -595,7 +595,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void ConstructorArguments ()
 		{
-			string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><ArgumentAttributed xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:String>xxx</x:String><x:String>yyy</x:String></x:Arguments></ArgumentAttributed>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
+			string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><ArgumentAttributed xmlns='clr-namespace:Tests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:String>xxx</x:String><x:String>yyy</x:String></x:Arguments></ArgumentAttributed>", GetType ().GetTypeInfo().Assembly.GetName ().Name);
 			Assert.IsFalse (sctx.FullyQualifyAssemblyNamesInClrNamespaces, "premise0");
 			var r = new XamlObjectReader (new ArgumentAttributed ("xxx", "yyy"), sctx);
 			var sw = new StringWriter ();
@@ -614,12 +614,12 @@ namespace MonoTests.Portable.Xaml
 			xw.WriteStartMember (xt.GetMember ("Foo"));
 			xw.WriteValue ("50");
 			xw.Close ();
-			//string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><TestXmlWriterClass1 xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'></TestXmlWriterClass1>",  GetType ().Assembly.GetName ().Name);
+			//string xml = String.Format (@"<?xml version='1.0' encoding='utf-16'?><TestXmlWriterClass1 xmlns='clr-namespace:Tests.Portable.Xaml;assembly={0}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'></TestXmlWriterClass1>",  GetType ().Assembly.GetName ().Name);
 		}
 
 		string ReadXml (string name)
 		{
-			return File.ReadAllText (Compat.GetTestFile(name)).Trim ().UpdateXml ();
+			return Compat.GetTestFileText(name).Trim ().UpdateXml ();
 		}
 
 		[Test]
@@ -1112,7 +1112,13 @@ namespace MonoTests.Portable.Xaml
 				IntValue = int.MaxValue,
 				LongValue = long.MaxValue
 			};
-			Assert.AreEqual(ReadXml("NumericValues_Max.xml").Trim(), XamlServices.Save(obj), "#1");
+			var xml = ReadXml("NumericValues_Max.xml").Trim();
+			
+			// .NET Core writes out floats a wee differently to be more IEEE compliant and roundtrip values.
+			if (Compat.IsNetCore)
+				xml = xml.Replace("\"3.40282347E+38\"", "\"3.4028235E+38\"");
+
+			Assert.AreEqual(xml, XamlServices.Save(obj), "#1");
 		}
 
 		[Test]
@@ -1261,7 +1267,7 @@ namespace MonoTests.Portable.Xaml
 			}
 			else
 			{
-				var xaml = @"<ShouldSerializeInCollectionTest xmlns=""clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5"" xmlns:scg=""clr-namespace:System.Collections.Generic;assembly=mscorlib"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+				var xaml = @"<ShouldSerializeInCollectionTest xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"" xmlns:scg=""clr-namespace:System.Collections.Generic;assembly=mscorlib"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
   <ShouldSerializeInCollectionTest.Collection>
     <scg:List x:TypeArguments=""ShouldSerializeInvisibleTest"" Capacity=""4"">
       <ShouldSerializeInvisibleTest IsVisibleInXml=""True"" Value=""This is visible"" />

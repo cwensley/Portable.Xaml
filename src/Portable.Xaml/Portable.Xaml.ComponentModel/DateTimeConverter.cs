@@ -9,7 +9,7 @@ namespace Portable.Xaml.ComponentModel
 {
 	/*
 	This class is needed to pass the following test:
-	2) MonoTests.Portable.Xaml.XamlXmlWriterTest.Write_NullableDateTime_UtcWithNoMilliseconds
+	2) Tests.Portable.Xaml.XamlXmlWriterTest.Write_NullableDateTime_UtcWithNoMilliseconds
 	Built-in DateTimeConverter from System.ComponentModel seems to be incompatible
 
 	*/

@@ -45,7 +45,7 @@ namespace Portable.Xaml
 		{
 		}
 
-		#if !PCL
+		#if !NETSTANDARD1_0
 		protected XamlObjectReaderException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{

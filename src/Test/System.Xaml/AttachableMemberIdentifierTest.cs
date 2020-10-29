@@ -24,7 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -36,7 +36,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class AttachableMemberIdentifierTest

@@ -5,27 +5,44 @@
     <SourceDir Condition="$(SourceDir) == ''">$(BasePath)\src\</SourceDir>
     <ArtifactsDir>$(BasePath)\artifacts\</ArtifactsDir>
 
-    <BaseIntermediateOutputPath>$(BasePath)artifacts\obj\$(OS)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <PackageOutputPath>$(BasePath)artifacts\nuget\$(Configuration)\</PackageOutputPath>
+    <BaseIntermediateOutputPath>$(ArtifactsDir)obj\$(OS)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+ 		<BaseOutputPath>$(ArtifactsDir)bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <PackageOutputPath>$(ArtifactsDir)nuget\$(Configuration)\</PackageOutputPath>
     <!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
     <RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.25.0.0</Version>
-    <InformationalVersion>0.25.0-alpha</InformationalVersion>
-    <Company>Mono development team</Company>
-    <Copyright>(c) Various Mono authors</Copyright>
+    <DevVersion>0.26.0</DevVersion>
 
-    <PackageVersion>$(InformationalVersion)</PackageVersion>
-    <PackageLicenseFile>Portable.Xaml-LICENSE.txt</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version Condition="$(Version) == ''">$(DevVersion).0</Version>
+
+    <InformationalVersion Condition="$(SetVersion) != ''">$(SetVersion)</InformationalVersion>
+    <!-- set version from tag -->
+    <InformationalVersion Condition="$(InformationalVersion) == '' AND $(BuildBranch.StartsWith('refs/tags/'))">$(BuildBranch.Substring(10))</InformationalVersion>
+    <!-- set version for CI build -->
+    <InformationalVersion Condition="$(InformationalVersion) == '' AND $(BuildVersion) != ''">$(DevVersion)-ci-$([System.DateTime]::Now.ToString('yyyyMMdd')).$(BuildVersion)</InformationalVersion>
+    <!-- set version for development -->
+    <InformationalVersion Condition="$(InformationalVersion) == ''">$(DevVersion)-dev</InformationalVersion>
 
     <AssemblyVersionMajorMinor>$([System.Version]::Parse($([System.String]::Copy('$(Version)').Replace('.*', ''))).ToString(2))</AssemblyVersionMajorMinor>
     <DaysSince2000>$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2000-01-01T00:00:00Z'))).TotalDays.ToString('0'))</DaysSince2000>
     <SecondsOfTodayHalved>$([MSBuild]::Divide($([System.DateTime]::Now.Subtract($([System.DateTime]::Today)).TotalSeconds), 2).ToString('0'))</SecondsOfTodayHalved>
     <FileVersion>$(AssemblyVersionMajorMinor).$(DaysSince2000).$(SecondsOfTodayHalved)</FileVersion>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>Mono development team</Company>
+    <Copyright>(c) Various Mono authors</Copyright>
+
+    <PackageVersion>$(InformationalVersion)</PackageVersion>
+    <PackageLicenseFile>Portable.Xaml-LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/cwensley/Portable.Xaml</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>$(PackageProjectUrl).git</RepositoryUrl>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <None Include="$(BasePath)LICENSE.txt" PackageCopyToOutput="False" Pack="True" PackagePath="$(PackageLicenseFile)">

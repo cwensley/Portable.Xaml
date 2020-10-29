@@ -35,53 +35,15 @@ using System.Security;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-#if !PCL
-using System.Security.Permissions;
-#endif
 
 // General Information about the System.Xaml assembly
 
-
 [assembly: NeutralResourcesLanguage("en-US")]
 [assembly: CLSCompliant(true)]
-//[assembly: ComVisible (false)]
-
-#if !PCL
-
-[assembly: AssemblyCompany (Consts.MonoCompany)]
-[assembly: AssemblyProduct (Consts.MonoProduct)]
-[assembly: AssemblyCopyright (Consts.MonoCopyright)]
-[assembly: AssemblyVersion (Consts.FxVersion)]
-[assembly: SatelliteContractVersion (Consts.FxVersion)]
-[assembly: AssemblyInformationalVersion (Consts.FxFileVersion)]
-[assembly: AssemblyFileVersion (Consts.FxFileVersion)]
-
-[assembly: AssemblyDelaySign (true)]
-
-#if NET_2_1
-[assembly: AssemblyKeyFile ("../silverlight.pub")]
-#else
-[assembly: AssemblyKeyFile ("../ecma.pub")]
-[assembly: AllowPartiallyTrustedCallers]
-[assembly: ComCompatibleVersion (1, 0, 3300, 0)]
-[assembly: SecurityCritical (SecurityCriticalScope.Explicit)]
-#endif
-
-
-#if !MOBILE
-[assembly: TypeForwardedTo (typeof (System.Windows.Markup.ValueSerializerAttribute))]
-#endif
-#endif
 
 // TODO: change tests so they don't use internals.
 #if STRONGNAME
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard10, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard13, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard20, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_core, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
+[assembly:InternalsVisibleTo("Tests.Portable.Xaml, PublicKey=0024000004800000940000000602000000240000525341310004000001000100279450a21d0eae9fa5612b94c99ef198bc03154426a3ecc95738bcc9be40da62fd5cb0a13016d85e1aac3466fc6b8dffbbc1633703fb338d969770df088acf8dee9a1be049bfa1b9f8225c6364eefd89051a6760f786b675c5372409ffa236d89284405b39ed1d2dcdfb10fdb5d637171263e81d9bd3babf6a550217563439b2")]
 #else
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard10")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard13")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_netstandard20")]
-[assembly:InternalsVisibleTo("Portable.Xaml_test_core")]
+[assembly:InternalsVisibleTo("Tests.Portable.Xaml")]
 #endif

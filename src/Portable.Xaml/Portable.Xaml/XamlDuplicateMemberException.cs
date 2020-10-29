@@ -55,7 +55,7 @@ namespace Portable.Xaml
 		public XamlMember DuplicateMember { get; set; }
 		public XamlType ParentType { get; set; }
 
-		#if !PCL
+		#if !NETSTANDARD1_0
 		protected XamlDuplicateMemberException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{

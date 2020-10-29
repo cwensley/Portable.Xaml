@@ -27,7 +27,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using System.IO;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
@@ -37,7 +37,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlSchemaContextTest
@@ -344,7 +344,7 @@ namespace MonoTests.Portable.Xaml
 		[Test]
 		public void PassesNullToGetXamlType_typeArguments_ForNoArguments()
 		{
-			var xml = File.ReadAllText(Compat.GetTestFile("Int32.xml")).UpdateXml();
+			var xml = Compat.GetTestFileText("Int32.xml").UpdateXml();
 			var ctx = new TestGetXamlTypeArgumentsNull();
 			var reader = new XamlXmlReader(new StringReader(xml), ctx);
 			var writer = new XamlObjectWriter(ctx);

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -16,7 +16,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	public class InlinesTest
 	{
@@ -225,7 +225,7 @@ namespace MonoTests.Portable.Xaml
 		{
 			if (!(r is XamlXmlReader))
 				return;
-#if !PCL
+#if !PORTABLE_XAML
 			if (Type.GetType ("Mono.Runtime") == null)
 				return;
 #endif

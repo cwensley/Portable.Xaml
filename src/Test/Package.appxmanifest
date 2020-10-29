@@ -3,7 +3,7 @@
   <Identity Name="89e49d26-a6df-4746-af3f-0a8faa4ad383" Publisher="CN=curti" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="89e49d26-a6df-4746-af3f-0a8faa4ad383" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>Portable.Xaml.Tests.UWP</DisplayName>
+    <DisplayName>Tests.Portable.Xaml.UWP</DisplayName>
     <PublisherDisplayName>curti</PublisherDisplayName>
     <Logo>Assets\NUnitStoreLogo.png</Logo>
   </Properties>

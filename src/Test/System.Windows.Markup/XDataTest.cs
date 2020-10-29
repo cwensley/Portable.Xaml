@@ -28,7 +28,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -42,7 +42,7 @@ using System.Xaml.Schema;
 
 using Category = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml.Markup
+namespace Tests.Portable.Xaml.Markup
 {
 	[TestFixture]
 	public class XDataTest

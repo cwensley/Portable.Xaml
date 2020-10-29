@@ -129,10 +129,8 @@ namespace Portable.Xaml
 
 			var assemblies =
 				GetAppDomainAssemblies()
-#if !PCL136
 				?? GetReferencedAssemblies()
 				?? GetUwpAssemblies()
-#endif
 				?? Enumerable.Empty<Assembly>();
 
 			cachedAssembliesInScope = assemblies.Distinct().ToList();
@@ -169,7 +167,6 @@ namespace Portable.Xaml
 #endif
 		}
 
-#if !PCL136
 		static IEnumerable<Assembly> GetReferencedAssemblies()
 		{
 			try
@@ -283,7 +280,6 @@ namespace Portable.Xaml
 			catch { }
 			return null;
 		}
-#endif
 
 		internal string GetXamlNamespace(string clrNamespace)
 		{
@@ -470,11 +466,7 @@ namespace Portable.Xaml
 			}
 
 			// fallback if not found
-#if PCL136
-			var assembly = Assembly.Load(assemblyName);
-#else
 			var assembly = Assembly.Load(aname);
-#endif
 			assembly_cache[assemblyName] = new AssemblyInfo { Assembly = assembly };
 			return assembly;
 		}
@@ -543,7 +535,7 @@ namespace Portable.Xaml
 				prefixes.Add(xpa.XmlNamespace, xpa.Prefix);
 		}
 
-		void FillCompatibilities(Assembly ass)
+        void FillCompatibilities(Assembly ass)
 		{
 			foreach (XmlnsCompatibleWithAttribute xca in ass.GetCustomAttributes (typeof (XmlnsCompatibleWithAttribute)))
 				compat_nss.Add(xca.OldNamespace, xca.NewNamespace);
@@ -561,11 +553,7 @@ namespace Portable.Xaml
 
 					var assembly = ass.Assembly;
 					if (!string.IsNullOrEmpty(xda.AssemblyName))
-#if PCL136
-						assembly = Assembly.Load (xda.AssemblyName);
-#else
 						assembly = Assembly.Load(new AssemblyName(xda.AssemblyName));
-#endif
 					var n = xda.ClrNamespace + "." + name;
 					var t = assembly.GetType(n);
 					if (t == null && genArgs == null)
@@ -600,11 +588,7 @@ namespace Portable.Xaml
 					}
 					var assembly = ass.Assembly;
 					if (!string.IsNullOrEmpty(xda.AssemblyName))
-#if PCL136
-						assembly = Assembly.Load (xda.AssemblyName);
-#else
 						assembly = Assembly.Load(new AssemblyName(xda.AssemblyName));
-#endif
 					foreach (var t in assembly.GetExportedTypes())
 						if (t.Namespace == xda.ClrNamespace && !t.GetTypeInfo().IsNested)
 							l.Add(GetXamlType(t));

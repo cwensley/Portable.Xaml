@@ -1,0 +1,61 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-debug",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "${workspaceFolder}/Portable.Xaml.sln",
+                "/v:Minimal",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "build-release",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "${workspaceFolder}/Portable.Xaml.sln",
+                "/v:Minimal",
+                "/property:Configuration=Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "run-tests",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "test",
+                "${workspaceFolder}/Portable.Xaml.sln",
+                "/v:Minimal",
+                "/property:Configuration=Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build",
+            "presentation": {
+                "clear": true
+            }
+        }
+    ]
+}

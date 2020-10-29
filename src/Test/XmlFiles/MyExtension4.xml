@@ -1,1 +1,1 @@
-<MyExtension4 xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0">MonoTests.Portable.Xaml.MyExtension4</MyExtension4>
+<MyExtension4 xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml">Tests.Portable.Xaml.MyExtension4</MyExtension4>

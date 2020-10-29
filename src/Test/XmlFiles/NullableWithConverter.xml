@@ -1,1 +1,1 @@
-<NullableWithTypeConverterContainer TestProp="SomeText" xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0" />
+<NullableWithTypeConverterContainer TestProp="SomeText" xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml" />

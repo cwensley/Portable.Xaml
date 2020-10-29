@@ -28,7 +28,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -40,7 +40,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml.Schema
+namespace Tests.Portable.Xaml.Schema
 {
 	[TestFixture]
 	public class XamlTypeInvokerTest

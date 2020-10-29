@@ -1,3 +1,4 @@
+#if FALSE
 using System;
 using NUnit.Framework.Internal;
 using System.Reflection;
@@ -7,7 +8,7 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework;
 using System.Diagnostics;
 
-namespace Portable.Xaml_tests_core2
+namespace Tests.Portable.Xaml
 {
 	public class TestListener : ITestListener
 	{
@@ -67,3 +68,4 @@ namespace Portable.Xaml_tests_core2
 		}
     }
 }
+#endif

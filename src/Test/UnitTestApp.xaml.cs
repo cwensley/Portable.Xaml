@@ -27,7 +27,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.

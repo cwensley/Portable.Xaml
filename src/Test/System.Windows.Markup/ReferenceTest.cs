@@ -27,7 +27,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
@@ -39,7 +39,7 @@ using System.Xaml.Schema;
 
 using Category = NUnit.Framework.CategoryAttribute;
 
-namespace MonoTests.Portable.Xaml.Markup
+namespace Tests.Portable.Xaml.Markup
 {
 	[TestFixture]
 	public class ReferenceTest

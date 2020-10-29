@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Portable.Xaml.Json
 {
@@ -20,7 +21,7 @@ namespace Portable.Xaml.Json
 		{
 		}
 
-#if !PCL
+#if HAS_SERIALIZATION_INFO
 		protected XamlJsonWriterException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{

@@ -73,7 +73,7 @@ namespace Portable.Xaml
 			LinePosition = linePosition;
 		}
 
-#if !PCL
+#if HAS_SERIALIZATION_INFO
 		protected XamlException (SerializationInfo info, StreamingContext context)
 			: base (info, context)
 		{

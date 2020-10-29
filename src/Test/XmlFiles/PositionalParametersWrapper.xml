@@ -1,1 +1,1 @@
-<PositionalParametersWrapper Body="{PositionalParametersClass1 foo, 5}" xmlns="clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0" />
+<PositionalParametersWrapper Body="{PositionalParametersClass1 foo, 5}" xmlns="clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml" />

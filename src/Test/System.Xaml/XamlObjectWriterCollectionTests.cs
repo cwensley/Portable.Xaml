@@ -9,7 +9,7 @@ using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
 using n = NUnit.Framework;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
@@ -21,7 +21,7 @@ using System.Xaml.Schema;
 using System.ComponentModel;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectWriterCollectionTests
@@ -32,7 +32,7 @@ namespace MonoTests.Portable.Xaml
 		[Test] // works on both MS.NET and Portable.Xaml, but no way to make use of type converters
         public void TestCustomCollectionAddOverride ()
 		{
-			var xaml = @"<CollectionParentCustomAddOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentCustomAddOverride>".UpdateXml ();
+			var xaml = @"<CollectionParentCustomAddOverride xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'><OtherItem/></CollectionParentCustomAddOverride>".UpdateXml ();
 			var parent = (CollectionParentCustomAddOverride)XamlServices.Load (new StringReader (xaml));
 
 			Assert.IsNotNull (parent, "#1");
@@ -52,7 +52,7 @@ namespace MonoTests.Portable.Xaml
 			if (!Compat.IsPortableXaml)
 				Assert.Ignore("doesn't work in MS.NET, it does not use type converters for items in a list");
 
-			var xaml = @"<CollectionParentGenericList xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentGenericList>".UpdateXml ();
+			var xaml = @"<CollectionParentGenericList xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'><OtherItem/></CollectionParentGenericList>".UpdateXml ();
 			var parent = (CollectionParentGenericList)XamlServices.Load (new StringReader (xaml));
 
 			Assert.IsNotNull (parent, "#1");
@@ -72,7 +72,7 @@ namespace MonoTests.Portable.Xaml
 			if (!Compat.IsPortableXaml)
 				Assert.Ignore("New in Portable.Xaml, doesn't work in MS.NET, but should");
 
-			var xaml = @"<CollectionParentCustomNoOverride xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0'><OtherItem/></CollectionParentCustomNoOverride>".UpdateXml ();
+			var xaml = @"<CollectionParentCustomNoOverride xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'><OtherItem/></CollectionParentCustomNoOverride>".UpdateXml ();
 			var parent = (CollectionParentCustomNoOverride)XamlServices.Load (new StringReader (xaml));
 
 			Assert.IsNotNull (parent, "#1");

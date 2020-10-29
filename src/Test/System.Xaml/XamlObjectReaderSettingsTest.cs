@@ -25,7 +25,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
-#if PCL
+using System.Diagnostics;
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -37,7 +38,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	public class XamlObjectReaderSettingsTest
@@ -50,7 +51,7 @@ namespace MonoTests.Portable.Xaml
 
 			Assert.IsFalse (s.AllowProtectedMembersOnRoot, "#2");
 			Assert.IsFalse (s.IgnoreUidsOnPropertyElements, "#3");
-			Assert.IsFalse (s.ProvideLineInfo, "#4");
+			Assert.AreEqual (Debugger.IsAttached, s.ProvideLineInfo, "#4");
 			Assert.IsFalse (s.ValuesMustBeString, "#5");
 			Assert.IsNull (s.BaseUri, "#6");
 			Assert.IsNull (s.LocalAssembly, "#7");

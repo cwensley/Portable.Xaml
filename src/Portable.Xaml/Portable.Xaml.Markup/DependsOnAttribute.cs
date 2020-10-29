@@ -35,7 +35,7 @@ namespace Portable.Xaml.Markup
 		
 		public string Name { get; private set; }
 
-#if !__MOBILE__ && !PCL
+#if !NETSTANDARD1_0
 		// really? I doubt it should be overriden.
 		public override Object TypeId {
 			get { return this; }

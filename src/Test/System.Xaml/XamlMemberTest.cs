@@ -27,10 +27,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using NUnit.Framework;
-using MonoTests.Portable.Xaml.NamespaceTest;
+using Tests.Portable.Xaml.NamespaceTest;
 
 
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
 using Portable.Xaml;
@@ -42,7 +42,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	[TestFixture]
 	// FIXME: uncomment TypeConverter tests
@@ -192,7 +192,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("Event3", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			Assert.AreEqual ($"clr-namespace:MonoTests.Portable.Xaml;assembly={Compat.TestAssemblyName}", m.PreferredXamlNamespace, "#9");
+			Assert.AreEqual ($"clr-namespace:Tests.Portable.Xaml;assembly={Compat.TestAssemblyName}", m.PreferredXamlNamespace, "#9");
 			Assert.AreEqual (new XamlType (typeof (EventStore), sctx), m.TargetType, "#10");
 			Assert.IsNotNull (m.Type, "#11");
 			Assert.AreEqual (typeof (EventHandler<CustomEventArgs>), m.Type.UnderlyingType, "#11-2");
@@ -287,7 +287,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyAddMethod", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
+			var ns = "clr-namespace:Tests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
@@ -322,7 +322,7 @@ namespace MonoTests.Portable.Xaml
 			Assert.IsTrue (m.IsWritePublic, "#6");
 			Assert.AreEqual ("DummyProp", m.Name, "#7");
 			Assert.IsTrue (m.IsNameValid, "#8");
-			var ns = "clr-namespace:MonoTests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
+			var ns = "clr-namespace:Tests.Portable.Xaml;assembly=" + GetType ().GetTypeInfo().Assembly.GetName ().Name;
 			Assert.AreEqual (ns, m.PreferredXamlNamespace, "#9");
 			// since it is unknown.
 			Assert.AreEqual (new XamlType (typeof (object), sctx), m.TargetType, "#10");
@@ -434,7 +434,7 @@ namespace MonoTests.Portable.Xaml
 
 			var namespaces = member.GetXamlNamespaces();
 			Assert.AreEqual(1, namespaces.Count, "#1");
-			Assert.AreEqual("clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_5".UpdateXml(), namespaces[0], "#2");
+			Assert.AreEqual("clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml".UpdateXml(), namespaces[0], "#2");
 		}
 
 		[Test]
@@ -444,7 +444,7 @@ namespace MonoTests.Portable.Xaml
 
 			var namespaces = member.GetXamlNamespaces().OrderBy(r => r).ToList();
 			Assert.AreEqual(3, namespaces.Count, "#1");
-			Assert.AreEqual("clr-namespace:MonoTests.Portable.Xaml.NamespaceTest;assembly=Portable.Xaml_test_net_4_5".UpdateXml(), namespaces[0], "#2");
+			Assert.AreEqual("clr-namespace:Tests.Portable.Xaml.NamespaceTest;assembly=Tests.Portable.Xaml".UpdateXml(), namespaces[0], "#2");
 			Assert.AreEqual("urn:bar", namespaces[1], "#3");
 			Assert.AreEqual("urn:mono-test", namespaces[2], "#4");
 		}

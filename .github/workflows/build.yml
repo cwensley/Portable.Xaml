@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  release:
+    type: published
+
+env:
+  BuildVersion: "CI.${{ github.run_id }}"
+  BuildBranch: "${{ github.ref }}"
+  BuildParameters: "/v:Minimal /p:Configuration=Release Portable.Xaml.sln"
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    env:
+      PlatformBuildParameters: ""
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.403
+
+    - name: Build
+      run: dotnet build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+
+    - name: Pack
+      run: dotnet pack ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: nuget
+        path: artifacts/nuget/**/*.*nupkg
+
+    - name: Test
+      run: dotnet test --no-build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+
+  publish:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+
+      - name: Download NuGet Packages
+        uses: actions/download-artifact@v1
+        with:
+          name: nuget
+
+      - name: Push packages
+        run: dotnet nuget push './nuget/**/*.*nupkg' --skip-duplicate -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}}

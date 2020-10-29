@@ -29,7 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-#if PCL
+#if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
@@ -39,7 +39,7 @@ using System.Xaml;
 using System.Xaml.Schema;
 #endif
 
-namespace MonoTests.Portable.Xaml
+namespace Tests.Portable.Xaml
 {
 	public class DummyValueSerializerContext : IValueSerializerContext
 	{
@@ -72,22 +72,13 @@ namespace MonoTests.Portable.Xaml
 			throw new NotImplementedException();
 		}
 
-#if NETSTANDARD
+#if PORTABLE_XAML
 		public PropertyDescriptor PropertyDescriptor {
 			get { throw new NotImplementedException (); }
 		}
 		public ValueSerializer GetValueSerializerFor (PropertyInfo descriptor)
 		{
 			throw new NotImplementedException ();
-		}
-#elif PCL
-		public PropertyInfo PropertyDescriptor
-		{
-			get { throw new NotImplementedException(); }
-		}
-		public ValueSerializer GetValueSerializerFor(PropertyInfo descriptor)
-		{
-			throw new NotImplementedException();
 		}
 #else
 		public PropertyDescriptor PropertyDescriptor {

@@ -1,4 +1,4 @@
-﻿#if !PCL && !NETSTANDARD
+﻿#if !PORTABLE_XAML && !NETSTANDARD
 //
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
