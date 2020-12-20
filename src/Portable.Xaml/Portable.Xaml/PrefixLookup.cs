@@ -74,8 +74,16 @@ namespace Portable.Xaml
 				prefix = String.Empty;
 			else if ((s = GetAcronym (ns)) != null && !l.Any (i => i.Prefix == s))
 				prefix = s;
-			else
-				prefix = sctx.GetPreferredPrefix (ns);
+            else
+            {
+                var idx = 2;
+                s = sctx.GetPreferredPrefix(ns);
+                prefix = s;
+                while (l.Any(i => i.Prefix == prefix))
+                {
+                    prefix = s + idx++;
+                }
+            }
 			l.Add (new NamespaceDeclaration (ns, prefix));
 			return prefix;
 		}
