@@ -76,14 +76,20 @@ namespace Portable.Xaml
 				prefix = s;
             else
             {
-                var idx = 2;
-                s = sctx.GetPreferredPrefix(ns);
-                prefix = s;
-                while (l.Any(i => i.Prefix == prefix))
-                {
-                    prefix = s + idx++;
-                }
-            }
+				s = sctx.GetPreferredPrefix(ns);
+				if (!l.Any(i => i.Prefix == s))
+					prefix = s;
+				else 
+				{
+					int checkSuffix(string p)
+						=> !p.StartsWith("p") ? 0 :
+						   int.TryParse(p.Substring(1), out var i) ? i :
+						   1;
+
+					var idx = l.Max(i => checkSuffix(i.Prefix)) + 1;
+					prefix = s + idx;
+				}
+			}
 			l.Add (new NamespaceDeclaration (ns, prefix));
 			return prefix;
 		}
