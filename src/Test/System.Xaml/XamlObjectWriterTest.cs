@@ -2566,5 +2566,17 @@ $@"<TestClass7
 			var xamlReader = new XamlXmlReader(stringReader, settings);
 			return XamlServices.Load(xamlReader);
 		}
+
+		[Test]
+		public void TypeConverterIsUsedEvenIfMatchingType()
+		{
+			var xml =
+$@"<TypeConverterUsed 
+		xmlns='clr-namespace:MonoTests.Portable.Xaml;assembly=Portable.Xaml_test_net_4_0' 
+		Value='Bar' />".UpdateXml();
+			var result = (TypeConverterUsed)XamlServices.Parse(xml);
+
+			Assert.AreEqual("FooBar", result.Value);
+		}
 	}
 }

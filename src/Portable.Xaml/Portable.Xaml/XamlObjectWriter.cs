@@ -729,23 +729,15 @@ namespace Portable.Xaml
 				if (ReferenceEquals(xt, null))
 					return value;
 
-				// Not sure if this is really required though...
-				var vt = sctx.GetXamlType(value.GetType());
-				if (vt.CanAssignTo(xt))
-					return value;
-
 				// FIXME: this could be generalized by some means, but I cannot find any.
 				if (xt.UnderlyingType == typeof(XamlType) && value is string)
 					value = ResolveTypeFromName((string)value);
 
 				// FIXME: this could be generalized by some means, but I cannot find any.
-				if (xt.UnderlyingType == typeof(Type))
-					value = new TypeExtension((string)value).ProvideValue(service_provider);
+				if (xt.UnderlyingType == typeof(Type) && value is string s)
+					value = new TypeExtension(s).ProvideValue(service_provider);
 				if (ReferenceEquals(xt, XamlLanguage.Type) && value is string)
 					value = new TypeExtension((string)value);
-
-				if (IsAllowedType(xt, value))
-					return value;
 
 				var xtc = xm?.TypeConverter ?? xt.TypeConverter;
 				if (xtc != null && value != null)
@@ -755,6 +747,9 @@ namespace Portable.Xaml
 						value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
 					return value;
 				}
+
+				if (IsAllowedType(xt, value))
+					return value;
 			}
 			catch (Exception ex)
 			{
