@@ -1,0 +1,5 @@
+﻿<List x:TypeArguments="x:Object" Capacity="4" xmlns="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:p="clr-namespace:Tests.Portable.Xaml.Acronym1;assembly=Tests.Portable.Xaml" xmlns:tpxa="clr-namespace:Tests.Portable.Xaml.Acronym;assembly=Tests.Portable.Xaml" xmlns:p2="clr-namespace:Tests.Portable.Xaml.Acronym2;assembly=Tests.Portable.Xaml" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <tpxa:Class1 />
+  <p:Class1 />
+  <p2:Class1 />
+</List>
