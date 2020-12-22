@@ -1,4 +1,4 @@
-﻿﻿//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -1281,10 +1281,67 @@ namespace Tests.Portable.Xaml
 				Assert.AreEqual(xaml, actual);
 			}
 		}
+
+		[Test]
+		public void Write_AcronymDuplicate()
+		{
+			var list = new List<object>();
+			list.Add(new Acronym.Class1());
+			list.Add(new Acronym1.Class1());
+
+			Assert.AreEqual(
+				XamlServices.Parse(ReadXml("AcronymDuplicate1.xml")),
+				XamlServices.Parse(XamlServices.Save(list)),
+				"#1");
+
+			list.Add(new Acronym2.Class1());
+
+			Assert.AreEqual(
+				XamlServices.Parse(ReadXml("AcronymDuplicate2.xml")), 
+				XamlServices.Parse(XamlServices.Save(list)),
+				"#2");
+
+			list.Add(new Acronym3.Class1());
+
+			Assert.AreEqual(
+				XamlServices.Parse(ReadXml("AcronymDuplicate3.xml")), 
+				XamlServices.Parse(XamlServices.Save(list)),
+				"#3");
+		}
+
 	}
 
 	public class TestXmlWriterClass1
 	{
 		public int Foo { get; set; }
+	}
+
+	namespace Acronym
+	{
+		public class Class1 { 
+			public override bool Equals(object obj)
+			{
+				if (obj == null)
+				{
+					return false;
+				}
+
+				return GetType() == obj.GetType();
+			}
+			
+			public override int GetHashCode() =>this.GetType().GetHashCode();
+		}
+	}
+	namespace Acronym1
+	{ 
+		public class Class1: Acronym.Class1 {}
+	}	
+	namespace Acronym2
+	{ 
+		public class Class1: Acronym.Class1 { }
+	}
+	namespace Acronym3
+	{ 
+		public class Class1: Acronym.Class1 { }
 	}
 }
