@@ -70,28 +70,43 @@ namespace Portable.Xaml
 			string prefix, s;
 			if (ns == XamlLanguage.Xaml2006Namespace)
 				prefix = "x";
-			else if (!l.Any (i => i.Prefix == String.Empty))
+			else if (!AnyHavePrefix(l, String.Empty))
 				prefix = String.Empty;
-			else if ((s = GetAcronym (ns)) != null && !l.Any (i => i.Prefix == s))
-				prefix = s;
-            else
-            {
-				s = sctx.GetPreferredPrefix(ns);
-				if (!l.Any(i => i.Prefix == s))
-					prefix = s;
-				else 
-				{
-					int checkSuffix(string p)
-						=> !p.StartsWith("p") ? 0 :
-						   int.TryParse(p.Substring(1), out var i) ? i :
-						   1;
-
-					var idx = l.Max(i => checkSuffix(i.Prefix)) + 1;
-					prefix = s + idx;
-				}
+			else
+			{
+				s = GetAcronym(ns) ?? sctx.GetPreferredPrefix(ns);
+				prefix = AnyHavePrefix(l, s) ? MakePrefixAddNumber(l, s) : s;
 			}
 			l.Add (new NamespaceDeclaration (ns, prefix));
 			return prefix;
+		}
+
+		string MakePrefixAddNumber(List<NamespaceDeclaration> namespaces, string prefix) 
+		{
+			var prefixLen = prefix.Length;
+
+			int max = 0;
+			for (int i = 0; i < namespaces.Count; i++)
+			{
+				var p = namespaces[i].Prefix;
+				var suffix = !p.StartsWith(prefix) ? 0 :
+						     int.TryParse(p.Substring(prefixLen), out var idx) ? idx :
+						     0;
+				max = Math.Max(suffix, max);
+			}
+
+			return prefix + (max+1);
+		}
+
+		bool AnyHavePrefix(List<NamespaceDeclaration> namespaces, string prefix)
+		{
+			for (int i = 0; i < namespaces.Count; i++)
+			{
+				var ns = namespaces[i];
+				if (ns.Prefix == prefix)
+					return true;
+			}
+			return false;
 		}
 
 		const string pre = "clr-namespace:";
