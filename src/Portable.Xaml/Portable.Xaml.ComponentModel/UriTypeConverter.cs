@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
@@ -25,7 +25,7 @@ namespace Portable.Xaml.ComponentModel
 		{
 			var text = value as string;
 			if (text != null)
-				return new Uri(text);
+				return new Uri(text, UriKind.RelativeOrAbsolute);
 			return base.ConvertFrom (context, culture, value);
 		}
 
