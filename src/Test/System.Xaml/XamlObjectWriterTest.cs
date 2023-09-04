@@ -931,6 +931,16 @@ namespace Tests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_UriRelative()
+		{
+			using (var xr = GetReader("UriRelative.xml"))
+			{
+				var des = XamlServices.Load(xr);
+				Assert.AreEqual(new Uri("./relative/uri", UriKind.Relative), des, "#1");
+			}
+		}
+
+		[Test]
 		public void Write_Null()
 		{
 			using (var xr = GetReader("NullExtension.xml"))
