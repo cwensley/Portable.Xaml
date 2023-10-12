@@ -1,4 +1,4 @@
-﻿﻿//
+//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using System.Xml.Serialization;
 #if PORTABLE_XAML
 using Portable.Xaml.Markup;
 using Portable.Xaml.ComponentModel;
@@ -1281,10 +1282,114 @@ namespace Tests.Portable.Xaml
 				Assert.AreEqual(xaml, actual);
 			}
 		}
+
+		[Test]
+		public void Write_AcronymNonDuplicate()
+		{
+			var list = new List<object>();
+			list.Add(new Acronym.Class1());
+
+			var genXaml = XamlServices.Save(list);
+
+			// match object
+			var readList = XamlServices.Parse(genXaml);
+			Assert.AreEqual(list, readList, "#1");
+
+			// check namespace
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa=""clr-namespace:Tests.Portable.Xaml.Acronym;assembly="), "#2");
+		}
+		[Test]
+		public void Write_AcronymDuplicate1()
+		{
+			var list = new List<object>();
+			list.Add(new Acronym.Class1());
+			list.Add(new Acronym1.Class1());
+
+			var genXaml = XamlServices.Save(list);
+
+			// match object
+			var readList = XamlServices.Parse(genXaml);
+			Assert.AreEqual(list, readList, "#1");
+
+			// check namespace
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa=""clr-namespace:Tests.Portable.Xaml.Acronym;assembly="), "#2");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa1=""clr-namespace:Tests.Portable.Xaml.Acronym1;assembly="), "#3");
+		}
+
+		[Test]
+		public void Write_AcronymDuplicate2()
+		{
+			var list = new List<object>();
+			list.Add(new Acronym.Class1());
+			list.Add(new Acronym1.Class1());
+			list.Add(new Acronym2.Class1());
+
+			var genXaml = XamlServices.Save(list);
+
+			// match object
+			var readList = XamlServices.Parse(genXaml);
+			Assert.AreEqual(list, readList, "#1");
+
+			// check namespace
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa=""clr-namespace:Tests.Portable.Xaml.Acronym;assembly="), "#2");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa1=""clr-namespace:Tests.Portable.Xaml.Acronym1;assembly="), "#3");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa2=""clr-namespace:Tests.Portable.Xaml.Acronym2;assembly="), "#4");
+		}
+
+		[Test]
+		public void Write_AcronymDuplicate3()
+		{
+			var list = new List<object>();
+			list.Add(new Acronym.Class1());
+			list.Add(new Acronym1.Class1());
+			list.Add(new Acronym2.Class1());
+			list.Add(new Acronym3.Class1());
+
+			var genXaml = XamlServices.Save(list);
+
+			// match object
+			var readList = XamlServices.Parse(genXaml);
+			Assert.AreEqual(list, readList, "#1");
+
+			// check namespace
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa=""clr-namespace:Tests.Portable.Xaml.Acronym;assembly="), "#2");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa1=""clr-namespace:Tests.Portable.Xaml.Acronym1;assembly="), "#3");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa2=""clr-namespace:Tests.Portable.Xaml.Acronym2;assembly="), "#4");
+			Assert.IsTrue(genXaml.Contains(@"xmlns:tpxa3=""clr-namespace:Tests.Portable.Xaml.Acronym3;assembly="), "#5");
+		}
 	}
 
 	public class TestXmlWriterClass1
 	{
 		public int Foo { get; set; }
+	}
+
+	namespace Acronym
+	{
+		public class Class1 { 
+			public override bool Equals(object obj)
+			{
+				if (obj == null)
+				{
+					return false;
+				}
+
+				return GetType() == obj.GetType();
+			}
+			
+			public override int GetHashCode() =>this.GetType().GetHashCode();
+		}
+	}
+	namespace Acronym1
+	{ 
+		public class Class1: Acronym.Class1 { }
+	}	
+	namespace Acronym2
+	{ 
+		public class Class1: Acronym.Class1 { }
+	}
+	namespace Acronym3
+	{ 
+		public class Class1: Acronym.Class1 { }
 	}
 }
