@@ -576,38 +576,24 @@ namespace Portable.Xaml
 				string name = null;
 				if (mi.Name.StartsWith("Get", StringComparison.Ordinal))
 				{
-					if (mi.ReturnType == typeof(void))
-						continue;
-					var args = mi.GetParameters();
-					if (args.Length != 1)
-						continue;
+					if(!ValidateRuntimeGetMethod(mi)) continue;
+					
 					name = mi.Name.Substring(3);
 					gl.Add(name, mi);
 				}
 				else if (mi.Name.StartsWith("Set", StringComparison.Ordinal))
 				{
-					// looks like the return type is *ignored*
-					//if (mi.ReturnType != typeof (void))
-					//	continue;
-					var args = mi.GetParameters();
-					if (args.Length != 2)
-						continue;
+					if(!ValidateRuntimeSetMethod(mi)) continue;
+					
 					name = mi.Name.Substring(3);
 					sl.Add(name, mi);
 				}
 				else if (mi.Name.EndsWith("Handler", StringComparison.Ordinal))
 				{
-					var args = mi.GetParameters();
-					if (args.Length != 2)
-						continue;
-					if (mi.Name.StartsWith("Add", StringComparison.Ordinal))
-					{
-						name = mi.Name.Substring(3, mi.Name.Length - 3 - 7);
-						al.Add(name, mi);
-					}/* else if (mi.Name.StartsWith ("Remove", StringComparison.Ordinal)) {
-						name = mi.Name.Substring (6, mi.Name.Length - 6 - 7);
-						rl.Add (name, mi);
-					}*/
+					if(!ValidateRuntimeHandler(mi)) continue;
+					
+					name = mi.Name.Substring(3);
+					sl.Add(name, mi);
 				}
 				if (name != null && !nl.Contains(name))
 					nl.Add(name);
@@ -625,6 +611,43 @@ namespace Portable.Xaml
 				if (a != null)
 					yield return SchemaContext.GetAttachableEvent(name, a);
 			}
+		}
+
+		protected virtual bool ValidateRuntimeHandler(MethodInfo mi)
+		{
+			var args = mi.GetParameters();
+			if (args.Length != 2)
+				return false;
+			if (mi.Name.StartsWith("Add", StringComparison.Ordinal))
+			{
+				return true;
+			}/* else if (mi.Name.StartsWith ("Remove", StringComparison.Ordinal)) {
+				return true;
+			}*/
+			return true;
+		}
+
+		protected virtual bool ValidateRuntimeSetMethod(MethodInfo mi)
+		{
+			// looks like the return type is *ignored*
+			//if (mi.ReturnType != typeof (void))
+					//	continue;
+			var args = mi.GetParameters();
+			if (args.Length != 2)
+				return false;
+			
+			return true;
+		}
+
+		protected virtual bool ValidateRuntimeGetMethod(MethodInfo mi)
+		{
+			if (mi.ReturnType == typeof(void))
+				return false;
+			var args = mi.GetParameters();
+			if (args.Length != 1)
+				return false;
+			
+			return true;
 		}
 
 		protected virtual IEnumerable<XamlMember> LookupAllMembers()
