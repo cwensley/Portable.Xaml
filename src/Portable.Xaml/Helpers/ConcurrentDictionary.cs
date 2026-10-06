@@ -11,7 +11,7 @@
 **
 **
 ===========================================================*/
-#if !NETSTANDARD1_3 && !NETSTANDARD2_0
+#if !NETSTANDARD1_3_OR_GREATER && !NET
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

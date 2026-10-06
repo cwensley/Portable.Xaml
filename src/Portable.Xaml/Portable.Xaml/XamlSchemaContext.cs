@@ -152,7 +152,7 @@ namespace Portable.Xaml
 
 		static IEnumerable<Assembly> GetAppDomainAssemblies()
 		{
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0_OR_GREATER || NET
 			return AppDomain.CurrentDomain.GetAssemblies();
 #else
 			try
@@ -216,7 +216,7 @@ namespace Portable.Xaml
 				}
 				else
 				{
-#if NETSTANDARD1_3 || NETSTANDARD2_0
+#if NETSTANDARD1_3_OR_GREATER || NET
 					foreach (var file in Directory.EnumerateFiles(AppContext.BaseDirectory, "*.dll"))
 					{
 						try

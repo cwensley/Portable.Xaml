@@ -11,7 +11,7 @@ on:
 env:
   BuildVersion: "CI.${{ github.run_id }}"
   BuildBranch: "${{ github.ref }}"
-  BuildParameters: "/v:Minimal /p:Configuration=Release Portable.Xaml.sln"
+  BuildParameters: "/v:Minimal /p:Configuration=Release Portable.Xaml.slnx"
 
 jobs:
   build:
