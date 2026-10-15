@@ -38,6 +38,9 @@ jobs:
         fileName: 'Portable.Xaml.snk'
         encodedString: ${{ secrets.STRONG_NAME_KEY }}
     
+    - name: Clear package cache as a temporary workaround for actions/setup-dotnet#155
+      run: dotnet clean && dotnet nuget locals all --clear
+
     - name: Build
       run: dotnet build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }} "/p:AssemblyOriginatorKeyFile=${{ steps.get_strong_name.outputs.filePath }}"
 
