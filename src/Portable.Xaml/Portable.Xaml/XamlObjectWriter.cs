@@ -747,7 +747,7 @@ namespace Portable.Xaml
 				if (xtc != null && value != null)
 				{
 					var tc = xtc.ConverterInstance;
-					if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
+					if (tc != null && tc.SafeCanConvertFrom(service_provider, value.GetType()))
 						value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
 					return value;
 				}

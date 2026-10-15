@@ -354,7 +354,7 @@ namespace Portable.Xaml
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return SafeConverterCall(() => tc.CanConvertFrom(xamlType?.UnderlyingType ?? typeof(object)));
+				return tc.SafeCanConvertFrom(null, xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
@@ -374,23 +374,10 @@ namespace Portable.Xaml
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return SafeConverterCall(() => tc.CanConvertTo(xamlType?.UnderlyingType ?? typeof(object)));
+				return tc.SafeCanConvertTo(null, xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
-		}
-
-		static bool SafeConverterCall(Func<bool> call)
-		{
-			// A converter whose dependencies fail to load (e.g. WPF's CommandConverter outside a WPF app) shouldn't break parsing.
-			try
-			{
-				return call();
-			}
-			catch (Exception ex) when (ex is System.IO.FileLoadException || ex is System.IO.FileNotFoundException || ex is TypeLoadException)
-			{
-				return false;
-			}
 		}
 
 		[EnhancedXaml]
