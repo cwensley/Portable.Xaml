@@ -32,7 +32,7 @@ namespace Portable.Xaml.Markup
 {
 	//[System.Runtime.CompilerServices.TypeForwardedFrom (Consts.AssemblyWindowsBase)]
 	public interface IValueSerializerContext : IServiceProvider
-	#if NETSTANDARD
+	#if NETSTANDARD || NET
 		, ITypeDescriptorContext
 	#endif
 	{

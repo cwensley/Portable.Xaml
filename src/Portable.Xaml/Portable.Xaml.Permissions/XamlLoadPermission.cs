@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD
+﻿#if CODE_ACCESS_SECURITY
 //
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //

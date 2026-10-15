@@ -3,9 +3,7 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Generic;
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 
 namespace Portable.Xaml.ComponentModel
 {

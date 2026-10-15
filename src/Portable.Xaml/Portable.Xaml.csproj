@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
     <DefineConstants>PORTABLE_XAML;HAS_TYPE_CONVERTER</DefineConstants>
   </PropertyGroup>
 
@@ -13,12 +13,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);HAS_CUSTOM_ATTRIBUTE_PROVIDER;HAS_ISUPPORT_INITIALIZE;HAS_SERIALIZATION_INFO</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup Condition="$(TargetFramework) != 'netstandard2.0'">
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-  </ItemGroup>
 </Project>

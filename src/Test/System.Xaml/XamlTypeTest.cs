@@ -39,9 +39,7 @@ using System.Xaml.Schema;
 #endif
 
 using CategoryAttribute = NUnit.Framework.CategoryAttribute;
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 
 namespace Tests.Portable.Xaml
 {

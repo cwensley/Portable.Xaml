@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-#if NETSTANDARD
+#if NETSTANDARD || NET
 using System.ComponentModel;
 #endif
 

@@ -10,6 +10,7 @@
     <PackageOutputPath>$(ArtifactsDir)nuget\$(Configuration)\</PackageOutputPath>
     <!-- RestoreProjectStyle will be supported in VS for Mac 7.4 -->
     <RestoreProjectStyle Condition="'$(RestoreProjectStyle)' == '' AND $(UsePackagesConfig) != 'True'">PackageReference</RestoreProjectStyle>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

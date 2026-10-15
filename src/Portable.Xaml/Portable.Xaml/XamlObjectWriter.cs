@@ -32,12 +32,8 @@ using Portable.Xaml.Markup;
 using Portable.Xaml;
 using Portable.Xaml.Schema;
 using System.Xml;
-#if !NETSTANDARD1_0
 using System.Xml.Serialization;
-#endif
-#if NETSTANDARD
 using System.ComponentModel;
-#endif
 
 // To use this under .NET, compile sources as:
 //
@@ -751,7 +747,7 @@ namespace Portable.Xaml
 				if (xtc != null && value != null)
 				{
 					var tc = xtc.ConverterInstance;
-					if (tc != null && tc.CanConvertFrom(service_provider, value.GetType()))
+					if (tc != null && tc.SafeCanConvertFrom(service_provider, value.GetType()))
 						value = tc.ConvertFrom(service_provider, CultureInfo.InvariantCulture, value);
 					return value;
 				}

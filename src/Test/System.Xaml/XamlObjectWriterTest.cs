@@ -2136,7 +2136,7 @@ namespace Tests.Portable.Xaml
 				CollectionAssert.AreEquivalent(expected, res.ImmutableHashSet.Select(r => r.Foo), "#5-2");
 
 				Assert.IsFalse(res.ImmutableStack.IsEmpty, "#6-1");
-				CollectionAssert.AreEqual(expected.Reverse(), res.ImmutableStack.Select(r => r.Foo), "#6-2");
+				CollectionAssert.AreEqual(Enumerable.Reverse(expected), res.ImmutableStack.Select(r => r.Foo), "#6-2");
 
 				Assert.IsFalse(res.ImmutableSortedSet.IsEmpty, "#7-1");
 				CollectionAssert.AreEqual(expected, res.ImmutableSortedSet.Select(r => r.Foo), "#7-2");

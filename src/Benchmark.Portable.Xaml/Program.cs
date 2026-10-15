@@ -58,8 +58,7 @@ namespace Benchmark.Portable.Xaml
 			config.AddValidator(JitOptimizationsValidator.DontFailOnError);
 
 			//config.AddJob(Job.Default);
-			config.AddJob(job.WithRuntime(CoreRuntime.Core31));
-			config.AddJob(job.WithRuntime(MonoRuntime.Default));
+			config.AddJob(job.WithRuntime(CoreRuntime.Core10_0));
 			config.AddJob(job.WithRuntime(ClrRuntime.Net48));
 
 			config.AddDiagnoser(MemoryDiagnoser.Default);

@@ -120,7 +120,7 @@ namespace Portable.Xaml
 			// FIXME: does this make sense?
 			var vc = xm?.TypeConverter ?? xt.TypeConverter;
 			var tc = vc?.ConverterInstance;
-			if (tc != null && tc.CanConvertTo ((ITypeDescriptorContext) vsctx, typeof(string)))
+			if (tc != null && tc.SafeCanConvertTo ((ITypeDescriptorContext) vsctx, typeof(string)))
 				return (string)tc.ConvertTo ((ITypeDescriptorContext)vsctx, CultureInfo.InvariantCulture, obj, typeof(string));
 			if (obj is string || obj == null)
 				return (string)obj;
@@ -262,6 +262,35 @@ namespace Portable.Xaml
 
 		#endregion
 
+		/// <summary>Same as CanConvertFrom, but returns false when the converter's dependencies fail to load.</summary>
+		internal static bool SafeCanConvertFrom(this TypeConverter converter, ITypeDescriptorContext context, Type sourceType)
+		{
+			try
+			{
+				return converter.CanConvertFrom(context, sourceType);
+			}
+			catch (Exception ex) when (IsLoadFailure(ex))
+			{
+				return false;
+			}
+		}
+
+		/// <summary>Same as CanConvertTo, but returns false when the converter's dependencies fail to load.</summary>
+		internal static bool SafeCanConvertTo(this TypeConverter converter, ITypeDescriptorContext context, Type destinationType)
+		{
+			try
+			{
+				return converter.CanConvertTo(context, destinationType);
+			}
+			catch (Exception ex) when (IsLoadFailure(ex))
+			{
+				return false;
+			}
+		}
+
+		// e.g. WPF's CommandConverter for ICommand on .NET Core, when WindowsBase can't be loaded.
+		static bool IsLoadFailure(Exception ex) => ex is System.IO.FileLoadException || ex is System.IO.FileNotFoundException || ex is TypeLoadException;
+
 		public static bool IsContentValue (this XamlMember member, IValueSerializerContext vsctx)
 		{
 			if (ReferenceEquals(member, XamlLanguage.Initialization))
@@ -269,7 +298,7 @@ namespace Portable.Xaml
 			if (ReferenceEquals(member, XamlLanguage.PositionalParameters) || ReferenceEquals(member, XamlLanguage.Arguments))
 				return false; // it's up to the argument (no need to check them though, as IList<object> is not of value)
 			var typeConverter = member.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.SafeCanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
 				return true;
 			return IsContentValue (member.Type, vsctx);
 		}
@@ -277,7 +306,7 @@ namespace Portable.Xaml
 		public static bool IsContentValue (this XamlType type, IValueSerializerContext vsctx)
 		{
 			var typeConverter = type.TypeConverter;
-			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.CanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
+			if (typeConverter != null && typeConverter.ConverterInstance != null && typeConverter.ConverterInstance.SafeCanConvertTo ((ITypeDescriptorContext)vsctx, typeof(string)))
 				return true;
 			return false;
 		}

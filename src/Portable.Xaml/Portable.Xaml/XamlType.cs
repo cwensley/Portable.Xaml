@@ -354,7 +354,7 @@ namespace Portable.Xaml
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return tc.CanConvertFrom(xamlType?.UnderlyingType ?? typeof(object));
+				return tc.SafeCanConvertFrom(null, xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;
@@ -374,7 +374,7 @@ namespace Portable.Xaml
 			var tc = TypeConverter?.ConverterInstance;
 			if (tc != null)
 			{
-				return tc.CanConvertTo(xamlType?.UnderlyingType ?? typeof(object));
+				return tc.SafeCanConvertTo(null, xamlType?.UnderlyingType ?? typeof(object));
 			}
 
 			return false;

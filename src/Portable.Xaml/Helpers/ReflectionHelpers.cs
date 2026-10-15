@@ -13,7 +13,7 @@ namespace Portable.Xaml
 
 		public static readonly MethodInfo IXmlSerializableWriteXmlMethod = IXmlSerializableType?.GetTypeInfo().GetDeclaredMethod("WriteXml");
 		public static readonly MethodInfo IXmlSerializableReadXmlMethod = IXmlSerializableType?.GetTypeInfo().GetDeclaredMethod("ReadXml");
-#elif NETSTANDARD1_3 || NETSTANDARD2_0
+#elif NETSTANDARD1_3_OR_GREATER || NET
 		public static readonly Type IXmlSerializableType = typeof(System.Xml.Serialization.IXmlSerializable);
 #else
 
