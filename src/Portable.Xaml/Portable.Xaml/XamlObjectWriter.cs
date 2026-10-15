@@ -695,8 +695,9 @@ namespace Portable.Xaml
 				ReferenceEquals(xm, XamlLanguage.PositionalParameters) ||
 				ReferenceEquals(xm, XamlLanguage.Arguments)) {
 
+				// the dictionary's own invoker, so a type can customize how items are added
 				if (xt.IsDictionary)
-					mt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
+					xt.Invoker.AddToDictionary(parent, GetCorrectlyTypedValue(null, xt.KeyType, keyObj), GetCorrectlyTypedValue(null, xt.ItemType, obj));
 				else // collection. Note that state.Type isn't usable for PositionalParameters to identify collection kind.
 					mt.Invoker.AddToCollection(parent, GetCorrectlyTypedValue(null, xt.ItemType, obj, true));
 				return true;
