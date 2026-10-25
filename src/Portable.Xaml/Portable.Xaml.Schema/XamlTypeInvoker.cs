@@ -88,11 +88,10 @@ namespace Portable.Xaml.Schema
 		{
 			if (instance == null)
 				throw new ArgumentNullException ("instance");
-			if (item == null)
-				throw new ArgumentNullException ("item");
 
 			var collectionType = instance.GetType ();
-			var itemType = item.GetType();
+			// null items are allowed (e.g. an empty cell in JSON), so the Add method is found by the collection's item type
+			var itemType = item?.GetType() ?? Type?.ItemType?.UnderlyingType ?? typeof(object);
 			var key = Tuple.Create(collectionType, itemType);
 
 			var mode = Type?.SchemaContext.InvokerOptions ?? XamlInvokerOptions.None;
