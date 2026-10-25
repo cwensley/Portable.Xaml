@@ -89,7 +89,7 @@ namespace Portable.Xaml
 			for (int i = 0; i < namespaces.Count; i++)
 			{
 				var p = namespaces[i].Prefix;
-				var suffix = !p.StartsWith(prefix) ? 0 :
+				var suffix = !p.StartsWith(prefix, StringComparison.Ordinal) ? 0 :
 						     int.TryParse(p.Substring(prefixLen), out var idx) ? idx :
 						     0;
 				max = Math.Max(suffix, max);
