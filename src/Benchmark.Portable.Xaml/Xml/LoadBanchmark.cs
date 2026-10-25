@@ -30,14 +30,14 @@ namespace Benchmark.Portable.Xaml.Xml
 				XamlServices.Load(stream);
 		}
 
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 		System.Xaml.XamlSchemaContext sxc;
 #endif
 
 		[Benchmark]
 		public void SystemXaml()
 		{
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 			sxc = sxc ?? new System.Xaml.XamlSchemaContext();
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(new System.Xaml.XamlXmlReader(stream, sxc));
@@ -49,7 +49,7 @@ namespace Benchmark.Portable.Xaml.Xml
 		[Benchmark]
 		public void SystemXamlNoCache()
 		{
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 			using (var stream = GetStream())
 				System.Xaml.XamlServices.Load(stream);
 #else

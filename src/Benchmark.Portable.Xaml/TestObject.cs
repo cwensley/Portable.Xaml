@@ -7,14 +7,14 @@ using Portable.Xaml.Markup;
 
 [assembly: Portable.Xaml.Markup.XmlnsDefinition ("http://example.com/benchmark", "Benchmark.Portable.Xaml")]
 
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 [assembly: System.Windows.Markup.XmlnsDefinition ("http://example.com/benchmark", "Benchmark.Portable.Xaml")]
 #endif
 
 namespace Benchmark.Portable.Xaml
 {
 	[ContentProperty ("Children")]
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 	[System.Windows.Markup.ContentProperty ("Children")]
 #endif
 	public class TestObject

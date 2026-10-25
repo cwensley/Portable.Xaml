@@ -27,7 +27,7 @@ namespace Benchmark.Portable.Xaml.Xml
 				XamlServices.Save(writer, Instance);
 		}
 
-#if NETFRAMEWORK
+#if SYSTEM_XAML
 		System.Xaml.XamlSchemaContext sxc;
 		[Benchmark]
 		public void SystemXaml()
