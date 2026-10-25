@@ -1,0 +1,36 @@
+name: Manual Version Bump and PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Development version to set, e.g. 0.27.0'
+        required: true
+        type: string
+  # called by release.yml to start the next version after a release
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  set-version-and-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: sed -i "s:<DevVersion>.*</DevVersion>:<DevVersion>$VERSION</DevVersion>:" Directory.Build.props
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "bump version to ${{ inputs.version }}"
+          body: "Automated version bump to ${{ inputs.version }}."
+          branch: version-bump/${{ inputs.version }}
+          commit-message: "Bump version to ${{ inputs.version }}"
