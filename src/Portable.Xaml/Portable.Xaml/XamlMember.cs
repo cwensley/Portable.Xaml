@@ -380,7 +380,7 @@ namespace Portable.Xaml
 				if (DeclaringType == null)
 					return Name.GetHashCode();
 				else
-					return DeclaringType.UnderlyingType.FullName.GetHashCode() ^ Name.GetHashCode();
+					return DeclaringTypeFullName.GetHashCode() ^ Name.GetHashCode();
 			}
 			else
 				return PreferredXamlNamespace.GetHashCode() ^ DeclaringType.Name.GetHashCode() ^ Name.GetHashCode();
@@ -394,11 +394,14 @@ namespace Portable.Xaml
 				if (DeclaringType == null)
 					return Name;
 				else
-					return String.Concat(DeclaringType.UnderlyingType.FullName, ".", Name);
+					return String.Concat(DeclaringTypeFullName, ".", Name);
 			}
 			else
 				return String.Concat("{", PreferredXamlNamespace, "}", DeclaringType?.Name, ".", Name);
 		}
+
+		// types without a runtime Type (e.g. from a code generator) only have a name
+		string DeclaringTypeFullName => DeclaringType.UnderlyingType?.FullName ?? DeclaringType.Name;
 
 		public virtual IList<string> GetXamlNamespaces()
 		{

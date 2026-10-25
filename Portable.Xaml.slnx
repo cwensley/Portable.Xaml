@@ -13,6 +13,8 @@
   </Folder>
   <Project Path="src/Benchmark.Portable.Xaml/Benchmark.Portable.Xaml.csproj" />
   <Project Path="src/Portable.Xaml/Portable.Xaml.csproj" />
+  <Project Path="src/Portable.Xaml.CodeGen/Portable.Xaml.CodeGen.csproj" />
+  <Project Path="src/Portable.Xaml.CodeGen.Tests/Portable.Xaml.CodeGen.Tests.csproj" />
   <Project Path="src/Test/Portable.Xaml-tests-uwp.csproj">
     <Platform Solution="*|Any CPU" Project="x86" />
     <Platform Solution="*|ARM" Project="ARM" />

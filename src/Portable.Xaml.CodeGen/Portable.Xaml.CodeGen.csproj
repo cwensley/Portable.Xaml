@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyTitle>Portable.Xaml.CodeGen</AssemblyTitle>
+    <Description>Turns XAML into C# at compile time. Reference it from a Roslyn source generator and ship it next to the generator.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
+  </ItemGroup>
+
+</Project>
