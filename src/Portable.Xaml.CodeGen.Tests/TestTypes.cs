@@ -72,6 +72,21 @@ namespace Portable.Xaml.CodeGen.Tests.Types
 		public TestRow Row { get; set; }
 	}
 
+	/// <summary>Converted to from a TestItem by an internal converter, like Eto's TableRow.</summary>
+	[TypeConverter(typeof(TestRowConverter))]
+	public class TestRow
+	{
+		public TestItem Item { get; set; }
+	}
+
+	class TestRowConverter : TypeConverter
+	{
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(TestItem) || base.CanConvertFrom(context, sourceType);
+
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			=> value is TestItem item ? new TestRow { Item = item } : base.ConvertFrom(context, culture, value);
+	}
+
 	/// <summary>Records whether it was stored in its owner before EndInit, like Eto's PixelLayout needs.</summary>
 	[ContentProperty("Items")]
 	public class TestInitItem : ISupportInitialize
@@ -115,21 +130,6 @@ namespace Portable.Xaml.CodeGen.Tests.Types
 			item.Owner = _owner;
 			base.InsertItem(index, item);
 		}
-	}
-
-	/// <summary>Converted to from a TestItem by an internal converter, like Eto's TableRow.</summary>
-	[TypeConverter(typeof(TestRowConverter))]
-	public class TestRow
-	{
-		public TestItem Item { get; set; }
-	}
-
-	class TestRowConverter : TypeConverter
-	{
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(TestItem) || base.CanConvertFrom(context, sourceType);
-
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-			=> value is TestItem item ? new TestRow { Item = item } : base.ConvertFrom(context, culture, value);
 	}
 
 	/// <summary>Has an internal type converter, so generated code goes through TypeDescriptor.</summary>

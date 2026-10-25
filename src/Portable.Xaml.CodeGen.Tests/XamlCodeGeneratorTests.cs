@@ -290,17 +290,6 @@ namespace Gen
 		}
 
 		[Test]
-		public void NullFromMarkupExtensionIsNotConverted()
-		{
-			const string xaml = @"<TestItem Row=""{Nothing}"" />";
-			var compiled = CodeGenHelper.Compile(CodeGenHelper.RootCode, Xaml("", xaml));
-			var panel = (TestPanel)compiled.CreateGenerated();
-			Assert.IsNull(((TestItem)panel.Children[0]).Row);
-			var runtime = (TestPanel)compiled.CreateRuntime(Xaml("", xaml));
-			Assert.IsNull(((TestItem)runtime.Children[0]).Row);
-		}
-
-		[Test]
 		public void EndInitIsCalledAfterStoringInTheOwner()
 		{
 			const string content = @"<TestInitItem Label=""outer""><TestInitItem.Child><TestInitItem Label=""child"" /></TestInitItem.Child><TestInitItem Label=""item""><TestInitItem Label=""nested"" /></TestInitItem></TestInitItem>";
@@ -312,6 +301,17 @@ namespace Gen
 				foreach (var item in items)
 					Assert.IsTrue(item.OwnedAtEndInit, $"{mode}: {item.Label} should be in its owner at EndInit");
 			}
+		}
+
+		[Test]
+		public void NullFromMarkupExtensionIsNotConverted()
+		{
+			const string xaml = @"<TestItem Row=""{Nothing}"" />";
+			var compiled = CodeGenHelper.Compile(CodeGenHelper.RootCode, Xaml("", xaml));
+			var panel = (TestPanel)compiled.CreateGenerated();
+			Assert.IsNull(((TestItem)panel.Children[0]).Row);
+			var runtime = (TestPanel)compiled.CreateRuntime(Xaml("", xaml));
+			Assert.IsNull(((TestItem)runtime.Children[0]).Row);
 		}
 
 		[Test]
