@@ -7,10 +7,16 @@ on:
     branches: [ develop ]
   release:
     types: [ published ]
+  workflow_call:
+    inputs:
+      release-tag:
+        description: Tag to version the packages with
+        type: string
+        required: false
 
 env:
   BuildVersion: "CI.${{ github.run_id }}"
-  BuildBranch: "${{ github.ref }}"
+  BuildBranch: "${{ inputs.release-tag && format('refs/tags/{0}', inputs.release-tag) || github.ref }}"
   BuildParameters: "/v:Minimal /p:Configuration=Release Portable.Xaml.slnx"
 
 jobs:
@@ -33,7 +39,7 @@ jobs:
     - name: Get strong name key
       id: get_strong_name
       uses: timheuer/base64-to-file@v2
-      if: github.event_name == 'release' || github.event_name == 'push'
+      if: github.event_name == 'release' || github.event_name == 'push' || inputs.release-tag
       with:
         fileName: 'Portable.Xaml.snk'
         encodedString: ${{ secrets.STRONG_NAME_KEY }}
