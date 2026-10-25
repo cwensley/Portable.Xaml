@@ -16,15 +16,18 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
+    # release_file.md is owned by root (written from the docker action), so write to a new file
     - name: Add Milestone Description
-      run: echo -e "${{ github.event.milestone.description }}\n\n$(cat release_file.md)" > release_file.md
-    
+      env:
+        MILESTONE_DESCRIPTION: ${{ github.event.milestone.description }}
+      run: printf '%s\n\n%s\n' "$MILESTONE_DESCRIPTION" "$(cat release_file.md)" > release_notes.md
+
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v3
       with:
         tag_name: ${{ github.event.milestone.title }}
         name: ${{ github.event.milestone.title }}
-        body_path: release_file.md
+        body_path: release_notes.md
         draft: false
         prerelease: false      
