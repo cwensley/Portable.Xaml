@@ -13,7 +13,7 @@ namespace Portable.Xaml.CodeGen
 	/// Turns XAML into C# for a compilation. Create one per compilation and call <see cref="Generate"/> for each file.
 	/// </summary>
 	/// <remarks>
-	/// Subclass to change type lookup (<see cref="CreateSchemaContext"/>), reading (<see cref="CreateReaderSettings"/>)
+	/// Subclass to change type lookup (<see cref="CreateSchemaContext"/>), reading (<see cref="CreateReader"/>, <see cref="CreateReaderSettings"/>)
 	/// or the generated code (<see cref="CreateEmitter"/>).
 	/// </remarks>
 	public class XamlCodeGenerator
@@ -47,10 +47,14 @@ namespace Portable.Xaml.CodeGen
 		{
 		}
 
+		/// <summary>Creates the reader for a file's text, e.g. a <see cref="Json.XamlJsonReader"/> for JSON.</summary>
+		protected virtual XamlReader CreateReader(string text, XamlCodeGenOptions options)
+			=> new XamlXmlReader(new StringReader(text), SchemaContext, CreateReaderSettings(options));
+
 		/// <summary>Reads XAML into a tree of objects without generating code.</summary>
 		public XamlObjectNode Read(string xaml, XamlCodeGenOptions options)
 		{
-			var reader = new XamlXmlReader(new StringReader(xaml), SchemaContext, CreateReaderSettings(options));
+			var reader = CreateReader(xaml, options);
 			return XamlObjectTree.Read(reader, options.Namespaces);
 		}
 

@@ -75,10 +75,11 @@ namespace Portable.Xaml.CodeGen.Tests
 		}
 
 		/// <summary>Generates code for the XAML, compiles it with the code-behind and loads the assembly.</summary>
-		public static CompiledXaml Compile(string code, string xaml, string rootClassName = "Gen.Root", XamlCodeGenOptions options = null)
+		public static CompiledXaml Compile(string code, string xaml, string rootClassName = "Gen.Root", XamlCodeGenOptions options = null, Func<Compilation, XamlCodeGenerator> createGenerator = null)
 		{
 			var compilation = CreateCompilation(code);
-			var result = new XamlCodeGenerator(compilation).Generate(xaml, options ?? new XamlCodeGenOptions { FilePath = FilePath });
+			var generator = createGenerator?.Invoke(compilation) ?? new XamlCodeGenerator(compilation);
+			var result = generator.Generate(xaml, options ?? new XamlCodeGenOptions { FilePath = FilePath });
 			var errors = result.Diagnostics.Where(r => r.Severity == DiagnosticSeverity.Error).ToList();
 			if (!result.Success || errors.Count > 0)
 				Assert.Fail("Generation failed:\n" + string.Join("\n", result.Diagnostics));
