@@ -59,4 +59,9 @@ jobs:
         path: artifacts/nuget/Release/*.*nupkg
 
     - name: Test
-      run: dotnet test --no-build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
+      run: dotnet test --no-build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }} --logger trx --results-directory artifacts/test
+
+    - name: Test summary
+      if: ${{ !cancelled() }}
+      shell: pwsh
+      run: ./build/TestSummary.ps1 -ResultsRoot artifacts/test
