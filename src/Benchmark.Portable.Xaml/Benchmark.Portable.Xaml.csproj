@@ -3,8 +3,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net48;net10.0</TargetFrameworks>
+    <!-- System.Xaml is only available in .NET on Windows via the desktop framework -->
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net48;net10.0-windows</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>False</IsPackable>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) OR $(TargetFramework.EndsWith('-windows'))">
+    <DefineConstants>$(DefineConstants);SYSTEM_XAML</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.EndsWith('-windows'))">
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.Xaml" />

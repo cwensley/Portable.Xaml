@@ -11,6 +11,7 @@ using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Validators;
 using BenchmarkDotNet.Toolchains.CsProj;
+using BenchmarkDotNet.Toolchains.DotNetCli;
 using BenchmarkDotNet.Environments;
 
 namespace Benchmark.Portable.Xaml
@@ -58,7 +59,12 @@ namespace Benchmark.Portable.Xaml
 			config.AddValidator(JitOptimizationsValidator.DontFailOnError);
 
 			//config.AddJob(Job.Default);
-			config.AddJob(job.WithRuntime(CoreRuntime.Core10_0));
+			// on Windows the .NET 10 build targets net10.0-windows so it can compare against System.Xaml
+			var coreJob = job.WithRuntime(CoreRuntime.Core10_0);
+			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+				coreJob = coreJob.WithToolchain(CsProjCoreToolchain.From(new NetCoreAppSettings("net10.0-windows", null, ".NET 10.0")));
+			// a net48 host may run emulated (x64 on Arm64), so don't force its architecture onto the .NET build
+			config.AddJob(coreJob.WithPlatform(Platform.AnyCpu));
 			config.AddJob(job.WithRuntime(ClrRuntime.Net48));
 
 			config.AddDiagnoser(MemoryDiagnoser.Default);

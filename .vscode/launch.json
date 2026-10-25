@@ -10,6 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build-release",
             "program": "${workspaceFolder}/artifacts/bin/Benchmark.Portable.Xaml/Release/net10.0/Benchmark.Portable.Xaml.dll",
+            "windows": {
+                "program": "${workspaceFolder}/artifacts/bin/Benchmark.Portable.Xaml/Release/net10.0-windows/Benchmark.Portable.Xaml.dll"
+            },
             "args": [ ],
             "cwd": "${workspaceFolder}/artifacts",
             "console": "integratedTerminal",
