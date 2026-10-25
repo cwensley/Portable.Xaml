@@ -56,7 +56,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: nuget
-        path: artifacts/nuget/**/*.*nupkg
+        path: artifacts/nuget/Release/*.*nupkg
 
     - name: Test
       run: dotnet test --no-build ${{ env.PlatformBuildParameters }} ${{ env.BuildParameters }}
