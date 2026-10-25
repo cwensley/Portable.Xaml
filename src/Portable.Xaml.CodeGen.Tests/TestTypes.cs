@@ -72,6 +72,51 @@ namespace Portable.Xaml.CodeGen.Tests.Types
 		public TestRow Row { get; set; }
 	}
 
+	/// <summary>Records whether it was stored in its owner before EndInit, like Eto's PixelLayout needs.</summary>
+	[ContentProperty("Items")]
+	public class TestInitItem : ISupportInitialize
+	{
+		TestInitItem _child;
+
+		public TestInitItem() => Items = new TestInitCollection(this);
+
+		public string Label { get; set; }
+		public TestInitItem Owner { get; set; }
+		public bool OwnedAtEndInit { get; private set; }
+		public TestInitCollection Items { get; }
+
+		public TestInitItem Child
+		{
+			get => _child;
+			set
+			{
+				_child = value;
+				if (value != null)
+					value.Owner = this;
+			}
+		}
+
+		public IEnumerable<TestInitItem> Descendants()
+			=> Items.Concat(Child != null ? new[] { Child } : Enumerable.Empty<TestInitItem>()).SelectMany(r => new[] { r }.Concat(r.Descendants()));
+
+		void ISupportInitialize.BeginInit() { }
+
+		void ISupportInitialize.EndInit() => OwnedAtEndInit = Owner != null;
+	}
+
+	public class TestInitCollection : System.Collections.ObjectModel.Collection<TestInitItem>
+	{
+		readonly TestInitItem _owner;
+
+		public TestInitCollection(TestInitItem owner) => _owner = owner;
+
+		protected override void InsertItem(int index, TestInitItem item)
+		{
+			item.Owner = _owner;
+			base.InsertItem(index, item);
+		}
+	}
+
 	/// <summary>Converted to from a TestItem by an internal converter, like Eto's TableRow.</summary>
 	[TypeConverter(typeof(TestRowConverter))]
 	public class TestRow

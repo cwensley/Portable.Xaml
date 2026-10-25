@@ -434,6 +434,34 @@ namespace Tests.Portable.Xaml
 		}
 	}
 
+	public class TestInitOwner
+	{
+		TestInitChild _child;
+
+		public TestInitChild Child
+		{
+			get => _child;
+			set
+			{
+				_child = value;
+				value.Owner = this;
+			}
+		}
+	}
+
+	public class TestInitChild : ISupportInitialize
+	{
+		public TestInitOwner Owner { get; set; }
+
+		public bool OwnedAtEndInit { get; private set; }
+
+		public void BeginInit()
+		{
+		}
+
+		public void EndInit() => OwnedAtEndInit = Owner != null;
+	}
+
 	[ContentProperty(nameof(Items))]
 	public class TestClass10
 	{
