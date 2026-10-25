@@ -72,6 +72,23 @@ namespace Portable.Xaml.CodeGen.Tests.Types
 		public TestRow Row { get; set; }
 	}
 
+	/// <summary>Kept off TestItem, as saving an object creates its properties' converters.</summary>
+	public class TestUnconvertibleItem
+	{
+		public TestUnconvertible Value { get; set; }
+	}
+
+	/// <summary>Its converter can't be created, like one named by an attribute whose assembly isn't available.</summary>
+	[TypeConverter(typeof(TestUnconvertibleConverter))]
+	public class TestUnconvertible
+	{
+	}
+
+	class TestUnconvertibleConverter : TypeConverter
+	{
+		public TestUnconvertibleConverter() => throw new InvalidOperationException("Converter should not be created");
+	}
+
 	/// <summary>Converted to from a TestItem by an internal converter, like Eto's TableRow.</summary>
 	[TypeConverter(typeof(TestRowConverter))]
 	public class TestRow
@@ -227,6 +244,13 @@ namespace Portable.Xaml.CodeGen.Tests.Types
 			var property = target?.TargetProperty as System.Reflection.PropertyInfo;
 			return $"{Prefix}:{target?.TargetObject?.GetType().Name}.{property?.Name}:{root?.RootObject?.GetType().Name}";
 		}
+	}
+
+	/// <summary>Returns a value that already fits, typed only as object, like Eto's binding.</summary>
+	[MarkupExtensionReturnType(typeof(object))]
+	public class UnconvertibleExtension : MarkupExtension
+	{
+		public override object ProvideValue(IServiceProvider serviceProvider) => new TestUnconvertible();
 	}
 
 	/// <summary>Returns null, like Eto's binding when the property has no value yet.</summary>

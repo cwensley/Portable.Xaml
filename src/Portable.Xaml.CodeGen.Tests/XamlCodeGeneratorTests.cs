@@ -301,6 +301,14 @@ namespace Gen
 		}
 
 		[Test]
+		public void ConverterIsNotCreatedWhenValueAlreadyFits()
+		{
+			var compiled = CodeGenHelper.Compile(CodeGenHelper.RootCode, Xaml("", @"<TestUnconvertibleItem Value=""{Unconvertible}"" />"));
+			var panel = (TestPanel)compiled.CreateGenerated();
+			Assert.IsNotNull(((TestUnconvertibleItem)panel.Children[0]).Value);
+		}
+
+		[Test]
 		public void PartialMethodDeclarationIsImplemented()
 		{
 			const string code = @"

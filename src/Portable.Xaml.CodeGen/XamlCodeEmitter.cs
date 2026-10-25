@@ -537,9 +537,10 @@ namespace Portable.Xaml.CodeGen
 			if (converter != null && onlyKnownAsBase)
 			{
 				// the runtime writer uses the value as-is when it already fits, so check at runtime
+				// and only look up the converter when it's needed, as that can probe for assemblies
 				_needsConvert = true;
 				var instance = ConverterInstance(converter, type, memberConverter != null ? member : null);
-				return new XamlExpression($"{ConvertMethod}<{TypeName(type)}>({value.Code}, {instance})", type);
+				return new XamlExpression($"{ConvertMethod}<{TypeName(type)}>({value.Code}, () => {instance})", type);
 			}
 			if (converter != null)
 				return UseConverter(converter, value, type, memberConverter != null ? member : null, lineInfo);
@@ -1014,8 +1015,8 @@ namespace Portable.Xaml.CodeGen
 			if (_needsConvert)
 			{
 				Line("");
-				Line($"static T {ConvertMethod}<T>(object value, global::System.ComponentModel.TypeConverter converter)");
-				Line("	=> value is T ? (T)value : value == null ? default(T) : (T)converter.ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, value);");
+				Line($"static T {ConvertMethod}<T>(object value, global::System.Func<global::System.ComponentModel.TypeConverter> converter)");
+				Line("	=> value is T ? (T)value : value == null ? default(T) : (T)converter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, value);");
 			}
 
 			WriteMembers(Line);
