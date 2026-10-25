@@ -2350,6 +2350,21 @@ $@"<TestClass7
 		}
 		
 		[Test]
+		public void PropertyShouldBeSetBeforeEndInit()
+		{
+			var xml =
+$@"<TestInitOwner xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
+	<TestInitOwner.Child>
+		<TestInitChild />
+	</TestInitOwner.Child>
+</TestInitOwner>".UpdateXml();
+
+			var result = (TestInitOwner)XamlServices.Parse(xml);
+
+			Assert.IsTrue(result.Child.OwnedAtEndInit, "The property should be set before EndInit, like System.Xaml");
+		}
+
+		[Test]
 		public void TestIsUsableDuringInitializationCorrectUsingOnMemberStart()
 		{
 			//NOTE: The assertion are happen in the TestClass8! Here just invoking methods 

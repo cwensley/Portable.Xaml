@@ -63,6 +63,9 @@ namespace Portable.Xaml.CodeGen
 		int _lastLine = -1;
 		bool _needsServiceProvider;
 		bool _needsConvert;
+		// EndInit for objects not yet stored in their parent, as the runtime writer stores them first
+		readonly List<string> _pendingEndInit = new List<string>();
+		bool _deferEndInit;
 
 		public XamlCodeEmitter(SymbolXamlSchemaContext context, XamlCodeGenOptions options, INamedTypeSymbol rootClass)
 		{
@@ -183,8 +186,30 @@ namespace Portable.Xaml.CodeGen
 				_scopes.Pop();
 			}
 
-			if (supportInitialize)
-				WriteLine($"((global::System.ComponentModel.ISupportInitialize){target.Code}).EndInit();");
+			if (isRoot)
+				WritePendingEndInit(0);
+			if (!supportInitialize)
+				return;
+			var endInit = $"((global::System.ComponentModel.ISupportInitialize){target.Code}).EndInit();";
+			if (isRoot)
+				WriteLine(endInit);
+			else
+				_pendingEndInit.Add(endInit);
+		}
+
+		/// <summary>Writes the EndInit calls held back since <paramref name="start"/>, once their objects are stored.</summary>
+		protected void WritePendingEndInit(int start = 0)
+		{
+			for (int i = start; i < _pendingEndInit.Count; i++)
+				WriteLine(_pendingEndInit[i]);
+			_pendingEndInit.RemoveRange(start, _pendingEndInit.Count - start);
+		}
+
+		/// <summary>Emits a value that the caller stores in its parent, then calls <see cref="WritePendingEndInit"/>.</summary>
+		protected XamlExpression EmitStoredValue(XamlValueNode value, ITypeSymbol type, SymbolXamlMember member, XamlValueTarget target, XamlObjectNode scope, bool allowAsIs = false)
+		{
+			_deferEndInit = true;
+			return EmitValue(value, type, member, target, scope, allowAsIs);
 		}
 
 		static readonly XamlMember[] s_handledDirectives =
@@ -246,12 +271,13 @@ namespace Portable.Xaml.CodeGen
 			if (symbolMember.IsReadOnly)
 				throw Error($"'{member.Name}' is read-only", memberNode.LineInfo);
 
-			var expr = EmitValue(value, symbolMember.ValueType, symbolMember, new XamlValueTarget(target, symbolMember), node);
+			var expr = EmitStoredValue(value, symbolMember.ValueType, symbolMember, new XamlValueTarget(target, symbolMember), node);
 			MarkLine(memberNode.LineInfo);
 			if (symbolMember.IsAttachable)
 				WriteLine($"{TypeName(symbolMember.Setter.ContainingType)}.{symbolMember.Setter.Name}({target.Code}, {expr.Code});");
 			else
 				WriteLine($"{target.Code}.{Identifier(member.Name)} = {expr.Code};");
+			WritePendingEndInit();
 		}
 
 		protected virtual void EmitEvent(XamlExpression target, SymbolXamlMember member, XamlMemberNode memberNode)
@@ -304,7 +330,7 @@ namespace Portable.Xaml.CodeGen
 					throw Error("Dictionary items must have an x:Key", value.LineInfo);
 				var keyType = Context.GetSymbol(collectionType.KeyType);
 				var key = EmitValue(keyNode.Values[0], keyType, null, null, value.Object);
-				var item = EmitValue(value, Context.GetSymbol(collectionType.ItemType), null, null, scope);
+				var item = EmitStoredValue(value, Context.GetSymbol(collectionType.ItemType), null, null, scope);
 				var keyText = keyNode.Values[0].Text;
 				if (keyText != null && item.Code != "null" && !SyntaxFacts.IsValidIdentifier(item.Code))
 				{
@@ -315,6 +341,7 @@ namespace Portable.Xaml.CodeGen
 				}
 				MarkLine(value.LineInfo);
 				WriteLine($"{collection.Code}.Add({key.Code}, {item.Code});");
+				WritePendingEndInit();
 				if (keyText != null && _scopes.Count > 0)
 				{
 					if (!_resources.TryGetValue(_scopes.Peek(), out var resources))
@@ -328,9 +355,10 @@ namespace Portable.Xaml.CodeGen
 				throw Error($"'{collectionType}' is not a collection", value.LineInfo);
 
 			var itemType = Context.GetSymbol(collectionType.ItemType);
-			var expr = EmitValue(value, itemType, null, null, scope, allowAsIs: true);
+			var expr = EmitStoredValue(value, itemType, null, null, scope, allowAsIs: true);
 			MarkLine(value.LineInfo);
 			WriteLine($"{AddTarget(collection, collectionSymbol)}.Add({expr.Code});");
+			WritePendingEndInit();
 		}
 
 		string AddTarget(XamlExpression collection, ITypeSymbol collectionSymbol)
@@ -353,10 +381,17 @@ namespace Portable.Xaml.CodeGen
 		/// <summary>Writes the code for a value converted to <paramref name="type"/>.</summary>
 		public virtual XamlExpression EmitValue(XamlValueNode value, ITypeSymbol type, SymbolXamlMember member, XamlValueTarget target, XamlObjectNode scope, bool allowAsIs = false)
 		{
+			var defer = _deferEndInit;
+			_deferEndInit = false;
 			if (value.Text != null)
 				return ConvertText(value.Text, type, member, scope, value.LineInfo, allowAsIs);
+			var start = _pendingEndInit.Count;
 			var expr = EmitObject(value.Object, type, target);
-			return ConvertValue(expr, type, member, value.LineInfo, allowAsIs);
+			expr = ConvertValue(expr, type, member, value.LineInfo, allowAsIs);
+			// values that aren't stored, e.g. arguments, are complete before they're used
+			if (!defer)
+				WritePendingEndInit(start);
+			return expr;
 		}
 
 		/// <summary>Writes the code that creates and fills an object, returning the expression for it.</summary>

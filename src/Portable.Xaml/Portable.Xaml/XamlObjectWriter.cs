@@ -446,6 +446,7 @@ namespace Portable.Xaml
 				if (!(state.Type.IsUsableDuringInitialization && state.WrittenProperties.Count > 0 && CurrentMemberState?.IsAlreadySet == true)) 
 				{
 					StoreAppropriatelyTypedValue(obj, state.KeyValue);
+					SetPropertyBeforeEndInit();
 				}
 			}
 
@@ -566,6 +567,19 @@ namespace Portable.Xaml
 				if (!xm.IsReadOnly) // exclude read-only object such as collection item.
 					SetValue(xm, CurrentMemberState.Value);
 			}
+		}
+
+		// System.Xaml sets an object's property before calling its EndInit, so it can see its parent
+		void SetPropertyBeforeEndInit()
+		{
+			var state = object_states.Count > 0 ? object_states.Peek() : null;
+			var ms = state?.CurrentMemberState;
+			if (ms == null || ms.Value == null || ms.IsAlreadySet || ms.Member.IsDirective || ms.Member.IsReadOnly)
+				return;
+			if (!state.IsInstantiated || (state.IsValueProvidedByParent && ms.Member.Type.IsCollection))
+				return;
+			SetValue(ms.Member, state.Value, ms.Value);
+			ms.IsAlreadySet = true;
 		}
 
 		void SetValue(XamlMember member, object value)

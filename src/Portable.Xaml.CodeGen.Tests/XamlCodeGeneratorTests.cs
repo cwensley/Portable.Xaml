@@ -290,6 +290,20 @@ namespace Gen
 		}
 
 		[Test]
+		public void EndInitIsCalledAfterStoringInTheOwner()
+		{
+			const string content = @"<TestInitItem Label=""outer""><TestInitItem.Child><TestInitItem Label=""child"" /></TestInitItem.Child><TestInitItem Label=""item""><TestInitItem Label=""nested"" /></TestInitItem></TestInitItem>";
+			var compiled = CodeGenHelper.Compile(CodeGenHelper.RootCode, Xaml("", content));
+			foreach (var (mode, panel) in new[] { ("compiled", (TestPanel)compiled.CreateGenerated()), ("runtime", (TestPanel)compiled.CreateRuntime(Xaml("", content))) })
+			{
+				var items = ((TestInitItem)panel.Children.Single()).Descendants().ToList();
+				Assert.That(items.Select(r => r.Label), Is.EquivalentTo(new[] { "child", "item", "nested" }));
+				foreach (var item in items)
+					Assert.IsTrue(item.OwnedAtEndInit, $"{mode}: {item.Label} should be in its owner at EndInit");
+			}
+		}
+
+		[Test]
 		public void NullFromMarkupExtensionIsNotConverted()
 		{
 			const string xaml = @"<TestItem Row=""{Nothing}"" />";
