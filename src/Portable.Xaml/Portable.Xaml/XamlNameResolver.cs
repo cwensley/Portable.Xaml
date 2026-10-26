@@ -51,6 +51,8 @@ namespace Portable.Xaml
 
 		Dictionary<string, NamedObject> objects = new Dictionary<string, NamedObject> ();
 		List<NamedObject> unnamed = new List<NamedObject>();
+		// finds an unnamed object without scanning the list, which made saving quadratic in the number of objects
+		Dictionary<object, NamedObject> unnamed_lookup = new Dictionary<object, NamedObject>(ReferenceComparer.Instance);
 		List<object> referenced = new List<object> ();
 
 		[MonoTODO]
@@ -66,6 +68,7 @@ namespace Portable.Xaml
 				OnNameScopeInitializationComplete (sender, EventArgs.Empty);
 			objects.Clear ();
 			unnamed.Clear ();
+			unnamed_lookup.Clear ();
 			used_reference_ids = 0;
 		}
 		
@@ -91,7 +94,14 @@ namespace Portable.Xaml
 			saved_referenced_count = 0;
 
 			if (saved_unnamed < unnamed.Count)
+			{
+				for (int i = saved_unnamed; i < unnamed.Count; i++)
+				{
+					if (unnamed_lookup.TryGetValue(unnamed[i].Value, out var existing) && ReferenceEquals(existing, unnamed[i]))
+						unnamed_lookup.Remove(unnamed[i].Value);
+				}
 				unnamed.RemoveRange (saved_unnamed, unnamed.Count - saved_unnamed);
+			}
 			saved_unnamed = 0;
 
 			used_reference_ids = saved_used_reference_ids;
@@ -101,7 +111,11 @@ namespace Portable.Xaml
 		{
 			if (value == null)
 				throw new ArgumentNullException ("value");
-			unnamed.Add (new NamedObject (null, value, fullyInitialized));
+			var namedObject = new NamedObject (null, value, fullyInitialized);
+			unnamed.Add (namedObject);
+			// the first one added is the one found
+			if (!unnamed_lookup.ContainsKey (value))
+				unnamed_lookup [value] = namedObject;
 		}
 		
 		public string GetName (object value)
@@ -127,20 +141,7 @@ namespace Portable.Xaml
 			if (name != null)
 				return name;
 
-			if (unnamed.Count == 0)
-				return null;
-
-			NamedObject un = null;
-			for (int i = 0; i < unnamed.Count; i++)
-			{
-				var r = unnamed[i];
-				if (ReferenceEquals(r.Value, value))
-				{
-					un = r;
-					break;
-				}
-			}
-			if (un == null)
+			if (unnamed.Count == 0 || value == null || !unnamed_lookup.TryGetValue (value, out var un))
 				return null;
 			
 			// generate a name for it, only when needed.

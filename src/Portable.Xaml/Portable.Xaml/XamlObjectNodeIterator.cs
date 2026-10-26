@@ -99,10 +99,11 @@ namespace Portable.Xaml
 			}
 		}
 
-		IEnumerable<XamlNodeInfo> GetNodes(XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null)
+		IEnumerable<XamlNodeInfo> GetNodes(XamlMember xm, XamlObject xobj, XamlType overrideMemberType = null, bool partOfPositionalParameters = false, XamlNodeInfo node = null, bool serializeChecked = false)
 		{
 			//If the item is invisible for the serialization then we must just skip it and return empty nodes info
-			if (!xobj.Type.ShouldSerialize(xobj.Value)) yield break;
+			// (serializeChecked so a ShouldSerialize method isn't called twice)
+			if (!serializeChecked && !xobj.Type.ShouldSerialize(xobj.Value)) yield break;
 
 			object val;
 			// Value - only for non-top-level node (thus xm != null)
@@ -157,44 +158,17 @@ namespace Portable.Xaml
 					yield break;
 				}
 
-				// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
-				if (!partOfPositionalParameters)
+				switch (GetContentValue(xm, val, overrideMemberType, partOfPositionalParameters, out var text))
 				{
-					if (xm.Invoker.IsDefaultValue(val))
+					case ContentValue.None:
 						yield break;
-					if (settings.IgnoreDefaultValues && xm.DefaultValue == null)
-					{
-						if (xm.Type?.UnderlyingType?.GetTypeInfo().IsValueType == true)
-						{
-							if (Equals(val, Activator.CreateInstance(xm.Type.UnderlyingType)))
-								yield break;
-						}
-						else if (ReferenceEquals(val, null))
-							yield break;
-					}
-				}
-
-				// overrideMemberType is (so far) used for XamlLanguage.Key.
-				var xtt = overrideMemberType ?? xm.Type;
-				if (!xtt.IsMarkupExtension && // this condition is to not serialize MarkupExtension whose type has TypeConverterAttribute (e.g. StaticExtension) as a string.
-					(xtt.IsContentValue(value_serializer_ctx) || xm.IsContentValue(value_serializer_ctx)))
-				{
-					// though null value is special: it is written as a standalone object.
-
-					if (val == null)
-					{
-						if (!partOfPositionalParameters)
-							foreach (var xn in GetNodes(null, null_object, node: node))
-								yield return xn;
-						else
-							yield return node.Set(String.Empty);
-					}
-					else if (!NameResolver.IsCollectingReferences) // for perf, getting string value can be expensive
-						yield return node.Set(TypeExtensionMethods.GetStringValue(xtt, xm, val, value_serializer_ctx));
-					else if (val is Type)
-						LookupType((Type)val);
-					//new XamlTypeName(xtt.SchemaContext.GetXamlType((Type)val)).ToString(value_serializer_ctx?.GetService(typeof(INamespacePrefixLookup)) as INamespacePrefixLookup);
-					yield break;
+					case ContentValue.Text:
+						yield return node.Set(text);
+						yield break;
+					case ContentValue.Null:
+						foreach (var xn in GetNodes(null, null_object, node: node))
+							yield return xn;
+						yield break;
 				}
 
 				// collection items: return GetObject and Items.
@@ -298,8 +272,27 @@ namespace Portable.Xaml
 			while (xce.MoveNext())
 			{
 				var xnm = xce.Current;
+				var memberValue = xnm.GetValue(xobject);
 
-				var en = GetNodes(xnm.Member, xnm.GetValue(xobject), node: node).GetEnumerator();
+				// most members are plain values, so write them without the cost of another iterator
+				var isSimple = IsSimpleMember(xnm.Member);
+				if (isSimple)
+				{
+					if (!memberValue.Type.ShouldSerialize(memberValue.Value))
+						continue;
+					var kind = GetContentValue(xnm.Member, memberValue.Value, null, false, out var text);
+					if (kind == ContentValue.None)
+						continue;
+					if (kind == ContentValue.Text)
+					{
+						yield return startNode.Set(XamlNodeType.StartMember, xnm.Member);
+						yield return node.Set(text);
+						yield return XamlNodeInfo.EndMember;
+						continue;
+					}
+				}
+
+				var en = GetNodes(xnm.Member, memberValue, node: node, serializeChecked: isSimple).GetEnumerator();
 				if (en.MoveNext())
 				{
 					if (!xnm.Member.IsWritePublic && xnm.Member.Type != null && (xnm.Member.Type.IsCollection || xnm.Member.Type.IsDictionary))
@@ -332,6 +325,77 @@ namespace Portable.Xaml
 			}
 
 			yield return XamlNodeInfo.EndObject;
+		}
+
+		enum ContentValue
+		{
+			/// <summary>Nothing is written, e.g. a default value.</summary>
+			None,
+			/// <summary>Written as a Value node with the text.</summary>
+			Text,
+			/// <summary>Written as a null object.</summary>
+			Null,
+			/// <summary>Not a content value, so it is written as an object.</summary>
+			Object
+		}
+
+		// a member that GetNodes would only check with ShouldSerialize and GetContentValue, so they can be used directly
+		static bool IsSimpleMember(XamlMember xm)
+		{
+			if (ReferenceEquals(xm, XamlLanguage.Items)
+				|| ReferenceEquals(xm, XamlLanguage.Arguments)
+				|| ReferenceEquals(xm, XamlLanguage.PositionalParameters)
+				|| ReferenceEquals(xm, XamlLanguage.Initialization)
+				|| xm.DeferringLoader != null
+				|| ReferenceEquals(xm.Type, null))
+				return false;
+			// read-only collections are checked for items by the caller
+			return xm.IsWritePublic || !(xm.Type.IsCollection || xm.Type.IsDictionary);
+		}
+
+		ContentValue GetContentValue(XamlMember xm, object val, XamlType overrideMemberType, bool partOfPositionalParameters, out string text)
+		{
+			text = null;
+			// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
+			if (!partOfPositionalParameters)
+			{
+				if (xm.Invoker.IsDefaultValue(val))
+					return ContentValue.None;
+				if (settings.IgnoreDefaultValues && xm.DefaultValue == null)
+				{
+					if (xm.Type?.UnderlyingType?.GetTypeInfo().IsValueType == true)
+					{
+						if (Equals(val, Activator.CreateInstance(xm.Type.UnderlyingType)))
+							return ContentValue.None;
+					}
+					else if (ReferenceEquals(val, null))
+						return ContentValue.None;
+				}
+			}
+
+			// overrideMemberType is (so far) used for XamlLanguage.Key.
+			var xtt = overrideMemberType ?? xm.Type;
+			if (!xtt.IsMarkupExtension && // this condition is to not serialize MarkupExtension whose type has TypeConverterAttribute (e.g. StaticExtension) as a string.
+				(xtt.IsContentValue(value_serializer_ctx) || xm.IsContentValue(value_serializer_ctx)))
+			{
+				// though null value is special: it is written as a standalone object.
+				if (val == null)
+				{
+					if (!partOfPositionalParameters)
+						return ContentValue.Null;
+					text = String.Empty;
+					return ContentValue.Text;
+				}
+				if (!NameResolver.IsCollectingReferences) // for perf, getting string value can be expensive
+				{
+					text = TypeExtensionMethods.GetStringValue(xtt, xm, val, value_serializer_ctx);
+					return ContentValue.Text;
+				}
+				if (val is Type)
+					LookupType((Type)val);
+				return ContentValue.None;
+			}
+			return ContentValue.Object;
 		}
 
 		bool IsPublicOrVisible(Type type)
