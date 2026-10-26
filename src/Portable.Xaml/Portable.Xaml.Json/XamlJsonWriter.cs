@@ -30,9 +30,20 @@ namespace Portable.Xaml.Json
 		{
 			var state = CurrentState;
 			var type = state.Type;
-			if (directTypes.Contains(type))
-				return;
+			if (!directTypes.Contains(type))
+			{
+				var member = LastState?.CurrentMember;
+				if (member?.Type?.IsCollection == true && member?.Type?.IsDictionary != true && state.IsGetObject)
+					_writer.Write("]");
+				else
+				{
+					_writer.Write("}");
+					if (type.IsMarkupExtension && !ReferenceEquals(type, XamlLanguage.Reference))
+						_writer.Write("\"");
+				}
+			}
 
+			// dictionary items are written aside until their key is known, including strings and nulls
 			var last = LastState;
 			var parentType = last?.Type;
 			if (parentType?.IsDictionary == true && _writers.Count > 0)
@@ -46,19 +57,6 @@ namespace Portable.Xaml.Json
 				}
 				_writer.Write(oldWriter);
 			}
-
-
-
-			var member = LastState?.CurrentMember;
-			if (member?.Type?.IsCollection == true && member?.Type?.IsDictionary != true && state.IsGetObject)
-			{
-				_writer.Write("]");
-				return;
-			}
-			_writer.Write("}");
-
-			if (type.IsMarkupExtension && !ReferenceEquals(type, XamlLanguage.Reference))
-				_writer.Write("\"");
 		}
 
 		protected override void OnWriteGetObject()
@@ -120,6 +118,8 @@ namespace Portable.Xaml.Json
 			if (!string.IsNullOrEmpty(name))
 			{
 				_writer.Write('\"');
+				if (buffer.Length < name.Length)
+					buffer = new char[name.Length];
 				int start = 0;
 				for (int i = 0; i < name.Length; i++)
 				{
@@ -127,6 +127,9 @@ namespace Portable.Xaml.Json
 					string text;
 					switch (ch)
 					{
+						case '\"':
+							text = "\\\"";
+							break;
 						case '\n':
 							text = "\\n";
 							break;
@@ -146,10 +149,9 @@ namespace Portable.Xaml.Json
 							text = "\\\\";
 							break;
 						default:
-							if (ch > 20)
+							if (ch >= 0x20)
 								continue;
-							// todo: write unicode value \u1234
-							text = @"\u1234";
+							text = "\\u" + ((int)ch).ToString("x4");
 							break;
 					}
 					var len = i - start;
@@ -240,7 +242,7 @@ namespace Portable.Xaml.Json
 			}
 
 			var type = state.Type;
-			if (ReferenceEquals(type, XamlLanguage.Null))
+			if (type == XamlLanguage.Null)
 			{
 				_writer.Write("null");
 				return;
@@ -274,7 +276,7 @@ namespace Portable.Xaml.Json
 			if (parentType?.IsDictionary == true || parentType?.IsCollection == true)
 				memberType = parentType.ItemType;
 			else
-				memberType = CurrentMember?.Type;
+				memberType = last?.CurrentMember?.Type;
 
 			if (type != memberType)
 			{
@@ -299,14 +301,14 @@ namespace Portable.Xaml.Json
 			XamlLanguage.Null
 		};
 
-		static HashSet<XamlType> numericTypes = new HashSet<XamlType> {
-			XamlLanguage.Byte,
-			XamlLanguage.Decimal,
-			XamlLanguage.Double,
-			XamlLanguage.Int16,
-			XamlLanguage.Int32,
-			XamlLanguage.Int64,
-			XamlLanguage.Single
+		static HashSet<Type> numericTypes = new HashSet<Type> {
+			typeof(byte),
+			typeof(decimal),
+			typeof(double),
+			typeof(short),
+			typeof(int),
+			typeof(long),
+			typeof(float)
 		};
 
 		protected override void OnWriteValue(object value)
@@ -319,15 +321,24 @@ namespace Portable.Xaml.Json
 				state.KeyValue = value;
 				return;
 			}
-			if (ReferenceEquals(member.Type, XamlLanguage.Boolean))
+			// types from other schema contexts aren't the same instances, so compare the CLR type
+			var valueType = (ReferenceEquals(member, XamlLanguage.Initialization) ? type : member.Type)?.UnderlyingType;
+			if (valueType != null)
+				valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
+			if (valueType == typeof(bool))
 			{
-				_writer.Write(string.Equals(Convert.ToString(value), "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false");
+				_writer.Write(string.Equals(Convert.ToString(value, CultureInfo.InvariantCulture), "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false");
 				return;
 			}
 
-			if (numericTypes.Contains(type))
+			if (valueType != null && numericTypes.Contains(valueType))
 			{
-				_writer.Write(Convert.ToString(value, CultureInfo.InvariantCulture));
+				var number = Convert.ToString(value, CultureInfo.InvariantCulture);
+				// NaN and Infinity aren't valid JSON numbers
+				if (double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) && !double.IsNaN(d) && !double.IsInfinity(d))
+					_writer.Write(number);
+				else
+					WriteEscapedString(number);
 				return;
 			}
 
