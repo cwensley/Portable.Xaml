@@ -125,19 +125,7 @@ namespace Tests.Portable.Xaml.Schema
 		{
 			var pi = str_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-#if WINDOWS_UWP
-			try
-			{
-				i.GetValue(new StringBuilder());
-				Assert.Fail("Expected TargetException");
-			}
-			catch (Exception e)
-			{
-				Assert.AreEqual("TargetException", e.GetType().Name);
-			}
-#else
 			Assert.Throws<TargetException> (() => i.GetValue (new StringBuilder ()));
-#endif
 		}
 
 		[Test]
@@ -181,19 +169,7 @@ namespace Tests.Portable.Xaml.Schema
 		{
 			var pi = sb_len;
 			var i = new XamlMemberInvoker (new XamlMember (pi, sctx));
-#if WINDOWS_UWP
-			try
-			{
-				i.SetValue("hello", 5);
-				Assert.Fail("Expected TargetException");
-			}
-			catch (Exception e)
-			{
-				Assert.AreEqual("TargetException", e.GetType().Name);
-			}
-#else
 			Assert.Throws<TargetException> (() => i.SetValue ("hello", 5));
-#endif
 		}
 
 		// Event

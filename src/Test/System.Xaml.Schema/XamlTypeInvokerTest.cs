@@ -218,9 +218,7 @@ namespace Tests.Portable.Xaml.Schema
 				i.AddToCollection (new ArrayExtension (), 5);
 				Assert.Fail ("not supported operation.");
 			} catch (NotSupportedException) {
-#if !WINDOWS_UWP
 			} catch (TargetException) {
-#endif
 				// .NET throws this, but the difference should not really matter.
 			}
 		}
