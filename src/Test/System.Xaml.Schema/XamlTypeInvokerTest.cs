@@ -390,5 +390,61 @@ namespace Tests.Portable.Xaml.Schema
 			Assert.IsNull (XamlTypeInvoker.UnknownInvoker.SetTypeConverterHandler, "#2");
 			Assert.IsNull (XamlTypeInvoker.UnknownInvoker.GetAddMethod (XamlLanguage.Object), "#3");
 		}
+
+#if PORTABLE_XAML
+		class ExplicitAddCollection : ICollection<string>
+		{
+			public readonly List<string> Items = new List<string> ();
+			void ICollection<string>.Add (string item) => Items.Add (item);
+			public int Count => Items.Count;
+			public bool IsReadOnly => false;
+			public void Clear () => Items.Clear ();
+			public bool Contains (string item) => Items.Contains (item);
+			public void CopyTo (string [] array, int arrayIndex) => Items.CopyTo (array, arrayIndex);
+			public bool Remove (string item) => Items.Remove (item);
+			public IEnumerator<string> GetEnumerator () => Items.GetEnumerator ();
+			IEnumerator IEnumerable.GetEnumerator () => Items.GetEnumerator ();
+		}
+
+		class ExplicitAddDictionary : IDictionary
+		{
+			readonly Hashtable items = new Hashtable ();
+			void IDictionary.Add (object key, object value) => items.Add (key, value);
+			public object this [object key] { get => items [key]; set => items [key] = value; }
+			public ICollection Keys => items.Keys;
+			public ICollection Values => items.Values;
+			public bool IsReadOnly => false;
+			public bool IsFixedSize => false;
+			public int Count => items.Count;
+			public object SyncRoot => items.SyncRoot;
+			public bool IsSynchronized => false;
+			public void Clear () => items.Clear ();
+			public bool Contains (object key) => items.Contains (key);
+			public IDictionaryEnumerator GetEnumerator () => items.GetEnumerator ();
+			public void Remove (object key) => items.Remove (key);
+			public void CopyTo (Array array, int index) => items.CopyTo (array, index);
+			IEnumerator IEnumerable.GetEnumerator () => items.GetEnumerator ();
+		}
+
+		[TestCase (XamlInvokerOptions.None)]
+		[TestCase (XamlInvokerOptions.Compile)]
+		[TestCase (XamlInvokerOptions.DeferCompile)]
+		public void ExplicitAddShouldBeUsed (XamlInvokerOptions options)
+		{
+			var context = new XamlSchemaContext (new XamlSchemaContextSettings { InvokerOptions = options });
+			var collection = new ExplicitAddCollection ();
+			var collectionInvoker = context.GetXamlType (typeof (ExplicitAddCollection)).Invoker;
+			collectionInvoker.AddToCollection (collection, "a");
+			collectionInvoker.AddToCollection (collection, "b");
+			CollectionAssert.AreEqual (new [] { "a", "b" }, collection.Items);
+
+			var dictionary = new ExplicitAddDictionary ();
+			var dictionaryInvoker = context.GetXamlType (typeof (ExplicitAddDictionary)).Invoker;
+			dictionaryInvoker.AddToDictionary (dictionary, "x", 1);
+			dictionaryInvoker.AddToDictionary (dictionary, "y", 2);
+			Assert.AreEqual (1, dictionary ["x"]);
+			Assert.AreEqual (2, dictionary ["y"]);
+		}
+#endif
 	}
 }

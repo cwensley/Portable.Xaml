@@ -220,12 +220,12 @@ namespace Portable.Xaml.Schema
 					throw new InvalidOperationException($"The dictionary type '{instanceType}' does not have 'Add' method");
 				if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
 				{
-					cache[key] = addDelegate = (i, k, v) => mi.Invoke(i, new object[] { k, v });
-					Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCall2Expression());
+					cache[lookupKey] = addDelegate = (i, k, v) => mi.Invoke(i, new object[] { k, v });
+					Task.Factory.StartNew(() => cache[lookupKey] = addDelegate = mi.BuildCall2Expression());
 				}
 				else
 				{
-					cache[key] = addDelegate = mi.BuildCall2Expression();
+					cache[lookupKey] = addDelegate = mi.BuildCall2Expression();
 				}
 				addDelegate(instance, key, item);
 			}
@@ -266,11 +266,10 @@ namespace Portable.Xaml.Schema
 
 		MethodInfo LookupAddMethod (Type ct, Type iface)
 		{
-			var map = ct.GetTypeInfo().GetRuntimeInterfaceMap(iface);
-			for (int i = 0; i < map.TargetMethods.Length; i++)
-				if (map.InterfaceMethods [i].Name == "Add")
-					return map.TargetMethods [i];
-			return null;
+			// calling the interface method reaches explicit implementations, and avoids GetRuntimeInterfaceMap which .NET Native doesn't support
+			if (!iface.GetTypeInfo().IsAssignableFrom(ct.GetTypeInfo()))
+				return null;
+			return iface.GetTypeInfo().GetDeclaredMethod("Add");
 		}
 
 		public virtual object CreateInstance (object [] arguments)
