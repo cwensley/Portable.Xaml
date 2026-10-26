@@ -1,0 +1,2 @@
+$type: Benchmark.Portable.Xaml.TestObject, Benchmark.Portable.Xaml
+StringProperty: Hello!
