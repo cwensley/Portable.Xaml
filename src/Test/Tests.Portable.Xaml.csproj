@@ -8,13 +8,6 @@
     <IsPackable>False</IsPackable>
   </PropertyGroup>
 	<ItemGroup>
-		<Compile Remove="MainTestPage.*" />
-		<Compile Remove="UnitTestApp.*" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Remove="MainTestPage.*" />
-		<None Remove="UnitTestApp.*" />
-		<None Remove="*.appxmanifest" />
 		<None Remove="XmlFiles\**" />
 		<EmbeddedResource Include="XmlFiles\*.*" />
 	</ItemGroup>

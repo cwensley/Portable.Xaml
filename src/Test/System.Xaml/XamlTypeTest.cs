@@ -574,9 +574,7 @@ namespace Tests.Portable.Xaml
 			Assert.IsNull (new XamlType (typeof (List<object>), sctx).TypeConverter, "#1");
 			Assert.IsNull (new XamlType (typeof (Dictionary<object, object>), sctx).TypeConverter, "#1");
 			Assert.IsNotNull (new XamlType (typeof (object), sctx).TypeConverter, "#2");
-#if !WINDOWS_UWP
 			Assert.IsTrue (new XamlType (typeof (Uri), sctx).TypeConverter.ConverterInstance.GetType().Name == "UriTypeConverter", "#3");
-#endif
 			Assert.IsTrue (new XamlType (typeof (TimeSpan), sctx).TypeConverter.ConverterInstance is TimeSpanConverter, "#4");
 			Assert.IsNull (new XamlType (typeof (XamlType), sctx).TypeConverter, "#5");
 			Assert.IsTrue (new XamlType (typeof (char), sctx).TypeConverter.ConverterInstance is CharConverter, "#6");

@@ -1,10 +1,4 @@
 <Solution>
-  <Configurations>
-    <Platform Name="Any CPU" />
-    <Platform Name="ARM" />
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
   <Folder Name="/build/">
     <File Path="build/Build.proj" />
     <File Path="build/Utilities.targets" />
@@ -15,16 +9,6 @@
   <Project Path="src/Portable.Xaml/Portable.Xaml.csproj" />
   <Project Path="src/Portable.Xaml.CodeGen/Portable.Xaml.CodeGen.csproj" />
   <Project Path="src/Portable.Xaml.CodeGen.Tests/Portable.Xaml.CodeGen.Tests.csproj" />
-  <Project Path="src/Test/Portable.Xaml-tests-uwp.csproj">
-    <Platform Solution="*|Any CPU" Project="x86" />
-    <Platform Solution="*|ARM" Project="ARM" />
-    <Platform Solution="*|x64" Project="x64" />
-    <Platform Solution="*|x86" Project="x86" />
-    <Build Solution="*|Any CPU" Project="false" />
-    <Deploy Solution="*|ARM" />
-    <Deploy Solution="*|x64" />
-    <Deploy Solution="*|x86" />
-  </Project>
   <Project Path="src/Test/Tests.Portable.Xaml.csproj" />
   <Project Path="src/Test/Tests.System.Xaml.csproj" />
 </Solution>
