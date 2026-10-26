@@ -11,10 +11,13 @@ namespace Benchmark.Portable.Xaml
 	{
 		Json.JsonLoadComplexBenchmark json = new Json.JsonLoadComplexBenchmark();
 		Xml.XmlLoadComplexBenchmark xml = new Xml.XmlLoadComplexBenchmark();
+		Yaml.YamlLoadComplexBenchmark yaml = new Yaml.YamlLoadComplexBenchmark();
 
 		[Benchmark(Baseline = true)]
 		public void PortableXamlXml() => xml.PortableXaml();
 		[Benchmark]
 		public void PortableXamlJson() => json.PortableXaml();
+		[Benchmark]
+		public void PortableXamlYaml() => yaml.PortableXaml();
 	}
 }

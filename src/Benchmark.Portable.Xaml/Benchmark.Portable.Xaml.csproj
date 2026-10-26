@@ -20,11 +20,13 @@
   <ItemGroup>
     <EmbeddedResource Include="Xml\*.xml" />
     <EmbeddedResource Include="Json\*.json" />
+    <EmbeddedResource Include="Yaml\*.yaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageReference Include="System.Collections.Immutable" Version="10.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Portable.Xaml\Portable.Xaml.csproj" />
