@@ -1,54 +1,339 @@
-﻿<TestObject xmlns="http://example.com/benchmark" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	StringProperty="Hello!"
-	>
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-	<ChildObject StringProperty="Hello" IntProperty="2" DoubleProperty="123.456" BoolProperty="True" />
-</TestObject>
+<ComplexObject Description="Application settings with &quot;quoted&quot; text, &lt;markup&gt; &amp; a&#xA;second line" Kind="Primary" Name="Settings" Version="3" xmlns="http://example.com/benchmark" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<ComplexObject.DefaultStyle>
+		<ItemStyle Bold="False" Color="#FF202020" FontFamily="Segoe UI" FontSize="12" Kind="Primary" />
+	</ComplexObject.DefaultStyle>
+	<GroupItem Expanded="True" Id="group0" Order="0" Title="Group 0" Visible="True">
+		<TextItem Id="group0.item0" MaxLength="100" Text="Some text value 0" Title="Text 0" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group0.item1" Maximum="100" Minimum="-100" Order="1" Title="Number 1" Value="1.25" Visible="True" />
+		<ChoiceItem Id="group0.item2" Kind="Secondary" Title="Choice 2" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group0.item3" MaxLength="103" Text="Some text value 3" Title="Text 3" Visible="True" />
+		<NumberItem Id="group0.item4" Maximum="100" Minimum="-100" Order="4" Step="0.5" Title="Number 4" Value="5" Visible="True" />
+		<ChoiceItem Id="group0.item5" Kind="Primary" Title="Choice 5" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group0.item6" MaxLength="106" Text="Some text value 6" Title="Text 6" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group0.item7" Maximum="100" Minimum="-100" Order="7" Title="Number 7" Value="8.75" Visible="True" />
+		<GroupItem Expanded="True" Id="group0.0" Order="0" Title="Group 0.0" Visible="True">
+			<TextItem Id="group0.0.item0" MaxLength="100" Text="Some text value 0" Title="Text 0" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group0.0.item1" Maximum="100" Minimum="-100" Order="1" Title="Number 1" Value="1.25" Visible="True" />
+			<ChoiceItem Id="group0.0.item2" Kind="Secondary" Title="Choice 2" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group0.0.item3" MaxLength="103" Text="Some text value 3" Title="Text 3" Visible="True" />
+		</GroupItem>
+		<GroupItem Expanded="False" Id="group0.1" Order="1" Title="Group 0.1" Visible="True">
+			<NumberItem Id="group0.1.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+			<ChoiceItem Id="group0.1.item1" Kind="Primary" Title="Choice 1" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group0.1.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group0.1.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		</GroupItem>
+	</GroupItem>
+	<GroupItem Expanded="False" Id="group1" Order="1" Title="Group 1" Visible="True">
+		<NumberItem Id="group1.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+		<ChoiceItem Id="group1.item1" Kind="Primary" Title="Choice 1" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group1.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group1.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		<ChoiceItem Id="group1.item4" Kind="None" Title="Choice 4" Visible="False">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group1.item5" MaxLength="105" Text="Some text value 5" Title="Text 5" Visible="True" />
+		<NumberItem Id="group1.item6" Maximum="100" Minimum="-100" Order="6" Step="0.5" Title="Number 6" Value="7.5" Visible="True" />
+		<ChoiceItem Id="group1.item7" Kind="Hidden" Title="Choice 7" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<GroupItem Expanded="False" Id="group1.0" Order="1" Title="Group 1.0" Visible="True">
+			<NumberItem Id="group1.0.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+			<ChoiceItem Id="group1.0.item1" Kind="Primary" Title="Choice 1" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group1.0.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group1.0.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		</GroupItem>
+		<GroupItem Expanded="True" Id="group1.1" Order="2" Title="Group 1.1" Visible="True">
+			<ChoiceItem Id="group1.1.item0" Kind="None" Title="Choice 0" Visible="False">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group1.1.item1" MaxLength="101" Text="Some text value 1" Title="Text 1" Visible="True" />
+			<NumberItem Id="group1.1.item2" Maximum="100" Minimum="-100" Order="2" Step="0.5" Title="Number 2" Value="2.5" Visible="True" />
+			<ChoiceItem Id="group1.1.item3" Kind="Hidden" Title="Choice 3" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+		</GroupItem>
+	</GroupItem>
+	<GroupItem Expanded="True" Id="group2" Order="2" Title="Group 2" Visible="True">
+		<ChoiceItem Id="group2.item0" Kind="None" Title="Choice 0" Visible="False">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group2.item1" MaxLength="101" Text="Some text value 1" Title="Text 1" Visible="True" />
+		<NumberItem Id="group2.item2" Maximum="100" Minimum="-100" Order="2" Step="0.5" Title="Number 2" Value="2.5" Visible="True" />
+		<ChoiceItem Id="group2.item3" Kind="Hidden" Title="Choice 3" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group2.item4" MaxLength="104" Text="Some text value 4" Title="Text 4" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group2.item5" Maximum="100" Minimum="-100" Order="5" Title="Number 5" Value="6.25" Visible="True" />
+		<ChoiceItem Id="group2.item6" Kind="Secondary" Title="Choice 6" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group2.item7" MaxLength="107" Text="Some text value 7" Title="Text 7" Visible="True" />
+		<GroupItem Expanded="True" Id="group2.0" Order="2" Title="Group 2.0" Visible="True">
+			<ChoiceItem Id="group2.0.item0" Kind="None" Title="Choice 0" Visible="False">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group2.0.item1" MaxLength="101" Text="Some text value 1" Title="Text 1" Visible="True" />
+			<NumberItem Id="group2.0.item2" Maximum="100" Minimum="-100" Order="2" Step="0.5" Title="Number 2" Value="2.5" Visible="True" />
+			<ChoiceItem Id="group2.0.item3" Kind="Hidden" Title="Choice 3" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+		</GroupItem>
+		<GroupItem Expanded="False" Id="group2.1" Order="3" Title="Group 2.1" Visible="True">
+			<TextItem Id="group2.1.item0" MaxLength="100" Text="Some text value 0" Title="Text 0" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group2.1.item1" Maximum="100" Minimum="-100" Order="1" Title="Number 1" Value="1.25" Visible="True" />
+			<ChoiceItem Id="group2.1.item2" Kind="Secondary" Title="Choice 2" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group2.1.item3" MaxLength="103" Text="Some text value 3" Title="Text 3" Visible="True" />
+		</GroupItem>
+	</GroupItem>
+	<GroupItem Expanded="False" Id="group3" Order="3" Title="Group 3" Visible="True">
+		<TextItem Id="group3.item0" MaxLength="100" Text="Some text value 0" Title="Text 0" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group3.item1" Maximum="100" Minimum="-100" Order="1" Title="Number 1" Value="1.25" Visible="True" />
+		<ChoiceItem Id="group3.item2" Kind="Secondary" Title="Choice 2" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group3.item3" MaxLength="103" Text="Some text value 3" Title="Text 3" Visible="True" />
+		<NumberItem Id="group3.item4" Maximum="100" Minimum="-100" Order="4" Step="0.5" Title="Number 4" Value="5" Visible="True" />
+		<ChoiceItem Id="group3.item5" Kind="Primary" Title="Choice 5" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group3.item6" MaxLength="106" Text="Some text value 6" Title="Text 6" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group3.item7" Maximum="100" Minimum="-100" Order="7" Title="Number 7" Value="8.75" Visible="True" />
+		<GroupItem Expanded="False" Id="group3.0" Order="3" Title="Group 3.0" Visible="True">
+			<TextItem Id="group3.0.item0" MaxLength="100" Text="Some text value 0" Title="Text 0" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group3.0.item1" Maximum="100" Minimum="-100" Order="1" Title="Number 1" Value="1.25" Visible="True" />
+			<ChoiceItem Id="group3.0.item2" Kind="Secondary" Title="Choice 2" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group3.0.item3" MaxLength="103" Text="Some text value 3" Title="Text 3" Visible="True" />
+		</GroupItem>
+		<GroupItem Expanded="True" Id="group3.1" Order="4" Title="Group 3.1" Visible="True">
+			<NumberItem Id="group3.1.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+			<ChoiceItem Id="group3.1.item1" Kind="Primary" Title="Choice 1" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group3.1.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group3.1.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		</GroupItem>
+	</GroupItem>
+	<GroupItem Expanded="True" Id="group4" Order="4" Title="Group 4" Visible="True">
+		<NumberItem Id="group4.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+		<ChoiceItem Id="group4.item1" Kind="Primary" Title="Choice 1" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group4.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+			<TextItem.Style>
+				<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+			</TextItem.Style>
+		</TextItem>
+		<NumberItem Id="group4.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		<ChoiceItem Id="group4.item4" Kind="None" Title="Choice 4" Visible="False">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<TextItem Id="group4.item5" MaxLength="105" Text="Some text value 5" Title="Text 5" Visible="True" />
+		<NumberItem Id="group4.item6" Maximum="100" Minimum="-100" Order="6" Step="0.5" Title="Number 6" Value="7.5" Visible="True" />
+		<ChoiceItem Id="group4.item7" Kind="Hidden" Title="Choice 7" Visible="True">
+			<ChoiceItem.Options>
+				<x:String>First</x:String>
+				<x:String>Second</x:String>
+				<x:String>Third</x:String>
+			</ChoiceItem.Options>
+		</ChoiceItem>
+		<GroupItem Expanded="True" Id="group4.0" Order="4" Title="Group 4.0" Visible="True">
+			<NumberItem Id="group4.0.item0" Maximum="100" Minimum="-100" Order="0" Step="0.5" Title="Number 0" Value="0" Visible="True" />
+			<ChoiceItem Id="group4.0.item1" Kind="Primary" Title="Choice 1" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group4.0.item2" MaxLength="102" Text="Some text value 2" Title="Text 2" Visible="True">
+				<TextItem.Style>
+					<ItemStyle Bold="True" Color="#FF0000FF" FontFamily="Consolas" FontSize="10.5" Kind="Secondary" />
+				</TextItem.Style>
+			</TextItem>
+			<NumberItem Id="group4.0.item3" Maximum="100" Minimum="-100" Order="3" Title="Number 3" Value="3.75" Visible="True" />
+		</GroupItem>
+		<GroupItem Expanded="False" Id="group4.1" Order="5" Title="Group 4.1" Visible="True">
+			<ChoiceItem Id="group4.1.item0" Kind="None" Title="Choice 0" Visible="False">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+			<TextItem Id="group4.1.item1" MaxLength="101" Text="Some text value 1" Title="Text 1" Visible="True" />
+			<NumberItem Id="group4.1.item2" Maximum="100" Minimum="-100" Order="2" Step="0.5" Title="Number 2" Value="2.5" Visible="True" />
+			<ChoiceItem Id="group4.1.item3" Kind="Hidden" Title="Choice 3" Visible="True">
+				<ChoiceItem.Options>
+					<x:String>First</x:String>
+					<x:String>Second</x:String>
+					<x:String>Third</x:String>
+				</ChoiceItem.Options>
+			</ChoiceItem>
+		</GroupItem>
+	</GroupItem>
+	<ComplexObject.Properties>
+		<x:String x:Key="author">Benchmark</x:String>
+		<x:String x:Key="license">MIT</x:String>
+		<x:String x:Key="culture">en-US</x:String>
+		<x:String x:Key="theme">dark</x:String>
+	</ComplexObject.Properties>
+	<ComplexObject.Tags>
+		<x:String>general</x:String>
+		<x:String>appearance</x:String>
+		<x:String>advanced</x:String>
+		<x:String>experimental</x:String>
+	</ComplexObject.Tags>
+</ComplexObject>

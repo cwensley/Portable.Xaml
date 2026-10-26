@@ -8,6 +8,6 @@ namespace Benchmark.Portable.Xaml.Yaml
 {
 	public class YamlSaveSimpleBenchmark : SaveBenchmark
 	{
-		public override object Instance => new TestObject { StringProperty = "Hello" };
+		public override object Instance => TestData.Simple;
 	}
 }
