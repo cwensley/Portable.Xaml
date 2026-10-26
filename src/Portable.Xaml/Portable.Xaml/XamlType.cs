@@ -42,7 +42,8 @@ namespace Portable.Xaml
 		public static readonly ReferenceComparer Instance = new ReferenceComparer();
 		bool IEqualityComparer<object>.Equals(object x, object y) => ReferenceEquals(x, y);
 
-		public int GetHashCode(object obj) => obj.GetHashCode();
+		// match Equals; XamlMember.GetHashCode hashes several strings on every lookup
+		public int GetHashCode(object obj) => RuntimeHelpers.GetHashCode(obj);
 	}
 
 	public class XamlType : IEquatable<XamlType>

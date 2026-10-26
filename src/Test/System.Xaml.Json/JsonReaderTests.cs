@@ -199,6 +199,27 @@ namespace Tests.Portable.Xaml.Json
 		}
 
 		[Test]
+		public void StringsAcrossReadBufferShouldLoad()
+		{
+			// lengths vary so strings start, end, and escape at every point of the reader's buffer
+			var texts = Enumerable.Range(0, 100).Select(i => new string((char)('a' + i % 26), i * 13) + (i % 2 == 0 ? "\"" : "")).ToList();
+			var escaped = texts.Select(r => r.Replace("\"", "\\\"")).ToList();
+			var json = "{ Items: [\n" + string.Join(",\n", escaped.Select(r => "{ Text: \"" + r + "\", Flag: true }")) + "\n] }";
+			var context = new XamlSchemaContext();
+			var reader = new XamlJsonReader(new StringReader(json), context, CreateSettings(context, typeof(JsonItem)));
+			var positions = new List<string>();
+			while (reader.Read())
+			{
+				if (reader.NodeType == XamlNodeType.Value || (reader.NodeType == XamlNodeType.StartMember && reader.Member.Name == "Flag"))
+					positions.Add($"{reader.LineNumber},{reader.LinePosition}");
+			}
+			// the Flag after each string shows the string moved the position by its length
+			CollectionAssert.AreEqual(escaped.SelectMany((r, i) => new[] { $"{i + 2},9", $"{i + 2},{r.Length + 13}", $"{i + 2},{r.Length + 19}" }), positions);
+
+			CollectionAssert.AreEqual(texts, Load<JsonItem>(json).Items.Select(r => r.Text));
+		}
+
+		[Test]
 		public void SubclassShouldFillInTypes()
 		{
 			var table = Load<JsonTable>(@"{
