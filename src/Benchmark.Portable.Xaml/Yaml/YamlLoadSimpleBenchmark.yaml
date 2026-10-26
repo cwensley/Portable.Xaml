@@ -1,2 +1,204 @@
-$type: Benchmark.Portable.Xaml.TestObject, Benchmark.Portable.Xaml
+$ns: http://example.com/benchmark
+$type: TestObject
 StringProperty: Hello!
+Children:
+  - BoolProperty: true
+    DoubleProperty: 100
+    IntProperty: 0
+    StringProperty: Child 0
+  - BoolProperty: false
+    DoubleProperty: 100.25
+    IntProperty: 10
+    StringProperty: Child 1
+  - BoolProperty: true
+    DoubleProperty: 100.5
+    IntProperty: 20
+    StringProperty: Child 2
+  - BoolProperty: false
+    DoubleProperty: 100.75
+    IntProperty: 30
+    StringProperty: Child 3
+  - BoolProperty: true
+    DoubleProperty: 101
+    IntProperty: 40
+    StringProperty: Child 4
+  - BoolProperty: false
+    DoubleProperty: 101.25
+    IntProperty: 50
+    StringProperty: Child 5
+  - BoolProperty: true
+    DoubleProperty: 101.5
+    IntProperty: 60
+    StringProperty: Child 6
+  - BoolProperty: false
+    DoubleProperty: 101.75
+    IntProperty: 70
+    StringProperty: Child 7
+  - BoolProperty: true
+    DoubleProperty: 102
+    IntProperty: 80
+    StringProperty: Child 8
+  - BoolProperty: false
+    DoubleProperty: 102.25
+    IntProperty: 90
+    StringProperty: Child 9
+  - BoolProperty: true
+    DoubleProperty: 102.5
+    IntProperty: 100
+    StringProperty: Child 10
+  - BoolProperty: false
+    DoubleProperty: 102.75
+    IntProperty: 110
+    StringProperty: Child 11
+  - BoolProperty: true
+    DoubleProperty: 103
+    IntProperty: 120
+    StringProperty: Child 12
+  - BoolProperty: false
+    DoubleProperty: 103.25
+    IntProperty: 130
+    StringProperty: Child 13
+  - BoolProperty: true
+    DoubleProperty: 103.5
+    IntProperty: 140
+    StringProperty: Child 14
+  - BoolProperty: false
+    DoubleProperty: 103.75
+    IntProperty: 150
+    StringProperty: Child 15
+  - BoolProperty: true
+    DoubleProperty: 104
+    IntProperty: 160
+    StringProperty: Child 16
+  - BoolProperty: false
+    DoubleProperty: 104.25
+    IntProperty: 170
+    StringProperty: Child 17
+  - BoolProperty: true
+    DoubleProperty: 104.5
+    IntProperty: 180
+    StringProperty: Child 18
+  - BoolProperty: false
+    DoubleProperty: 104.75
+    IntProperty: 190
+    StringProperty: Child 19
+  - BoolProperty: true
+    DoubleProperty: 105
+    IntProperty: 200
+    StringProperty: Child 20
+  - BoolProperty: false
+    DoubleProperty: 105.25
+    IntProperty: 210
+    StringProperty: Child 21
+  - BoolProperty: true
+    DoubleProperty: 105.5
+    IntProperty: 220
+    StringProperty: Child 22
+  - BoolProperty: false
+    DoubleProperty: 105.75
+    IntProperty: 230
+    StringProperty: Child 23
+  - BoolProperty: true
+    DoubleProperty: 106
+    IntProperty: 240
+    StringProperty: Child 24
+  - BoolProperty: false
+    DoubleProperty: 106.25
+    IntProperty: 250
+    StringProperty: Child 25
+  - BoolProperty: true
+    DoubleProperty: 106.5
+    IntProperty: 260
+    StringProperty: Child 26
+  - BoolProperty: false
+    DoubleProperty: 106.75
+    IntProperty: 270
+    StringProperty: Child 27
+  - BoolProperty: true
+    DoubleProperty: 107
+    IntProperty: 280
+    StringProperty: Child 28
+  - BoolProperty: false
+    DoubleProperty: 107.25
+    IntProperty: 290
+    StringProperty: Child 29
+  - BoolProperty: true
+    DoubleProperty: 107.5
+    IntProperty: 300
+    StringProperty: Child 30
+  - BoolProperty: false
+    DoubleProperty: 107.75
+    IntProperty: 310
+    StringProperty: Child 31
+  - BoolProperty: true
+    DoubleProperty: 108
+    IntProperty: 320
+    StringProperty: Child 32
+  - BoolProperty: false
+    DoubleProperty: 108.25
+    IntProperty: 330
+    StringProperty: Child 33
+  - BoolProperty: true
+    DoubleProperty: 108.5
+    IntProperty: 340
+    StringProperty: Child 34
+  - BoolProperty: false
+    DoubleProperty: 108.75
+    IntProperty: 350
+    StringProperty: Child 35
+  - BoolProperty: true
+    DoubleProperty: 109
+    IntProperty: 360
+    StringProperty: Child 36
+  - BoolProperty: false
+    DoubleProperty: 109.25
+    IntProperty: 370
+    StringProperty: Child 37
+  - BoolProperty: true
+    DoubleProperty: 109.5
+    IntProperty: 380
+    StringProperty: Child 38
+  - BoolProperty: false
+    DoubleProperty: 109.75
+    IntProperty: 390
+    StringProperty: Child 39
+  - BoolProperty: true
+    DoubleProperty: 110
+    IntProperty: 400
+    StringProperty: Child 40
+  - BoolProperty: false
+    DoubleProperty: 110.25
+    IntProperty: 410
+    StringProperty: Child 41
+  - BoolProperty: true
+    DoubleProperty: 110.5
+    IntProperty: 420
+    StringProperty: Child 42
+  - BoolProperty: false
+    DoubleProperty: 110.75
+    IntProperty: 430
+    StringProperty: Child 43
+  - BoolProperty: true
+    DoubleProperty: 111
+    IntProperty: 440
+    StringProperty: Child 44
+  - BoolProperty: false
+    DoubleProperty: 111.25
+    IntProperty: 450
+    StringProperty: Child 45
+  - BoolProperty: true
+    DoubleProperty: 111.5
+    IntProperty: 460
+    StringProperty: Child 46
+  - BoolProperty: false
+    DoubleProperty: 111.75
+    IntProperty: 470
+    StringProperty: Child 47
+  - BoolProperty: true
+    DoubleProperty: 112
+    IntProperty: 480
+    StringProperty: Child 48
+  - BoolProperty: false
+    DoubleProperty: 112.25
+    IntProperty: 490
+    StringProperty: Child 49

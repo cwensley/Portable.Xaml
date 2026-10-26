@@ -1,306 +1,1087 @@
-﻿{
-	"$type": "Benchmark.Portable.Xaml.TestObject, Benchmark.Portable.Xaml",
-	"StringProperty": "Hello!",
-	"Children": [
+{
+	"$ns": "http://example.com/benchmark",
+	"$ns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
+	"$type": "ComplexObject",
+	"Description": "Application settings with \"quoted\" text, <markup> & a\nsecond line",
+	"Kind": "Primary",
+	"Name": "Settings",
+	"Version": 3,
+	"DefaultStyle": {
+		"Bold": false,
+		"Color": "#FF202020",
+		"FontFamily": "Segoe UI",
+		"FontSize": 12,
+		"Kind": "Primary"
+	},
+	"Groups": [
 		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
+			"Expanded": true,
+			"Id": "group0",
+			"Order": 0,
+			"Title": "Group 0",
+			"Visible": true,
+			"Items": [
+				{
+					"$type": "TextItem",
+					"Id": "group0.item0",
+					"MaxLength": 100,
+					"Text": "Some text value 0",
+					"Title": "Text 0",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group0.item1",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 1,
+					"Title": "Number 1",
+					"Value": 1.25,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group0.item2",
+					"Kind": "Secondary",
+					"Title": "Choice 2",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group0.item3",
+					"MaxLength": 103,
+					"Text": "Some text value 3",
+					"Title": "Text 3",
+					"Visible": true
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group0.item4",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 4,
+					"Step": 0.5,
+					"Title": "Number 4",
+					"Value": 5,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group0.item5",
+					"Kind": "Primary",
+					"Title": "Choice 5",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group0.item6",
+					"MaxLength": 106,
+					"Text": "Some text value 6",
+					"Title": "Text 6",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group0.item7",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 7,
+					"Title": "Number 7",
+					"Value": 8.75,
+					"Visible": true
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": true,
+					"Id": "group0.0",
+					"Order": 0,
+					"Title": "Group 0.0",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "TextItem",
+							"Id": "group0.0.item0",
+							"MaxLength": 100,
+							"Text": "Some text value 0",
+							"Title": "Text 0",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group0.0.item1",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 1,
+							"Title": "Number 1",
+							"Value": 1.25,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group0.0.item2",
+							"Kind": "Secondary",
+							"Title": "Choice 2",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group0.0.item3",
+							"MaxLength": 103,
+							"Text": "Some text value 3",
+							"Title": "Text 3",
+							"Visible": true
+						}
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": false,
+					"Id": "group0.1",
+					"Order": 1,
+					"Title": "Group 0.1",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "NumberItem",
+							"Id": "group0.1.item0",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 0,
+							"Step": 0.5,
+							"Title": "Number 0",
+							"Value": 0,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group0.1.item1",
+							"Kind": "Primary",
+							"Title": "Choice 1",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group0.1.item2",
+							"MaxLength": 102,
+							"Text": "Some text value 2",
+							"Title": "Text 2",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group0.1.item3",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 3,
+							"Title": "Number 3",
+							"Value": 3.75,
+							"Visible": true
+						}
+					]
+				}
+			]
 		},
 		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
+			"Expanded": false,
+			"Id": "group1",
+			"Order": 1,
+			"Title": "Group 1",
+			"Visible": true,
+			"Items": [
+				{
+					"$type": "NumberItem",
+					"Id": "group1.item0",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 0,
+					"Step": 0.5,
+					"Title": "Number 0",
+					"Value": 0,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group1.item1",
+					"Kind": "Primary",
+					"Title": "Choice 1",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group1.item2",
+					"MaxLength": 102,
+					"Text": "Some text value 2",
+					"Title": "Text 2",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group1.item3",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 3,
+					"Title": "Number 3",
+					"Value": 3.75,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group1.item4",
+					"Kind": "None",
+					"Title": "Choice 4",
+					"Visible": false,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group1.item5",
+					"MaxLength": 105,
+					"Text": "Some text value 5",
+					"Title": "Text 5",
+					"Visible": true
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group1.item6",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 6,
+					"Step": 0.5,
+					"Title": "Number 6",
+					"Value": 7.5,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group1.item7",
+					"Kind": "Hidden",
+					"Title": "Choice 7",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": false,
+					"Id": "group1.0",
+					"Order": 1,
+					"Title": "Group 1.0",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "NumberItem",
+							"Id": "group1.0.item0",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 0,
+							"Step": 0.5,
+							"Title": "Number 0",
+							"Value": 0,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group1.0.item1",
+							"Kind": "Primary",
+							"Title": "Choice 1",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group1.0.item2",
+							"MaxLength": 102,
+							"Text": "Some text value 2",
+							"Title": "Text 2",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group1.0.item3",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 3,
+							"Title": "Number 3",
+							"Value": 3.75,
+							"Visible": true
+						}
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": true,
+					"Id": "group1.1",
+					"Order": 2,
+					"Title": "Group 1.1",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "ChoiceItem",
+							"Id": "group1.1.item0",
+							"Kind": "None",
+							"Title": "Choice 0",
+							"Visible": false,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group1.1.item1",
+							"MaxLength": 101,
+							"Text": "Some text value 1",
+							"Title": "Text 1",
+							"Visible": true
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group1.1.item2",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 2,
+							"Step": 0.5,
+							"Title": "Number 2",
+							"Value": 2.5,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group1.1.item3",
+							"Kind": "Hidden",
+							"Title": "Choice 3",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						}
+					]
+				}
+			]
 		},
 		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
+			"Expanded": true,
+			"Id": "group2",
+			"Order": 2,
+			"Title": "Group 2",
+			"Visible": true,
+			"Items": [
+				{
+					"$type": "ChoiceItem",
+					"Id": "group2.item0",
+					"Kind": "None",
+					"Title": "Choice 0",
+					"Visible": false,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group2.item1",
+					"MaxLength": 101,
+					"Text": "Some text value 1",
+					"Title": "Text 1",
+					"Visible": true
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group2.item2",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 2,
+					"Step": 0.5,
+					"Title": "Number 2",
+					"Value": 2.5,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group2.item3",
+					"Kind": "Hidden",
+					"Title": "Choice 3",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group2.item4",
+					"MaxLength": 104,
+					"Text": "Some text value 4",
+					"Title": "Text 4",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group2.item5",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 5,
+					"Title": "Number 5",
+					"Value": 6.25,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group2.item6",
+					"Kind": "Secondary",
+					"Title": "Choice 6",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group2.item7",
+					"MaxLength": 107,
+					"Text": "Some text value 7",
+					"Title": "Text 7",
+					"Visible": true
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": true,
+					"Id": "group2.0",
+					"Order": 2,
+					"Title": "Group 2.0",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "ChoiceItem",
+							"Id": "group2.0.item0",
+							"Kind": "None",
+							"Title": "Choice 0",
+							"Visible": false,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group2.0.item1",
+							"MaxLength": 101,
+							"Text": "Some text value 1",
+							"Title": "Text 1",
+							"Visible": true
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group2.0.item2",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 2,
+							"Step": 0.5,
+							"Title": "Number 2",
+							"Value": 2.5,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group2.0.item3",
+							"Kind": "Hidden",
+							"Title": "Choice 3",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						}
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": false,
+					"Id": "group2.1",
+					"Order": 3,
+					"Title": "Group 2.1",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "TextItem",
+							"Id": "group2.1.item0",
+							"MaxLength": 100,
+							"Text": "Some text value 0",
+							"Title": "Text 0",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group2.1.item1",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 1,
+							"Title": "Number 1",
+							"Value": 1.25,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group2.1.item2",
+							"Kind": "Secondary",
+							"Title": "Choice 2",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group2.1.item3",
+							"MaxLength": 103,
+							"Text": "Some text value 3",
+							"Title": "Text 3",
+							"Visible": true
+						}
+					]
+				}
+			]
 		},
 		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
+			"Expanded": false,
+			"Id": "group3",
+			"Order": 3,
+			"Title": "Group 3",
+			"Visible": true,
+			"Items": [
+				{
+					"$type": "TextItem",
+					"Id": "group3.item0",
+					"MaxLength": 100,
+					"Text": "Some text value 0",
+					"Title": "Text 0",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group3.item1",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 1,
+					"Title": "Number 1",
+					"Value": 1.25,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group3.item2",
+					"Kind": "Secondary",
+					"Title": "Choice 2",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group3.item3",
+					"MaxLength": 103,
+					"Text": "Some text value 3",
+					"Title": "Text 3",
+					"Visible": true
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group3.item4",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 4,
+					"Step": 0.5,
+					"Title": "Number 4",
+					"Value": 5,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group3.item5",
+					"Kind": "Primary",
+					"Title": "Choice 5",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group3.item6",
+					"MaxLength": 106,
+					"Text": "Some text value 6",
+					"Title": "Text 6",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group3.item7",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 7,
+					"Title": "Number 7",
+					"Value": 8.75,
+					"Visible": true
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": false,
+					"Id": "group3.0",
+					"Order": 3,
+					"Title": "Group 3.0",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "TextItem",
+							"Id": "group3.0.item0",
+							"MaxLength": 100,
+							"Text": "Some text value 0",
+							"Title": "Text 0",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group3.0.item1",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 1,
+							"Title": "Number 1",
+							"Value": 1.25,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group3.0.item2",
+							"Kind": "Secondary",
+							"Title": "Choice 2",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group3.0.item3",
+							"MaxLength": 103,
+							"Text": "Some text value 3",
+							"Title": "Text 3",
+							"Visible": true
+						}
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": true,
+					"Id": "group3.1",
+					"Order": 4,
+					"Title": "Group 3.1",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "NumberItem",
+							"Id": "group3.1.item0",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 0,
+							"Step": 0.5,
+							"Title": "Number 0",
+							"Value": 0,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group3.1.item1",
+							"Kind": "Primary",
+							"Title": "Choice 1",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group3.1.item2",
+							"MaxLength": 102,
+							"Text": "Some text value 2",
+							"Title": "Text 2",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group3.1.item3",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 3,
+							"Title": "Number 3",
+							"Value": 3.75,
+							"Visible": true
+						}
+					]
+				}
+			]
 		},
 		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
-		},
-		{
-			"StringProperty": "Hello",
-			"IntProperty": 2,
-			"DoubleProperty": 123.456,
-			"BoolProperty": true
+			"Expanded": true,
+			"Id": "group4",
+			"Order": 4,
+			"Title": "Group 4",
+			"Visible": true,
+			"Items": [
+				{
+					"$type": "NumberItem",
+					"Id": "group4.item0",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 0,
+					"Step": 0.5,
+					"Title": "Number 0",
+					"Value": 0,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group4.item1",
+					"Kind": "Primary",
+					"Title": "Choice 1",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group4.item2",
+					"MaxLength": 102,
+					"Text": "Some text value 2",
+					"Title": "Text 2",
+					"Visible": true,
+					"Style": {
+						"Bold": true,
+						"Color": "#FF0000FF",
+						"FontFamily": "Consolas",
+						"FontSize": 10.5,
+						"Kind": "Secondary"
+					}
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group4.item3",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 3,
+					"Title": "Number 3",
+					"Value": 3.75,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group4.item4",
+					"Kind": "None",
+					"Title": "Choice 4",
+					"Visible": false,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "TextItem",
+					"Id": "group4.item5",
+					"MaxLength": 105,
+					"Text": "Some text value 5",
+					"Title": "Text 5",
+					"Visible": true
+				},
+				{
+					"$type": "NumberItem",
+					"Id": "group4.item6",
+					"Maximum": 100,
+					"Minimum": -100,
+					"Order": 6,
+					"Step": 0.5,
+					"Title": "Number 6",
+					"Value": 7.5,
+					"Visible": true
+				},
+				{
+					"$type": "ChoiceItem",
+					"Id": "group4.item7",
+					"Kind": "Hidden",
+					"Title": "Choice 7",
+					"Visible": true,
+					"Options": [
+						"First",
+						"Second",
+						"Third"
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": true,
+					"Id": "group4.0",
+					"Order": 4,
+					"Title": "Group 4.0",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "NumberItem",
+							"Id": "group4.0.item0",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 0,
+							"Step": 0.5,
+							"Title": "Number 0",
+							"Value": 0,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group4.0.item1",
+							"Kind": "Primary",
+							"Title": "Choice 1",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group4.0.item2",
+							"MaxLength": 102,
+							"Text": "Some text value 2",
+							"Title": "Text 2",
+							"Visible": true,
+							"Style": {
+								"Bold": true,
+								"Color": "#FF0000FF",
+								"FontFamily": "Consolas",
+								"FontSize": 10.5,
+								"Kind": "Secondary"
+							}
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group4.0.item3",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 3,
+							"Title": "Number 3",
+							"Value": 3.75,
+							"Visible": true
+						}
+					]
+				},
+				{
+					"$type": "GroupItem",
+					"Expanded": false,
+					"Id": "group4.1",
+					"Order": 5,
+					"Title": "Group 4.1",
+					"Visible": true,
+					"Items": [
+						{
+							"$type": "ChoiceItem",
+							"Id": "group4.1.item0",
+							"Kind": "None",
+							"Title": "Choice 0",
+							"Visible": false,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						},
+						{
+							"$type": "TextItem",
+							"Id": "group4.1.item1",
+							"MaxLength": 101,
+							"Text": "Some text value 1",
+							"Title": "Text 1",
+							"Visible": true
+						},
+						{
+							"$type": "NumberItem",
+							"Id": "group4.1.item2",
+							"Maximum": 100,
+							"Minimum": -100,
+							"Order": 2,
+							"Step": 0.5,
+							"Title": "Number 2",
+							"Value": 2.5,
+							"Visible": true
+						},
+						{
+							"$type": "ChoiceItem",
+							"Id": "group4.1.item3",
+							"Kind": "Hidden",
+							"Title": "Choice 3",
+							"Visible": true,
+							"Options": [
+								"First",
+								"Second",
+								"Third"
+							]
+						}
+					]
+				}
+			]
 		}
+	],
+	"Properties": {
+		"author": "Benchmark",
+		"license": "MIT",
+		"culture": "en-US",
+		"theme": "dark"
+	},
+	"Tags": [
+		"general",
+		"appearance",
+		"advanced",
+		"experimental"
 	]
 }
