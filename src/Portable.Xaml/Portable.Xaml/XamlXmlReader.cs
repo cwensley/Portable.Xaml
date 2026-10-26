@@ -169,34 +169,34 @@ namespace Portable.Xaml
 		#endregion
 
 		XamlXmlParser parser;
-		IEnumerator<XamlXmlNodeInfo> iter;
+		bool started;
 
 		public bool HasLineInfo {
-			get { return iter != null ? iter.Current.HasLineInfo : false; }
+			get { return started ? parser.Current.HasLineInfo : false; }
 		}
 
 		public override bool IsEof {
-			get { return iter != null ? iter.Current.NodeType == XamlNodeType.None : false; }
+			get { return started ? parser.Current.NodeType == XamlNodeType.None : false; }
 		}
 
 		public int LineNumber {
-			get { return iter != null ? iter.Current.LineNumber : 0; }
+			get { return started ? parser.Current.LineNumber : 0; }
 		}
 
 		public int LinePosition {
-			get { return iter != null ? iter.Current.LinePosition : 0; }
+			get { return started ? parser.Current.LinePosition : 0; }
 		}
 
 		public override XamlMember Member {
-			get { return iter != null && iter.Current.NodeType == XamlNodeType.StartMember ? (XamlMember) iter.Current.NodeValue : null; }
+			get { return started && parser.Current.NodeType == XamlNodeType.StartMember ? (XamlMember) parser.Current.NodeValue : null; }
 		}
 
 		public override NamespaceDeclaration Namespace {
-			get { return iter != null && iter.Current.NodeType == XamlNodeType.NamespaceDeclaration ? (NamespaceDeclaration) iter.Current.NodeValue : null; }
+			get { return started && parser.Current.NodeType == XamlNodeType.NamespaceDeclaration ? (NamespaceDeclaration) parser.Current.NodeValue : null; }
 		}
 
 		public override XamlNodeType NodeType {
-			get { return iter != null ? iter.Current.NodeType : XamlNodeType.None; }
+			get { return started ? parser.Current.NodeType : XamlNodeType.None; }
 		}
 
 		public override XamlSchemaContext SchemaContext {
@@ -204,21 +204,20 @@ namespace Portable.Xaml
 		}
 
 		public override XamlType Type {
-			get { return iter != null && iter.Current.NodeType == XamlNodeType.StartObject ? (XamlType) iter.Current.NodeValue : null; }
+			get { return started && parser.Current.NodeType == XamlNodeType.StartObject ? (XamlType) parser.Current.NodeValue : null; }
 		}
 
 		public override object Value {
-			get { return iter != null && iter.Current.NodeType == XamlNodeType.Value ? iter.Current.NodeValue : null; }
+			get { return started && parser.Current.NodeType == XamlNodeType.Value ? parser.Current.NodeValue : null; }
 		}
 
 		public override bool Read ()
 		{
 			if (IsDisposed)
 				throw new ObjectDisposedException ("reader");
-			if (iter == null)
-				iter = parser.Parse ().GetEnumerator ();
-			iter.MoveNext ();
-			return iter.Current.NodeType != XamlNodeType.None;
+			started = true;
+			parser.Read ();
+			return parser.Current.NodeType != XamlNodeType.None;
 		}
 	}
 	
@@ -237,6 +236,15 @@ namespace Portable.Xaml
 				LineNumber = 0;
 				LinePosition = 0;
 			}
+		}
+
+		public XamlXmlNodeInfo (XamlNodeType nodeType, object nodeValue, XamlXmlParser.LineInfo lineInfo)
+		{
+			NodeType = nodeType;
+			NodeValue = nodeValue;
+			HasLineInfo = true;
+			LineNumber = lineInfo.LineNumber;
+			LinePosition = lineInfo.LinePosition;
 		}
 		
 		public bool HasLineInfo;
@@ -282,28 +290,120 @@ namespace Portable.Xaml
 			get { return sctx; }
 		}
 
-		XamlXmlNodeInfo Node (XamlNodeType nodeType, object nodeValue)
+		enum ParseStep
 		{
-			return new XamlXmlNodeInfo(nodeType, nodeValue, line_info);
+			// a node was set in current
+			Node,
+			// a nested parse was set in pendingCall
+			Call,
+			// tells the nearest catching caller to stop reading the current element as it belongs to a parent
+			Stop
+		}
+
+		struct Frame
+		{
+			public IEnumerator<ParseStep> Enumerator;
+			public bool CatchStop;
+		}
+
+		// nested parse methods run from a single stack so each node is passed up once rather than through every level
+		readonly List<Frame> frames = new List<Frame>();
+		IEnumerable<ParseStep> pendingCall;
+		bool pendingCatchStop;
+		bool stopped;
+		bool parseStarted;
+		XamlXmlNodeInfo current;
+
+		public XamlXmlNodeInfo Current => current;
+
+		public bool Read ()
+		{
+			if (!parseStarted) {
+				parseStarted = true;
+				frames.Add (new Frame { Enumerator = Parse ().GetEnumerator () });
+			}
+			while (frames.Count > 0) {
+				var top = frames [frames.Count - 1].Enumerator;
+				if (!top.MoveNext ()) {
+					top.Dispose ();
+					frames.RemoveAt (frames.Count - 1);
+					continue;
+				}
+				switch (top.Current) {
+				case ParseStep.Node:
+					return true;
+				case ParseStep.Call:
+					frames.Add (new Frame { Enumerator = pendingCall.GetEnumerator (), CatchStop = pendingCatchStop });
+					pendingCall = null;
+					continue;
+				case ParseStep.Stop:
+					var index = frames.Count - 1;
+					while (index > 0 && !frames [index].CatchStop)
+						index--;
+					if (index == 0)
+						return true; // nothing catches it, so it is returned as a None node
+					for (int i = frames.Count - 1; i >= index; i--) {
+						frames [i].Enumerator.Dispose ();
+						frames.RemoveAt (i);
+					}
+					stopped = true;
+					continue;
+				}
+			}
+			return false;
+		}
+
+		// runs a nested parse, set catchStop when the caller checks WasStopped() after it
+		ParseStep Call (IEnumerable<ParseStep> parse, bool catchStop = false)
+		{
+			pendingCall = parse;
+			pendingCatchStop = catchStop;
+			stopped = false;
+			return ParseStep.Call;
+		}
+
+		bool WasStopped ()
+		{
+			var result = stopped;
+			stopped = false;
+			return result;
+		}
+
+		ParseStep Stop ()
+		{
+			current = new XamlXmlNodeInfo(XamlNodeType.None, null, line_info);
+			return ParseStep.Stop;
+		}
+
+		ParseStep Node (XamlNodeType nodeType, object nodeValue)
+		{
+			current = new XamlXmlNodeInfo(nodeType, nodeValue, line_info);
+			return ParseStep.Node;
 		}
 		
 		/// <summary>
-		/// Create new <see cref="XamlXmlNodeInfo"/> Use this overload only then you want pass deferred line info information to instance
+		/// Set the current <see cref="XamlXmlNodeInfo"/>. Use this overload only when you want to pass deferred line info information to the instance
 		/// </summary>
 		/// <param name="nodeType">Type of new node</param>
 		/// <param name="nodeValue">Value of new node</param>
 		/// <param name="lineInfo">Line info</param>
 		/// <returns></returns>
-		XamlXmlNodeInfo Node (XamlNodeType nodeType, object nodeValue, IXmlLineInfo lineInfo)
+		ParseStep Node (XamlNodeType nodeType, object nodeValue, IXmlLineInfo lineInfo)
 		{
-			return new XamlXmlNodeInfo(nodeType, nodeValue, lineInfo);
+			current = new XamlXmlNodeInfo(nodeType, nodeValue, lineInfo);
+			return ParseStep.Node;
 		}
 
-		public IEnumerable<XamlXmlNodeInfo> Parse ()
+		ParseStep Node (XamlNodeType nodeType, object nodeValue, LineInfo lineInfo)
+		{
+			current = new XamlXmlNodeInfo(nodeType, nodeValue, lineInfo);
+			return ParseStep.Node;
+		}
+
+		IEnumerable<ParseStep> Parse ()
 		{
 			r.MoveToContent ();
-			foreach (var xi in ReadObjectElement (null, null))
-				yield return xi;
+			yield return Call (ReadObjectElement (null, null));
 			yield return Node (XamlNodeType.None, null);
 		}
 
@@ -316,18 +416,15 @@ namespace Portable.Xaml
 			return ns;
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadElementContent(XamlType parentType, XamlMember currentMember)
+		IEnumerable<ParseStep> ReadElementContent(XamlType parentType, XamlMember currentMember)
 		{
 			while (r.NodeType != XmlNodeType.EndElement)
 			{
 				if (currentMember == XamlLanguage.Items)
 				{
-					foreach (var x in ReadCollectionItems(parentType, currentMember))
-					{
-						if (x.NodeType == XamlNodeType.None)
-							yield break;
-						yield return x;
-					}
+					yield return Call(ReadCollectionItems(parentType, currentMember), true);
+					if (WasStopped())
+						yield break;
 				}
 				else if (r.NodeType == XmlNodeType.Text || r.NodeType == XmlNodeType.CDATA)
 				{
@@ -336,8 +433,7 @@ namespace Portable.Xaml
 						currentMember == XamlLanguage.UnknownContent)
 					{
 						yield return Node(XamlNodeType.GetObject, currentMember.Type);
-						foreach (var ni in ReadMembers(parentType, currentMember.Type))
-							yield return ni;
+						yield return Call(ReadMembers(parentType, currentMember.Type));
 						yield return Node(XamlNodeType.EndObject, currentMember.Type);
 					}
 					else
@@ -348,20 +444,20 @@ namespace Portable.Xaml
 				}
 				else
 				{
-					foreach (var x in ReadObjectElement(parentType, currentMember))
-					{
-						if (x.NodeType == XamlNodeType.None)
-							yield break;
-						yield return x;
-					}
+					yield return Call(ReadObjectElement(parentType, currentMember), true);
+					if (WasStopped())
+						yield break;
 				}
 			}
 		}
 
 		Stack<bool> _preserveWhitespace = new Stack<bool>();
 
+		// type name of the element ReadObjectElement just finished, so callers don't need to parse it separately
+		XamlTypeName lastObjectTypeName;
+
 		// Note that it could return invalid (None) node to tell the caller that it is not really an object element.
-		IEnumerable<XamlXmlNodeInfo> ReadObjectElement (XamlType parentType, XamlMember currentMember)
+		IEnumerable<ParseStep> ReadObjectElement (XamlType parentType, XamlMember currentMember)
 		{
 			if (r.NodeType == XmlNodeType.Whitespace)
 				r.MoveToContent();
@@ -389,7 +485,7 @@ namespace Portable.Xaml
 				// Current element could be for another member in the parent type (if exists)
 				if (parentType != null && (r.LocalName.IndexOf ('.') > 0 || parentType.GetMember (r.LocalName) != null)) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
-					yield return Node (XamlNodeType.None, null);
+					yield return Stop ();
 					yield break;
 				}
 
@@ -414,8 +510,8 @@ namespace Portable.Xaml
 			   )
 			{
 				yield return Node(XamlNodeType.GetObject, currentMember.Type);
-				foreach (var ni in ReadMembers(parentType, currentMember.Type))
-					yield return ni;
+				yield return Call(ReadMembers(parentType, currentMember.Type));
+				lastObjectTypeName = sti.TypeName;
 				yield return Node(XamlNodeType.EndObject, currentMember.Type);
 				yield break;
 			}
@@ -425,14 +521,14 @@ namespace Portable.Xaml
 			// process attribute members (including MarkupExtensions)
 			ProcessAttributesToMember (sti, xt);
 
+			// members are read by index rather than into a local, as a struct held across yields is slow to copy
 			for (int i = 0; i < sti.Members.Count; i++)
 			{
-				var memberInfo = sti.Members[i];
-				yield return Node(XamlNodeType.StartMember, memberInfo.Member, memberInfo.LineInfo);
+				yield return Node(XamlNodeType.StartMember, sti.Members[i].Member, sti.Members[i].LineInfo);
 
 				// Try markup extension
 				// FIXME: is this rule correct?
-				var v = memberInfo.Value;
+				var v = sti.Members[i].Value;
 				if (!string.IsNullOrEmpty(v) && v[0] == '{')
 				{
 					if (v.Length >= 2 && v[1] == '}')
@@ -444,14 +540,13 @@ namespace Portable.Xaml
 					{
 						var pai = new ParsedMarkupExtensionInfo(v, xaml_namespace_resolver, sctx);
 						pai.Parse();
-						foreach (var node in ReadMarkup(pai))
-							yield return node;
+						yield return Call(ReadMarkup(pai));
 					}
 				}
 				else
-					yield return Node(XamlNodeType.Value, v, memberInfo.LineInfo);
+					yield return Node(XamlNodeType.Value, v, sti.Members[i].LineInfo);
 
-				yield return Node(XamlNodeType.EndMember, memberInfo.Member, memberInfo.LineInfo);
+				yield return Node(XamlNodeType.EndMember, sti.Members[i].Member, sti.Members[i].LineInfo);
 			}
 
 			// process content members
@@ -460,8 +555,7 @@ namespace Portable.Xaml
 					_preserveWhitespace.Push(sti.PreserveWhitespace.Value);
 
 				r.Read ();
-				foreach (var ni in ReadMembers (parentType, xt))
-					yield return ni;
+				yield return Call (ReadMembers (parentType, xt));
 				r.ReadEndElement ();
 
 				if (sti.PreserveWhitespace != null)
@@ -470,10 +564,11 @@ namespace Portable.Xaml
 			else
 				r.Read (); // consume empty element.
 
+			lastObjectTypeName = sti.TypeName;
 			yield return Node (XamlNodeType.EndObject, xt);
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMarkup(ParsedMarkupExtensionInfo pai)
+		IEnumerable<ParseStep> ReadMarkup(ParsedMarkupExtensionInfo pai)
 		{
 			yield return Node (XamlNodeType.StartObject, pai.Type);
 
@@ -481,47 +576,38 @@ namespace Portable.Xaml
 				yield return Node (XamlNodeType.StartMember, xepair.Key);
 				var list = xepair.Value as List<object>;
 				if (list != null) {
-					foreach (var s in list) {
-						foreach (var node in ReadMarkupArgument(s))
-							yield return node;
-					}
+					foreach (var s in list)
+						yield return Call(ReadMarkupArgument(s));
 				}
-				else {
-					foreach (var node in ReadMarkupArgument(xepair.Value))
-						yield return node;
-				}
+				else
+					yield return Call(ReadMarkupArgument(xepair.Value));
 				yield return Node (XamlNodeType.EndMember, xepair.Key);
 			}
 
 			yield return Node (XamlNodeType.EndObject, pai.Type);
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMarkupArgument(object value)
+		IEnumerable<ParseStep> ReadMarkupArgument(object value)
 		{
 			var markup = value as ParsedMarkupExtensionInfo;
-			if (markup != null) {
-				foreach (var node in ReadMarkup(markup))
-					yield return node;
-			}
+			if (markup != null)
+				yield return Call(ReadMarkup(markup));
 			else
 				yield return Node (XamlNodeType.Value, value);
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMembers (XamlType parentType, XamlType xt)
+		IEnumerable<ParseStep> ReadMembers (XamlType parentType, XamlType xt)
 		{
 			for (r.MoveToContent (); r.NodeType != XmlNodeType.EndElement; r.MoveToContent ()) {
 				switch (r.NodeType) {
 				case XmlNodeType.Element:
 					// FIXME: parse type arguments etc.
-					foreach (var x in ReadMemberElement (parentType, xt)) {
-						if (x.NodeType == XamlNodeType.None)
-							yield break;
-						yield return x;
-					}
+					yield return Call (ReadMemberElement (parentType, xt), true);
+					if (WasStopped ())
+						yield break;
 					continue;
 				default:
-					foreach (var x in ReadMemberText (parentType, xt))
-						yield return x;
+					yield return Call (ReadMemberText (parentType, xt));
 					continue;
 				}
 			}
@@ -539,6 +625,24 @@ namespace Portable.Xaml
 			IList<XamlTypeName> typeArgs = typeArgNames == null ? null : XamlTypeName.ParseList (typeArgNames, xaml_namespace_resolver);
 			var xtn = new XamlTypeName (ns, name, typeArgs);
 			return new StartTagInfo { Name = name, Namespace = ns, TypeName = xtn, Members = members, Attributes = atts, PreserveWhitespace = preserveWhitespace};
+		}
+
+		// the type name of the current element, without processing all of its attributes
+		XamlTypeName GetTypeName ()
+		{
+			// GetAttribute(name, ns) is slow on CompatibleXmlReader, so look through the attributes directly
+			string typeArgNames = null;
+			if (r.MoveToFirstAttribute ()) {
+				do {
+					if (r.LocalName == "TypeArguments" && r.NamespaceURI == XamlLanguage.Xaml2006Namespace) {
+						typeArgNames = r.Value;
+						break;
+					}
+				} while (r.MoveToNextAttribute ());
+				r.MoveToElement ();
+			}
+			IList<XamlTypeName> typeArgs = typeArgNames == null ? null : XamlTypeName.ParseList (typeArgNames, xaml_namespace_resolver);
+			return new XamlTypeName (ResolveLocalNamespace(r.NamespaceURI), r.LocalName, typeArgs);
 		}
 
 		bool xmlbase_done;
@@ -716,7 +820,7 @@ namespace Portable.Xaml
 			return sb.ToString();
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMemberText (XamlType parentType, XamlType xt)
+		IEnumerable<ParseStep> ReadMemberText (XamlType parentType, XamlType xt)
 		{
 			if (!xt.IsCollection)
 			{
@@ -729,21 +833,19 @@ namespace Portable.Xaml
 				}
 				else
 				{
-					foreach (var x in ReadMember(xt, xt.ContentProperty))
-						yield return x;
+					yield return Call(ReadMember(xt, xt.ContentProperty));
 				}
 			}
 			else
 			{
 				yield return Node(XamlNodeType.StartMember, XamlLanguage.Items);
-				foreach (var x in ReadCollectionItems(xt, XamlLanguage.Items))
-					yield return x;
+				yield return Call(ReadCollectionItems(xt, XamlLanguage.Items));
 				yield return Node(XamlNodeType.EndMember, XamlLanguage.Items);
 			}
 		}
 
 		// member element, implicit member, children via content property, or value
-		IEnumerable<XamlXmlNodeInfo> ReadMemberElement (XamlType parentType, XamlType xt)
+		IEnumerable<ParseStep> ReadMemberElement (XamlType parentType, XamlType xt)
 		{
 			XamlMember xm = null;
 			var name = r.LocalName;
@@ -764,8 +866,7 @@ namespace Portable.Xaml
 					// still not? could it be omitted as content property or items ?
 					if ((xm = GetExtraMember (xt)) != null) {
 						// Note that this does not involve r.Read()
-						foreach (var ni in ReadMember (xt, xm))
-							yield return ni;
+						yield return Call (ReadMember (xt, xm));
 						yield break;
 					}
 				}
@@ -777,7 +878,7 @@ namespace Portable.Xaml
 					&& typeName == parentType.InternalXmlName
 					&& parentType.GetMember (name) != null) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
-					yield return Node (XamlNodeType.None, null);
+					yield return Stop ();
 					yield break;
 				}
 
@@ -790,8 +891,7 @@ namespace Portable.Xaml
 				{
 					// Unknown content member.
 					xm = XamlLanguage.UnknownContent;
-					foreach (var ni in ReadMember(xt, xm))
-						yield return ni;
+					yield return Call(ReadMember(xt, xm));
 					yield break;
 				}
 			}
@@ -814,8 +914,7 @@ namespace Portable.Xaml
 				}
 
 				r.Read ();
-				foreach (var ni in ReadMember (xt, xm))
-					yield return ni;
+				yield return Call (ReadMember (xt, xm));
 				r.MoveToContent ();
 				r.ReadEndElement ();
 
@@ -826,7 +925,7 @@ namespace Portable.Xaml
 				r.Read ();
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadMember (XamlType parentType, XamlMember xm)
+		IEnumerable<ParseStep> ReadMember (XamlType parentType, XamlMember xm)
 		{
 			yield return Node (XamlNodeType.StartMember, xm);
 
@@ -835,42 +934,33 @@ namespace Portable.Xaml
 				r.Read ();
 			} else if (!xm.IsWritePublic) {
 				if (xm.Type.IsXData)
-					foreach (var ni in ReadXData ())
-						yield return ni;
+					yield return Call (ReadXData ());
 				else if (xm.Type.IsCollection || xm.Type.IsDictionary) {
 					yield return Node (XamlNodeType.GetObject, xm.Type);
 					yield return Node (XamlNodeType.StartMember, XamlLanguage.Items);
-					foreach (var ni in ReadCollectionItems (xm.Type, XamlLanguage.Items))
-					{
-						if (ni.NodeType == XamlNodeType.None)
-							break;
-						yield return ni;
-					}
+					yield return Call (ReadCollectionItems (xm.Type, XamlLanguage.Items), true);
+					WasStopped ();
 					yield return Node (XamlNodeType.EndMember, XamlLanguage.Items);
 					yield return Node (XamlNodeType.EndObject, xm.Type);
 				}
 				else
 					throw WithLineInfo(new XamlParseException (String.Format ("Read-only member '{0}' showed up in the source XML, and the xml contains element content that cannot be read.", xm.Name)));
 			} else {
-				foreach (var ni in ReadElementContent(parentType, xm))
-				{
-					if (ni.NodeType == XamlNodeType.None)
-						throw new Exception("should not happen");
-					yield return ni;
-				}
+				yield return Call(ReadElementContent(parentType, xm), true);
+				if (WasStopped())
+					throw new Exception("should not happen");
 			}
 
 			yield return Node (XamlNodeType.EndMember, xm);
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadCollectionItems(XamlType parentType, XamlMember xm)
+		IEnumerable<ParseStep> ReadCollectionItems(XamlType parentType, XamlMember xm)
 		{
 			bool GetNextElementTrim()
 			{
 				if (r.NodeType == XmlNodeType.Element)
 				{
-					var sti = GetStartTagInfo();
-					var xt = sctx.GetXamlType(sti.TypeName);
+					var xt = sctx.GetXamlType(GetTypeName());
 					return xt.TrimSurroundingWhitespace;
 				}
 
@@ -900,17 +990,13 @@ namespace Portable.Xaml
 					case XmlNodeType.Element:
 						if (parentType != null && (r.LocalName.IndexOf('.') > 0 || parentType.GetMember(r.LocalName) != null))
 						{
-							yield return Node(XamlNodeType.None, null);
+							yield return Stop();
 							yield break;
 						}
 
-						var sti = GetStartTagInfo();
-						previous = sti.TypeName;
-
-						foreach (var x in ReadObjectElement(parentType, xm))
-						{
-							yield return x;
-						}
+						lastObjectTypeName = null;
+						yield return Call(ReadObjectElement(parentType, xm));
+						previous = lastObjectTypeName;
 						break;
 
 					case XmlNodeType.Whitespace:
@@ -930,7 +1016,7 @@ namespace Portable.Xaml
 			}
 		}
 
-		IEnumerable<XamlXmlNodeInfo> ReadXData ()
+		IEnumerable<ParseStep> ReadXData ()
 		{
 			var xt = XamlLanguage.XData;
 			var xm = xt.GetMember ("Text");
@@ -1053,7 +1139,7 @@ namespace Portable.Xaml
 			public LineInfo LineInfo;
 		}
 
-		internal struct StartTagInfo
+		internal class StartTagInfo
 		{
 			public string Name;
 			public string Namespace;

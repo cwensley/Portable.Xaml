@@ -84,7 +84,8 @@ namespace Portable.Xaml
 		Dictionary<string, List<XamlType>> all_xaml_types;
 		XamlType[] empty_xaml_types = new XamlType[0];
 		Dictionary<Type, XamlType> run_time_types = new Dictionary<Type, XamlType>();
-		Dictionary<Tuple<string, string>, XamlType> type_lookup = new Dictionary<Tuple<string, string>, XamlType>();
+		// keyed by namespace then name, as string keys hash faster than a tuple of strings
+		Dictionary<string, Dictionary<string, XamlType>> type_lookup = new Dictionary<string, Dictionary<string, XamlType>>();
 		Dictionary<Pair, XamlDirective> xaml_directives = new Dictionary<Pair, XamlDirective>();
 		Dictionary<object, XamlMember> member_cache = new Dictionary<object, XamlMember>();
 		Dictionary<ParameterInfo, XamlMember> parameter_cache = new Dictionary<ParameterInfo, XamlMember>();
@@ -435,11 +436,16 @@ namespace Portable.Xaml
 		protected virtual XamlType GetXamlType(string xamlNamespace, string name, params XamlType[] typeArguments)
 		{
 			XamlType ret;
-			var key = Tuple.Create(xamlNamespace, name);
-			var useLookup = typeArguments == null || typeArguments.Length == 0;
-			if (useLookup && type_lookup.TryGetValue(key, out ret))
-				return ret;
-			
+			Dictionary<string, XamlType> names = null;
+			var useLookup = (typeArguments == null || typeArguments.Length == 0) && xamlNamespace != null && name != null;
+			if (useLookup)
+			{
+				if (!type_lookup.TryGetValue(xamlNamespace, out names))
+					type_lookup[xamlNamespace] = names = new Dictionary<string, XamlType>();
+				else if (names.TryGetValue(name, out ret))
+					return ret;
+			}
+
 			string dummy;
 			if (TryGetCompatibleXamlNamespace(xamlNamespace, out dummy))
 				xamlNamespace = dummy;
@@ -447,7 +453,7 @@ namespace Portable.Xaml
 			ret = ResolveXamlTypeName(xamlNamespace, name, typeArguments, false);
 
 			if (useLookup)
-				type_lookup[key] = ret;
+				names[name] = ret;
 
 			// If the type was not found, it just returns null.
 			return ret;

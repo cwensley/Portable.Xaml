@@ -79,6 +79,9 @@ namespace Portable.Xaml
 		ReferenceValue<IList<XamlType>> allowedContentTypes;
 		ReferenceValue<XamlType> baseType;
 		ReferenceValue<XamlMember> contentProperty;
+		// the object writer checks these for every member, so avoid a dictionary lookup
+		ReferenceValue<XamlMember> aliasedName;
+		ReferenceValue<XamlMember> aliasedKey;
 		ReferenceValue<IList<XamlType>> contentWrappers;
 		ReferenceValue<XamlValueConverter<XamlDeferringLoader>> deferringLoader;
 		ReferenceValue<XamlType> itemType;
@@ -437,6 +440,11 @@ namespace Portable.Xaml
 
 		public XamlMember GetAliasedProperty(XamlDirective directive)
 		{
+			if (ReferenceEquals(directive, XamlLanguage.Name))
+				return aliasedName.HasValue ? aliasedName.Value : aliasedName.Set(LookupAliasedProperty(directive));
+			if (ReferenceEquals(directive, XamlLanguage.Key))
+				return aliasedKey.HasValue ? aliasedKey.Value : aliasedKey.Set(LookupAliasedProperty(directive));
+
 			XamlMember member;
 			if (aliased_property_cache == null)
 				aliased_property_cache = new Dictionary<XamlDirective, XamlMember>(ReferenceComparer.Instance);

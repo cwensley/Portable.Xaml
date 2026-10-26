@@ -67,13 +67,41 @@ namespace Portable.Xaml
 	    {
 		    if (ns == "http://schemas.openxmlformats.org/markup-compatibility/2006")
 				return true;
+		    if (_scope.Ignore.Count == 0)
+			    return false;
 		    if (_knownNamespaces.Contains(ns))
 			    return false;
 		    return _scope.Ignore.Contains(ns);
 	    }
 
 
+	    // namespaces from the reader are usually the same instances each time (e.g. the element's and its attributes'),
+	    // so avoid hashing them on every access
+	    private string _lastNs, _previousNs;
+	    private string _lastMapped, _previousMapped;
+
 	    string GetMapped(string ns)
+		{
+			if (ns != null)
+			{
+				if (ReferenceEquals(ns, _lastNs))
+					return _lastMapped;
+				if (ReferenceEquals(ns, _previousNs))
+				{
+					_previousNs = _lastNs;
+					_lastNs = ns;
+					var mapped = _previousMapped;
+					_previousMapped = _lastMapped;
+					return _lastMapped = mapped;
+				}
+			}
+			_previousNs = _lastNs;
+			_previousMapped = _lastMapped;
+			_lastNs = ns;
+			return _lastMapped = GetMappedInternal(ns);
+		}
+
+	    string GetMappedInternal(string ns)
 		{
 			if (_nsmap.TryGetValue(ns, out var rv))
 				return rv;
@@ -121,9 +149,18 @@ namespace Portable.Xaml
 		    _ignoredAttributes = 0;
 		    if (_base.HasAttributes)
 		    {
-			    var ignorable = _base.GetAttribute("Ignorable", "http://schemas.openxmlformats.org/markup-compatibility/2006");
-				if(ignorable!=null)
-					PushScope(ignorable);
+			    // look through the attributes directly, as GetAttribute(name, ns) hashes both strings
+			    _base.MoveToFirstAttribute();
+			    do
+			    {
+				    if (_base.LocalName == "Ignorable" && _base.NamespaceURI == "http://schemas.openxmlformats.org/markup-compatibility/2006")
+				    {
+					    var ignorable = _base.Value;
+					    _base.MoveToElement();
+					    PushScope(ignorable);
+					    break;
+				    }
+			    } while (_base.MoveToNextAttribute());
 			    _base.MoveToFirstAttribute();
 			    do
 			    {
