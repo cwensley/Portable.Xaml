@@ -28,8 +28,14 @@ namespace Portable.Xaml.Json
 		readonly XamlSchemaContext _context;
 		readonly XamlJsonReaderSettings _settings;
 		readonly StringBuilder _text = new StringBuilder(50);
+		// read in blocks, as a virtual TextReader.Read() per character is most of the parsing time
+		readonly char[] _buffer = new char[1024];
+		int _bufferPosition;
+		int _bufferLength;
 		readonly Stack<Dictionary<string, string>> _namespaces = new Stack<Dictionary<string, string>>();
-		IEnumerator<NodeInfo> _enumerator;
+		List<NodeInfo> _nodes;
+		int _index = -1;
+		int _nodeEstimate;
 		NodeInfo _current;
 		bool _isEof;
 		int _ch;
@@ -56,10 +62,22 @@ namespace Portable.Xaml.Json
 			public int Line;
 			public int Column;
 
-			public JsonProperty Find(string name) => Properties?.FirstOrDefault(r => r.Name == name);
+			public bool TryFind(string name, out JsonProperty property)
+			{
+				foreach (var p in Properties)
+				{
+					if (p.Name == name)
+					{
+						property = p;
+						return true;
+					}
+				}
+				property = default(JsonProperty);
+				return false;
+			}
 		}
 
-		class JsonProperty
+		struct JsonProperty
 		{
 			public string Name;
 			public JsonNode Value;
@@ -67,7 +85,7 @@ namespace Portable.Xaml.Json
 			public int Column;
 		}
 
-		class NodeInfo
+		struct NodeInfo
 		{
 			public XamlNodeType NodeType;
 			public object Value;
@@ -120,34 +138,37 @@ namespace Portable.Xaml.Json
 
 		public override bool IsEof => _isEof;
 
-		public override XamlMember Member => _current?.Value as XamlMember;
+		public override XamlMember Member => _current.Value as XamlMember;
 
-		public override NamespaceDeclaration Namespace => _current?.Value as NamespaceDeclaration;
+		public override NamespaceDeclaration Namespace => _current.Value as NamespaceDeclaration;
 
-		public override XamlNodeType NodeType => _current?.NodeType ?? XamlNodeType.None;
+		public override XamlNodeType NodeType => _current.NodeType;
 
 		public override XamlSchemaContext SchemaContext => _context;
 
-		public override XamlType Type => _current?.NodeType == XamlNodeType.StartObject ? _current.Value as XamlType : null;
+		public override XamlType Type => _current.NodeType == XamlNodeType.StartObject ? _current.Value as XamlType : null;
 
-		public override object Value => _current?.NodeType == XamlNodeType.Value ? _current.Value : null;
+		public override object Value => _current.NodeType == XamlNodeType.Value ? _current.Value : null;
 
 		public bool HasLineInfo => _settings.ProvideLineInfo;
 
-		public int LineNumber => _current?.Line ?? 0;
+		public int LineNumber => _current.Line;
 
-		public int LinePosition => _current?.Column ?? 0;
+		public int LinePosition => _current.Column;
 
 		public override bool Read()
 		{
-			if (_enumerator == null)
-				_enumerator = GetNodes().GetEnumerator();
-			if (_enumerator.MoveNext())
+			if (_isEof)
+				return false;
+			if (_nodes == null)
+				_nodes = GetNodes();
+			if (++_index < _nodes.Count)
 			{
-				_current = _enumerator.Current;
+				_current = _nodes[_index];
 				return true;
 			}
-			_current = null;
+			_current = default(NodeInfo);
+			_nodes = null;
 			_isEof = true;
 			return false;
 		}
@@ -180,7 +201,8 @@ namespace Portable.Xaml.Json
 			return null;
 		}
 
-		IEnumerable<NodeInfo> GetNodes()
+		// the whole document is parsed before the first node, so generate all nodes at once rather than through nested iterators
+		List<NodeInfo> GetNodes()
 		{
 			_namespaces.Push(_settings.DefaultNamespaces.ToDictionary(r => r.Key, r => r.Value));
 			ReadChar();
@@ -191,7 +213,9 @@ namespace Portable.Xaml.Json
 				throw CreateException("Expected the end of the document");
 			if (root.Kind != JsonKind.Object && root.Kind != JsonKind.Array)
 				throw CreateException("Expected an object {} or array []", root);
-			return WriteValue(root, _settings.RootType, null);
+			_nodes = new List<NodeInfo>(_nodeEstimate);
+			WriteValue(root, _settings.RootType, null);
+			return _nodes;
 		}
 
 		#region Parsing
@@ -203,7 +227,12 @@ namespace Portable.Xaml.Json
 				_line++;
 				_column = 0;
 			}
-			_ch = _reader.Read();
+			if (_bufferPosition >= _bufferLength)
+			{
+				_bufferLength = _reader.Read(_buffer, 0, _buffer.Length);
+				_bufferPosition = 0;
+			}
+			_ch = _bufferPosition < _bufferLength ? _buffer[_bufferPosition++] : -1;
 			_column++;
 			_newLine = _ch == '\n';
 		}
@@ -249,6 +278,8 @@ namespace Portable.Xaml.Json
 		JsonNode ReadValue()
 		{
 			var node = new JsonNode { Line = _line, Column = _column };
+			// most values become a start and end node, and properties add a start and end member
+			_nodeEstimate += 2;
 			if (_ch == '{')
 			{
 				node.Kind = JsonKind.Object;
@@ -268,6 +299,7 @@ namespace Portable.Xaml.Json
 					SkipWhitespace();
 					property.Value = ReadValue();
 					node.Properties.Add(property);
+					_nodeEstimate += 2;
 					if (!ReadSeparator('}'))
 						break;
 				}
@@ -356,6 +388,24 @@ namespace Portable.Xaml.Json
 		string ReadQuotedString()
 		{
 			var quote = _ch;
+			// most strings are in the buffer without escapes or line breaks, so take them directly
+			var start = _bufferPosition;
+			for (int i = start; i < _bufferLength; i++)
+			{
+				var c = _buffer[i];
+				if (c == quote)
+				{
+					var value = new string(_buffer, start, i - start);
+					_column += i - start;
+					_bufferPosition = i;
+					ReadChar();
+					ReadChar();
+					return value;
+				}
+				if (c == '\\' || c == '\n')
+					break;
+			}
+
 			_text.Clear();
 			ReadChar();
 			while (_ch != quote)
@@ -403,44 +453,47 @@ namespace Portable.Xaml.Json
 
 		#region Nodes
 
-		static NodeInfo Node(XamlNodeType nodeType, object value, int line, int column)
-			=> new NodeInfo { NodeType = nodeType, Value = value, Line = line, Column = column };
+		void Add(XamlNodeType nodeType, object value, int line, int column)
+			=> _nodes.Add(new NodeInfo { NodeType = nodeType, Value = value, Line = line, Column = column });
 
-		static NodeInfo Node(XamlNodeType nodeType, object value, JsonNode node) => Node(nodeType, value, node.Line, node.Column);
+		void Add(XamlNodeType nodeType, object value, JsonNode node) => Add(nodeType, value, node.Line, node.Column);
 
-		IEnumerable<NodeInfo> WriteValue(JsonNode node, XamlType expectedType, XamlMember member, string key = null)
+		void WriteValue(JsonNode node, XamlType expectedType, XamlMember member, string key = null)
 		{
 			switch (node.Kind)
 			{
 				case JsonKind.Object:
-					return WriteObject(node, expectedType, member, key);
+					WriteObject(node, expectedType, member, key);
+					break;
 				case JsonKind.Array:
-					return WriteArray(node, expectedType, member, key);
+					WriteArray(node, expectedType, member, key);
+					break;
 				case JsonKind.Null:
-					return WriteNull(node, key);
+					WriteNull(node, key);
+					break;
 				default:
-					return WriteText(node, expectedType, key);
+					WriteText(node, expectedType, key);
+					break;
 			}
 		}
 
-		IEnumerable<NodeInfo> WriteNull(JsonNode node, string key)
+		void WriteNull(JsonNode node, string key)
 		{
-			yield return Node(XamlNodeType.StartObject, XamlLanguage.Null, node);
-			foreach (var n in WriteKey(node, key))
-				yield return n;
-			yield return Node(XamlNodeType.EndObject, null, node);
+			Add(XamlNodeType.StartObject, XamlLanguage.Null, node);
+			WriteKey(node, key);
+			Add(XamlNodeType.EndObject, null, node);
 		}
 
-		IEnumerable<NodeInfo> WriteKey(JsonNode node, string key)
+		void WriteKey(JsonNode node, string key)
 		{
 			if (key == null)
-				yield break;
-			yield return Node(XamlNodeType.StartMember, XamlLanguage.Key, node);
-			yield return Node(XamlNodeType.Value, key, node);
-			yield return Node(XamlNodeType.EndMember, null, node);
+				return;
+			Add(XamlNodeType.StartMember, XamlLanguage.Key, node);
+			Add(XamlNodeType.Value, key, node);
+			Add(XamlNodeType.EndMember, null, node);
 		}
 
-		IEnumerable<NodeInfo> WriteObject(JsonNode node, XamlType expectedType, XamlMember member, string key)
+		void WriteObject(JsonNode node, XamlType expectedType, XamlMember member, string key)
 		{
 			var hasNamespaces = false;
 			foreach (var property in node.Properties)
@@ -456,23 +509,21 @@ namespace Portable.Xaml.Json
 				}
 				var prefix = property.Name.Length > 4 ? property.Name.Substring(4) : string.Empty;
 				_namespaces.Peek()[prefix] = property.Value.Text;
-				yield return Node(XamlNodeType.NamespaceDeclaration, new NamespaceDeclaration(property.Value.Text, prefix), property.Line, property.Column);
+				Add(XamlNodeType.NamespaceDeclaration, new NamespaceDeclaration(property.Value.Text, prefix), property.Line, property.Column);
 			}
 
-			var reference = node.Find("$ref");
-			if (reference != null)
+			if (node.TryFind("$ref", out var reference))
 			{
-				yield return Node(XamlNodeType.StartObject, XamlLanguage.Reference, node);
-				yield return Node(XamlNodeType.StartMember, XamlLanguage.PositionalParameters, reference.Line, reference.Column);
-				yield return Node(XamlNodeType.Value, GetText(reference.Value), reference.Value);
-				yield return Node(XamlNodeType.EndMember, null, reference.Value);
+				Add(XamlNodeType.StartObject, XamlLanguage.Reference, node);
+				Add(XamlNodeType.StartMember, XamlLanguage.PositionalParameters, reference.Line, reference.Column);
+				Add(XamlNodeType.Value, GetText(reference.Value), reference.Value);
+				Add(XamlNodeType.EndMember, null, reference.Value);
 			}
 			else
 			{
 				XamlType type;
-				var typeProperty = node.Find("$type");
 				var isGetObject = false;
-				if (typeProperty != null)
+				if (node.TryFind("$type", out var typeProperty))
 				{
 					if (IsReadOnly(member))
 						throw CreateException($"Cannot specify a '$type' for read only member '{member}'", typeProperty.Value);
@@ -480,25 +531,31 @@ namespace Portable.Xaml.Json
 				}
 				else
 				{
-					var names = node.Properties.Select(r => r.Name).Where(r => !r.StartsWith("$", StringComparison.Ordinal)).ToList();
+					var names = new List<string>(node.Properties.Count);
+					foreach (var property in node.Properties)
+					{
+						if (!property.Name.StartsWith("$", StringComparison.Ordinal))
+							names.Add(property.Name);
+					}
 					type = GetObjectType(expectedType, names);
 					if (ReferenceEquals(type, null))
 						throw CreateException("Add a '$type' to say what type of object to create", node);
 					isGetObject = IsReadOnly(member);
 				}
 
-				yield return isGetObject
-					? Node(XamlNodeType.GetObject, null, node)
-					: Node(XamlNodeType.StartObject, type, node);
+				if (isGetObject)
+					Add(XamlNodeType.GetObject, null, node);
+				else
+					Add(XamlNodeType.StartObject, type, node);
 
 				var itemsStarted = false;
 				foreach (var property in node.Properties)
 				{
 					if (property.Name == "$name")
 					{
-						yield return Node(XamlNodeType.StartMember, XamlLanguage.Name, property.Line, property.Column);
-						yield return Node(XamlNodeType.Value, GetText(property.Value), property.Value);
-						yield return Node(XamlNodeType.EndMember, null, property.Value);
+						Add(XamlNodeType.StartMember, XamlLanguage.Name, property.Line, property.Column);
+						Add(XamlNodeType.Value, GetText(property.Value), property.Value);
+						Add(XamlNodeType.EndMember, null, property.Value);
 						continue;
 					}
 					if (property.Name.StartsWith("$", StringComparison.Ordinal))
@@ -508,27 +565,24 @@ namespace Portable.Xaml.Json
 					{
 						if (!itemsStarted)
 						{
-							yield return Node(XamlNodeType.StartMember, XamlLanguage.Items, property.Line, property.Column);
+							Add(XamlNodeType.StartMember, XamlLanguage.Items, property.Line, property.Column);
 							itemsStarted = true;
 						}
-						foreach (var n in WriteValue(property.Value, type.ItemType, XamlLanguage.Items, property.Name))
-							yield return n;
+						WriteValue(property.Value, type.ItemType, XamlLanguage.Items, property.Name);
 						continue;
 					}
 
 					var propertyMember = LookupMember(type, property);
-					yield return Node(XamlNodeType.StartMember, propertyMember, property.Line, property.Column);
-					foreach (var n in WriteValue(property.Value, propertyMember.Type, propertyMember))
-						yield return n;
-					yield return Node(XamlNodeType.EndMember, null, property.Value);
+					Add(XamlNodeType.StartMember, propertyMember, property.Line, property.Column);
+					WriteValue(property.Value, propertyMember.Type, propertyMember);
+					Add(XamlNodeType.EndMember, null, property.Value);
 				}
 				if (itemsStarted)
-					yield return Node(XamlNodeType.EndMember, null, node);
+					Add(XamlNodeType.EndMember, null, node);
 			}
 
-			foreach (var n in WriteKey(node, key))
-				yield return n;
-			yield return Node(XamlNodeType.EndObject, null, node);
+			WriteKey(node, key);
+			Add(XamlNodeType.EndObject, null, node);
 
 			if (hasNamespaces)
 				_namespaces.Pop();
@@ -536,7 +590,7 @@ namespace Portable.Xaml.Json
 
 		static bool IsReadOnly(XamlMember member) => member != null && !member.IsDirective && !member.IsWritePublic;
 
-		IEnumerable<NodeInfo> WriteArray(JsonNode node, XamlType expectedType, XamlMember member, string key)
+		void WriteArray(JsonNode node, XamlType expectedType, XamlMember member, string key)
 		{
 			if (ReferenceEquals(expectedType, null))
 				throw CreateException("Add a '$type' to say what type of collection to create", node);
@@ -547,37 +601,32 @@ namespace Portable.Xaml.Json
 				if (ReferenceEquals(collectionMember, null))
 					throw CreateException($"An array can't be used for '{expectedType}'", node);
 
-				yield return Node(XamlNodeType.StartObject, objectType ?? collectionMember.DeclaringType, node);
-				yield return Node(XamlNodeType.StartMember, collectionMember, node);
-				foreach (var n in WriteArray(node, collectionMember.Type, collectionMember, null))
-					yield return n;
-				yield return Node(XamlNodeType.EndMember, null, node);
-				foreach (var n in WriteKey(node, key))
-					yield return n;
-				yield return Node(XamlNodeType.EndObject, null, node);
-				yield break;
+				Add(XamlNodeType.StartObject, objectType ?? collectionMember.DeclaringType, node);
+				Add(XamlNodeType.StartMember, collectionMember, node);
+				WriteArray(node, collectionMember.Type, collectionMember, null);
+				Add(XamlNodeType.EndMember, null, node);
+				WriteKey(node, key);
+				Add(XamlNodeType.EndObject, null, node);
+				return;
 			}
 
 			// like XAML, fill the collection a property already has rather than replacing it
-			yield return member != null && !member.IsDirective
-				? Node(XamlNodeType.GetObject, null, node)
-				: Node(XamlNodeType.StartObject, expectedType, node);
+			if (member != null && !member.IsDirective)
+				Add(XamlNodeType.GetObject, null, node);
+			else
+				Add(XamlNodeType.StartObject, expectedType, node);
 			if (node.Items.Count > 0)
 			{
-				yield return Node(XamlNodeType.StartMember, XamlLanguage.Items, node);
+				Add(XamlNodeType.StartMember, XamlLanguage.Items, node);
 				foreach (var item in node.Items)
-				{
-					foreach (var n in WriteValue(item, expectedType.ItemType, XamlLanguage.Items))
-						yield return n;
-				}
-				yield return Node(XamlNodeType.EndMember, null, node);
+					WriteValue(item, expectedType.ItemType, XamlLanguage.Items);
+				Add(XamlNodeType.EndMember, null, node);
 			}
-			foreach (var n in WriteKey(node, key))
-				yield return n;
-			yield return Node(XamlNodeType.EndObject, null, node);
+			WriteKey(node, key);
+			Add(XamlNodeType.EndObject, null, node);
 		}
 
-		IEnumerable<NodeInfo> WriteText(JsonNode node, XamlType expectedType, string key)
+		void WriteText(JsonNode node, XamlType expectedType, string key)
 		{
 			var text = node.Text;
 			if (node.Kind == JsonKind.String && text.Length > 0 && text[0] == '{')
@@ -589,9 +638,8 @@ namespace Portable.Xaml.Json
 					var markup = ParseMarkup(text);
 					if (markup != null)
 					{
-						foreach (var n in WriteMarkup(markup, node, key))
-							yield return n;
-						yield break;
+						WriteMarkup(markup, node, key);
+						return;
 					}
 				}
 			}
@@ -600,29 +648,28 @@ namespace Portable.Xaml.Json
 			var textMember = node.Kind == JsonKind.String && !ReferenceEquals(expectedType, null) ? GetTextMember(expectedType, out textObjectType) : null;
 			if (!ReferenceEquals(textMember, null))
 			{
-				yield return Node(XamlNodeType.StartObject, textObjectType ?? textMember.DeclaringType, node);
-				yield return Node(XamlNodeType.StartMember, textMember, node);
-				yield return Node(XamlNodeType.Value, text, node);
-				yield return Node(XamlNodeType.EndMember, null, node);
+				Add(XamlNodeType.StartObject, textObjectType ?? textMember.DeclaringType, node);
+				Add(XamlNodeType.StartMember, textMember, node);
+				Add(XamlNodeType.Value, text, node);
+				Add(XamlNodeType.EndMember, null, node);
 			}
 			else if (key != null)
 			{
 				if (ReferenceEquals(expectedType, null))
 					throw CreateException("Unknown type for dictionary item", node);
-				yield return Node(XamlNodeType.StartObject, expectedType, node);
-				yield return Node(XamlNodeType.StartMember, XamlLanguage.Initialization, node);
-				yield return Node(XamlNodeType.Value, text, node);
-				yield return Node(XamlNodeType.EndMember, null, node);
+				Add(XamlNodeType.StartObject, expectedType, node);
+				Add(XamlNodeType.StartMember, XamlLanguage.Initialization, node);
+				Add(XamlNodeType.Value, text, node);
+				Add(XamlNodeType.EndMember, null, node);
 			}
 			else
 			{
-				yield return Node(XamlNodeType.Value, text, node);
-				yield break;
+				Add(XamlNodeType.Value, text, node);
+				return;
 			}
 
-			foreach (var n in WriteKey(node, key))
-				yield return n;
-			yield return Node(XamlNodeType.EndObject, null, node);
+			WriteKey(node, key);
+			Add(XamlNodeType.EndObject, null, node);
 		}
 
 		/// <summary>Parses a markup extension, or returns null when the text doesn't name one so it is used as is.</summary>
@@ -640,28 +687,24 @@ namespace Portable.Xaml.Json
 			}
 		}
 
-		IEnumerable<NodeInfo> WriteMarkup(ParsedMarkupExtensionInfo info, JsonNode node, string key)
+		void WriteMarkup(ParsedMarkupExtensionInfo info, JsonNode node, string key)
 		{
-			yield return Node(XamlNodeType.StartObject, info.Type, node);
+			Add(XamlNodeType.StartObject, info.Type, node);
 			foreach (var argument in info.Arguments)
 			{
-				yield return Node(XamlNodeType.StartMember, argument.Key, node);
+				Add(XamlNodeType.StartMember, argument.Key, node);
 				var values = argument.Value as List<object> ?? new List<object> { argument.Value };
 				foreach (var value in values)
 				{
 					if (value is ParsedMarkupExtensionInfo nested)
-					{
-						foreach (var n in WriteMarkup(nested, node, null))
-							yield return n;
-					}
+						WriteMarkup(nested, node, null);
 					else
-						yield return Node(XamlNodeType.Value, value, node);
+						Add(XamlNodeType.Value, value, node);
 				}
-				yield return Node(XamlNodeType.EndMember, null, node);
+				Add(XamlNodeType.EndMember, null, node);
 			}
-			foreach (var n in WriteKey(node, key))
-				yield return n;
-			yield return Node(XamlNodeType.EndObject, null, node);
+			WriteKey(node, key);
+			Add(XamlNodeType.EndObject, null, node);
 		}
 
 		string GetText(JsonNode node)
@@ -750,7 +793,7 @@ namespace Portable.Xaml.Json
 			else if (ns != null)
 			{
 				member = ns == XamlLanguage.Xaml2006Namespace
-					? XamlLanguage.AllDirectives.FirstOrDefault(r => r.Name == name)
+					? FindDirective(name)
 					: new XamlDirective(ns, name);
 			}
 			else
@@ -759,6 +802,17 @@ namespace Portable.Xaml.Json
 			if (ReferenceEquals(member, null))
 				throw CreateException($"Could not find member '{property.Name}' in type '{type}'", property);
 			return member;
+		}
+
+		// not a lambda, so the closure isn't allocated on every LookupMember call
+		static XamlDirective FindDirective(string name)
+		{
+			foreach (var directive in XamlLanguage.AllDirectives)
+			{
+				if (directive.Name == name)
+					return directive;
+			}
+			return null;
 		}
 
 		#endregion

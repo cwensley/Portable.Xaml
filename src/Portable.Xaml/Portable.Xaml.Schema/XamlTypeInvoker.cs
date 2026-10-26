@@ -50,6 +50,8 @@ namespace Portable.Xaml.Schema
 		}
 		
 		ConcurrentDictionary<object, object> cache;
+		// separate so the per-item lookup doesn't allocate a key
+		ConcurrentDictionary<(Type, Type), object> add_cache;
 
 		static object s_CreateImmutableFromMutableKey = new object();
 		static object s_MutableTypeKey = new object();
@@ -92,13 +94,16 @@ namespace Portable.Xaml.Schema
 			var collectionType = instance.GetType ();
 			// null items are allowed (e.g. an empty cell in JSON), so the Add method is found by the collection's item type
 			var itemType = item?.GetType() ?? Type?.ItemType?.UnderlyingType ?? typeof(object);
-			var key = Tuple.Create(collectionType, itemType);
+			var key = (collectionType, itemType);
+			if (add_cache == null)
+				add_cache = new ConcurrentDictionary<(Type, Type), object>();
+			add_cache.TryGetValue(key, out var cached);
 
 			var mode = Type?.SchemaContext.InvokerOptions ?? XamlInvokerOptions.None;
 			if (mode.HasFlag(XamlInvokerOptions.Compile))
 			{
-				Action<object, object> addDelegate;
-				if (TryGetCache(key, out addDelegate))
+				var addDelegate = cached as Action<object, object>;
+				if (addDelegate != null)
 				{
 					addDelegate(instance, item);
 					return;
@@ -117,8 +122,8 @@ namespace Portable.Xaml.Schema
 			}
 			else
 			{
-				MethodInfo mi;
-				if (TryGetCache(key, out mi))
+				var mi = cached as MethodInfo;
+				if (mi != null)
 				{
 					mi.Invoke(instance, new object[] { item });
 					return;
@@ -128,12 +133,12 @@ namespace Portable.Xaml.Schema
 				if (mi == null)
 					throw new InvalidOperationException($"The collection type '{collectionType}' does not have 'Add' method");
 				// FIXME: this method lookup should be mostly based on GetAddMethod(). At least iface method lookup must be done there.
-				cache[key] = mi;
+				add_cache[key] = mi;
 				mi.Invoke(instance, new object[] { item });
 			}
 		}
 
-		Action<object, object> CreateAddDelegate(object instance, object item, Type collectionType, Type itemType, Tuple<Type, Type> key, XamlInvokerOptions mode)
+		Action<object, object> CreateAddDelegate(object instance, object item, Type collectionType, Type itemType, (Type, Type) key, XamlInvokerOptions mode)
 		{
 			// this is separate as the anonymous types are instantiated at the beginning of the method
 			Action<object, object> addDelegate;
@@ -143,12 +148,12 @@ namespace Portable.Xaml.Schema
 
 			if (mode.HasFlag(XamlInvokerOptions.DeferCompile))
 			{
-				cache[key] = addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
-				Task.Factory.StartNew(() => cache[key] = addDelegate = mi.BuildCallExpression());
+				add_cache[key] = addDelegate = (i, v) => mi.Invoke(i, new object[] { v });
+				Task.Factory.StartNew(() => add_cache[key] = addDelegate = mi.BuildCallExpression());
 			}
 			else
 			{
-				cache[key] = addDelegate = mi.BuildCallExpression();
+				add_cache[key] = addDelegate = mi.BuildCallExpression();
 			}
 			return addDelegate;
 		}
