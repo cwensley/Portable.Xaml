@@ -1283,6 +1283,29 @@ namespace Tests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_ShouldSerializeObjectInMember()
+		{
+			if (!Compat.IsPortableXaml)
+			{
+				Assert.Ignore("This is not support in System.Xaml");
+			}
+			else
+			{
+				var xaml = @"<ShouldSerializeMemberTest xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"">
+  <ShouldSerializeMemberTest.Visible>
+    <ShouldSerializeCountedTest IsVisibleInXml=""True"" />
+  </ShouldSerializeMemberTest.Visible>
+</ShouldSerializeMemberTest>".UpdateXml();
+
+				var instance = new ShouldSerializeMemberTest();
+				var actual = XamlServices.Save(instance);
+				Assert.AreEqual(xaml, actual);
+				// the check is user code, so it should run as often for a written object as a skipped one
+				Assert.AreEqual(instance.Invisible.Calls, instance.Visible.Calls);
+			}
+		}
+
+		[Test]
 		public void Write_AcronymNonDuplicate()
 		{
 			var list = new List<object>();

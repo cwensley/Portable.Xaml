@@ -517,6 +517,29 @@ namespace Tests.Portable.Xaml
 		}
 	}
 
+#if PORTABLE_XAML
+	[ShouldSerializeAttribute(nameof(CustomShouldSerializeMethod))]
+#endif
+	public class ShouldSerializeCountedTest
+	{
+		internal int Calls;
+
+		public bool IsVisibleInXml { get; set; }
+
+		public bool CustomShouldSerializeMethod()
+		{
+			Calls++;
+			return IsVisibleInXml;
+		}
+	}
+
+	public class ShouldSerializeMemberTest
+	{
+		public ShouldSerializeCountedTest Visible { get; set; } = new ShouldSerializeCountedTest { IsVisibleInXml = true };
+
+		public ShouldSerializeCountedTest Invisible { get; set; } = new ShouldSerializeCountedTest();
+	}
+
 	public class ShouldSerializeInCollectionTest
 	{
 		public ShouldSerializeInCollectionTest()
