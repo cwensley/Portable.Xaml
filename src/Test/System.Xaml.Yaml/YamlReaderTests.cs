@@ -236,6 +236,15 @@ Values:
 		}
 
 		[Test]
+		public void QuotedMergeKeyShouldBeAKey()
+		{
+			var item = Load<YamlItem>("Lookup:\n  '<<':\n    Text: a\n");
+			Assert.AreEqual("a", item.Lookup["<<"].Text);
+			item = Load<YamlItem>("Lookup: { \"<<\": { Text: b } }");
+			Assert.AreEqual("b", item.Lookup["<<"].Text);
+		}
+
+		[Test]
 		public void TagsShouldSetType()
 		{
 			var item = Load<YamlItem>(@"
