@@ -216,6 +216,18 @@ Items:
 		}
 
 		[Test]
+		public void TagOnAliasShouldNotChangeAnchor()
+		{
+			var item = Load<YamlItem>(@"
+Values:
+  - &a !j:JsonCell { Text: a }
+  - !YamlItem *a
+  - *a
+");
+			CollectionAssert.AreEqual(new[] { typeof(JsonCell), typeof(YamlItem), typeof(JsonCell) }, item.Values.Select(r => r.GetType()));
+		}
+
+		[Test]
 		public void TagsShouldSetType()
 		{
 			var item = Load<YamlItem>(@"
