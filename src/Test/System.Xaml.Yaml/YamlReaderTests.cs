@@ -215,6 +215,14 @@ Items:
 			Assert.AreNotSame(item.Items[0], item.Items[1]);
 		}
 
+		[TestCase("'{'")]
+		[TestCase("'{ not markup'")]
+		public void TextThatIsNotMarkupShouldBeText(string text)
+		{
+			var item = Load<YamlItem>("Text: " + text);
+			Assert.AreEqual(text.Trim('\''), item.Text);
+		}
+
 		[Test]
 		public void TagsShouldSetType()
 		{
