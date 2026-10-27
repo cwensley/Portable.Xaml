@@ -215,6 +215,35 @@ Items:
 			Assert.AreNotSame(item.Items[0], item.Items[1]);
 		}
 
+		[TestCase("'{'")]
+		[TestCase("'{ not markup'")]
+		public void TextThatIsNotMarkupShouldBeText(string text)
+		{
+			var item = Load<YamlItem>("Text: " + text);
+			Assert.AreEqual(text.Trim('\''), item.Text);
+		}
+
+		[Test]
+		public void TagOnAliasShouldNotChangeAnchor()
+		{
+			var item = Load<YamlItem>(@"
+Values:
+  - &a !j:JsonCell { Text: a }
+  - !YamlItem *a
+  - *a
+");
+			CollectionAssert.AreEqual(new[] { typeof(JsonCell), typeof(YamlItem), typeof(JsonCell) }, item.Values.Select(r => r.GetType()));
+		}
+
+		[Test]
+		public void QuotedMergeKeyShouldBeAKey()
+		{
+			var item = Load<YamlItem>("Lookup:\n  '<<':\n    Text: a\n");
+			Assert.AreEqual("a", item.Lookup["<<"].Text);
+			item = Load<YamlItem>("Lookup: { \"<<\": { Text: b } }");
+			Assert.AreEqual("b", item.Lookup["<<"].Text);
+		}
+
 		[Test]
 		public void TagsShouldSetType()
 		{
@@ -338,6 +367,11 @@ Items: [ { Text: '{0} items' }, { Text: '{}{x:Null}' }, { Text: '{Unknown}' } ]
 		[TestCase("Items: [ a", 1, 11)]
 		[TestCase("Text: a\n---\nText: b", 2, 1)]
 		[TestCase("Items: *missing", 1, 8)]
+		[TestCase("Text: \"\\U00110000\"", 1, 10)]
+		[TestCase("Text: \"\\UFFFFFFFF\"", 1, 10)]
+		[TestCase("$type: ,", 1, 8)]
+		[TestCase("$type: Missing, MissingAssembly", 1, 8)]
+		[TestCase("$type: Missing,", 1, 8)]
 		public void InvalidYamlShouldThrowWithLineInfo(string yaml, int line, int column)
 		{
 			var ex = Assert.Throws<XamlParseException>(() => ReadNodes(yaml));

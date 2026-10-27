@@ -471,16 +471,18 @@ namespace Portable.Xaml.Yaml
 		XamlDataNode ReadBlockMapping(int indent)
 		{
 			var node = NewNode(XamlDataKind.Object, _line, Column);
+			XamlDataProperty? merge = null;
 			while (true)
 			{
 				var property = new XamlDataProperty { Line = _line, Column = Column };
-				property.Name = Ch == '"' || Ch == '\'' ? ReadQuoted() : ReadPlain(indent, false, true);
+				var quoted = Ch == '"' || Ch == '\'';
+				property.Name = quoted ? ReadQuoted() : ReadPlain(indent, false, true);
 				SkipSpaces();
 				if (Ch != ':')
 					throw CreateException("Expected a colon after the key");
 				_pos++;
 				property.Value = ReadBlockNode(indent, true);
-				AddProperty(node, property);
+				AddProperty(node, property, quoted, ref merge);
 
 				SkipToContent();
 				if (Ch == -1 || IsDocumentMarker() || Indent < indent)
@@ -492,7 +494,7 @@ namespace Portable.Xaml.Yaml
 				if (!IsImplicitKey())
 					throw CreateException("Expected a key and colon");
 			}
-			ApplyMerges(node);
+			ApplyMerges(node, merge);
 			return node;
 		}
 
@@ -515,6 +517,20 @@ namespace Portable.Xaml.Yaml
 			return node;
 		}
 
+		/// <summary>Adds a mapping's key, or keeps it in <paramref name="merge"/> when it is a merge key.</summary>
+		void AddProperty(XamlDataNode node, XamlDataProperty property, bool quoted, ref XamlDataProperty? merge)
+		{
+			// only a plain << merges, so a dictionary can still have it as a quoted key
+			if (!quoted && property.Name == "<<")
+			{
+				if (merge != null)
+					throw CreateException("Duplicate key '<<'", property.Line, property.Column);
+				merge = property;
+				return;
+			}
+			AddProperty(node, property);
+		}
+
 		void AddProperty(XamlDataNode node, XamlDataProperty property)
 		{
 			if (node.TryFind(property.Name, out _))
@@ -525,11 +541,11 @@ namespace Portable.Xaml.Yaml
 		}
 
 		/// <summary>Adds the keys of mappings given with <c>&lt;&lt;</c> that the mapping doesn't have itself.</summary>
-		void ApplyMerges(XamlDataNode node)
+		void ApplyMerges(XamlDataNode node, XamlDataProperty? mergeProperty)
 		{
-			if (!node.TryFind("<<", out var merge))
+			if (mergeProperty == null)
 				return;
-			node.Properties.Remove(merge);
+			var merge = mergeProperty.Value;
 			var sources = merge.Value.Kind == XamlDataKind.Array ? merge.Value.Items : new List<XamlDataNode> { merge.Value };
 			foreach (var source in sources)
 			{
@@ -840,6 +856,8 @@ namespace Portable.Xaml.Yaml
 					var name = ReadAnchorName(true);
 					if (_anchors == null || !_anchors.TryGetValue(name, out node))
 						throw CreateException($"Unknown anchor '{name}'", line, column);
+					// copied so a tag on the alias doesn't change the anchored node
+					node = node.Clone();
 					break;
 				case ',':
 				case ']':
@@ -886,6 +904,7 @@ namespace Portable.Xaml.Yaml
 		XamlDataNode ReadFlowMapping()
 		{
 			var node = NewNode(XamlDataKind.Object, _line, Column);
+			XamlDataProperty? merge = null;
 			_pos++;
 			while (true)
 			{
@@ -893,7 +912,8 @@ namespace Portable.Xaml.Yaml
 				if (Ch == '}')
 					break;
 				var property = new XamlDataProperty { Line = _line, Column = Column };
-				property.Name = Ch == '"' || Ch == '\'' ? ReadQuoted() : ReadPlain(-1, true, true);
+				var quoted = Ch == '"' || Ch == '\'';
+				property.Name = quoted ? ReadQuoted() : ReadPlain(-1, true, true);
 				SkipFlowSpace();
 				if (Ch == ':')
 				{
@@ -902,12 +922,12 @@ namespace Portable.Xaml.Yaml
 				}
 				else
 					property.Value = NewNode(XamlDataKind.Null, property.Line, property.Column);
-				AddProperty(node, property);
+				AddProperty(node, property, quoted, ref merge);
 				if (!ReadFlowSeparator('}'))
 					break;
 			}
 			_pos++;
-			ApplyMerges(node);
+			ApplyMerges(node, merge);
 			return node;
 		}
 
@@ -1023,6 +1043,8 @@ namespace Portable.Xaml.Yaml
 		{
 			if (_pos + length > _text.Length || !int.TryParse(_text.Substring(_pos, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var code))
 				throw CreateException($"Expected {length} hex digits");
+			if (code < 0 || code > 0x10FFFF)
+				throw CreateException("Invalid unicode character");
 			_pos += length;
 			if (code > 0xFFFF)
 				_sb.Append(char.ConvertFromUtf32(code));

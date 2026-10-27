@@ -388,6 +388,19 @@ namespace Portable.Xaml
 		/// <summary>Looks up "Type", "prefix:Type", "prefix:Type(prefix:Arg)", "Namespace.Type" or "Namespace.Type, Assembly".</summary>
 		XamlType LookupType(string typeName, XamlDataNode node)
 		{
+			try
+			{
+				return FindType(typeName, node);
+			}
+			catch (Exception ex) when (!(ex is XamlException xamlException && xamlException.LineNumber > 0))
+			{
+				// e.g. a missing or empty assembly name, which would otherwise not say where it is
+				throw new XamlParseException($"Type '{typeName}' is unknown", ex, node.Line, node.Column);
+			}
+		}
+
+		XamlType FindType(string typeName, XamlDataNode node)
+		{
 			string ns;
 			string name;
 			var assemblyIndex = typeName.IndexOf(',');

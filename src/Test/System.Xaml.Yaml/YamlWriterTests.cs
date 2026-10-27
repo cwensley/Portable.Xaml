@@ -176,6 +176,14 @@ $type: x:Null
 		}
 
 		[Test]
+		public void MergeKeyShouldRoundTrip()
+		{
+			var yaml = XamlYamlServices.Save(new Dictionary<string, TestClass4> { ["<<"] = new TestClass4 { Foo = "f" } });
+			var instance = (Dictionary<string, TestClass4>)XamlYamlServices.Parse(yaml);
+			Assert.AreEqual("f", instance["<<"].Foo, yaml);
+		}
+
+		[Test]
 		public void MarkupExtensionsShouldBeText()
 		{
 			var yaml = XamlYamlServices.Save(new Dictionary<string, Type> { ["int"] = typeof(int), ["list"] = typeof(List<int>) });

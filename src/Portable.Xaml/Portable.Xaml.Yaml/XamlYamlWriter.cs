@@ -181,6 +181,9 @@ namespace Portable.Xaml.Yaml
 				return true;
 			if (text.StartsWith("---", StringComparison.Ordinal) || text.StartsWith("...", StringComparison.Ordinal))
 				return true;
+			// a plain << key is a merge
+			if (text == "<<")
+				return true;
 
 			for (int i = 0; i < text.Length; i++)
 			{
