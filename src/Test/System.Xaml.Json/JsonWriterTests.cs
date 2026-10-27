@@ -1,5 +1,6 @@
 ﻿#if PORTABLE_XAML
 using System;
+using System.IO;
 using NUnit.Framework;
 using Portable.Xaml.Json;
 
@@ -33,6 +34,21 @@ namespace Tests.Portable.Xaml.Json
 			var json = XamlJsonServices.Save(instance);
 			var expected = @"{""$ns"":""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"",""$ns:x"":""http://schemas.microsoft.com/winfx/2006/xaml"",""$type"":""ListWrapper"",""Items"":[1,2,5]}";
 			Assert.AreEqual(expected.UpdateJson(), json);
+		}
+
+		[Test]
+		public void FileShouldRoundTrip()
+		{
+			var fileName = Path.GetTempFileName();
+			try
+			{
+				XamlJsonServices.Save(fileName, new TestClass4 { Foo = "f" });
+				Assert.AreEqual("f", ((TestClass4)XamlJsonServices.Load(fileName)).Foo);
+			}
+			finally
+			{
+				File.Delete(fileName);
+			}
 		}
 
 		[Test]

@@ -161,6 +161,21 @@ $type: x:Null
 		}
 
 		[Test]
+		public void FileShouldRoundTrip()
+		{
+			var fileName = Path.GetTempFileName();
+			try
+			{
+				XamlYamlServices.Save(fileName, new TestClass4 { Foo = "f" });
+				Assert.AreEqual("f", ((TestClass4)XamlYamlServices.Load(fileName)).Foo);
+			}
+			finally
+			{
+				File.Delete(fileName);
+			}
+		}
+
+		[Test]
 		public void MarkupExtensionsShouldBeText()
 		{
 			var yaml = XamlYamlServices.Save(new Dictionary<string, Type> { ["int"] = typeof(int), ["list"] = typeof(List<int>) });
