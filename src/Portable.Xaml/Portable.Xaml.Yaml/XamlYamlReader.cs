@@ -1043,6 +1043,8 @@ namespace Portable.Xaml.Yaml
 		{
 			if (_pos + length > _text.Length || !int.TryParse(_text.Substring(_pos, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var code))
 				throw CreateException($"Expected {length} hex digits");
+			if (code < 0 || code > 0x10FFFF)
+				throw CreateException("Invalid unicode character");
 			_pos += length;
 			if (code > 0xFFFF)
 				_sb.Append(char.ConvertFromUtf32(code));
