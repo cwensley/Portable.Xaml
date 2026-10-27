@@ -342,7 +342,7 @@ namespace Portable.Xaml
 		public void Parse ()
 		{
 			//Get all inside brackets
-			if (value.Length > 1 && (value[0] != '{' || value[value.Length-1] != '}'))
+			if (value.Length < 2 || value[0] != '{' || value[value.Length-1] != '}')
 			{
 				throw new XamlParseException("Invalid markup extension attribute. It should begin with '{{' and end with '}}'");
 			}
