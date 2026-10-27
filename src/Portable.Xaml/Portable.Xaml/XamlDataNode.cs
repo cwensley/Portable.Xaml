@@ -44,6 +44,9 @@ namespace Portable.Xaml
 
 		public static XamlDataNode CreateText(XamlDataKind kind, string text) => new XamlDataNode { Kind = kind, Text = text };
 
+		/// <summary>Copies the node, sharing its properties and items.</summary>
+		public XamlDataNode Clone() => (XamlDataNode)MemberwiseClone();
+
 		public void Add(string name, XamlDataNode value) => Properties.Add(new XamlDataProperty { Name = name, Value = value });
 	}
 

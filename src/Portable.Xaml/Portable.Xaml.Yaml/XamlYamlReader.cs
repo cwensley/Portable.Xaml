@@ -840,6 +840,8 @@ namespace Portable.Xaml.Yaml
 					var name = ReadAnchorName(true);
 					if (_anchors == null || !_anchors.TryGetValue(name, out node))
 						throw CreateException($"Unknown anchor '{name}'", line, column);
+					// copied so a tag on the alias doesn't change the anchored node
+					node = node.Clone();
 					break;
 				case ',':
 				case ']':
