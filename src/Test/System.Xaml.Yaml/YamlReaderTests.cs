@@ -338,6 +338,11 @@ Items: [ { Text: '{0} items' }, { Text: '{}{x:Null}' }, { Text: '{Unknown}' } ]
 		[TestCase("Items: [ a", 1, 11)]
 		[TestCase("Text: a\n---\nText: b", 2, 1)]
 		[TestCase("Items: *missing", 1, 8)]
+		[TestCase("Text: \"\\U00110000\"", 1, 10)]
+		[TestCase("Text: \"\\UFFFFFFFF\"", 1, 10)]
+		[TestCase("$type: ,", 1, 8)]
+		[TestCase("$type: Missing, MissingAssembly", 1, 8)]
+		[TestCase("$type: Missing,", 1, 8)]
 		public void InvalidYamlShouldThrowWithLineInfo(string yaml, int line, int column)
 		{
 			var ex = Assert.Throws<XamlParseException>(() => ReadNodes(yaml));
