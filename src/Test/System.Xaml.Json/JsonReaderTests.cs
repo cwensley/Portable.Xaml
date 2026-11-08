@@ -179,6 +179,15 @@ namespace Tests.Portable.Xaml.Json
 			CollectionAssert.Contains(members, XamlLanguage.Name);
 		}
 
+		[TestCase("$name")]
+		[TestCase("$id")]
+		public void RefShouldReferToNamedObject(string name)
+		{
+			var item = Load<JsonItem>($@"{{ Items: [ {{ $ref: ""child"" }} ], Child: {{ {name}: ""child"", Text: ""a"" }} }}");
+			Assert.IsNotNull(item.Child);
+			Assert.AreSame(item.Child, item.Items[0]);
+		}
+
 		[Test]
 		public void MissingTypeShouldThrowWithLineInfo()
 		{

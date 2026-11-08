@@ -155,7 +155,8 @@ namespace Portable.Xaml
 				var itemsStarted = false;
 				foreach (var property in node.Properties)
 				{
-					if (property.Name == "$name")
+					// $id is the usual name for it in JSON, and what the writer uses
+					if (property.Name == "$name" || property.Name == "$id")
 					{
 						Add(XamlNodeType.StartMember, XamlLanguage.Name, property.Line, property.Column);
 						Add(XamlNodeType.Value, GetText(property.Value), property.Value);
