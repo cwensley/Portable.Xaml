@@ -24,6 +24,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using Portable.Xaml.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -158,8 +160,12 @@ namespace Portable.Xaml
 					yield break;
 				}
 
-				switch (GetContentValue(xm, val, overrideMemberType, partOfPositionalParameters, out var text))
+				switch (GetContentValue(xm, val, overrideMemberType, partOfPositionalParameters, out var text, out var extension))
 				{
+					case ContentValue.MarkupExtension:
+						foreach (var xn in GetNodes(null, new XamlObject(GetType(extension), extension), node: node))
+							yield return xn;
+						yield break;
 					case ContentValue.None:
 						yield break;
 					case ContentValue.Text:
@@ -280,7 +286,7 @@ namespace Portable.Xaml
 				{
 					if (!memberValue.Type.ShouldSerialize(memberValue.Value))
 						continue;
-					var kind = GetContentValue(xnm.Member, memberValue.Value, null, false, out var text);
+					var kind = GetContentValue(xnm.Member, memberValue.Value, null, false, out var text, out _);
 					if (kind == ContentValue.None)
 						continue;
 					if (kind == ContentValue.Text)
@@ -336,7 +342,9 @@ namespace Portable.Xaml
 			/// <summary>Written as a null object.</summary>
 			Null,
 			/// <summary>Not a content value, so it is written as an object.</summary>
-			Object
+			Object,
+			/// <summary>The type converter gave a markup extension, which is written in place of the value.</summary>
+			MarkupExtension
 		}
 
 		// a member that GetNodes would only check with ShouldSerialize and GetContentValue, so they can be used directly
@@ -353,9 +361,10 @@ namespace Portable.Xaml
 			return xm.IsWritePublic || !(xm.Type.IsCollection || xm.Type.IsDictionary);
 		}
 
-		ContentValue GetContentValue(XamlMember xm, object val, XamlType overrideMemberType, bool partOfPositionalParameters, out string text)
+		ContentValue GetContentValue(XamlMember xm, object val, XamlType overrideMemberType, bool partOfPositionalParameters, out string text, out MarkupExtension extension)
 		{
 			text = null;
+			extension = null;
 			// don't serialize default values if one is explicitly specified using the DefaultValueAttribute
 			if (!partOfPositionalParameters)
 			{
@@ -375,6 +384,19 @@ namespace Portable.Xaml
 
 			// overrideMemberType is (so far) used for XamlLanguage.Key.
 			var xtt = overrideMemberType ?? xm.Type;
+
+			// like System.Xaml, a converter that can produce a markup extension wins over converting to a string
+			if (val != null && !partOfPositionalParameters && !xtt.IsMarkupExtension)
+			{
+				var tc = (xm.TypeConverter ?? xtt.TypeConverter)?.ConverterInstance;
+				if (tc != null && tc.SafeCanConvertTo((ITypeDescriptorContext)value_serializer_ctx, typeof(MarkupExtension))
+					&& tc.ConvertTo((ITypeDescriptorContext)value_serializer_ctx, CultureInfo.InvariantCulture, val, typeof(MarkupExtension)) is MarkupExtension me)
+				{
+					extension = me;
+					return ContentValue.MarkupExtension;
+				}
+			}
+
 			if (!xtt.IsMarkupExtension && // this condition is to not serialize MarkupExtension whose type has TypeConverterAttribute (e.g. StaticExtension) as a string.
 				(xtt.IsContentValue(value_serializer_ctx) || xm.IsContentValue(value_serializer_ctx)))
 			{

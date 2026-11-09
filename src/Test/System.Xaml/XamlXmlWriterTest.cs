@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (C) 2010 Novell Inc. http://novell.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -24,6 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -681,6 +682,52 @@ namespace Tests.Portable.Xaml
 			var testData = new NullableContainer2 { NullableDate = new DateTime(2015, 12, 30, 23, 50, 51, DateTimeKind.Utc) };
 			var result = XamlServices.Save(testData);
 			Assert.AreEqual(ReadXml("DateTime6.xml"), result, "#6");
+		}
+
+		[Test]
+		public void Write_TypeConverterToMarkupExtension()
+		{
+			var obj = new ConvertibleToExtensionContainer { Value = new ConvertibleToExtension { Name = "hello" } };
+			var xml = XamlServices.Save(obj);
+			var expected = @"<ConvertibleToExtensionContainer Extension=""{x:Null}"" Value=""{Thing Key=hello}"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" />".UpdateXml();
+			Assert.AreEqual(expected, xml, "#1");
+
+			var result = (ConvertibleToExtensionContainer)XamlServices.Parse(xml);
+			Assert.AreEqual("hello", result.Value?.Name, "#2");
+		}
+
+		[Test]
+		public void Write_MarkupExtensionInObjectProperty()
+		{
+			var obj = new ConvertibleToExtensionContainer { Extension = new ThingExtension("hello") };
+			var xml = XamlServices.Save(obj);
+			var expected = @"<ConvertibleToExtensionContainer Extension=""{Thing Key=hello}"" Value=""{x:Null}"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" />".UpdateXml();
+			Assert.AreEqual(expected, xml, "#1");
+		}
+
+		[Test]
+		public void Write_MarkupExtensionPositionalAndNamed()
+		{
+			var container = sctx.GetXamlType(typeof(ConvertibleToExtensionContainer));
+			var ext = sctx.GetXamlType(typeof(PositionalWithNamedExtension));
+			var sw = new StringWriter();
+			using (var xw = new XamlXmlWriter(XmlWriter.Create(sw, new XmlWriterSettings { OmitXmlDeclaration = true }), sctx))
+			{
+				xw.WriteStartObject(container);
+				xw.WriteStartMember(container.GetMember("Extension"));
+				xw.WriteStartObject(ext);
+				xw.WriteStartMember(XamlLanguage.PositionalParameters);
+				xw.WriteValue("hello");
+				xw.WriteEndMember();
+				xw.WriteStartMember(ext.GetMember("Number"));
+				xw.WriteValue("5");
+				xw.WriteEndMember();
+				xw.WriteEndObject();
+				xw.WriteEndMember();
+				xw.WriteEndObject();
+			}
+			var expected = @"<ConvertibleToExtensionContainer Extension=""{PositionalWithNamed hello, Number=5}"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"" />".UpdateXml();
+			Assert.AreEqual(expected, sw.ToString(), "#1");
 		}
 
 		[Test]
