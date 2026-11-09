@@ -568,6 +568,22 @@ namespace Tests.Portable.Xaml
 		}
 	}
 	
+	[ContentProperty(nameof(Content))]
+	public class ContentBeforeListBase
+	{
+		public ContentBeforeListBase Content { get; set; }
+	}
+
+	public class ContentBeforeList : ContentBeforeListBase
+	{
+		public List<ContentBeforeListItem> Items { get; set; } = new List<ContentBeforeListItem>();
+	}
+
+	public class ContentBeforeListItem : ContentBeforeListBase
+	{
+		public string Name { get; set; }
+	}
+
 	[RuntimeNameProperty("TheName")]
 	public class TestClass5WithName : TestClass5
 	{
