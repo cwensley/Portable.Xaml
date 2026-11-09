@@ -11,7 +11,7 @@ namespace Portable.Xaml.Json
 	/// </summary>
 	/// <remarks>
 	/// Objects name their type with <c>"$type"</c>, or take the type of the member they are set to.
-	/// <c>"$ns"</c> and <c>"$ns:prefix"</c> declare namespaces, <c>"$name"</c> sets x:Name, and <c>"$ref"</c> refers to a named object.
+	/// <c>"$ns"</c> and <c>"$ns:prefix"</c> declare namespaces, <c>"$name"</c> or <c>"$id"</c> sets x:Name, and <c>"$ref"</c> refers to a named object.
 	/// Strings such as <c>"{Binding Path}"</c> are markup extensions when they name one, and <c>"{}"</c> escapes the rest of a string.
 	///
 	/// The JSON can be relaxed: comments, unquoted property names, single quotes, and trailing commas are allowed.
