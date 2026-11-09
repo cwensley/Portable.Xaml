@@ -2480,6 +2480,28 @@ $@"<TestInitOwner xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portab
 			Assert.AreEqual(2, result.Items.Count);
 		}
 
+		[TestCase(true)]
+		[TestCase(false)]
+		public void ContentAndCollectionPropertyInAnyOrder(bool contentFirst)
+		{
+			var content = "<ContentBeforeList />";
+			var items = @"<ContentBeforeList.Items>
+		<ContentBeforeListItem Name='1' />
+		<ContentBeforeListItem Name='2' />
+	</ContentBeforeList.Items>";
+			var xml = $@"
+<ContentBeforeList xmlns='clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml'>
+	{(contentFirst ? content : items)}
+	{(contentFirst ? items : content)}
+</ContentBeforeList>".UpdateXml();
+			var result = (ContentBeforeList)XamlServices.Parse(xml);
+
+			Assert.IsInstanceOf<ContentBeforeList>(result.Content);
+			Assert.AreEqual(2, result.Items.Count);
+			Assert.AreEqual("1", result.Items[0].Name);
+			Assert.AreEqual("2", result.Items[1].Name);
+		}
+
 		[Test]
 		public void ExceptionShouldBeThrownForNotFoundType()
 		{

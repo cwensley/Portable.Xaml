@@ -481,14 +481,16 @@ namespace Portable.Xaml
 			var sti = GetStartTagInfo ();
 
 			var xt = sctx.GetXamlType (sti.TypeName);
-			if (ReferenceEquals(xt, null)) {
+			// schema context can return an unknown type for a property element like <Owner.Member>
+			if (ReferenceEquals(xt, null) || xt.IsUnknown) {
 				// Current element could be for another member in the parent type (if exists)
 				if (parentType != null && (r.LocalName.IndexOf ('.') > 0 || parentType.GetMember (r.LocalName) != null)) {
 					// stop the iteration and signal the caller to not read current element as an object. (It resolves conflicts between "start object for current collection's item" and "start member for the next member in the parent object".
 					yield return Stop ();
 					yield break;
 				}
-
+			}
+			if (ReferenceEquals(xt, null)) {
 				// creates name-only XamlType. Also, it does not seem that it does not store this XamlType to XamlSchemaContext (Try GetXamlType(xtn) after reading such xaml node, it will return null).
 				xt = new XamlType (sti.Namespace, sti.Name, sti.TypeName.TypeArguments?.Select(xxtn => sctx.GetXamlType (xxtn)).ToArray (), sctx);
 			}
