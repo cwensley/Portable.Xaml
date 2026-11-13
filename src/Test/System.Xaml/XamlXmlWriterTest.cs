@@ -706,6 +706,35 @@ namespace Tests.Portable.Xaml
 		}
 
 		[Test]
+		public void Write_ValueSerializerCanConvertToString()
+		{
+			var obj = new TextArgContainer { Text = new TextArg { Expression = new TextLiteral { Value = "Hello World!" } } };
+			var xml = XamlServices.Save(obj);
+			var expected = @"<TextArgContainer Text=""Hello World!"" xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"" />".UpdateXml();
+			Assert.AreEqual(expected, xml, "#1");
+
+			var result = (TextArgContainer)XamlServices.Parse(xml);
+			Assert.AreEqual("Hello World!", (result.Text?.Expression as TextLiteral)?.Value, "#2");
+		}
+
+		[Test]
+		public void Write_ValueSerializerCannotConvertToString()
+		{
+			var obj = new TextArgContainer { Text = new TextArg { Expression = new TextReference { Name = "v" } } };
+			var xml = XamlServices.Save(obj);
+			var expected = @"<TextArgContainer xmlns=""clr-namespace:Tests.Portable.Xaml;assembly=Tests.Portable.Xaml"">
+  <TextArgContainer.Text>
+    <TextArg>
+      <TextArg.Expression>
+        <TextReference Name=""v"" />
+      </TextArg.Expression>
+    </TextArg>
+  </TextArgContainer.Text>
+</TextArgContainer>".UpdateXml();
+			Assert.AreEqual(expected, xml, "#1");
+		}
+
+		[Test]
 		public void Write_MarkupExtensionPositionalAndNamed()
 		{
 			var container = sctx.GetXamlType(typeof(ConvertibleToExtensionContainer));

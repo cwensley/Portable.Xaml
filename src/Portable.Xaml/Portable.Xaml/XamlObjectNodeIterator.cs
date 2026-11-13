@@ -395,6 +395,16 @@ namespace Portable.Xaml
 					extension = me;
 					return ContentValue.MarkupExtension;
 				}
+
+				// like System.Xaml, a value serializer can write this value as text even when the type converter can't
+				var vs = (xm.ValueSerializer ?? xtt.ValueSerializer)?.ConverterInstance;
+				if (vs != null && vs.CanConvertToString(val, value_serializer_ctx))
+				{
+					if (NameResolver.IsCollectingReferences)
+						return ContentValue.None;
+					text = vs.ConvertToString(val, value_serializer_ctx);
+					return ContentValue.Text;
+				}
 			}
 
 			if (!xtt.IsMarkupExtension && // this condition is to not serialize MarkupExtension whose type has TypeConverterAttribute (e.g. StaticExtension) as a string.
