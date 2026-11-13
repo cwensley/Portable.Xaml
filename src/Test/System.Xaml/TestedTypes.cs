@@ -286,6 +286,50 @@ namespace Tests.Portable.Xaml
 		public object Extension { get; set; }
 	}
 
+	// like WF's InArgument<T>: only the value serializer can write it as a string, and only when it holds a literal
+	[ValueSerializer(typeof(TextArgValueSerializer))]
+	[TypeConverter(typeof(TextArgConverter))]
+	public class TextArg
+	{
+		public object Expression { get; set; }
+	}
+
+	public class TextLiteral
+	{
+		public string Value { get; set; }
+	}
+
+	public class TextReference
+	{
+		public string Name { get; set; }
+	}
+
+	public class TextArgValueSerializer : ValueSerializer
+	{
+		public override bool CanConvertToString(object value, IValueSerializerContext context)
+			=> (value as TextArg)?.Expression is TextLiteral;
+
+		public override string ConvertToString(object value, IValueSerializerContext context)
+			=> ((TextLiteral)((TextArg)value).Expression).Value;
+	}
+
+	public class TextArgConverter : TypeConverter
+	{
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			=> sourceType == typeof(string);
+
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			=> false;
+
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			=> new TextArg { Expression = new TextLiteral { Value = (string)value } };
+	}
+
+	public class TextArgContainer
+	{
+		public TextArg Text { get; set; }
+	}
+
 	public class PositionalWithNamedExtension : MarkupExtension
 	{
 		public PositionalWithNamedExtension() { }
