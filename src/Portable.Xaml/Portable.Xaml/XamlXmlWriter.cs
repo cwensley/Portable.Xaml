@@ -257,14 +257,10 @@ namespace Portable.Xaml
 					w.WriteString (prefix);
 					w.WriteString (":");
 				}
-				string name = ns == XamlLanguage.Xaml2006Namespace ? xamlType.InternalXmlName : xamlType.Name;
-				w.WriteString (name);
+				// like System.Xaml, drop the "Extension" suffix for all markup extensions
+				w.WriteString (xamlType.InternalXmlName);
 
 				attribute_index = -1;
-
-				// space between type and first member (if any).
-				if (xamlType.IsMarkupExtension && xamlType.GetSortedConstructorArguments ().GetEnumerator ().MoveNext ())
-					w.WriteString (" ");
 			} else {
 				WritePendingNamespaces ();
 				w.WriteStartElement (prefix, xamlType.InternalXmlName, xamlType.PreferredXamlNamespace);
@@ -352,15 +348,18 @@ namespace Portable.Xaml
 				inside_attribute_object = true;
 
 			if (w.WriteState == WriteState.Attribute) {
-				if (state.PositionalParameterIndex < 0) {
+				// top-level positional parameters are the whole attribute value, so need no separator
+				if (posprms == null) {
+					// positional parameters count as the first member so named ones after them get a comma
 					attribute_index++;
-
 					if (attribute_index > 0)
 						w.WriteString(",");
-
 					w.WriteString (" ");
-					w.WriteString (member.Name);
-					w.WriteString ("=");
+
+					if (state.PositionalParameterIndex < 0) {
+						w.WriteString (member.Name);
+						w.WriteString ("=");
+					}
 				}
 			}
 			else if (ReferenceEquals(member, XamlLanguage.PositionalParameters) && posprms == null && state.Type.GetSortedConstructorArguments ().All (m => m == state.Type.ContentProperty)) // PositionalParameters and ContentProperty, excluding such cases that it is already processed above (as attribute).

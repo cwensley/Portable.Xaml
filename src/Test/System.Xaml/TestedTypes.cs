@@ -248,6 +248,57 @@ namespace Tests.Portable.Xaml
 		public string Foo { get; set; }
 	}
 
+	public class ThingExtension : MarkupExtension
+	{
+		public ThingExtension() { }
+		public ThingExtension(string key) { Key = key; }
+
+		[ConstructorArgument("key")]
+		public string Key { get; set; }
+
+		public override object ProvideValue(IServiceProvider sp) => new ConvertibleToExtension { Name = Key };
+	}
+
+	// can be converted to a string too, but the markup extension should be preferred
+	[TypeConverter(typeof(ConvertibleToExtensionConverter))]
+	public class ConvertibleToExtension
+	{
+		public string Name { get; set; }
+	}
+
+	public class ConvertibleToExtensionConverter : TypeConverter
+	{
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+			=> destinationType == typeof(MarkupExtension) || destinationType == typeof(string);
+
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+		{
+			var thing = (ConvertibleToExtension)value;
+			if (destinationType == typeof(MarkupExtension))
+				return new ThingExtension(thing.Name);
+			return "string:" + thing.Name;
+		}
+	}
+
+	public class ConvertibleToExtensionContainer
+	{
+		public ConvertibleToExtension Value { get; set; }
+		public object Extension { get; set; }
+	}
+
+	public class PositionalWithNamedExtension : MarkupExtension
+	{
+		public PositionalWithNamedExtension() { }
+		public PositionalWithNamedExtension(string key) { Key = key; }
+
+		[ConstructorArgument("key")]
+		public string Key { get; set; }
+
+		public int Number { get; set; }
+
+		public override object ProvideValue(IServiceProvider sp) => Key + Number;
+	}
+
 	//[MarkupExtensionReturnType (typeof (Array))]
 	//[ContentProperty ("Items")]  ... so, these attributes do not affect XamlObjectReader.
 	public class MyArrayExtension : MarkupExtension
